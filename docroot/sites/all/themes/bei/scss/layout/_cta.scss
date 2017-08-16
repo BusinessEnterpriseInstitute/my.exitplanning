@@ -1,0 +1,35 @@
+// Non-modular or client styles for .l-featured region.
+.l-cta {
+    padding: rem-calc(20) 0;
+    background: #888C98;
+    color: rgba(255,255,255,.8);
+    .block {
+        text-align: center;
+    }
+    h2.block-title,
+    h2.field-cta-headline {
+        @include font-size(30);
+    }
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 0;
+        color: #fff;
+    }
+    a:not(.button) {
+        color: #fff;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    button, .button {
+        font-family: $roboto-condensed;
+    }
+    .field-cta-footer,
+    .field-cta-footer p,
+    .login-text {
+        @include font-size(13);
+        a {
+            color: #fff;
+            text-decoration: underline;
+        }
+    }
+}

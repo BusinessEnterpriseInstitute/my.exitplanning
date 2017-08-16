@@ -1,0 +1,142 @@
+// Non-modular or client styles for .l-header region.
+body.maintenance-page {
+    .l-header {
+        padding: rem-calc(15) 0;
+    }
+}
+.l-header {
+    .l-header-top {
+        background: lighten($blue, 5);
+        height: rem-calc($topheader-height);
+        line-height: rem-calc($topheader-height);
+        text-transform: uppercase;
+        ul.menu {
+            line-height: inherit;
+            margin: 0;
+            @include font-size(14);
+            list-style: none;
+            font-family: $roboto-condensed;
+            li {
+                display: inline-block;
+                margin-left: rem-calc(15);
+                label:before, a:before {
+                    margin-right: rem-calc(5);
+                }
+                &:first-child {
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+    .l-header-top,
+    .l-header-top ul.menu {
+        a, label {
+            color: rgba(255,255,255,.9);
+        }
+    }
+    background: $blue;
+    .l-banner {
+        padding-top: rem-calc(15);
+        padding-bottom: rem-calc(15);
+    }
+    .top-bar {
+        .top-bar-section {
+            font-family: $roboto-condensed;
+            ul.dropdown label {
+                background: scale-color($blue, $lightness: 20%);
+                color: scale-color($blue, $lightness: 75%);
+                cursor: default;
+                padding-top: 8px;
+                padding-bottom: 8px;
+            }
+        }
+    }
+}
+@media #{$medium-up} {
+    .top-bar, .contain-to-grid {
+        background: inherit;
+    }
+    .top-bar {
+        @include topbar-large;
+        ul.title-area {
+            height: inherit;
+            line-height: inherit;
+            li.name {
+                height: inherit;
+                line-height: inherit;
+            }
+            z-index: 1;
+            span.logo,
+            span.logo a,
+            a.logo {
+                //height: inherit;
+                //line-height: inherit;
+            }
+            a {
+                //height: inherit;
+                //line-height: inherit;
+                padding: rem-calc(5) 0;
+                img {
+                    height: rem-calc(70);
+                    max-height: 100%;
+                    display: block;
+                }
+            }
+        }
+        > .top-bar-section {
+            height: inherit;
+            line-height: inherit;
+            > ul,
+            > div.menu-block-wrapper > ul{
+                float: right;
+            }
+            > ul,
+            > div.menu-block-wrapper > ul,
+            > ul > li,
+            > div.menu-block-wrapper > ul > li,
+            > ul > li > a,
+            > div.menu-block-wrapper > ul > li > a {
+                background: inherit;
+                height: inherit !important;
+                line-height: inherit !important;
+            }
+            > ul > li,
+            > div.menu-block-wrapper > ul > li {
+                > a {
+                    text-transform: uppercase;
+                    font-size: rem-calc(18);
+                    &:hover,
+                    &.active {
+                        color: $red;
+                        background: inherit !important;
+                    }
+                }
+                &:hover,
+                &:active {
+                    > a {
+                        //background: lighten($topbar-bg, 5%) !important;
+                        //background: inherit;
+                    }
+                }
+                ul li a {
+                    line-height: 2.4rem !important;
+                }
+            }
+            .dropdown li:not(.has-form):not(.active) {
+                > a:not(.button) {
+                    &:hover {
+                        //background: $jet;
+                    }
+                }
+            }
+            > ul > .divider,
+            > div.menu-block-wrapper > ul > .divider {
+                //height: $topbar-height-large;
+            }
+            > ul > li.has-dropdown > a:after
+            > div.menu-block-wrapper > ul > li.has-dropdown > a:after {
+                top: 50%;
+            }
+        }
+    }
+}

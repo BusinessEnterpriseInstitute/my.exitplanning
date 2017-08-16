@@ -1,0 +1,50 @@
+// @file
+// Place your mixins here. Feel free to roll your own mixins.
+
+// Font Sizes
+
+@mixin font-size($sizeValue: 16) {
+  font-size: ($sizeValue) + px;
+  font-size: rem-calc($sizeValue);
+}
+
+@mixin box-shadow($top, $left, $blur, $spread, $color, $inset:"") {
+    -webkit-box-shadow:$top $left $blur $spread $color #{$inset};
+    -moz-box-shadow:$top $left $blur $spread $color #{$inset};
+    box-shadow:$top $left $blur $spread $color #{$inset};
+}
+@mixin topbar-large {
+  height: rem-calc($topbar-large-height);
+  line-height: rem-calc($topbar-large-height);
+}
+@mixin adjust-top() {
+  top: rem-calc($topbar-large-height);
+}
+@mixin adjust-top-top() {
+  //top: calc($topbar-height-large + 1rem);
+  //top: calc(40px + 60px);
+  top: page_top_adjust($topheader-height, $topbar-large-height);
+}
+
+
+/// Slightly lighten a color
+/// @access public
+/// @param {Color} $color - color to tint
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function tint($color, $percentage) {
+  @return mix($color, white, $percentage);
+}
+
+/// Slightly darken a color
+/// @access public
+/// @param {Color} $color - color to shade
+/// @param {Number} $percentage - percentage of `$color` in returned color
+/// @return {Color}
+@function shade($color, $percentage) {
+  @return mix($color, black, $percentage);
+}
+
+@function page_top_adjust($topheader, $topbar) {
+  @return rem-calc($topheader + $topbar);
+}

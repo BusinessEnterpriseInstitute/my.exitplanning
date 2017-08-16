@@ -1,0 +1,135 @@
+// Non-modular or client styles for .l-footer region.
+.l-footer {
+  background: $blue;
+  color: #fff;
+  padding: rem-calc(25) 0;
+  form {
+    input, button, .button {
+      border: none;
+    }
+  }
+  .panel-pane {
+    margin-bottom: rem-calc(15);
+  }
+  a {
+    color: #fff;
+  }
+  .copyright {
+    @include font-size(12);
+  }
+  h2.pane-title {
+    text-transform: uppercase;
+    @include font-size(18);
+    margin: 0 0 rem-calc(5);
+    color: #fff;
+  }
+  .pane-menu-tree,
+  .panel-pane.contact-info {
+    @include font-size(14);
+  }
+  .pane-menu-tree {
+    @include grid-column(12);
+    ul.menu {
+      list-style: none;
+      margin-left: 0;
+    }
+  }
+  .footer-menus {
+    .pane-menu-tree:first-child {
+      padding-left: 0;
+    }
+  }
+  .pane-menu-menu-footer-menu {
+    ul.menu {
+      list-style: none;
+      li {
+        a {
+          display: block;
+        }
+      }
+    }
+  }
+  .footer-vcard {
+    @include font-size(14);
+    line-height: normal;
+  }
+  ul.social-links {
+    @include font-size(30);
+    list-style: none;
+    text-align: center;
+    margin: rem-calc(20) 0;
+    li {
+      display: inline-block;
+      padding-left: rem-calc(10);
+      &:first-child {
+        padding-left: 0;
+      }
+    }
+  }
+}
+
+@media #{$medium-up} {
+  .l-footer {
+    .pane-menu-tree {
+      width: auto;
+    }
+    .footer-vcard {
+      float: right;
+    }
+    .pane-menu-menu-footer-menu {
+      text-align: center;
+      ul.menu {
+        margin: rem-calc(15) 0;
+        @include font-size(12);
+        li {
+          display: inline-block;
+          border-left: 1px solid;
+          line-height: 1.2;
+          &:first-child {
+            border-left: none;
+          }
+          a {
+            padding: 0 rem-calc(8);
+            float: left;
+            &:hover {
+              text-decoration: underline;
+            }
+          }
+        }
+      }
+    }
+    .pane-webform-client-block-6164 {
+      p {
+        @include font-size(14);
+        margin-bottom: rem-calc(10);
+      }
+      h2 {
+        @include font-size(28);
+        text-transform: uppercase;
+      }
+      form {
+        .form-item,
+        .form-actions {
+          margin-top: 0;
+          @include grid-row();
+        }
+        @extend .row;
+        @extend .collapse;
+        .webform-component--email {
+          @include grid-column(10);
+          padding: 0;
+        }
+        div.form-actions {
+          @include grid-column(2);
+          padding: 0;
+          button {
+            @extend .postfix;
+            @extend .alert;
+            border: none;
+            padding: 0;
+          }
+        }
+      }
+    }
+  }
+}

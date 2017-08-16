@@ -1,0 +1,581 @@
+//Admin menu
+#admin-menu input {
+    height: auto;
+}
+// login form
+form#user-login-form {
+    input.form-text {
+        width: 100%;
+    }
+}
+// Search content
+form#views-exposed-form-search-member-content-page {
+    input, button {
+        height: rem-calc(50);
+        line-height: rem-calc(50);
+        @include font-size(20);
+    }
+}
+input[type="checkbox"], input[type="radio"] {
+    margin: 0 0 rem-calc(3);
+}
+input.form-text {
+    max-width: 100%;
+}
+// Fields with suffix
+input[type="text"].with-suffix {
+    display: inline-block;
+    width: auto !important;
+}
+// recaptcha
+.google_recaptcha {
+    margin-bottom: 1em;
+}
+.form-item {
+    .description {
+        margin: 0 0 1em;
+        font-size: rem-calc(12);
+        color: #787878;
+        line-height: normal;
+        p {
+            font-size: inherit;
+        }
+        p, ul, ol {
+            margin-bottom: 1rem;
+        }
+    }
+    label {
+        &:not(.option) {
+            margin-bottom: rem-calc(5);
+            font-weight: bold;
+        }
+        &.option {
+            font-size: rem-calc(14);
+        }
+    }
+}
+.views-exposed-widget {
+    button, .button {
+        margin-bottom: 0;
+        @extend .alert;
+    }
+    .form-item {
+        margin-top: 0;
+    }
+    > label {
+        margin-bottom: rem-calc(5);
+        font-weight: bold;
+    }
+    // Override date.css
+    .container-inline-date {
+        clear: none;
+        > .form-item {
+            margin-right: 0;
+        }
+        .form-item,
+        .form-item input {
+            width: 100%;
+            display: block;
+        }
+        .date-padding {
+            float: none;
+        }
+        .form-item {
+            float: none;
+            .description {
+                display: none;
+            }
+        }
+    }
+    .views-submit-button,
+    .views-reset-button {
+        padding-bottom: 0;
+        button, .button {
+            width: 100%;
+        }
+    }
+}
+// Vertical Tabs
+div.vertical-tabs {
+    margin: 0 0 1em;
+    border: none;
+    .form-type-textfield input {
+        width: 100%;
+    }
+    .form-navigation {
+        background: #484848;
+        width: 100%;
+        display: table;
+        table-layout: fixed;
+        &.top {
+            @include side-radius(top, 3px);
+        }
+        &.bottom {
+            @include side-radius(bottom, 3px);
+        }
+        a, a:hover, .heading {
+            color: rgba(255,255,255,.8);
+        }
+        .prev-tab,
+        .next-tab,
+        .heading {
+            display: table-cell;
+            padding: .4em;
+            vertical-align: middle;
+        }
+        .heading {
+            text-align:center;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: rem-calc(13);
+            width: 100%;
+        }
+        .prev-tab, .next-tab {
+            font-size: rem-calc(20);
+            width: 40px;
+            text-align: center;
+            span {
+                display: none;
+            }
+            &:before {
+                @extend .epic-icon:before;
+            }
+            &:hover {
+                color: #fff;
+            }
+        }
+        .prev-tab {
+            &:before {
+                @extend .icon-arrow-left4:before;
+            }
+        }
+        .next-tab {
+            &:before {
+                @extend .icon-arrow-right5:before;
+            }
+        }
+    }
+    ul.vertical-tabs-list {
+        display: none;
+        margin: 0 0 1em;
+        @include grid-column(12);
+        padding: 0;
+        border: none;
+        z-index: 10;
+        font-size: rem-calc(13);
+        li {
+            border: none;
+            overflow: hidden;
+            background: $blue_medium;
+            border-top: 1px solid rgba(255,255,255,.2);
+            > ul {
+                background: inherit;
+                margin: 0;
+                li {
+                    background: rgba(255,255,255,.3);
+                    padding-left: rem-calc(10);
+                    &.selected {
+                        border-top: none;
+                    }
+                }
+            }
+            a {
+                padding: rem-calc(10) rem-calc(20);
+                color: rgba(255,255,255,.8);
+            }
+            &.selected {
+                //background: darken($blue_medium, 10%);
+                background: #F04124;
+                border-top: none;
+                a {
+                    border-top: none;
+                }
+                a, strong {
+                    color: #fff;
+                }
+            }
+            a:hover,
+            a:hover strong,
+            a:active,
+            a:active strong,
+            a:focus strong {
+                text-decoration: none;
+            }
+            &.child {
+                font-size: rem-calc(12);
+                a strong { font-weight: normal; }
+            }
+        }
+        > li {
+            &:first-child {
+                border-top: none;
+                @include side-radius(top, 3px);
+            }
+            &:last-child {
+                @include side-radius(bottom, 3px);
+            }
+        }
+    }
+    .vertical-tabs-panes {
+        @include grid-column(12);
+        border: none;
+        padding: 0;
+        margin: 0 0 1em;
+    }
+    fieldset.vertical-tabs-pane {
+        padding: 0;
+        > .fieldset-wrapper {
+            padding: 0 1em;
+            @extend .clearfix;
+            background: $secondary-color;
+            border-width: 0 1px 0;
+            border-style: solid;
+            border-color: darken($secondary-color, 15%);
+            fieldset {
+                border-color: darken($secondary-color, 15%);
+                legend {
+                    background: inherit;
+                }
+            }
+        }
+    }
+}
+// Recurly checkout form
+#bei-recurly-checkout-form {
+    .checkout-right-rail {
+        #edit-plan-details {
+            padding:15px 10px;
+            border:3px solid #ccc;
+        }
+        span.cost-amount {
+            float: right;
+        }
+        .plan-info-title {
+            font-size:16px;
+            font-weight:bold;
+            padding-bottom:15px;
+        }
+        .membership-cost {
+            @include font-size(12);
+        }
+        .discount {
+            font-size:12px;
+            padding-top:15px;
+        }
+        .total-cost {
+            padding-top: 15px;
+            margin-top: 15px;
+            border-top: 1px solid #ccc;
+        }
+    }
+    #edit-outro {
+        @include font-size(12);
+    }
+    button#edit-back {
+        @extend .button.secondary;
+    }
+    .form-type-radios.form-item-plan {
+        #edit-plan {
+            display: table;
+            .form-item-plan {
+                display: table-cell;
+                vertical-align: top;
+                label {
+                    padding: 20px;
+                    border: 3px solid #E0E0E0;
+                    color: #8F8D8D;
+                    border-radius: 4px;
+                    font-size: 14px;
+                    cursor: pointer;
+                    z-index: 90;
+                    display:block;
+                    @include font-size(16);
+                    height: 100px;
+                    margin: 0;
+                    &:hover {
+                        border: 3px solid #8F8D8D;
+                    }
+                    span.plan-cost {
+                        @include font-size(26);
+                        font-weight: bold;
+                        padding-right: 4px;
+                        padding-bottom: 5px;
+                        display:inline-block;
+                    }
+                    span.plan-duration,
+                    span.plan-description {
+                        display:block;
+                        @include font-size(12);
+                    }
+                }
+                &:first-child label {
+                    margin-right: rem-calc(10);
+                }
+                input[type="radio"] {
+                    opacity: 0.011;
+                    z-index: 100;
+                }
+                input[type="radio"]:checked + label {
+                    border: 3px solid #0079B4;
+                    color: #0079B4;
+                    span.plan-cost,
+                    span.plan-interval {
+                        color: #000;
+                    }
+                }
+            }
+        }
+    }
+    #edit-graphic img {
+        max-width:100%;
+        height:auto;
+    }
+    .form-item {
+        span.valid-input {
+            background: url('../images/recurly/valid-input.png');
+            background-position: top left;
+            background-repeat:no-repeat;
+            background-size: 20px 20px;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            position: relative;
+            top: 6px;
+            left: 10px;
+        }
+        .description {
+            @include font-size(12);
+        }
+        .input-error {
+            @include font-size(12);
+            color: red;
+        }
+    }
+    div.password-confirm,
+    .password-strength {
+        @include font-size(12);
+    }
+    .password-suggestions {
+        display:none !important;
+    }
+    .password-indicator {
+        height: 10px;
+        .indicator {
+            background-color:#006687;
+        }
+    }
+    .password-confirm span,
+    .password-confirm span.error,
+    .password-strength .password-strength-text {
+        display:inline;
+        background:none;
+        color:#333333;
+        font-weight:normal;
+        font-size:12px;
+    }
+    .form-item-month,
+    .form-item-year,
+    .form-item-verification-value {
+        @include grid-column(3);
+        padding: 0;
+    }
+    .form-item-month {
+        label {
+            white-space: nowrap;
+        }
+        select {
+            margin-right: 5px;
+        }
+    }
+    .form-item-year {
+        label {
+            @extend .element-invisible;
+        }
+    }
+    .form-item-verification-value {
+        padding-left: $column-gutter/2;
+    }
+    #edit-coupon {
+        border-top: 1px solid #ccc;
+        padding-top: rem-calc(15);
+        display: table;
+        margin-bottom: 1em;
+    }
+    .form-item-coupon-code {
+        display: table-cell;
+        vertical-align: bottom;
+        margin: 0;
+        input {
+            margin: 0;
+        }
+    }
+    #coupon-apply {
+        display: table-cell;
+        width: 70px;
+        vertical-align: bottom;
+    }
+    #edit-coupon-apply {
+        margin: 0;
+        @extend .postfix;
+        @extend .button.alert;
+    }
+    button#edit-next {
+        @extend .button.alert;
+    }
+}
+@media #{$medium-up} {
+    div.vertical-tabs {
+        ul.vertical-tabs-list {
+            display: block;
+            @include grid-column(4);
+            padding-left: 0;
+        }
+        .vertical-tabs-panes {
+            @include grid-column(8);
+            padding-right: 0;
+        }
+    }
+    input[type="text"],
+    select {
+        width: auto;
+    }
+    $sticky-height: 60px;
+    form.sticky-buttons {
+        margin-bottom: $sticky_height;
+        div.actions-wrapper {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: $blue;
+            height: $sticky-height;
+        }
+        div.form-actions {
+            margin: 0;
+            overflow: hidden;
+            text-align: right;
+            line-height: 60px;
+            @include grid-column(12);
+            .form-submit {
+                margin: 0;
+                @extend .button.small;
+                font-weight: bold;
+            }
+        }
+    }
+    // Find an advisor simple search
+    form#views-exposed-form-member-directory-panel-pane-1 {
+        #edit-distance-wrapper {
+            > .wrapper {
+                @include grid-row();
+                .form-item-distance-country {
+                    @include grid-column(8);
+                    padding-left: 0;
+                }
+                .form-item-distance-postal-code {
+                    @include grid-column(4);
+                    padding-left: 0;
+                    padding-right: 0;
+                }
+            }
+        }
+    }
+    form#bei-recurly-checkout-form {
+       .form-item-city,
+       .form-item-state,
+       .form-item-zip {
+            float: left;
+       }
+       .form-item-city {
+            width: 50%;
+       }
+       .form-item-state {
+            width: 25%;
+            padding: 0 $column-gutter/2;
+       }
+       .form-item-zip {
+            width: 25%;
+       }
+       .form-type-radios.form-item-payment-type {
+            clear: both;
+            border-top: 1px solid #ccc;
+            padding-top: 15px;
+       }
+    }
+}
+
+@media #{$small-range} {
+    
+}
+
+body.page-node-edit {
+    &.node-type-subscriber-list,
+    &.node-type-campaign {
+        @extend .full-width;
+        overflow: hidden;
+        padding-top: 60px;
+        .form-buttons {
+            background: $blue;
+            height: 60px;
+            line-height: 60px;
+            @extend .fixed;
+            button, .button {
+                margin: 0;
+            }
+            .form-actions {
+                margin: 0;
+                height: inherit;
+                line-height: inherit;
+                button, .button {
+                    @extend .button.small;
+                    @extend .button.success;
+                }
+            }
+        }
+        // adjust postioning when admin menu is enabled.
+        &.admin-menu {
+            .form-buttons {
+                top: 20px;
+            }
+        }
+        > div.page,
+        > div.page > div.contextual-links-region {
+            position: relative;
+            height: 100%;
+        }
+        .form-preview,
+        .form-content {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: #fff;
+        }
+        .form-content {
+            left: 60%;
+            right: 0;
+            @extend .scrollable;
+            > .form-content-inner {
+                padding: rem-calc(20);
+            }
+        }
+        .form-preview {
+            left: 0;
+            right: 40%;
+            overflow: hidden;
+            z-index: 99;
+        }
+    }
+}
+@media #{$large-up} {
+    form#bei-recurly-checkout-form {
+        @include grid-row();
+        .checkout-right-rail {
+            @include grid-column(4, $push: 8);
+        }
+        .checkout-main-content {
+            @include grid-column(6, $pull: 4);
+        }
+    }
+}

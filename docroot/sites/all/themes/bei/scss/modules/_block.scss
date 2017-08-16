@@ -1,0 +1,155 @@
+.sidebar .block {
+  margin-bottom: rem-calc(30);
+}
+.block.stats {
+  margin-bottom: rem-calc(25);
+  > ul li {
+    text-align: center;
+  }
+  span.big {
+    display: block;
+    @include font-size(40);
+    color: #84926B;
+  }
+}
+// Resources sections
+.pane-resources-blog,
+.pane-resources-podcasts,
+.pane-resources-find-advisors {
+  > h2.pane-title {
+    text-align: center;
+    margin-bottom: rem-calc(20);
+    text-transform: uppercase;
+  }
+}
+.block-views-testimonials-block-1 {
+  h2.block-title {
+    text-align: center;
+    text-transform: uppercase;
+    @include font-size(34);
+    margin: 0 0 rem-calc(25);
+  }
+  .more-link {
+    margin-top: rem-calc(15);
+  }
+}
+
+#what-is {
+  h2, h3 {
+    text-align: center;
+    text-transform: uppercase;
+    @include font-size(34);
+  }
+  h3 {
+    @include font-size(24);
+  }
+}
+.pane-testimonials-panel-pane-1 {
+  h2.pane-title {
+    margin-bottom: rem-calc(30);
+    text-align: center;
+    text-transform: uppercase;
+  }
+}
+
+.block-facetapi {
+  .item-list {
+    ul {
+      list-style: none;
+      margin: 0;
+      div.facetapi-inactive {
+        @include font-size(13);
+      }
+      &.expanded div.facetapi-inactive {
+        padding-left: 1.5em;
+      }
+      li {
+        a.facetapi-checkbox {
+          margin: 0;
+        }
+        margin: 0;
+        @include font-size(14);
+        input.facetapi-checkbox {
+          margin-right: 5px;
+        }
+        .facetapi-facet {
+          padding: .2em .5em;
+          line-height: 1.5;
+          &.facetapi-active {
+            background: #f5f5f5;
+            padding: .5em;
+            margin-bottom: 1px;
+          }
+        }
+      }
+    }
+  }
+}
+.sidebar .block {
+  &.block-webform {
+    button.webform-submit {
+      @extend .alert;
+      @extend .expand;
+    }
+  }
+}
+.block {
+  &.block-webform-client-block-6166 {
+    button.webform-submit {
+      @extend .alert;
+      @extend .expand;
+    }
+  }
+}
+
+.block.membership {
+  .panel {
+    //border: none;
+    h2 {
+      text-align: center;
+      span {
+        display: block;
+      }
+    }
+  }
+  .more-link {
+    margin-top: rem-calc(20);
+    a.button {
+      @include box-shadow(0, 14px, 7px, -10px, rgba(0, 0, 0, 0.8));
+    }
+  }
+  .learn-more {
+    text-align: center;
+    a {
+      text-decoration: underline;
+    }
+  }
+  .price {
+    margin: rem-calc(10) 0;
+    text-align: center;
+    span {
+      @include font-size(22);
+    }
+  }
+  .panel.callout {
+    background: $blue_medium;
+    color: #fff;
+    border-color: scale-color($blue_medium, $lightness: $panel-function-factor);
+    h1, h2, h3, h4, h5, h6, .price {
+      color: inherit;
+    }
+    .learn-more {
+      a, a:active, a:hover {
+        color: inherit;
+      }
+    }
+  }
+}
+
+@media #{$medium-up} {
+  .block.stats {
+    span.big {
+      @include font-size(60);
+    }
+  }
+}

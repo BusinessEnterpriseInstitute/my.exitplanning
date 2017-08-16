@@ -1,0 +1,719 @@
+/* @file
+ * This file is a custom file that loads all files. Each non-base layer
+ * can be disabled.
+ *
+ * Do not name this file "STARTER.scss". This file should be named
+ * THEMENAME.scss. If you used the drush command to generate this subtheme,
+ * it should be named for you.
+ *
+ * This application file (THEMENAME.scss) is where all the partials are
+ * imported.
+ *
+ * Theme styles are categorized using SMACSS standards. They utilize
+ * categorization of styles into various categories. Those categories are the
+ * following:
+ *
+ * - Base: CSS reset/normalize plus HTML element styling.
+ * - Layout: Macro arrangement of a web page, including any grid systems.
+ * - Modules: Dictate minor layout modules or reusable elements.
+ * - States: Describe the appearance of a module in various states.
+ * - Theme: Specific customizations for your subtheme.
+ * For more information about this new Drupal css file standard, please review
+ * the following:
+ * - https://drupal.org/node/1887922
+ * - http://smacss.com/
+ */
+
+// Make sure the charset is set appropriately
+@charset "UTF-8";
+
+// Core
+// The following imports bootstrap the theme.
+// You may comment out bourbon if you don't want to use its library of mixins.
+// The theme will have compilation errors if Foundation is not imported.
+
+// Global Zurb Foundation variable overrides.
+@import "base/init";
+
+// Comment out this import if you don't want to use normalize.
+@import "../../zurb_foundation/scss/normalize";
+
+// Comment out the imports you don't need below.
+@import "../../zurb_foundation/scss/foundation/components/grid";
+@import "../../zurb_foundation/scss/foundation/components/accordion";
+@import "../../zurb_foundation/scss/foundation/components/alert-boxes";
+@import "../../zurb_foundation/scss/foundation/components/block-grid";
+@import "../../zurb_foundation/scss/foundation/components/breadcrumbs";
+@import "../../zurb_foundation/scss/foundation/components/button-groups";
+@import "../../zurb_foundation/scss/foundation/components/buttons";
+@import "../../zurb_foundation/scss/foundation/components/clearing";
+@import "../../zurb_foundation/scss/foundation/components/dropdown";
+@import "../../zurb_foundation/scss/foundation/components/dropdown-buttons";
+@import "../../zurb_foundation/scss/foundation/components/flex-video";
+@import "../../zurb_foundation/scss/foundation/components/forms";
+//@import "../../zurb_foundation/scss/foundation/components/icon-bar";
+@import "../../zurb_foundation/scss/foundation/components/inline-lists";
+//@import "../../zurb_foundation/scss/foundation/components/joyride";
+@import "../../zurb_foundation/scss/foundation/components/keystrokes";
+@import "../../zurb_foundation/scss/foundation/components/labels";
+//@import "../../zurb_foundation/scss/foundation/components/magellan";
+//@import "../../zurb_foundation/scss/foundation/components/orbit";
+@import "../../zurb_foundation/scss/foundation/components/pagination";
+@import "../../zurb_foundation/scss/foundation/components/panels";
+@import "../../zurb_foundation/scss/foundation/components/pricing-tables";
+@import "../../zurb_foundation/scss/foundation/components/progress-bars";
+//@import "../../zurb_foundation/scss/foundation/components/range-slider";
+@import "../../zurb_foundation/scss/foundation/components/reveal";
+@import "../../zurb_foundation/scss/foundation/components/side-nav";
+@import "../../zurb_foundation/scss/foundation/components/split-buttons";
+@import "../../zurb_foundation/scss/foundation/components/sub-nav";
+//@import "../../zurb_foundation/scss/foundation/components/switches";
+@import "../../zurb_foundation/scss/foundation/components/tables";
+@import "../../zurb_foundation/scss/foundation/components/tabs";
+@import "../../zurb_foundation/scss/foundation/components/thumbs";
+@import "../../zurb_foundation/scss/foundation/components/tooltips";
+@import "../../zurb_foundation/scss/foundation/components/top-bar";
+@import "../../zurb_foundation/scss/foundation/components/type";
+@import "../../zurb_foundation/scss/foundation/components/offcanvas";
+@import "../../zurb_foundation/scss/foundation/components/visibility";
+
+// Comment out this import if you don't want to use Bourbon, a replacement for Compass mixins.
+@import "bourbon";
+
+// Import our mixins early so they can be used by other partials.
+// Optional.
+@import "base/mixins";
+
+// Common file is where you place common utility classes to extend or
+// parametrics.
+// Optional.
+// @import "base/common";
+
+// Fix for some Drupal CSS quirks (Drupalisms).
+@import "base/drupal";
+
+// Styling for elements.
+// Optional.
+@import "base/elements";
+
+// Layout
+// Each section of the document has it's own partial seperated out to improve
+// developer experience. Additionally, grids can be declared in layouts as well.
+@import "layout/header";
+@import "layout/main";
+@import "layout/featured";
+@import "layout/cta";
+@import "layout/aside";
+@import "layout/footer";
+@import "layout/search";
+@import "layout/action_bar";
+
+// Modules
+@import "modules/block";
+// @import "modules/button";
+@import "modules/forms";
+@import "modules/views";
+
+// States
+// @import "states/collapse";
+
+// Themes
+// @import "theme/button-light";
+
+// Fonts
+// @import "fonts/epic-icons";
+@import "fonts/bei-icons";
+
+// Older IE support
+// @import "vendor/ie";
+
+// d. Media Query Ranges
+// - - - - - - - - - - - - - - - - - - - - - - - - -
+
+// $small-range: (0em, 40em);
+// $medium-range: (40.063em, 64em);
+// $large-range: (64.063em, 90em);
+// $xlarge-range: (90.063em, 120em);
+// $xxlarge-range: (120.063em, 99999999em);
+
+// $screen: "only screen";
+
+// $landscape: "#{$screen} and (orientation: landscape)";
+// $portrait: "#{$screen} and (orientation: portrait)";
+
+// $small-up: $screen;
+// $small-only: "#{$screen} and (max-width: #{upper-bound($small-range)})";
+
+// $medium-up: "#{$screen} and (min-width:#{lower-bound($medium-range)})";
+// $medium-only: "#{$screen} and (min-width:#{lower-bound($medium-range)}) and (max-width:#{upper-bound($medium-range)})";
+
+// $large-up: "#{$screen} and (min-width:#{lower-bound($large-range)})";
+// $large-only: "#{$screen} and (min-width:#{lower-bound($large-range)}) and (max-width:#{upper-bound($large-range)})";
+
+// $xlarge-up: "#{$screen} and (min-width:#{lower-bound($xlarge-range)})";
+// $xlarge-only: "#{$screen} and (min-width:#{lower-bound($xlarge-range)}) and (max-width:#{upper-bound($xlarge-range)})";
+
+// $xxlarge-up: "#{$screen} and (min-width:#{lower-bound($xxlarge-range)})";
+// $xxlarge-only: "#{$screen} and (min-width:#{lower-bound($xxlarge-range)}) and (max-width:#{upper-bound($xxlarge-range)})";
+
+// Legacy
+// $small: $medium-up;
+// $medium: $medium-up;
+// $large: $large-up;
+
+body {
+  &.design-mode,
+  &.cke_editable,
+  &.cke_ltr {
+    background: #fff;
+  }
+  // Add some extra ckeditor stuff
+  &.cke_editable {
+    [contenteditable=true]:empty:not(:focus):before {
+      content:attr(data-text);
+      color: #aaa;
+    }
+    span.fn {
+      font-family: monospace;
+      background: yellow;
+      &:before {
+        content: "FOOTNOTE: ";
+        color: red;
+      }
+    }
+  }
+  .cke_button__templates_label {
+    display: inline-block;
+  }
+  &.cke_show_blocks div.column:not([contenteditable="false"]):not(.cke_show_blocks_off),
+  &.cke_show_blocks div.columns:not([contenteditable="false"]):not(.cke_show_blocks_off) {
+    background-image: none;
+    p:not(:focus):before {
+      content:attr(data-text);
+      color: #aaa;
+      @include font-size(12);
+      display: block;
+      margin-bottom: .5em;
+    }
+  }
+  &.full-width {
+    .row {
+      max-width: 100%;
+    }
+  }
+  &.title-banner {
+    .page-header {
+      display: table;
+      width: 100%;
+      height: 150px;
+      position: relative;
+      padding: $column-gutter/2;
+      color: #fff;
+      text-align: center;
+      margin-bottom: rem-calc(20);
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: scroll;
+      h1#page-title {
+      }
+      h1, h2, h3, h4, h5, h6 {
+        color: #fff;
+        margin: 0;
+        font-family: $roboto-condensed;
+      }
+      h1 {
+        text-transform: uppercase;
+        line-height: normal;
+      }
+      &:before {
+        content: "";
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(43, 58, 81, .8);
+      }
+      h1#page-title {
+        margin: 0;
+        color: #fff;
+        line-height: normal;
+      }
+      > .row {
+        display: table-cell;
+        vertical-align: middle;
+      }
+    }
+    &.front {
+      .page-header {
+        h1 {
+          color: #fff;
+          font-weight: 700;
+        }
+        h2 {
+          margin: rem-calc(25) 0;
+        }
+        a.button {
+          text-transform: uppercase;
+        }
+      }
+    }
+  }
+}
+
+input[type="text"], select {
+  width: 100%;
+}
+// Headings
+h1, h2, h3, h4, h5, h6 {
+  font-family: $roboto-condensed;
+};
+.l-main,
+.l-featured {
+  h1, h2, h3, h4, h5, h6 {
+    &.pane-title {
+      color: $blue;
+      a {
+        color: $blue;
+      }
+    }
+  };
+}
+h1#page-title {
+  margin-top: rem-calc(15);
+}
+.page-header h1, h2.pane-title, h2.block-title {
+    font-family: $roboto-condensed;
+}
+
+// Lists
+ul, ol, dl {
+    font-size: unset;
+}
+ol.ep-process {
+  counter-reset:li; /* Initiate a counter */
+  margin-left:0; /* Remove the default left margin */
+  padding-left:0; /* Remove the default left padding */
+  li {
+    position:relative; /* Create a positioning context */
+    margin:0 0 rem-calc(10) 90px; /* Give each list item a left margin to make room for the numbers */
+    //padding-left: 80px; /* Add some spacing around the content */
+    list-style:none; /* Disable the normal item numbering */
+    &:before {
+      color: $blue;
+      content:counter(li); /* Use the counter as content */
+      counter-increment:li; /* Increment the counter by 1 */
+      /* Position and style the number */
+      position:absolute;
+      left:-80px;
+      top: 4px;
+      border:2px solid;
+      text-align:center;
+      @include radius(1000px);
+      font-size: 30px;
+      padding: 0 15px;
+    }
+  }
+}
+ul.about-team {
+  img {
+    -webkit-filter: grayscale(1);
+    filter: grayscale(1);
+    @include single-transition();
+    &:hover {
+      -webkit-filter: none;
+      filter: none;
+    }
+  }
+}
+ul.accordion {
+    margin: 0;
+    &#faq-list {
+        li {
+            @include accordion-navigation;
+            border-bottom: 2px solid $red;
+            &:last-child {
+                border: none;
+            }
+            > a {
+                background: #fff;
+                font-weight: bold;
+                &:after {
+                    @include font-size(20);
+                    float: right;
+                    @extend .bei-icon:before;
+                    @extend .icon-arrow-right22:before;
+                }
+            }
+            &.active > a:after {
+                @extend .icon-arrow-down2:before;
+            }
+        }
+    }
+}
+ul.checks {
+  list-style: none;
+  li {
+    &:before {
+      @extend .bei-icon:before;
+      @extend .icon-checkmark:before;
+      margin-right: rem-calc(10);
+      color: $blue_medium;
+    }
+    a, a:active, a:hover {
+      color: $red;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  }
+}
+ul.benefits {
+  li {
+    padding: rem-calc(20) rem-calc(15);
+    h3 {
+      text-align: center;
+      @include font-size(24);
+      &:before {
+        content: "";
+        background-position: center top;
+        background-repeat: no-repeat;
+        background-size: contain;
+        display: block;
+        height: 75px;
+        margin-bottom: rem-calc(20);
+        text-align: center;
+      }
+    }
+  }
+  &.network {
+    li:nth-child(1n) h3:before {
+      background-image: url(../images/membership/network.png);
+    }
+    li:nth-child(2n) h3:before {
+      background-image: url(../images/membership/listing.png);
+    }
+    li:nth-child(3n) h3:before {
+      background-image: url(../images/membership/webcast.png);
+    }
+  }
+  &.planning {
+    li:nth-child(1n) h3:before {
+      background-image: url(../images/membership/software.png);
+    }
+    li:nth-child(2n) h3:before {
+      background-image: url(../images/membership/support.png);
+    }
+    li:nth-child(3n) h3:before {
+      background-image: url(../images/membership/plan_support.png);
+    }
+  }
+  &.marketing {
+    li:nth-child(1n) h3:before {
+      background-image: url(../images/membership/automated_marketing.png);
+    }
+    li:nth-child(2n) h3:before {
+      background-image: url(../images/membership/assessment_software.png);
+    }
+    li:nth-child(3n) h3:before {
+      background-image: url(../images/membership/practice_groups.png);
+    }
+  }
+  &.full {
+    li:nth-child(1n) h3:before {
+      background-image: url(../images/membership/network_benefits.png);
+    }
+    li:nth-child(2n) h3:before {
+      background-image: url(../images/membership/marketing_benefits.png);
+    }
+    li:nth-child(3n) h3:before {
+      background-image: url(../images/membership/planning_benefits.png);
+    }
+  }
+}
+#faq-callout {
+    @include font-size(30);
+}
+// Breadcrumbs
+ul.breadcrumbs {
+  display: none;
+  margin: rem-calc(20) 0;
+  padding: rem-calc(10) 0;
+  background: none;
+  border: none;
+  font-family: $roboto-condensed;
+  > * {
+    @include font-size(14);
+    line-height: normal;
+    &:not(.current) {
+      a:hover, a:focus {
+        color: $base;
+      }
+    }
+  }
+  > *:before {
+    margin: 0 .4rem;
+    @extend .bei-icon:before;
+    @extend .icon-arrow-right:before;
+  }
+  > *:first-child:before {
+    margin: 0;
+  }
+}
+// Messages
+.alert-box {
+    margin: 1.25rem 0;
+}
+// Book
+.book-navigation {
+    margin-bottom: 1em;
+}
+.row.full-width,
+.row.full-width .row {
+    max-width: 100% !important;
+}
+// Misc.
+.text-upper {
+  text-transform: uppercase;
+}
+.scrollable {
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+}
+.no-bg {
+  background: none;
+}
+.more-link {
+    text-transform: uppercase;
+    text-align: center;
+    font-family: $roboto-condensed;
+    font-weight: 700;
+    a {
+        display: inline-block;
+        text-align: center;
+        padding: rem-calc(10) rem-calc(20);
+        color: $blue;
+        border: 1px solid;
+        &:hover {
+            background: $blue;
+            color: #fff;
+        }
+    }
+}
+// Devel styles
+div.krumo-preview {
+  color: #222;
+}
+
+table {
+    width: 100%;
+    &.draggable,
+    tr.draggable {
+        a.tabledrag-handle {
+            margin: 2px 0 0;
+            height: 13px;
+            .handle {
+                background-position: 0 0;
+                margin: 0 .5em 0 0;
+            }
+            &:hover .handle {
+                background-position: 0 -20px;
+            }
+        }
+    }
+    td.icon {
+        width: 40px;
+        text-align: center;
+        padding: 0 !important;
+        a {
+            display: block;
+            padding: .75em;
+        }
+        i.disabled {
+          color: #aaa;
+          cursor: not-allowed;
+        }
+    }
+    .form-item, .form-actions {
+      margin: 0;
+    }
+    button, .button {
+      margin-bottom: 0;
+    }
+}
+
+
+.landing-teaser {
+    margin-bottom: 1em;
+    @include box-shadow(0, 22px, 8px, -20px, rgba(50, 50, 50, 0.6));
+    padding: 1.5em;
+    border: 1px solid $gainsboro;
+    h2.pane-title,
+    h2.block-title {
+        text-align: center;
+        font-size: rem-calc(20);
+        margin: 0 0 .75em;
+        padding-bottom: 5px;
+        border-bottom: 2px solid $red;
+        color: #00334d;
+        a {
+            color: #00334d;
+        }
+    }
+}
+// Break a div outside its container.
+.breakout {
+  padding: $column-gutter/2;
+  background: #F5F6F7;
+  margin: $column-gutter -100%; /* old browsers fallback */
+  margin: $column-gutter calc(50% - 50vw);
+  h2 {
+    text-align: center;
+  }
+  > .contain {
+    @include grid-row();
+  }
+  &.blue {
+    background: $blue;
+    color: #fff;
+    h1, h2, h3, h4, h5, h6 {
+      color: #fff;
+    }
+  }
+  &.video-promo {
+    h2 {
+      text-transform: uppercase;
+    }
+  }
+  &.bootcamp {
+    > .contain {
+      .live, .online {
+        padding-top: rem-calc(30);
+        padding-bottom: rem-calc(30);
+        h2 {
+          &:before {
+            content: "";
+            height: 70px;
+            display: block;
+            margin-bottom: rem-calc(20);
+            background-position: center top;
+            background-repeat: no-repeat;
+            background-size: contain;
+          }
+        }
+      }
+      .live h2:before {
+        background-image: url(../images/bootcamp_live.png);
+      }
+      .online h2:before {
+        background-image: url(../images/bootcamp_online.png);
+      }
+    }
+  }
+}
+
+@media #{$medium-up} {
+  .top-bar {
+    padding: 0 $column-gutter/2;
+  }
+  h2 {
+    @include font-size(36);
+  }
+  h3 {
+      @include font-size(30);
+  }
+  h2.block-title {
+    @include font-size(24);
+  }
+  ul.breadcrumbs {
+    display: block;
+  }
+  $admin-menu-height: 20px;
+  $header-top-height: 35px;
+  $topbar-height: 80px;
+  body {
+    &.admin-menu {
+      .fixed {
+        top: $admin-menu-height;
+      }
+    }
+    &.f-topbar-fixed {
+      padding-top: $topbar-height;
+      &.admin-menu {
+        div.fixed {
+            top: $admin-menu-height;
+        }
+      }
+      &.top-header-enabled {
+        padding-top: calc(#{$topbar-height} + #{$header-top-height});
+        /*
+        .l-header-top {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 99;
+        }*/
+        div.fixed {
+            top: $header-top-height;
+        }
+        &.admin-menu {
+            .l-header-top {
+                top: $admin-menu-height;
+            }
+            div.fixed {
+                top: calc(#{$admin-menu-height} + #{$header-top-height});
+            }
+        }
+      }
+    }
+    &.title-banner {
+      .page-header {
+        padding: 0;
+        height: 275px;
+        h1#page-title {
+          margin: 0;
+          @include font-size(70);
+        }
+      }
+      &.front {
+        .page-header {
+          height: 500px;
+          h1 {
+            @include font-size(90);
+          }
+          h2 {
+            @include font-size(34);
+            margin: rem-calc(25) 0;
+          }
+        }
+        &.logged-in {
+          .page-header {
+            height: auto;
+            padding: rem-calc(20) 0;
+            h1 {
+              @include font-size(70);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media #{$large-up} {
+  .breakout {
+    padding: 0;
+    &.video-promo {
+      h2 {
+        @include font-size(40);
+        text-align: left;
+      }
+      .block.body {
+        padding: rem-calc(20) rem-calc(20) 0;
+      }
+    }
+  }
+}

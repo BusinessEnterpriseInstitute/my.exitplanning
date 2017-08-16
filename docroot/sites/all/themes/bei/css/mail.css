@@ -1,0 +1,26 @@
+table {
+    border-collapse:collapse !important;
+}
+table.data {
+    border: 1px solid #bebfb9;
+    width: 100%;
+    margin: 0 0 20px;
+}
+table.data td,
+table.data th {
+    padding: 8px 10px;
+    vertical-align: middle;
+    border-color: #bebfb9;
+    border-style: solid;
+    border-width: 1px;
+}
+table#bei-order-summary tbody tr th {
+    width: 25%;
+}
+table.data th {
+    background: #e1e2dc;
+    text-transform: uppercase;
+}
+table.data tbody tr th {
+    text-align: left;
+}

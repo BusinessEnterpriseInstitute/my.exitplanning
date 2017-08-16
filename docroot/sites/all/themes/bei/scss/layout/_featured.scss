@@ -1,0 +1,29 @@
+// Non-modular or client styles for .l-featured region.
+.l-featured {
+    background: #F5F6F7;
+    padding: rem-calc(40) 0;
+    .block {
+        margin-bottom: rem-calc(60);
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+@media #{$medium-up} {
+    .view-featured-entities {
+        .views-row-odd {
+            > .row {
+                .columns:first-child {
+                    @extend .push-6;
+                    div.image {
+                        text-align: right;
+                    }
+                }
+                .columns:last-child {
+                    @extend .pull-6;
+                }
+            }
+        }
+    }
+}
