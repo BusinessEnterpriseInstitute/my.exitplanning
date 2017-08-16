@@ -652,7 +652,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
       $conf['preprocess_css'] = 0;
       $conf['preprocess_js'] = 0;
       // Show error messages.
-      $conf['error_level'] = 0;
+      $conf['error_level'] = 2;
       // Disable Easy cron.
       $conf['easycron_status'] = 0;
       $conf['file_private_path'] = '/mnt/files/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/' . $files_private_conf_path . '/files-private';
