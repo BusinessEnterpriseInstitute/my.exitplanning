@@ -637,3 +637,25 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 if (file_exists('/var/www/site-php')) {
   require('/var/www/site-php/exitplanning/exitplanning-settings.inc');
 }
+// Set private files directory for acquia
+if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
+  $files_private_conf_path = conf_path();
+  switch ($_ENV['AH_SITE_ENVIRONMENT']) {
+    case 'dev':
+    case 'test':
+      $conf['cache'] = 0;
+      // Cached page compression - always off.
+      $conf['page_compression'] = 0;
+      $conf['block_cache'] = 0;
+      $conf['page_cache_maximum_age'] = 0;
+      $conf['cache_lifetime'] = 0;
+      $conf['preprocess_css'] = 0;
+      $conf['preprocess_js'] = 0;
+      // Show error messages.
+      $conf['error_level'] = 0;
+      // Disable Easy cron.
+      $conf['easycron_status'] = 0;
+      $conf['file_private_path'] = '/mnt/files/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/' . $files_private_conf_path . '/files-private';
+      break;
+  }
+}
