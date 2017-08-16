@@ -1,0 +1,489 @@
+<?php
+
+/**
+ * @file
+ * Module implementing a field-collection modal widget.
+ */
+
+/**
+ * Implements hook_theme().
+ */
+function field_collection_modal_theme() {
+  return array(
+    'field_collection_modal_value_form' => array(
+      'render element' => 'element',
+      'file' => 'field_collection_modal.theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function field_collection_modal_field_widget_info() {
+  return array(
+    'field_collection_modal' => array(
+      'label' => t('Modal'),
+      'field types' => array('field_collection'),
+      'settings' => array(
+        'view_mode' => 'default',
+      ),
+      'behaviors' => array(
+        'multiple values' => FIELD_BEHAVIOR_CUSTOM,
+        'default value' => FIELD_BEHAVIOR_NONE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function field_collection_modal_field_widget_settings_form($field, $instance) {
+  $form = array();
+
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  if ($widget['type'] == 'field_collection_modal') {
+    $entity_info = entity_get_info('field_collection_item');
+
+    $view_modes = array();
+    foreach ($entity_info['view modes'] as $view_mode_key => $view_mode) {
+      $view_modes[$view_mode_key] = $view_mode['label'];
+    }
+
+    $form['view_mode'] = array(
+      '#type' => 'select',
+      '#title' => t('View mode'),
+      '#default_value' => $settings['view_mode'],
+      '#options' => $view_modes,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function field_collection_modal_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  if ($instance['widget']['type'] == 'field_collection_modal') {
+    $field_parents = $element['#field_parents'];
+    $field_name = $element['#field_name'];
+    $language = $element['#language'];
+
+    $id_prefix = implode('-', array_merge($field_parents, array($field_name)));
+    $wrapper_id = drupal_clean_css_identifier($id_prefix . '-add-more-wrapper');
+
+    $parents = array_merge($field_parents, array($field_name, $language));
+
+    $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
+    if (!isset($field_state['items'])) {
+      $field_state['items'] = $items;
+      field_form_set_state($field_parents, $field_name, $language, $form_state, $field_state);
+    }
+
+    $items = $field_state['items'];
+    $max = count($items);
+
+    foreach ($items as $delta => $item) {
+      $field_collection_item = field_collection_field_get_entity($item, $field_name);
+      if (!$field_collection_item) {
+        continue;
+      }
+
+      $content = $field_collection_item->view($instance['widget']['settings']['view_mode']);
+      $content = $content['field_collection_item'][$field_collection_item->identifier()];
+      $element[$delta]['element'] = $content;
+
+      if ($field['cardinality'] != 1) {
+        // Input field for the delta (drag-n-drop reordering).
+        // We name the element '_weight' to avoid clashing with elements
+        // defined by widget.
+        $element[$delta]['_weight'] = array(
+          '#type' => 'weight',
+          '#title' => t('Weight for row @number', array('@number' => $delta + 1)),
+          '#title_display' => 'invisible',
+          // Note: this 'delta' is the FAPI 'weight' element's property.
+          '#delta' => $max,
+          '#default_value' => isset($items[$delta]['_weight']) ? $items[$delta]['_weight'] : $delta,
+          '#weight' => 100,
+        );
+      }
+
+      $element[$delta]['actions'] = array(
+        '#type' => 'actions',
+      );
+
+      $name = $id_prefix . '_edit_' . $delta;
+      $element[$delta]['actions']['edit'] = array(
+        '#id' => drupal_clean_css_identifier($name),
+        '#type' => 'submit',
+        '#name' => $name,
+        '#value' => t('Edit'),
+        '#attributes' => array('class' => array('ctools-use-modal')),
+        '#delta' => $delta,
+        '#submit' => array(),
+        '#limit_validation_errors' => array(),
+        '#ajax' => array(
+          'callback' => 'field_collection_modal_edit_item_ajax',
+          'wrapper' => $wrapper_id,
+        ),
+      );
+
+      $name = $id_prefix . '_remove_' . $delta;
+      $element[$delta]['actions']['remove'] = array(
+        '#id' => drupal_clean_css_identifier($name),
+        '#type' => 'submit',
+        '#name' => $name,
+        '#value' => t('Remove'),
+        '#delta' => $delta,
+        '#submit' => array('field_collection_modal_remove_item_submit'),
+        '#limit_validation_errors' => array(),
+        '#ajax' => array(
+          'callback' => 'field_collection_modal_remove_item_ajax',
+          'wrapper' => $wrapper_id,
+        ),
+      );
+    }
+
+    $element += array(
+      '#element_validate' => array('field_collection_modal_element_validate'),
+      '#parents' => $parents,
+      '#theme' => 'field_collection_modal_value_form',
+      '#field_name' => $field_name,
+      '#cardinality' => $field['cardinality'],
+      '#title' => check_plain($instance['label']),
+      '#required' => $instance['required'],
+      '#description' => field_filter_xss($instance['description']),
+      '#prefix' => '<div id="' . $wrapper_id . '">',
+      '#suffix' => '</div>',
+      '#max_delta' => $max,
+      '#attached' => array(
+        'call_user_func' => array(
+          array('_field_collection_modal_ctools_modal_add_js'),
+        ),
+      ),
+    );
+
+    if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $max != $field['cardinality']) {
+      $name = $id_prefix . '_add_more';
+      $element['add_more'] = array(
+        '#id' => drupal_clean_css_identifier($name),
+        '#type' => 'submit',
+        '#name' => $name,
+        '#value' => t('Add item'),
+        '#attributes' => array('class' => array('field-add-more-submit', 'ctools-use-modal')),
+        '#submit' => array(),
+        '#limit_validation_errors' => array(),
+        '#ajax' => array(
+          'callback' => 'field_collection_modal_add_item_ajax',
+          'wrapper' => $wrapper_id,
+        ),
+      );
+    }
+
+    return $element;
+  }
+}
+
+/**
+ * Validation callback for widget element.
+ *
+ * @param array $element
+ *   An associative array containing the properties of the element.
+ * @param array $form_state
+ *   A keyed array containing the current state of the form.
+ */
+function field_collection_modal_element_validate(&$element, &$form_state) {
+  $button = &$form_state['triggering_element'];
+
+  $field_parents = $element['#field_parents'];
+  $field_name = $element['#field_name'];
+  $language = $element['#language'];
+
+  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
+
+  $items = $element['#cardinality'] != 1 ? array() : $field_state['items'];
+
+  if ($element['#cardinality'] != 1) {
+    $sort = array();
+    foreach ($field_state['items'] as $delta => $item) {
+      $sort[$delta] = $element[$delta]['_weight']['#value'];
+    }
+    asort($sort);
+
+    $new_delta = 0;
+    foreach ($sort as $delta => $weight) {
+      $items[$new_delta] = $field_state['items'][$delta];
+      // We have to update the form widgets or re-ordering the form will lead to
+      // the edit and remove buttons editing the wrong thing.
+      if ($delta != $new_delta) {
+        $actions = &$element[$delta]['actions'];
+        $actions['edit']['#delta'] = $new_delta;
+        $actions['remove']['#delta'] = $new_delta;
+
+        if ($button['#name'] == $actions['edit']['#name'] || $button['#name'] == $actions['remove']['#name']) {
+          $button['#delta'] = $new_delta;
+        }
+      }
+
+      $new_delta++;
+    }
+  }
+
+  $field_state['items'] = $items;
+
+  field_form_set_state($field_parents, $field_name, $language, $form_state, $field_state);
+  form_set_value($element, $field_state['items'], $form_state);
+}
+
+/**
+ * Ajax callback for the "Add item" button.
+ */
+function field_collection_modal_add_item_ajax($form, $form_state) {
+  ctools_include('modal');
+
+  $button = $form_state['triggering_element'];
+  $button_parents = $button['#parents'];
+  array_pop($button_parents);
+  $element = drupal_array_get_nested_value($form, $button_parents);
+
+  $entity_type = $element['#entity_type'];
+  $entity = $element['#entity'];
+  $field_parents = $element['#field_parents'];
+  $field_name = $element['#field_name'];
+  $language = $element['#language'];
+
+  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
+  $field_collection_item = entity_create('field_collection_item', array('field_name' => $field_name));
+  $field_collection_item->setHostEntity($entity_type, $entity, $language);
+
+  $label = $field_collection_item->translatedInstanceLabel();
+  $title = ($element['#cardinality'] == 1) ? $label : t('Add new !instance_label', array('!instance_label' => $label));
+
+  $form_state_tmp = array(
+    'element_address' => $element['#parents'],
+    'original_form_id' => $form['#build_id'],
+    'field_collection_item' => $field_collection_item,
+    'delta' => $field_state['items'] ? max(array_keys($field_state['items'])) + 1 : 0,
+    'language' => $language,
+    'title' => $title,
+    'ajax' => TRUE,
+    'ajax_wrapper' => $button['#ajax']['wrapper'],
+  );
+
+  $commands = ctools_modal_form_wrapper('field_collection_modal_item_form', $form_state_tmp);
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Ajax callback for the "Edit" button.
+ */
+function field_collection_modal_edit_item_ajax($form, $form_state) {
+  ctools_include('modal');
+
+  $button = $form_state['triggering_element'];
+  $button_parents = $button['#parents'];
+  $button_parents = array_diff_key($button_parents, array_slice($button_parents, -3, 3, TRUE));
+  $element = drupal_array_get_nested_value($form, $button_parents);
+
+  $field_parents = $element['#field_parents'];
+  $field_name = $element['#field_name'];
+  $language = $element['#language'];
+
+  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
+  $field_collection_item = field_collection_field_get_entity($field_state['items'][$button['#delta']], $field_name);
+
+  $form_state_tmp = array(
+    'element_address' => $element['#parents'],
+    'original_form_id' => $form['#build_id'],
+    'field_collection_item' => $field_collection_item,
+    'delta' => $button['#delta'],
+    'language' => $language,
+    'title' => $field_collection_item->label(),
+    'ajax' => TRUE,
+    'ajax_wrapper' => $button['#ajax']['wrapper'],
+  );
+
+  $commands = ctools_modal_form_wrapper('field_collection_modal_item_form', $form_state_tmp);
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Submit callback for the "Remove" button.
+ */
+function field_collection_modal_remove_item_submit($form, &$form_state) {
+  $button = $form_state['triggering_element'];
+  $button_parents = $button['#parents'];
+  $button_parents = array_diff_key($button_parents, array_slice($button_parents, -3, 3, TRUE));
+  $element = drupal_array_get_nested_value($form, $button_parents);
+
+  $field_parents = $element['#field_parents'];
+  $field_name = $element['#field_name'];
+  $language = $element['#language'];
+
+  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
+
+  if (isset($field_state['items'][$button['#delta']])) {
+    unset($field_state['items'][$button['#delta']]);
+  }
+
+  $field_state['items'] = array_values($field_state['items']);
+
+  field_form_set_state($field_parents, $field_name, $language, $form_state, $field_state);
+
+  $form_state['rebuild'] = TRUE;
+  $form_state['rebuild_info']['copy']['triggering_element'] = $button;
+}
+
+/**
+ * Ajax callback for the "Remove" button.
+ */
+function field_collection_modal_remove_item_ajax($form, $form_state) {
+  $button = $form_state['rebuild_info']['copy']['triggering_element'];
+  $button_parents = $button['#parents'];
+  $button_parents = array_diff_key($button_parents, array_slice($button_parents, -3, 3, TRUE));
+  $element = drupal_array_get_nested_value($form, $button_parents);
+
+  $commands[] = ajax_command_replace('#' . $button['#ajax']['wrapper'], theme('status_messages') . drupal_render($element));
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Form builder for the creation and edition an item.
+ *
+ * @see field_collection_modal_item_form_submit()
+ * @ingroup forms
+ */
+function field_collection_modal_item_form($form, &$form_state) {
+  field_attach_form('field_collection_item', $form_state['field_collection_item'], $form, $form_state, $form_state['language']);
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#ajax' => array(
+      'callback' => 'field_collection_modal_item_form_ajax',
+    ),
+  );
+
+  $form['actions']['cancel'] = array(
+    '#type' => 'submit',
+    '#value' => t('Cancel'),
+    '#submit' => array(),
+    '#limit_validation_errors' => array(),
+    '#ajax' => array(
+      'callback' => 'field_collection_modal_item_form_cancel_ajax',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for field_collection_modal_item_form().
+ *
+ * @see field_collection_modal_item_form()
+ */
+function field_collection_modal_item_form_submit($form, &$form_state) {
+  $entity_type = 'field_collection_item';
+  $entity = $form_state['field_collection_item'];
+
+  field_attach_submit($entity_type, $entity, $form, $form_state);
+
+  // Fix image and file items to have "uri" and use in entity_view.
+  list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+  foreach (field_info_instances($entity_type, $bundle) as $instance) {
+    $field_name = $instance['field_name'];
+    $field_info = field_info_field($field_name);
+
+    if (in_array($field_info['type'], array('file', 'image'))) {
+      $langcode = field_language($entity_type, $entity, $field_name);
+      if (isset($entity->{$field_name}[$langcode])) {
+        $items = &$entity->{$field_name}[$langcode];
+        if (is_array($items) && $fids = array_column($items, 'fid')) {
+          if ($files = file_load_multiple($fids)) {
+            foreach ($items as &$item) {
+              if (!empty($item['fid']) && isset($files[$item['fid']])) {
+                $item = (array) $files[$item['fid']];
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Ajax callback for field_collection_modal_item_form().
+ *
+ * @see field_collection_modal_item_form()
+ */
+function field_collection_modal_item_form_ajax($form, $form_state) {
+  ctools_include('modal');
+
+  if (form_get_errors()) {
+    $commands[] = ctools_modal_command_display(NULL, theme('status_messages') . drupal_render($form));
+  }
+  else {
+    $original_form_state = form_state_defaults();
+    $original_form = form_get_cache($form_state['original_form_id'], $original_form_state);
+
+    $element = drupal_array_get_nested_value($original_form, $form_state['element_address']);
+
+    $field_parents = $element['#field_parents'];
+    $field_name = $element['#field_name'];
+    $language = $element['#language'];
+
+    $field_state = field_form_get_state($field_parents, $field_name, $language, $original_form_state);
+    $field_state['items'][$form_state['delta']]['entity'] = $form_state['field_collection_item'];
+    field_form_set_state($field_parents, $field_name, $language, $original_form_state, $field_state);
+
+    $new_form = drupal_retrieve_form($original_form['#form_id'], $original_form_state);
+    $new_form['#build_id'] = $original_form['#build_id'];
+    $new_form['#action'] = $original_form['#action'];
+
+    drupal_prepare_form($original_form['#form_id'], $new_form, $original_form_state);
+    form_set_cache($new_form['#build_id'], $new_form, $original_form_state);
+    drupal_process_form($original_form['#form_id'], $new_form, $original_form_state);
+
+    $element = drupal_array_get_nested_value($new_form, $form_state['element_address']);
+
+    $commands[] = ctools_modal_command_dismiss();
+    $commands[] = ajax_command_replace('#' . $form_state['ajax_wrapper'], theme('status_messages') . drupal_render($element));
+  }
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Ajax callback for the "Cancel" button.
+ */
+function field_collection_modal_item_form_cancel_ajax($form, $form_state) {
+  ctools_include('modal');
+
+  $commands[] = ctools_modal_command_dismiss();
+
+  return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+/**
+ * Helper callback to add JS files via "#attached" attribute of element.
+ *
+ * We should attach files via "#attached" attribute because in other case
+ * modals not work on main form validation error.
+ */
+function _field_collection_modal_ctools_modal_add_js() {
+  ctools_include('ajax');
+  ctools_include('modal');
+  ctools_modal_add_js();
+}

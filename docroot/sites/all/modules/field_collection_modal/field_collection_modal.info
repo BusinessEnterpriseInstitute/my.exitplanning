@@ -1,0 +1,13 @@
+name = Field Collection Modal
+description = Provides a field-collection modal widget.
+core = 7.x
+dependencies[] = field_collection
+dependencies[] = ctools
+package = Fields
+
+; Information added by Drupal.org packaging script on 2017-05-19
+version = "7.x-1.5"
+core = "7.x"
+project = "field_collection_modal"
+datestamp = "1495193288"
+
