@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * @file
+ * Sets up the base table for our entity and a table to store information about
+ * the entity types.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ * Automatically drops tables in hook_schema.
+ */
+function bei_list_uninstall() {
+
+  // remove variables
+  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'bei_list_%'));
+}
+
+/**
+ * Implements hook_schema().
+ */
+function bei_list_schema() {
+  
+  $schema['bei_list'] = array(
+    'description' => 'Table for BEI Mailchimp lists',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier for a list',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'Primary Key Identifier for List.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'subject' => array(
+        'description' => 'Email subject text',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'from_email' => array(
+        'description' => 'From email address',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'from_name' => array(
+        'description' => 'From Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'list_id' => array(
+        'description' => 'The List ID on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'nid' => array('nid'),
+    ),
+  );
+  return $schema;
+}

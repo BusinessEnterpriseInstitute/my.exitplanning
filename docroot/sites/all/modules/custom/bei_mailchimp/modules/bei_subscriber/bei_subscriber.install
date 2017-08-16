@@ -1,0 +1,102 @@
+<?php
+
+/**
+ * @file
+ * Sets up the base table for our entity and a table to store information about
+ * the entity types.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ * Automatically drops tables in hook_schema.
+ */
+function bei_subscriber_uninstall() {
+  // remove variables
+  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'bei_subscriber_%'));
+  // delete queues
+  $queue = DrupalQueue::get('subscriber_sync');
+  $queue->deleteQueue();
+}
+
+/**
+ * Implements hook_schema().
+ */
+function bei_subscriber_schema() {
+  $schema['bei_subscriber'] = array(
+    'description' => '',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier for a subscriber',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The author id of the subscriber.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'email' => array(
+        'description' => 'Email Address',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => TRUE,
+      ),
+      'first_name' => array(
+        'description' => 'First Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'last_name' => array(
+        'description' => 'Last Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => 'Subscriber\'s current status.',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'lid' => array(
+        'description' => 'List Id of the subscriber',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'list_id' => array(
+        'description' => 'The List Id on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the subscriber was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the subscriber was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'lid' => array('lid'),
+    ),
+  );
+  return $schema;
+}

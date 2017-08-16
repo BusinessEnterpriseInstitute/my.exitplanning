@@ -1,0 +1,852 @@
+<?php
+
+/**
+ * Implements hook_entity_info().
+ * Inform the base system and the Field API about one or more entity types.
+ */
+function bei_order_entity_info() {
+  $info = array();
+  $info['bei_order'] = array(
+    'label' => t('Bei Order'),
+    'plural label' => t('Bei Orders'),
+    'base table' => 'bei_order',
+    'revision table' => 'bei_order_revision',
+    'entity keys' => array(
+      'id' => 'oid',
+      'label' => 'name',
+      'revision' => 'vid',
+    ),
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'bei_order' => array(
+        'label' => t('Bei Order'),
+        'admin' => array(
+          'path' => 'admin/structure/bei-orders/manage',
+        ),
+      ),
+    ),
+    'entity class' => 'BeiOrderEntity',
+    'controller class' => 'EntityAPIController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'bei_order',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    'access callback' => 'bei_order_access',
+    'admin ui' => array(
+      'path' => 'admin/config/bei-orders',
+      'controller class' => 'EntityDefaultUIController',
+      'file' => 'includes/bei_order.admin.inc',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'label callback' => 'entity_class_label',
+    'load hook' => 'bei_order_load',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_menu().
+ * Define menu items and page callbacks.
+ */
+function bei_order_menu() {
+  $items = array();
+  $items['admin/structure/bei-orders/manage'] = array(
+    'title' => 'BEI Material Orders',
+    'description' => 'Manage fields on bei material orders.',
+    'page callback' => 'bei_order_info',
+    'access arguments' => array('administer bei orders'),
+  );
+  $items['bei-order/%bei_order'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Order Summary',
+    'page callback' => 'bei_order_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'bei_order', 1),
+    'file' => 'includes/bei_order.pages.inc',
+  );
+  $items['bei-order/%bei_order/review'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Order Summary',
+    'page callback' => 'bei_order_review', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'bei_order', 1),
+    'file' => 'includes/bei_order.pages.inc',
+  );
+  $items['bei-order/%bei_order/view'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'View',
+    'weight' => -10,
+  );
+  $items['bei-order/%bei_order/done'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Order confirmation',
+    'page callback' => '_bei_order_confirmation',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'bei_order', 1),
+  );
+  $items['bei-order/add'] = array(
+    'type' => MENU_LOCAL_ACTION,
+    'title' => 'Add an order',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_order', NULL, 'add'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('create', 'bei_order'),
+    'file' => 'includes/bei_order.admin.inc',
+  );
+  $items['bei-order/%bei_order/edit'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_order', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'bei_order', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_order.admin.inc',
+    'weight' => -9,
+  );
+  /*
+  $items['bei-subscriber/%bei_subscriber/delete'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_subscriber_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'bei_subscriber', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_subscriber.admin.inc',
+    'weight' => -8,
+  );
+  */
+  return $items;
+}
+
+function bei_order_info() {
+  return ('Welcome to the administration page for your Material Orders.');
+}
+
+/**
+ * Implements hook_permission().
+ * Define user permissions.
+ */
+function bei_order_permission() {
+   return array(
+    'create order entity' => array(
+      'title' => t('Create order entities'),
+    ),
+    'view own order entities' => array(
+      'title' => t('View own order entities'),
+    ),
+    'edit own order entities' => array(
+      'title' => t('Edit own order entities'),
+    ),
+    'edit any order entities' => array(
+      'title' => t('Edit any order entities'),
+      'restrict access' => TRUE,
+    ),
+    'delete own order entities' => array(
+      'title' => t('Delete own order entities'),
+      'description' => t('Allows user to delete own subscribers.'),
+    ),
+    'administer bei orders' => array(
+      'title' => t('Administer orders'),
+      'restrict access' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Access callback for order entities.
+ */
+function bei_order_access($op, $order = NULL, $account = NULL, $entity_type = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer bei orders', $account) ||
+      user_access('create order entity', $account);
+    case 'view':
+      if (isset($order)) {
+         return user_access('administer bei orders', $account) ||
+         (user_access('view own order entities', $account) && ($order->uid === $account->uid));
+      }
+    case 'update':
+      if (isset($order)) {
+        $edit_statuses = array(0, 2);
+        return user_access('administer bei orders', $account) ||
+        (user_access('edit own order entities', $account) && ($order->uid === $account->uid) && in_array($order->status, $edit_statuses)) ||
+        user_access('edit any order entities', $account);
+      }
+    case 'delete':
+      if (isset($order)) {
+         return user_access('administer bei orders', $account);
+      }
+  }
+}
+
+/**
+ *  Load an order.
+ */
+function bei_order_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $order = bei_order_load_multiple($ids, $reset);
+  return $order? reset ($order) : FALSE;
+}
+function bei_order_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('bei_order', $ids, $conditions, $reset);
+}
+
+/**
+ * Save an Order.
+ */
+function bei_order_save($order) {
+  global $user;
+   if (!isset($order->oid)) {
+    $order->created = REQUEST_TIME;
+    $order->uid = $user->uid;
+   }
+   $order->revision_uid = $user->uid;
+   $order->changed = REQUEST_TIME;
+   entity_save('bei_order', $order);
+}
+
+/**
+ * Location provinces.
+ *
+ * @return array
+ *   An associative array of states/territories where
+ *   -> the keys are integers starting from 1
+ *   -> the values are the English names for those states/territories
+ *
+ * The states are grouped together at the beginning of the array and sorted
+ * alphabetically.
+ *
+ * The territories are grouped together at the end of the array and sorted
+ * alphabetically.
+ */
+function bei_order_province_list_us() {
+  return array(
+    'AL' => t('Alabama'),
+    'AK' => t('Alaska'),
+    'AZ' => t('Arizona'),
+    'AR' => t('Arkansas'),
+    'CA' => t('California'),
+    'CO' => t('Colorado'),
+    'CT' => t('Connecticut'),
+    'DE' => t('Delaware'),
+    'DC' => t('District Of Columbia'),
+    'FL' => t('Florida'),
+    'GA' => t('Georgia'),
+    'HI' => t('Hawaii'),
+    'ID' => t('Idaho'),
+    'IL' => t('Illinois'),
+    'IN' => t('Indiana'),
+    'IA' => t('Iowa'),
+    'KS' => t('Kansas'),
+    'KY' => t('Kentucky'),
+    'LA' => t('Louisiana'),
+    'ME' => t('Maine'),
+    'MD' => t('Maryland'),
+    'MA' => t('Massachusetts'),
+    'MI' => t('Michigan'),
+    'MN' => t('Minnesota'),
+    'MS' => t('Mississippi'),
+    'MO' => t('Missouri'),
+    'MT' => t('Montana'),
+    'NE' => t('Nebraska'),
+    'NV' => t('Nevada'),
+    'NH' => t('New Hampshire'),
+    'NJ' => t('New Jersey'),
+    'NM' => t('New Mexico'),
+    'NY' => t('New York'),
+    'NC' => t('North Carolina'),
+    'ND' => t('North Dakota'),
+    'OH' => t('Ohio'),
+    'OK' => t('Oklahoma'),
+    'OR' => t('Oregon'),
+    'PA' => t('Pennsylvania'),
+    'RI' => t('Rhode Island'),
+    'SC' => t('South Carolina'),
+    'SD' => t('South Dakota'),
+    'TN' => t('Tennessee'),
+    'TX' => t('Texas'),
+    'UT' => t('Utah'),
+    'VT' => t('Vermont'),
+    'VA' => t('Virginia'),
+    'WA' => t('Washington'),
+    'WV' => t('West Virginia'),
+    'WI' => t('Wisconsin'),
+    'WY' => t('Wyoming'),
+    'AS' => t('American Samoa'),
+    'FM' => t('Federated States of Micronesia'),
+    'GU' => t('Guam'),
+    'MH' => t('Marshall Islands'),
+    'MP' => t('Northern Mariana Islands'),
+    'PW' => t('Palau'),
+    'PR' => t('Puerto Rico'),
+    'VI' => t('Virgin Islands'),
+    'AA' => t('Armed Forces Americas'),
+    'AE' => t('Armed Forces Europe'),
+    'AP' => t('Armed Forces Pacific'),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ * Register a module (or theme's) theme implementations.
+ */
+/**
+ * Implements hook_theme().
+ */
+function bei_order_theme() {
+  $themes = array(
+    'materials_form' => array(
+      'render element' => 'form',
+      'file' => 'materials_form.theme.inc',
+      'path' => drupal_get_path('module', 'bei_order') . '/themes',
+    ),
+    'adjustments_form' => array(
+      'render element' => 'form',
+      'file' => 'adjustments_form.theme.inc',
+      'path' => drupal_get_path('module', 'bei_order') . '/themes',
+    ),
+    'proofs_form' => array(
+      'render element' => 'form',
+      'file' => 'proofs_form.theme.inc',
+      'path' => drupal_get_path('module', 'bei_order') . '/themes',
+    ),
+    'bei_order_confirmation' => array(
+      'variables' => array('order' => NULL),
+      'template' => 'templates/bei-order-confirmation',
+    ),
+  );
+  return $themes;
+}
+
+/**
+ * Prints the confirmation message after a successful submission.
+ */
+function _bei_order_confirmation($order) {
+  drupal_set_title(t('Order Confirmation'));
+  //webform_set_breadcrumb($node, TRUE);
+  return theme('bei_order_confirmation', array('bei_order' => $order));
+}
+
+/**
+ * Prepare for theming of the webform submission confirmation.
+ */
+function template_preprocess_bei_order_confirmation(&$vars) {
+  $order = $vars['bei_order'];
+  global $user;
+  
+  // Confirmation message if order was created but not submitted.
+  if ($order->status == 0) {
+    $confirmation = '
+    <p>Your order has been saved as a draft. You can continue making changes to this order
+    until you are ready to submit it.</p>';
+  }
+  // Confirmation message if order was submitted.
+  if ($order->status == 1) {
+    $confirmation = '
+    <p><strong>WHAT HAPPENS NEXT?</strong></p>
+    <ul>
+    <li>We will charge your card on file or contact you for payment if you do not have a card on file.</li>
+    <li>In 3 to 5 business days, BEI Support will provide you with proofs for your approval.</li>
+    </ul>
+    <p>One round of revisions is included in the cost of your materials -
+    after that you will be charged for changes at a rate of $100/hour with a 1 hour minimum.</p>';
+  }
+  // Confirmation message if revisions are requested.
+  if ($order->status == 3) {
+    $confirmation = '
+    <p><strong>WHAT HAPPENS NEXT?</strong></p>
+    <ul>
+    <li>If this is your first revision request, there is no additional cost to you.
+    If this is a subsequent revision, we will adjust the pricing for this order based
+    on the time involved in making the revisions you\'ve just requested.</li>
+    <li>In 3 to 5 business days, BEI Support will provide you with revised proofs for your approval.</li>
+    </ul>
+    <p>Any additional revisions hereafter will be charged at a rate of $100/hour, with a minimum of one hour.</p>';
+  }
+  // Confirmation message if approved.
+  if ($order->status == 4) {
+    $confirmation = '
+    <p><strong>WHAT HAPPENS NEXT?</strong></p>
+    <ul>
+    <li>We will order print materials based on your approval of the proofs provided in the order form.</li>
+    <li>We will ship the print materials to the shipping address specified in the order form.</li>
+    <li>We will provide a tracking number to this order that will display in your orders summary page.</li>
+    </ul>';
+  }
+
+  // Replace tokens.
+  //module_load_include('inc', 'webform', 'includes/webform.submissions');
+  //$submission = webform_get_submission($node->nid, $vars['sid']);
+  $vars['confirmation_message'] = $confirmation;
+
+  // URL back to form (or same page for in-block confirmations).
+  $vars['url'] = url('/user/' . $user->uid . '/orders', array('query' => drupal_get_query_parameters()));
+}
+
+/**
+ * Implements hook_entity_property_info()
+ */
+function bei_order_entity_property_info() {
+  $info = array();
+  $properties = &$info['bei_order']['properties'];
+  $properties['id'] = array(
+    'label' => t('Order ID'),
+    'type' => 'integer',
+    'description' => t('Entity id of the order.'),
+    'schema field' => 'oid',
+  );
+  $properties['uid'] = array(
+    'label' => t('Order author'),
+    'type' => 'user',
+    'description' => t('The user who submitted the order.'),
+    'required' => TRUE,
+    'schema field' => 'uid',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['created'] = array(
+    'label' => t('Created date'),
+    'type' => 'date',
+    'description' => t('The date the order was created.'),
+    'schema field' => 'created',
+  );
+  $properties['changed'] = array(
+    'label' => t('Changed date'),
+    'type' => 'date',
+    'description' => t('The date the order was last updated.'),
+    'schema field' => 'changed',
+  );
+  $properties['status'] = array(
+    'label' => t('Order status'),
+    'type' => 'integer',
+    'description' => t('The status of the order.'),
+    'schema field' => 'status',
+    'options list' => 'bei_order_status_options',
+  );
+  $properties['edit_url'] = array(
+    'label' => t('Edit URL'),
+    'description' => t('The URL of the order\'s edit page.'),
+    'getter callback' => 'bei_order_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['action_link'] = array(
+    'label' => t('Action Link'),
+    'description' => t('A link to an action the user can perform based on order status'),
+    'getter callback' => 'bei_order_get_properties',
+    'type' => 'text',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+    'sanitized' => TRUE,
+  );
+  $properties['revision'] = array(
+    'label' => t('Creates revision'),
+    'type' => 'boolean',
+    'description' => t('Whether saving this order creates a new revision.'),
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['tracking_url'] = array(
+    'label' => t('Tracking URL'),
+    'type' => 'uri',
+    'description' => t('The tracking url associated with a shipped order.'),
+    'schema field' => 'tracking_url',
+    'getter callback' => 'bei_order_get_properties',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['send_url'] = array(
+    'label' => t('Send E-mail Link'),
+    'type' => 'uri',
+    'description' => t('The link to the E-mail order summary form.'),
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+    'sanitized' => TRUE,
+    'getter callback' => 'bei_order_get_properties',
+  );
+  $properties['order_data_html'] = array(
+    'label' =>  t('Order Data'),
+    'type' => 'text',
+    'computed' => TRUE,
+    'getter callback' => 'bei_order_get_properties',
+    'sanitized' => TRUE,
+    'entity views field' => TRUE,
+  );
+  return $info;
+}
+
+/**
+ * Callback for getting additional order properties.
+ *
+ */
+function bei_order_get_properties($order, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $access = entity_access('update', $entity_type, $order);
+      if ($access) {
+        $options = array('query' => drupal_get_destination());
+        return url('bei-order/' . $order->oid . '/edit', $options);
+      }
+      return;
+    case 'send_url':
+      $access = user_access('administer bei orders');
+      if ($access) {
+        $options = array('query' => drupal_get_destination());
+        return url('bei-order/' . $order->oid . '/send', $options);
+      }
+    case 'action_link':
+      $access = entity_access('update', $entity_type, $order);
+      $link = '';
+      if ($access && ($order->status == 0 || $order->status == 2)) {
+        $options = array('query' => drupal_get_destination());
+        if ($order->status == 0) {
+          $url = 'bei-order/' . $order->oid . '/edit';
+          $link = l(t('Update'), $url, $options);
+        }
+        if ($order->status == 2) {
+          $url = 'bei-order/' . $order->oid . '/review';
+          $link = l(t('Review Proofs'), $url, $options);
+        }
+        return $link;
+      }
+      if ($order->status == 6 && !empty($order->tracking_url)) {
+        $options = array('external' => TRUE, 'attributes' => array('target' => '_blank'));
+        $link = l(t('Track Shipment'), $order->tracking_url, $options);
+        return $link;
+      }
+      return;
+    case 'tracking_url':
+      if (!empty($order->tracking_url)) {
+        $options = array('external' => TRUE, 'attributes' => array('target' => '_blank'));
+        return url($order->tracking_url, $options);
+      }
+      return;
+    case 'order_data_html':
+      $data = isset($order->data) ? $order->data : NULL;
+      $header = array();
+      $rows = array();
+      $rows[] = array(
+        'data' => array(
+          array(
+            'data' => t('Name'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => check_plain($order->name),
+            'colspan' => 2,
+          ),
+        ),
+      );
+      $rows[] = array(
+        array(
+          'data' => t('Company'),
+          'header' => TRUE,
+        ),
+        array(
+          'data' => check_plain($order->company_name),
+          'colspan' => 2,
+        ),
+      );
+      if ($data) {
+        $address = check_plain($data['address']['street']) . '<br />';
+        if (!empty($data['address']['additional'])) {
+          $address .= check_plain($data['address']['additional']) . '<br />';
+        }
+        $address .= check_plain($data['address']['city']) . ', ' . $data['address']['state'] . ' ' . check_plain($data['address']['postal_code']);
+        $rows[] = array(
+          array(
+            'data' => t('Address'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => $address,
+            'colspan' => 2,
+          ),
+        );
+        if (!empty($order->phone)) {
+          $rows[] = array(
+            array(
+              'data' => t('Phone'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_plain($order->phone),
+              'colspan' => 2,
+            ),
+          );
+        }
+        if (!empty($order->email)) {
+          $rows[] = array(
+            array(
+              'data' => t('E-mail Address'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_plain($order->email),
+              'colspan' => 2,
+            ),
+          );
+        }
+        if (!empty($order->website)) {
+          $rows[] = array(
+            array(
+              'data' => t('Website'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_plain($order->website),
+              'colspan' => 2,
+            ),
+          );
+        }
+        // Branding
+        $rows[] = array(
+          array(
+            'data' => t('Background Color'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => $data['branding']['background_color']['colorfield_picker'],
+            'colspan' => 2,
+          ),
+        );
+        $rows[] = array(
+          array(
+            'data' => t('Primary Color'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => $data['branding']['primary_color']['colorfield_picker'],
+            'colspan' => 2,
+          ),
+        );
+        $rows[] = array(
+          array(
+            'data' => t('Secondary Color'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => $data['branding']['secondary_color']['colorfield_picker'],
+            'colspan' => 2,
+          ),
+        );
+        $disclaimer_field = field_get_items('bei_order', $order, 'field_disclaimers');
+        $mission_field = field_get_items('bei_order', $order, 'field_mission');
+        if ($disclaimer_field) {
+          $rows[] = array(
+            array(
+              'data' => t('Disclaimers'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_markup($disclaimer_field[0]['value'], $disclaimer_field[0]['format']),
+              'colspan' => 2,
+            ),
+          );
+        }
+        if ($mission_field) {
+          $rows[] = array(
+            array(
+              'data' => t('Mission'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_markup($mission_field[0]['value'], $mission_field[0]['format']),
+              'colspan' => 2,
+            ),
+          );
+        }
+        $material_rows = bei_order_material_list();
+        $materials = $data['materials'];
+        $row_count = 1;
+        foreach ($materials as $key => $material) {
+          if (is_integer($key)) {
+            $material_rows[$key]['quantity'] = !empty($material['quantity']) ? $material['quantity'] : NULL;
+            $row_count++;
+            /*
+            if (!empty($material['quantity'])) {
+              $material_list[$key]['quantity'] = $material['quantity'] . ' - ' . check_plain($material_list[$key]['title']);
+            }*/
+          }
+        }
+        $rows[] = array(
+          array(
+            'data' => t('Materials'),
+            'header' => TRUE,
+            'rowspan' => $row_count,
+          ),
+          array(
+            'data' => t('Material'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => t('Quantity'),
+            'header' => TRUE,
+          ),
+        );
+        foreach ($material_rows as $key => $material_row) {
+          if (is_integer($key)) {
+            $rows[] = array(
+              'data' => array(
+                array(
+                  'data' => check_plain($material_row['title']),
+                ),
+                array(
+                  'data' => $material_row['quantity'],
+                ),
+              ),
+            );
+          }
+        }
+        
+        $table = theme('table', array(
+          'header' => $header,
+          'rows' => $rows,
+          'attributes' => array(
+            'class' => array('data'),
+            'id' => 'bei-order-summary',
+          ),
+        ));
+        return $table;
+      }
+      return;
+  }
+}
+
+/**
+ * Callback to return array of options for order status.
+ */
+function bei_order_status_options($order) {
+  return array(
+    0 => t('Started'),
+    1 => t('Submitted'),
+    2 => t('Proofs Available'),
+    3 => t('Revisions Requested'),
+    4 => t('Proofs Approved'),
+    5 => t('Sent for Printing'),
+    6 => t('Shipped'),
+  );
+}
+/**
+ * Callback to return array of materials.
+ */
+function bei_order_material_list() {
+  return array(
+    array(
+      'title' => t('How to run your business so you can leave it in style (book)'),
+      'pricing' => array(
+        50 => 16.00,
+        100 => 14.50,
+      ),
+    ),
+    array(
+      'title' => t('Exit Planning: The Definitive Guide (book)'),
+      'pricing' => array(
+        50 => 15.00,
+        100 => 12.00,
+      ),
+    ),
+    array(
+      'title' => t('Marketing Brochure'),
+      'pricing' => array(
+        50 => 5.00,
+        100 => 3.50,
+      ),
+    ),
+    array(
+      'title' => t('Exit Planning Brochure (assessment)'),
+      'pricing' => array(
+        50 => 5.00,
+        100 => 3.50,
+      ),
+    ),
+    array(
+      'title' => t('Exit Planning Workbook (assessment)'),
+      'pricing' => array(
+        50 => 10.00,
+        100 => 7.00,
+      ),
+    ),
+    array(
+      'title' => t('EPIC Discussion Sheets'),
+      'pricing' => array(
+        50 => 8.00,
+        100 => 6.00,
+      ),
+    ),
+    array(
+      'title' => t('Value Driver Booklet (assessment)'),
+      'pricing' => array(
+        50 => 7.00,
+        100 => 5.00,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_views_api()
+ */
+function bei_order_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'bei_order') . '/includes/views',
+  );
+}
+
+/**
+ * Implements hook_rules_panes_convert_type_names().
+ */
+function bei_order_rules_panes_convert_type_names() {
+  return array('bei_order' => 'bei_order');
+}
+
+/**
+ * Implements hook_form_alter().
+ * Perform alterations before a form is rendered.
+ */
+function bei_order_form_rules_panes_render_form_alter(&$form, &$form_state, $form_id) {
+  if ($form['component']['#value'] == 'rules_email_order_summary') {
+    $order_id = $form['parameter']['bei_order']['settings']['bei_order']['#value'];
+    $form['parameter']['email']['settings']['email']['#type'] = 'textfield';
+    $form['parameter']['email']['settings']['email']['#element_validate'] = array('bei_order_send_email_validation');
+    $form['parameter']['email']['settings']['email']['#default_value'] = t('amacarak@icloud.com');
+    $form['parameter']['email_bcc']['settings']['email_bcc'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bcc'),
+      '#required' => FALSE,
+      '#description' => t('Enter a single valid email address to blind carbon copy to.'),
+      '#element_validate' => array('bei_order_send_email_validation'),
+      '#default_value' => t('support@exitplanning.com'),
+    );
+    $form['parameter']['message']['settings']['message'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Personal Message'),
+      '#required' => FALSE,
+      '#description' => t('A personal message will be prepended to the body of the email.'),
+    );
+    $form['parameter']['subject']['settings']['subject']['#type'] = 'textfield';
+    $form['parameter']['subject']['settings']['subject']['#default_value'] = t('BEI Order #!id Summary', array('!id' => $order_id));
+    unset($form['exec_help']);
+    unset($form['parameter']['email']['settings']['email']['#rows']);
+    unset($form['parameter']['subject']['settings']['subject']['#rows']);
+  }
+}
+function bei_order_send_email_validation($element, &$form_state) {
+  $mail = !empty($element['#value']) ? $element['#value'] : NULL; //$form_state['values']['parameter']['email']['settings']['email'];
+  if ($mail && !valid_email_address($mail)) {
+    form_error($element, t('Please enter a valid email address to send to.'));
+  }
+}
+

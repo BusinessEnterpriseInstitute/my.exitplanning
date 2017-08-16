@@ -1,0 +1,5 @@
+name = BEI Mailchimp Computed Output
+description = Contains functions to output computed fields in Mailchimp Campaigns.
+package = Custom
+core = 7.x
+dependencies[] = computed_field

@@ -1,0 +1,11 @@
+name = BEI Material Order Form
+description = Form structure for material order form.
+package = Custom
+core = 7.x
+
+dependencies[] = entity
+dependencies[] = views
+
+stylesheets[all][] = bei_order.css
+files[] = includes/bei_order.admin.inc
+files[] = includes/bei_order.entity.inc

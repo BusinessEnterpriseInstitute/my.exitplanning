@@ -1,0 +1,11 @@
+name = MailChimp Old
+description = Deprecated mailchimp version to use 2.0 api as a workaround for 3.0 api limitations.
+package = Temporary
+core = 7.x
+
+files[] = includes/mailchimp_old.inc
+files[] = includes/mailchimp_old_exception.inc
+
+dependencies[] = libraries (>=2.0)
+dependencies[] = mailchimp
+

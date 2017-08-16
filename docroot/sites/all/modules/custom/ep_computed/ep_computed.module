@@ -1,0 +1,841 @@
+<?php
+function computed_field_field_mc_output_compute(&$entity_field, $entity_type, $entity, $field, $instance, $langcode, $items) {
+    $sender = user_load($entity->uid);
+    $mc_sender_website = field_get_items('user', $sender, 'field_website');
+    $mc_sender_phone = field_get_items('user', $sender, 'field_phone');
+    $mc_sender_address = field_get_items('user', $sender, 'field_address');
+    $mc_sender_company = field_get_items('user', $sender, 'field_company_name');
+    $mc_from_name = !empty($entity->from_name) ? $entity->from_name : NULL;
+    $mc_from_email = !empty($entity->from_email) ? $entity->from_email : NULL;
+    $mc_body = field_get_items($entity_type, $entity, 'body');
+    $mc_color_email_bg = field_get_items($entity_type, $entity, 'field_mc_color_email_bg');
+    $mc_color_email_bg_user = field_get_items('user', $sender, 'field_mc_color_email_bg');
+    $mc_color_primary = field_get_items($entity_type, $entity, 'field_mc_color_primary');
+    $mc_color_primary_user = field_get_items('user', $sender, 'field_mc_color_primary');
+    $mc_logo = field_get_items($entity_type, $entity, 'field_mc_logo');
+    $mc_logo_user = field_get_items('user', $sender,'field_company_logo');
+    $mc_profile_pic = field_get_items($entity_type, $entity, 'field_mc_profile_pic');
+    $mc_profile_pic_user = field_get_items('user', $sender, 'field_user_photo');
+    $mc_profile_bio = field_get_items('user', $sender, 'field_mc_profile_bio');
+    $mc_banner = field_get_items($entity_type, $entity, 'field_mc_banner');
+    $mc_disclaimer = field_get_items('user', $sender, 'field_mc_disclaimer');
+    $bundle = $entity->type;
+
+
+    if ($bundle == 'subscriber_list') {
+        // Preheader region not needed for list
+        $mc_preheader_html = '';
+    }
+    else {
+        // Preheader region
+        $mc_preheader_html = '
+        <tr>
+            <td align="center" valign="top">
+                <!-- BEGIN PREHEADER // -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templatePreheader">
+                    <tr>
+                        <!-- *|IFNOT:ARCHIVE_PAGE|* -->
+                        <td valign="top" class="preheaderContent" style="padding-top:10px; padding-right:20px; padding-bottom:10px; padding-left:20px;">
+                        <a href="*|ARCHIVE|*" target="_blank">View in browser</a>
+                        </td>
+                        <!-- *|END:IF|* -->
+                    </tr>
+                </table>
+                <!-- // END PREHEADER -->
+            </td>
+        </tr>
+        ';
+    }
+    // Sender Name.
+    if ($mc_from_name) {
+        $mc_sender_name_html = '
+        <em>This issue brought to you by:</em><br /><br />
+        <strong>' . check_plain($mc_from_name) . '</strong><br />';
+        if ($mc_from_email) {
+            $mc_sender_name_html .= l($mc_from_email, 'mailto:' . $mc_from_email, array('external' => TRUE));
+        }
+        $mc_sender_name_html .= '<br /><br />';
+    }
+    else {
+        $mc_sender_name_html = '';
+    }
+    // Headline
+    if ($bundle == 'subscriber_list') {
+        $mc_headline_value = '<h1 id="title">First Things First: Prioritize Your Objectives</h1>';
+    }
+    else {
+        $mc_headline_value = '<h1 id="title">' . check_plain($entity->headline) . '</h1>';
+    }
+    // Body content.
+    if ($bundle == 'subscriber_list') {
+        $mc_content = '
+        <blockquote><p><em>"You\'ve got to be very careful if you don\'t know
+        where you\'re going, because you might not get there." - Yogi
+        Berra</em></p></blockquote>
+        <p>It is not always easy to interpret Yogi. In this case, perhaps he is
+        advising you to figure out just where you are headed in your business.
+        As you near the time when you will leave behind the daily worries and
+        stresses of business ownership, have you defined your successful exit?
+        Do you know where "there" is, much less how to get there? Unless you set
+        and prioritize your exit goals or objectives, you may have too many, or
+        they might conflict, but in either case you may not make much
+        headway.</p>
+        <p>The clearest example of a failure to set objectives may be Bill
+        Wilson, a business owner who recently told us that he wanted:</p>
+        <ul>
+          <li>To leave his business within three years (although he was ready to
+          leave right away)</li><li>Financial security, defined as a seamless
+          continuation of his current lifestyle</li><li>To transfer the
+          business to his management team</li>
+        </ul>
+        <p>A quick review of Bill\'s personal financial statement, however,
+        revealed that most of the income required to maintain his lifestyle
+        would have to come from the business. Unfortunately, his business wasn\'t
+        large enough to attract a cash buyer. And, since Bill had done no Exit
+        Planning, his employees had no funds with which to purchase his
+        ownership interest. A long term installment note seemed to be the only
+        answer - a risk Bill was unwilling to take.</p>
+        <p>Contrast this unpalatable solution with Bill\'s objectives -
+        objectives which could have been achieved had he taken the time (well
+        before he wanted to leave the business) to establish and to prioritize
+        his exit objectives.<br /> If, for example, an owner\'s need for
+        financial security prevails, selling a business to a third party for
+        cash may be the best and quickest exit path.</p>
+        <p>If, however, attracting a qualified third party is unlikely or
+        undesirable, an owner may need more time to devise and to implement a
+        transfer to one or more insiders (children or employees) that provides
+        the owner adequate cash.</p>
+        <p>On the other hand, if an owner\'s desire to transfer the business to a
+        specific person or group trumps his or her need for financial security,
+        and his/her deadline for departure draws near, financial security in the
+        form of "up-front" cash must take a backseat.</p>
+        <p>As you can see, owners must consider-simultaneously-the three primary
+        exit goals (listed below). Ask yourself which is your most important
+        exit objective and rank your answers from 1 (most important) to 3 (least
+        important).</p>
+        <p>Financial security<br />
+        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3</p>
+        <p>Transferring the business to the person of my choice (may include key
+        employees, co-owner or child)<br />
+        1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3</p>
+        <p>Leaving the business when I want (could be immediately or never)<br
+        /> 1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 3</p>
+        <p>Prioritizing your objectives will help you choose your overall path
+        and design your Exit Plan. For example, if you want out-soon and with
+        cash but your business cannot be sold today, do you wait until market
+        conditions improve or sell now to your employees? While prioritizing
+        your objectives is not easy, doing so gives you a framework for decision
+        making.</p>
+        <p>Start with the choices and priorities in the exercise above, but if
+        you have any difficulty we can ask you some additional questions that
+        will help you make your selections. When combined with an overview
+        of some critical facts about you and your business, the Exit Planning
+        solutions begin to crystalize. While we don\'t have a ready-made
+        Exit Planning package ready for you, we do have the background and the
+        Exit Planning process that we believe will shine a spotlight on the Exit
+        Planning solutions that are best for you. We\'d like to sit down to
+        talk with you about it sooner rather than later. Gathering your
+        Exit Planning resources today can help you confirm your path to the
+        future.</p>';
+    }
+    elseif (!empty($mc_body)) {
+        $mc_content = $mc_body[0]['value'];
+    }
+    else {
+        $mc_content = '';
+    }
+    $bei_disclaimer = module_invoke('block', 'block_view', '9');
+    if ($bei_disclaimer) {
+        $mc_content .= '<div id="article-corporate-disclaimer">' . render($bei_disclaimer['content']) . '</div>';
+    }
+    // Disclaimer.
+    if ($mc_disclaimer) {
+        $mc_disclaimer_html = '
+        <tr>
+            <td valign="top" class="footerContent">
+            ' . $mc_disclaimer[0]['value'] . '
+            </td>
+        </tr>';
+    }
+    else {
+        $mc_disclaimer_html = '';
+    }
+    // Logo.
+    if ($mc_logo || $mc_logo_user) {
+        if (!$mc_logo) {
+            $mc_logo_id = $mc_logo_user[0]['fid'];
+            $mc_logo_output = array(
+                '#theme' => 'image_style',
+                '#style_name' => 'mc_logo',
+                '#path' => file_load($mc_logo_id)->uri,
+                '#alt' => 'Logo for ' . check_plain($mc_sender_company[0]['value'])
+            );
+        }
+        else {
+            $mc_logo_id = $mc_logo[0]['fid'];
+            $mc_logo_output = array(
+                '#theme' => 'image_style',
+                '#style_name' => 'mc_logo',
+                '#path' => file_load($mc_logo_id)->uri,
+                '#alt' => 'Logo for ' . check_plain($mc_sender_company[0]['value'])
+            );
+        }
+        $mc_logo_html = '
+            <tr>
+                <td align="center" valign="top">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBranding">
+                        <tr>
+                            <td align="center" valign="top" style="padding-top:10px; padding-right:0; padding-bottom:10px; padding-left:0;">
+                                ' . render($mc_logo_output) . '
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        ';
+    }
+    else {
+        $mc_logo_html = '';
+    }
+    // Profile Bio.
+    if ($mc_profile_bio) {
+        $mc_profile_bio_html = '
+        <tr>
+            <td align="center" valign="top">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateBio">
+                    <tr>
+                        <td valign="top" class="bioContent">' . $mc_profile_bio[0]['value'] . '</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        ';
+    }
+    else {
+        $mc_profile_bio_html = '';
+    }
+    // Company Vcard.
+    if (!empty($mc_sender_company) && !empty($mc_sender_address)) {
+        $mc_company_html = '
+        <div class="vcard">
+        <span class="org fn"><strong>' . $mc_sender_company[0]['safe_value'] . '</strong></span>
+        <div class="adr">';
+        if (!empty($mc_sender_address[0]['street'])) {
+            $mc_company_html .= '<div class="street-address">' . check_plain($mc_sender_address[0]['street']) . '</div>';
+        }
+        if (!empty($mc_sender_address[0]['additional'])) {
+            $mc_company_html .= '<div class="extended-address">' . check_plain($mc_sender_address[0]['additional']) . '</div>';
+        }
+        if (!empty($mc_sender_address[0]['city'])) {
+            $mc_company_html .= '<span class="locality">' . check_plain($mc_sender_address[0]['city']) . '</span>, ';
+        }
+        if (!empty($mc_sender_address[0]['province'])) {
+            $mc_company_html .= '<span class="region">' . check_plain($mc_sender_address[0]['province']) . '</span> ';
+        }
+        if (!empty($mc_sender_address[0]['postal_code'])) {
+            $mc_company_html .= '<span class="postal-code">' . $mc_sender_address[0]['postal_code'] . '</span>';
+        }
+        if ($mc_sender_address[0]['country'] != 'us') {
+            $mc_company_html .= '<div class="country">' . $mc_sender_address[0]['country_name'] . '</div>';
+        }
+        $mc_company_html .= '</div>';
+        if ($mc_sender_website) {
+            $mc_sender_website_url = $mc_sender_website[0]['url'];
+            $mc_sender_website_title = $mc_sender_website[0]['title'];
+            if (empty($mc_sender_website_title)) {
+                $mc_sender_website_title = $mc_sender_website_url;
+            }
+            if (!preg_match('/^http:\/\//',$mc_sender_website_url)) {
+                $mc_sender_website_url = 'http://' . $mc_sender_website_url;
+            }
+            $mc_company_html .= '<div>' . l($mc_sender_website_title, $mc_sender_website_url, array('external' => TRUE, 'attributes' => array('target' => '_blank'))) . '</div>';
+        }
+        if ($mc_sender_phone) {
+            $mc_company_html .= '<div>' . l($mc_sender_phone[0]['safe_value'], 'tel:' . $mc_sender_phone[0]['safe_value'], array('external' => TRUE)) . '</div>';
+        }
+        $mc_company_html .= '</div>';
+    }
+    else {
+        $mc_company_html = '';
+    }
+    // Banner.
+    if ($mc_banner) {
+        $mc_banner_id = $mc_banner[0]['fid'];
+        $mc_banner_output = array(
+            '#theme' => 'image_style',
+            '#style_name' => 'mc_banner',
+            '#path' => file_load($mc_banner_id)->uri,
+        );
+        $mc_banner_html = '
+            <tr>
+                <td align="center" valign="top">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateHeader">
+                        <tr>
+                            <td align="center" valign="top">
+                            ' . render($mc_banner_output) . '
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>';
+    }
+    else {
+        $mc_banner_html = '';
+    }
+    // Email Background Color.
+    // Check for color in Newsletter first.
+    if ($mc_color_email_bg) {
+        $mc_color_email_bg_value = $mc_color_email_bg[0]['rgb'];
+    }
+    // Set user background color as fallback if available.
+    elseif ($mc_color_email_bg_user) {
+        $mc_color_email_bg_value = $mc_color_email_bg_user[0]['rgb'];
+    }
+    // If both the above are empty, provide a sensible default.
+    else {
+        $mc_color_email_bg_value = '#DEE0E2';
+    }
+    // Logo Background Color.
+    // Check for color in Newsletter first.
+    if ($mc_color_primary) {
+        $mc_color_primary_value = $mc_color_primary[0]['rgb'];
+    }
+    // Set user logo background color as fallback if available.
+    elseif ($mc_color_primary_user) {
+        $mc_color_primary_value = $mc_color_primary_user[0]['rgb'];
+    }
+    // If both the above are empty, provide a sensible default.
+    else {
+        $mc_color_primary_value = '#fff';
+    }
+    // Profile.
+    if (!empty($mc_profile_pic) || !empty($mc_profile_pic_user)) {
+        if (empty($mc_profile_pic)) {
+            $mc_profile_pic_id = $mc_profile_pic_user[0]['fid'];
+        }
+        else {
+            $mc_profile_pic_id = $mc_profile_pic[0]['fid'];
+        }
+        $mc_profile_pic_output = array(
+            '#theme' => 'image_style',
+            '#style_name' => 'mc_profile',
+            '#path' => file_load($mc_profile_pic_id)->uri,
+            '#alt' => 'Picture of me '
+        );
+        $mc_profile_html = '
+        <tr>
+            <td valign="top" align="center">
+                <!-- BEGIN COLUMNS // -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateColumns">
+                    <tr>
+                        <td align="center" valign="middle" class="templateColumnContainer" style="width:420px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td class="leftColumnContent profilePerson" style="padding-top: 10px; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;">
+                                    ' . $mc_sender_name_html . $mc_company_html . '
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td align="center" valign="middle" class="templateColumnContainer" style="width:180px;">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td class="rightColumnContent profilePerson" style="padding-top: 10px; padding-left: 0px; padding-right: 0px; padding-bottom: 10px;">
+                                    ' . render($mc_profile_pic_output) . '
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <!-- // END COLUMNS -->
+            </td>
+        </tr>';
+    }
+    else {
+        $mc_profile_html = '
+        <tr>
+            <td valign="top" align="center">
+                <!-- BEGIN COLUMNS // -->
+                <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateColumns">
+                    <tr>
+                        <td align="center" valign="middle" class="templateColumnContainer">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td class="leftColumnContent profilePerson" style="padding-top: 10px; padding-left: 10px; padding-right: 10px; padding-bottom: 10px;">
+                                    ' . $mc_sender_name_html . $mc_company_html . '
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+                <!-- // END COLUMNS -->
+            </td>
+        </tr>';
+    }
+    $mc_styles = '
+    <style type="text/css">
+        /* /\/\/\/\/\/\/\/\/ CLIENT-SPECIFIC STYLES /\/\/\/\/\/\/\/\/ */
+        #outlook a{padding:0;} /* Force Outlook to provide a "view in browser" message */
+        .ReadMsgBody{width:100%;} .ExternalClass{width:100%;} /* Force Hotmail to display emails at full width */
+        .ExternalClass,
+        .ExternalClass p,
+        .ExternalClass span,
+        .ExternalClass font,
+        .ExternalClass td,
+        .ExternalClass div {
+            line-height: 100%;} /* Force Hotmail to display normal line spacing */
+        body, table, td, p, a, li, blockquote{-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%;} /* Prevent WebKit and Windows mobile changing default text sizes */
+        table, td{mso-table-lspace:0pt; mso-table-rspace:0pt;} /* Remove spacing between tables in Outlook 2007 and up */
+        img{-ms-interpolation-mode:bicubic;} /* Allow smoother rendering of resized image in Internet Explorer */
+
+        /* /\/\/\/\/\/\/\/\/ RESET STYLES /\/\/\/\/\/\/\/\/ */
+                        body{
+                            margin:0;
+                            padding:0;
+                        }
+                        img{
+                            border:0;
+                            height:auto;
+                            line-height:100%;
+                            outline:none;
+                            text-decoration:none;
+                        }
+                        table{
+                            border-collapse:collapse !important;
+                        }
+                        body, #bodyTable, #bodyCell{
+                            height:100% !important;
+                            margin:0;
+                            padding:0;
+                            width:100% !important;
+                        }
+
+                        /* /\/\/\/\/\/\/\/\/ TEMPLATE STYLES /\/\/\/\/\/\/\/\/ */
+
+                        /* ========== Page Styles ========== */
+
+                        #bodyCell{padding:20px;}
+                        #templateContainer{width:600px;}
+
+                        body, #bodyTable{
+                            background-color:' . $mc_color_email_bg_value . ';
+                        }
+                        #bodyCell{
+                        }
+                        #templateContainer{
+                        }
+                        h1{
+                            color:#202020 !important;
+                            display:block;
+                            font-family:Helvetica;
+                            font-size:26px;
+                            font-style:normal;
+                            font-weight:bold;
+                            line-height:100%;
+                            letter-spacing:normal;
+                            margin-top:0;
+                            margin-right:0;
+                            margin-bottom:10px;
+                            margin-left:0;
+                            text-align:left;
+                        }
+                        h2{
+                            color:#404040 !important;
+                            display:block;
+                            font-family:Helvetica;
+                            font-style:normal;
+                            font-weight:bold;
+                            line-height:100%;
+                            letter-spacing:normal;
+                            margin-top:0;
+                            margin-right:0;
+                            margin-bottom:10px;
+                            margin-left:0;
+                            text-align:left;
+                        }
+                        h3{
+                            color:#606060 !important;
+                            display:block;
+                            font-family:Helvetica;
+                            font-size:16px;
+                            font-style:italic;
+                            font-weight:normal;
+                            line-height:100%;
+                            letter-spacing:normal;
+                            margin-top:0;
+                            margin-right:0;
+                            margin-bottom:10px;
+                            margin-left:0;
+                            text-align:left;
+                        }
+                        h4{
+                            color:#808080 !important;
+                            display:block;
+                            font-family:Helvetica;
+                            font-size:14px;
+                            font-style:italic;
+                            font-weight:normal;
+                            line-height:100%;
+                            letter-spacing:normal;
+                            margin-top:0;
+                            margin-right:0;
+                            margin-bottom:10px;
+                            margin-left:0;
+                            text-align:left;
+                        }
+
+                        /* ========== Header Styles ========== */
+
+                        #templatePreheader{
+                            background-color:#F4F4F4;
+                        }
+                        #templateBranding {
+                            background-color:' . $mc_color_primary_value . ';
+                        }
+                        #templateBranding img {
+                            vertical-align: top;
+                        }
+                        .preheaderContent{
+                            color:#808080;
+                            font-family:Helvetica;
+                            font-size:10px;
+                            line-height:125%;
+                            text-align:left;
+                        }
+                        .preheaderContent a:link,
+                        .preheaderContent a:visited, /* Yahoo! Mail Override */
+                        .preheaderContent a .yshortcuts /* Yahoo! Mail Override */{
+                            color:#606060;
+                            font-weight:normal;
+                            text-decoration:underline;
+                        }
+                        #templateHeader{
+                            background-color:#F4F4F4;
+                        }
+                        #templateHeader img {
+                            height:auto;
+                            display:inline;
+                            max-width:600px;
+                            vertical-align:top;
+                        }
+                        .headerContent{
+                            color:#505050;
+                            font-family:Helvetica;
+                            font-size:20px;
+                            font-weight:bold;
+                            line-height:100%;
+                            padding-top:0;
+                            padding-right:0;
+                            padding-bottom:0;
+                            padding-left:0;
+                            text-align:left;
+                            vertical-align:middle;
+                        }
+                        /**
+                        * @tab Header
+                        * @section header link
+                        * @tip Set the styling for your email header links. Choose a color that helps them stand out from your text.
+                        */
+                        .headerContent a:link,
+                        .headerContent a:visited, /* Yahoo! Mail Override */
+                        .headerContent a .yshortcuts /* Yahoo! Mail Override */{
+                            color:#EB4102;
+                            font-weight:normal;
+                            text-decoration:underline;
+                        }
+
+                        /* ========== Column Styles ========== */
+
+                        .templateColumnContainer{}
+                        #templateColumns{
+                            background-color:#F4F4F4;
+                            border-top:1px solid #FFFFFF;
+                            border-bottom:1px solid #CCCCCC;
+                        }
+                        #templateArticle {
+                            background-color: #fff;
+                            border-top: 1px solid #FFFFFF;
+                            border-bottom: 1px solid #CCCCCC;
+                        }
+                        #templateBio {
+                            background-color: #F4F4F4;
+                            border-top: 1px solid #FFFFFF;
+                            border-bottom: 1px solid #CCCCCC;
+                        }
+                        .bioContent {
+                            color: #505050;
+                            font-family: Helvetica;
+                            font-size: 13px;
+                            line-height: 125%;
+                            text-align: left;
+                            padding-top: 20px;
+                            padding-right: 20px;
+                            padding-left: 20px;
+                            padding-bottom: 20px;
+                        }
+                        .articleContent {
+                            color: #505050;
+                            font-family: Helvetica;
+                            font-size: 14px;
+                            line-height: 150%;
+                            padding-top: 20px;
+                            padding-right: 20px;
+                            padding-left: 20px;
+                            text-align:left;
+                        }
+                        #article-corporate-disclaimer {
+                            font-size: 13px;
+                            line-height: 125%;
+                        }
+                        .leftColumnContent{
+                            color:#505050;
+                            font-family:Helvetica;
+                            font-size:14px;
+                            line-height:150%;
+                            padding-top:0;
+                            padding-right:20px;
+                            padding-bottom:20px;
+                            padding-left:20px;
+                            text-align:left;
+                        }
+                        .leftColumnContent a:link,
+                        .leftColumnContent a:visited, /* Yahoo! Mail Override */
+                        .leftColumnContent a .yshortcuts /* Yahoo! Mail Override */{
+                            color:#EB4102;
+                            font-weight:normal;
+                            text-decoration:underline;
+                        }
+
+                        /**
+                        * @tab Columns
+                        * @section right column text
+                        * @tip Set the styling for your email right column content text. Choose a size and color that is easy to read.
+                        */
+                        .rightColumnContent{
+                            color:#505050;
+                            font-family:Helvetica;
+                            font-size:14px;
+                            line-height:150%;
+                            padding-top:0;
+                            padding-right:20px;
+                            padding-bottom:20px;
+                            padding-left:20px;
+                            text-align:left;
+                        }
+                        .rightColumnContent a:link,
+                        .rightColumnContent a:visited, /* Yahoo! Mail Override */
+                        .rightColumnContent a .yshortcuts /* Yahoo! Mail Override */{
+                            color:#EB4102;
+                            font-weight:normal;
+                            text-decoration:underline;
+                        }
+
+                        .columnImage{
+                            display:inline;
+                            height:auto;
+                            max-width: 200px !important;
+                        }
+                        .profileBio {
+                            font-size:12px;
+                        }
+                        .profilePerson {
+                            text-align:center;
+                            font-size:13px;
+                            padding-top: 10px;
+                            padding-right: 10px;
+                            padding-bottom: 10px;
+                            padding-left: 10px;
+                        }
+
+                        /* ========== Footer Styles ========== */
+                        /**
+                        * @tab Footer
+                        * @section footer style
+                        * @tip Set the background color and borders for your email footer area.
+                        * @theme footer
+                        */
+                        #templateFooter{
+                            background-color:#F4F4F4;
+                            border-top:1px solid #FFFFFF;
+                        }
+
+                        /**
+                        * @tab Footer
+                        * @section footer text
+                        * @tip Set the styling for your email footer text. Choose a size and color that is easy to read.
+                        * @theme footer
+                        */
+                        .footerContent{
+                            color:#808080;
+                            font-family:Helvetica;
+                            font-size:12px;
+                            line-height:150%;
+                            padding-top:20px;
+                            padding-right:20px;
+                            padding-bottom:20px;
+                            padding-left:20px;
+                            text-align:left;
+                        }
+
+                        /**
+                        * @tip Set the styling for your email footer links. Choose a color that helps them stand out from your text.
+                        */
+                        .footerContent a:link,
+                        .footerContent a:visited, /* Yahoo! Mail Override */
+                        .footerContent a .yshortcuts,
+                        .footerContent a span /* Yahoo! Mail Override */{
+                            color:#606060;
+                            font-weight:normal;
+                            text-decoration:underline;
+                        }
+        </style>';
+    $mc_styles_mobile = '
+    <style type="text/css">
+            @media only screen and (max-width: 480px){
+                /* ======== CLIENT-SPECIFIC MOBILE STYLES ========= */
+                body, table, td, p, a, li, blockquote{
+                    -webkit-text-size-adjust:none !important;
+                } /* Prevent Webkit platforms from changing default text sizes */
+                body{
+                    width:100% !important;
+                    min-width:100% !important;
+                } /* Prevent iOS Mail from adding padding to the body */
+
+                /* ======== MOBILE RESET STYLES ========= */
+                #bodyCell{
+                    padding:10px !important;
+                }
+
+                /* ======== Page Styles ======== */
+
+                #templateContainer{
+                    max-width:600px !important;
+                    width:100% !important;
+                }
+                h1{
+                    font-size:24px !important;
+                    line-height:100% !important;
+                }
+                h2{
+                    font-size:20px !important;
+                    line-height:100% !important;
+                }
+                h3{
+                    font-size:18px !important;
+                    line-height:100% !important;
+                }
+                h4{
+                    font-size:16px !important;
+                    line-height:100% !important;
+                }
+
+                /* ======== Header Styles ======== */
+                #headerImage{
+                    height:auto !important;
+                    max-width:600px !important;
+                    width:100% !important;
+                }
+                .headerContent{
+                    font-size:20px !important;
+                    line-height:125% !important;
+                }
+
+                /* ======== Column Styles ======== */
+
+                .templateColumnContainer{
+                    display:block !important;
+                    width:100% !important;
+                }
+                #templateHeader img {
+                    height:auto !important;
+                    max-width:300px !important;
+                    width:100% !important;
+                }
+                .leftColumnContent{
+                    font-size:16px !important;
+                    line-height:125% !important;
+                }
+                .rightColumnContent{
+                    font-size:16px !important;
+                    line-height:125% !important;
+                }
+
+                /* ======== Footer Styles ======== */
+                .footerContent{
+                    font-size:14px !important;
+                    line-height:115% !important;
+                }
+                .footerContent a{
+                    display:block !important;
+                }
+            }
+    </style>';
+    // HTML output to send to mailchimp.
+    $mc_html = '
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>*|MC:SUBJECT|*</title>
+    ' . $mc_styles . '
+    </head>
+    <body leftmargin="0" marginwidth="0" topmargin="0" marginheight="0" offset="0">
+        <center>
+            <table align="center" border="0" cellpadding="0" cellspacing="0" height="100%" width="100%" id="bodyTable">
+                <tr>
+                    <td align="center" valign="top" id="bodyCell">
+                        <!-- BEGIN TEMPLATE // -->
+                        <table border="0" cellpadding="0" cellspacing="0" id="templateContainer">
+                            ' . $mc_preheader_html . $mc_logo_html . $mc_banner_html . $mc_profile_html . '
+                            <tr>
+                                <td align="center" valign="top">
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateArticle">
+                                        <tr>
+                                            <td align="center" valign="top" class="articleContent">'
+                                            . $mc_headline_value . $mc_content . '
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>'
+                            . $mc_profile_bio_html . '
+                            <tr>
+                                <td align="center" valign="top">
+                                    <!-- BEGIN FOOTER // -->
+                                    <table border="0" cellpadding="0" cellspacing="0" width="100%" id="templateFooter">
+                                        ' . $mc_disclaimer_html . '
+                                        <tr>
+                                            <td valign="top" class="footerContent" mc:edit="footer_content00">
+                                                <a href="*|FORWARD|*">Forward to Friend</a>&nbsp;
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content01">
+                                                <em>Copyright &copy; *|CURRENT_YEAR|* *|USER:COMPANY|*, All rights reserved.</em>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" class="footerContent" style="padding-top:0;" mc:edit="footer_content02">
+                                            <a href="*|LIST:SUBSCRIBE|*">subscribe to this list</a>&nbsp;&nbsp;&nbsp;<a href="*|UNSUB|*">unsubscribe from this list</a>&nbsp;&nbsp;&nbsp;<a href="*|UPDATE_PROFILE|*">update subscription preferences</a>&nbsp;
+                                            </td>
+                                        </tr>
+                                    </table>
+                                    <!-- // END FOOTER -->
+                                </td>
+                            </tr>
+                        </table>
+                        <!-- // END TEMPLATE -->
+                    </td>
+                </tr>
+            </table>
+        </center>
+    ' . $mc_styles_mobile . '</body>
+</html>';
+
+$entity_field[0]['value'] = $mc_html;
+}

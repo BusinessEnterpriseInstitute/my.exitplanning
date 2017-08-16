@@ -1,0 +1,204 @@
+<?php
+
+/**
+ * @file
+ * Mailchimp operations using Drupal hooks and helper functions.
+ */
+
+/**
+ * Implements hook_cron().
+ */
+
+function bei_mailchimp_cron() {
+  // Gather all list IDs.
+  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+
+  // Lets check for scheduled campaigns that have been sent.
+  $query = 'SELECT n.nid FROM {bei_campaign} n WHERE n.campaign_status = :campaign_status';
+  $results = db_query_range($query, 0, 25, array(':campaign_status' => 'schedule'))->fetchAll();
+
+  // Load all of the campaigns that have not been sent and get their status.
+  if (!empty($results)) {
+    try {
+      if (!$mc_campaigns) {
+        throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
+      }
+      foreach ($results as $result) {
+        $node = node_load($result->nid);
+        $cid = $node->campaign_id;
+        if ($cid) {
+          $campaign = $mc_campaigns->getCampaign($cid);
+          if ($campaign && $campaign->status == 'sent') {
+            $node->campaign_status = $campaign->status;
+            $node->sent_date = strtotime($campaign->send_time);
+            node_save($node);
+          }
+        }
+      }
+    }
+    catch (Exception $e) {
+      watchdog('bei_mailchimp', 'An error occurred requesting campaign information from MailChimp. "%message"', array(
+        '%message' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
+    }
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function bei_mailchimp_menu() {
+  $items = array();
+  $items['admin/config/bei_mailchimp'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'BEI Mailchimp',
+    'description' => 'Settings for BEI Mailchimp',
+    'position' => 'right',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer bei mailchimp'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['bei-mailchimp/newsletter-autocomplete'] = array(
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+    'page callback' => 'bei_mailchimp_newsletter_autocomplete',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function bei_mailchimp_permission() {
+  return array(
+    'administer bei mailchimp' => array(
+      'title' => t('Administer BEI Mailchimp'),
+      'description' => t('Allows the role to configure case study settings'),
+      'restrict access' => TRUE,
+    ),
+    'bei_mailchimp_create_campaign' => array(
+      'title' => t('Create custom Campaign'),
+      'description' => t('Gives the ability to access custom create campaign page that includes a rules form.'),
+    ),
+    'bei_mailchimp_access_campaign_templates' => array(
+      'title' => t('Access the campaign template library'),
+      'description' => t('Gives access to the newsletter template library page for adding campaigns.'),
+    ),
+  );
+}
+
+/**
+ * Helper function to gather open and click details for a member per campaign.
+ */
+function _bei_mailchimp_get_member_activity($activity) {
+  // Set default open and clicked variables.
+  $opens = 0;
+  $clicks = 0;
+
+  // Loop through each action and gather opens and clicks only.
+  foreach ($activity as $entry) {
+    if ($entry['action'] == 'open') {
+      $opens += 1;
+    }
+    elseif ($entry['action'] == 'click') {
+      $clicks += 1;
+    }
+  };
+
+  // Return the data as an array.
+  return array(
+    'opens' => $opens,
+    'clicks' => $clicks,
+  );
+}
+
+/**
+ * Helper function to check if string is UTF-8 formatted
+ */
+function bei_mailchimp_is_utf8($str) {
+    return (bool) preg_match('//u', $str);
+}
+
+/**
+ * Helper function to log errors in multiple places.
+ */
+function _bei_mailchimp_log_error($feed_nid, $message, $mail, $error) {
+  //drupal_set_message($message, 'error');
+  watchdog('BEI Mailchimp', $message, array(), $error);
+  feeds_log('subscribers', $feed_nid, 'subscriber', $message, array(), $error);
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function bei_mailchimp_form_alter(&$form, $form_state, $form_id) {
+  // Add an autocomplete to the textfield upon campaign creation.
+  if ($form_id == 'views_form_administer_subscriber_lists_page') {
+    $form['parameter']['newsletter_node']['settings']['newsletter_node']['#autocomplete_path'] = 'bei-mailchimp/newsletter-autocomplete';
+  }
+
+  // Subscriber list alterations.
+  if ($form_id == 'subscriber_list_node_form') {
+
+    // Hide the delete button on lists. Lists work themselves out.
+    unset($form['actions']['delete']);
+  }
+}
+
+
+/**
+ * Autocomplete to pull newsletter node titles.
+ */
+function bei_mailchimp_newsletter_autocomplete($string) {
+  $matches = array();
+  $result = db_select('node', 'n')
+    ->fields('n', array('title', 'nid'))
+    ->condition('type', 'newsletter')
+    ->condition('title', '%' . db_like($string) . '%', 'LIKE')
+    ->execute();
+
+  // Save the query to matches.
+  foreach ($result as $row) {
+    $matches[$row->nid] = check_plain($row->title);
+  }
+
+  // Return the result to the form in JSON.
+  drupal_json_output($matches);
+}
+
+
+/**
+ * Helper function to get lists.
+ *
+ * @param bool $show_nid
+ *  A flag to determine whether to show a node id next to the list name.
+ *
+ * @return $lists
+ *  An array of all list nodes.
+ */
+function bei_mailchimp_get_lists($show_nid = FALSE) {
+  $lists = array();
+
+  // Grab all list nodes.
+  $query = "SELECT n.nid, n.title " .
+           "FROM {node} n " .
+           "WHERE n.type = :type";
+
+  $results = db_query($query, array(':type' => 'subscriber_list'));
+  foreach ($results as $result) {
+    if ($show_nid == TRUE) {
+      $nid = ' [nid:' . $result->nid . ']';
+    }
+    else {
+      $nid = '';
+    }
+    $lists[$result->nid] = $result->title . $nid;
+  }
+
+  // Sort the list so the output is a little cleaner.
+  asort($lists);
+
+  return $lists;
+}

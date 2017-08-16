@@ -1,0 +1,7 @@
+name = BEI List
+description = Interacts with Mailchimp Lists
+core = 7.x
+package = BEI Mailchimp
+
+dependencies[] = bei_mailchimp
+files[] = includes/bei_list.admin.inc

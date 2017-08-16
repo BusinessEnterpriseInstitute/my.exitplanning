@@ -1,0 +1,21 @@
+form #order-wrapper table input.form-text,
+form #order-wrapper table select {
+  width: auto;
+  margin-bottom: 0;
+  display: inline-block;
+}
+form #order-wrapper table .form-item {
+  display: inline-block;
+}
+form #order-wrapper table button {
+  float: left;
+  margin-right: .5em;
+}
+
+form #order-wrapper .text-format-wrapper a.ckeditor_links,
+form #order-wrapper .text-format-wrapper .filter-wrapper {
+  display: none !important;
+}
+form #order-wrapper .text-format-wrapper .form-item {
+  margin-bottom: 1em !important;
+}

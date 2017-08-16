@@ -1,0 +1,45 @@
+<?php
+function bei_recurly_install() {
+  // store field definition in separate file just to keep this file readable
+  require_once DRUPAL_ROOT ."/". drupal_get_path('module', 'bei_recurly') . '/install_fields/fields_subscription_plan.inc';
+  foreach ($field_data['subscription_plan'] as $field) {
+    //check if exists -- don't duplicate
+    if (!field_info_field($field['field']['field_name'])) {
+      field_create_field($field['field']);
+    }
+    //check if instance exists -- don't duplicate
+    if (!field_info_instance($field['instance']['entity_type'], $field['instance']['field_name'], $field['instance']['bundle'])) {
+      field_create_instance($field['instance']);
+    }
+  }
+}
+
+function bei_recurly_uninstall() {
+  require_once DRUPAL_ROOT ."/". drupal_get_path('module', 'bei_recurly') . '/install_fields/fields_subscription_plan.inc';
+  foreach ($field_data['subscription_plan'] as $field) {
+    //check if exists -- before trying to delete instance
+    if (field_info_instance($field['instance']['entity_type'], $field['instance']['field_name'], $field['instance']['bundle'])) {
+      field_delete_instance($field['instance'],true);
+    }
+  }
+}
+
+/**
+* Add new subscription_plan fields -- CT is in hook_node_info
+*/
+function bei_recurly_update_7101() {
+
+  require_once DRUPAL_ROOT ."/". drupal_get_path('module', 'bei_recurly') . '/install_fields/fields_subscription_plan.inc';
+  foreach ($field_data['subscription_plan'] as $field) {
+    //check if exists -- don't duplicate
+    if (!field_info_field($field['field']['field_name'])) {
+      field_create_field($field['field']);
+    }
+    //check if exists -- don't duplicate
+    if (!field_info_instance($field['instance']['entity_type'], $field['instance']['field_name'], $field['instance']['bundle'])) {
+      field_create_instance($field['instance']);
+    } else { // update the instance to what we have defined
+      field_update_instance($field['instance']);
+    }
+  }
+}

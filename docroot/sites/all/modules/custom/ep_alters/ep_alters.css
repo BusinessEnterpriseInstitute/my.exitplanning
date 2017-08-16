@@ -1,0 +1,33 @@
+/* Modal styles */
+div.ctools-modal-content {
+    border-radius: 0 !important;
+    overflow: auto !important;
+}
+div.ctools-modal-content .modal-header {
+    background-image: none !important;
+    background-color: #5C7F92 !important;
+    padding: 20px 30px !important;
+    border-radius: 0 !important;
+}
+div.ctools-modal-content .modal-content {
+    background-color: #fff !important;
+    height: auto !important;
+    width: auto !important;
+    padding: 20px 40px !important;
+}
+div.ctools-modal-content .form-item label:not(.option) {
+    float: none;
+    clear: both;
+    width: 100%;
+}
+div.ctools-modal-content .modal-header .modal-title,
+div.ctools-modal-content .modal-header .close {
+    color: #fff !important;
+}
+div.ctools-modal-content .modal-header .modal-title {
+    text-shadow: none !important;
+}
+div.ctools-modal-content a.close {
+    background: none !important;
+    outline: none;
+}

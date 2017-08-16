@@ -1,0 +1,52 @@
+<?php
+
+function bei_install_helper_menu() {
+ 	 
+ $items = array();
+ $items['bei/fields/%/%'] = array(
+   'title' => 'Export fields by content type',
+   'description' => 'Export Fields',
+   'page callback' => 'get_them_fields',
+   'page arguments' => array(2,3),
+   'access arguments' => array('access administration pages'),
+   'type' => MENU_NORMAL_ITEM,
+   //'file' => 'cfs.admin.inc',
+ );
+  return $items;
+}
+
+function get_them_fields($content_type,$entity_type = "node") {
+    $export_data = array();
+    $export_data['entity_name'] = $entity_type;
+    $export_data['bundle_name'] = $content_type;
+    $instances = field_info_instances($export_data['entity_name'], $export_data['bundle_name']);
+
+    foreach ($instances as $field_name => $field) {
+      $info_config = field_info_field($field_name);
+      $info_instance = field_info_instance($export_data['entity_name'], $field_name, $export_data['bundle_name']);
+      
+      // unset the IDs
+      unset($info_config['id']);
+      unset($info_instance['id'], $info_instance['field_id']);
+      $export_structure[] = array(
+        'field' => $info_config,
+        'instance' => $info_instance,
+      );
+    }
+  print "&lt;?php <br />
+/* fields for $content_type of entity type $entity_type <br />
+*  Generated from our bei_install_helper module -- ie: http://xxxxx/bei/fields/$content_type/$entity_type <br />
+* <br />
+*/ <br />";
+print '$field_data["'.$content_type.'"] = ';
+    print "<pre>";
+    /*
+
+    print_r($instances_serial);
+
+    */
+    var_export($export_structure);
+    print "</pre>";
+    //watchdog('instances','<pre>'.var_dump($instances,true).'</pre>');
+    print ";";
+}

@@ -1,0 +1,373 @@
+<?php
+
+/**
+ * @file
+ * Sets up the base table for our entity and a table to store information about
+ * the entity types.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ * Automatically drops tables in hook_schema.
+ */
+function bei_order_uninstall() {
+  // remove variables
+  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'bei_order_%'));
+}
+
+/**
+ * Implements hook_schema().
+ */
+function bei_order_schema() {
+  $schema['bei_order'] = array(
+    'description' => 'Stores bei material order submissions.',
+    'fields' => array(
+      'oid' => array(
+        'description' => 'The unique identifier for an order',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'vid' => array(
+        'description' => 'The current {bei_order_revision}.vid version identifier.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+        'default' => NULL,
+      ),
+      'uid' => array(
+        'description' => 'The author id of the order.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'company_name' => array(
+        'description' => 'Company Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'phone' => array(
+        'description' => 'Phone Number',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'E-mail Address',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'website' => array(
+        'description' => 'Website',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => 'Status of order',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'tracking_url' => array(
+        'description' => 'Tracking Url',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the subscriber was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the subscriber was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'serialize' => TRUE,
+      ),
+    ),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+    'unique keys' => array(
+      'vid' => array('vid'),
+    ),
+    'foreign keys' => array(
+      'bei_order_revision' => array(
+        'table' => 'bei_order_revision',
+        'columns' => array('vid' => 'vid'),
+      ),
+      'bei_order_author' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
+    'primary key' => array('oid'),
+  );
+  $schema['bei_order_revision'] = array(
+    'description' => 'Stores bei material order submissions.',
+    'fields' => array(
+      'oid' => array(
+        'description' => 'The {bei_order} this version belongs to.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'vid' => array(
+        'description' => 'The primary identifier for this version.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The author id of the order.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'revision_uid' => array(
+        'description' => 'The author id making the revision.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'name' => array(
+        'description' => 'Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'company_name' => array(
+        'description' => 'Company Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'phone' => array(
+        'description' => 'Phone Number',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'E-mail Address',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'website' => array(
+        'description' => 'Website',
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => 'Status of order',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'default' => 0,
+      ),
+      'tracking_url' => array(
+        'description' => 'Tracking Url',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the subscriber was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the subscriber was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('vid'),
+    'indexes' => array(
+      'oid' => array('oid'),
+      'uid' => array('uid'),
+      'revision_uid' => array('revision_uid'),
+    ),
+    'foreign keys' => array(
+      'versioned_bei_order' => array(
+        'table' => 'node',
+        'columns' => array('oid' => 'oid'),
+      ),
+      'version_author' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+      'revision_author' => array(
+        'table' => 'users',
+        'columns' => array('revision_uid' => 'revision_uid'),
+      ),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Add tracking url field to bei_order and bei_order_revision table.
+ */
+function bei_order_update_7001() {
+  db_add_field(
+    'bei_order',
+    'tracking_url',
+    array(
+      'description' => 'Tracking Url',
+      'type' => 'varchar',
+      'length' => 256,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order_revision',
+    'tracking_url',
+    array(
+      'description' => 'Tracking Url',
+      'type' => 'varchar',
+      'length' => 256,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+}
+/**
+ * Add company_name field to bei_order and bei_order_revision table.
+ */
+function bei_order_update_7002() {
+  db_add_field(
+    'bei_order',
+    'company_name',
+    array(
+      'description' => 'Company Name',
+      'type' => 'varchar',
+      'length' => 256,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order_revision',
+    'company_name',
+    array(
+      'description' => 'Company Name',
+      'type' => 'varchar',
+      'length' => 256,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+}
+/**
+ * Add phone, email and website fields to bei_order and bei_order_revision tables.
+ */
+function bei_order_update_7003() {
+  db_add_field(
+    'bei_order',
+    'phone',
+    array(
+      'description' => 'Phone Number',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order',
+    'email',
+    array(
+      'description' => 'E-mail Address',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order',
+    'website',
+    array(
+      'description' => 'Website',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order_revision',
+    'phone',
+    array(
+      'description' => 'Phone Number',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order_revision',
+    'email',
+    array(
+      'description' => 'E-mail Address',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_field(
+    'bei_order_revision',
+    'website',
+    array(
+      'description' => 'Website',
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+}

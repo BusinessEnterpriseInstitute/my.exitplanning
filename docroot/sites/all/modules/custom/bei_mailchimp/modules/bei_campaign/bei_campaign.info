@@ -1,0 +1,9 @@
+name = BEI Campaign
+description = Interacts with Mailchimp Campaigns
+package = BEI Mailchimp
+core = 7.x
+
+dependencies[] = bei_mailchimp
+dependencies[] = views
+
+files[] = includes/bei_campaign.admin.inc

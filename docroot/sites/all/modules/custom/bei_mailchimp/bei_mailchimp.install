@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * @file
+ * Installation instructions for the bei_mailchimp module.
+ */
+
+  // Set the module weight to 0 to make sure it is run before feeds.
+  db_update('system')
+    ->fields(array('weight' => 0))
+    ->condition('name', 'bei_mailchimp', '=')
+    ->execute();
+
+/**
+ * Implements hook_uninstall().
+ */
+function bei_mailchimp_uninstall() {
+  // Delete the default feeds CSV file.
+  $fid = db_query("SELECT fid FROM {file_managed} WHERE filename = 'subscribers_template.csv'")->fetchField();
+  if (!empty($fid)) {
+    $file = file_load($fid);
+    file_usage_delete($file, 'bei_mailchimp', 'module', 0);
+    file_delete($file);
+  }
+}

@@ -1,0 +1,95 @@
+/**
+ * @file
+ * CSS instructions for theming Mailchimp Statistics.
+ */
+
+.table-header {
+  background-color: #f3fafd;
+  border: 10px solid #e3f1fa;
+  border-bottom: none;
+  font-weight: bold;
+  padding: 15px 10px;
+  width: 100%;
+}
+
+.table-header span {
+  color: #0a274b;
+  font-size: 200%;
+}
+
+#bei-mailchimp-stats {
+  border: 10px solid #e3f1fa;
+  display: table;
+  margin-top: 0;
+}
+
+.table-header,
+.table-header *,
+#bei-mailchimp-stats * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  line-height: normal;
+}
+
+#bei-mailchimp-stats tbody {
+  width: 100%;
+}
+
+#bei-mailchimp-stats tr {
+  border-bottom: 5px solid #e3f1fa;
+}
+
+#bei-mailchimp-stats .details {
+  float: right;
+}
+
+.cell-1 {
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  width: 25%;
+
+  -webkit-text-shadow: 1px 1px 3px #555;
+  text-shadow: 1px 1px 3px #555;
+}
+
+.cell-1 span {
+  font-size: 200%;
+}
+
+.cell-2 {
+  background-color: #F3FAFD;
+  color: #0A274B;
+  font-size: 115%;
+  font-weight: bold;
+  width: 75%;
+}
+
+.cell-1.opens {
+  background-color: #24cbe5;
+}
+
+.cell-1.clicks {
+  background-color: #50B432;
+}
+
+.cell-1.forwarded {
+  background-color: #5D5D5D;
+}
+
+.cell-1.bounces {
+  background-color: #FFC001;
+}
+
+.cell-1.spam {
+  background-color: #B32CDA;
+}
+
+.cell-1.unsubscribed {
+  background-color: #ED561B;
+}
+
+.cell-1.unopened {
+  background-color: #5D5D5D;
+}

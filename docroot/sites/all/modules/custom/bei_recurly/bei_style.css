@@ -1,0 +1,453 @@
+.page-buy-membership h1#page-title {
+  display:none;
+}
+.membership-steps-wrepper {
+  padding:20px 0 25px 0;
+}
+.membership-steps-wrepper .form-type-item {
+  display:inline;
+  padding-right:20px;
+  color:#ccc;
+}
+.membership-steps-wrepper .form-type-item span.active {
+  color:#000;
+}
+.membership-steps-wrepper button {
+  background: none;
+  color: #006699;
+  font-weight: normal;
+  padding: 0;
+  margin: 0 20px 0 0;
+}
+.membership-steps-wrepper button:hover, .membership-steps-wrepper button:active {
+  text-decoration:underline;
+  background:none;
+  color: #006699;
+}
+
+/* PLAN TYPES */
+.ctools-modal-content .modal-content #membership #plan-types {
+  padding-bottom: 30px;
+  border-bottom: 1px solid #000000;
+  margin-bottom: 20px;
+}
+.ctools-modal-content .modal-content #membership #plan-types .form-item {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+/* PAYMENT METHOD */
+.ctools-modal-content .modal-content #membership #payment-method label,
+.ctools-modal-content .modal-content #membership #payment-method .form-radios,
+.ctools-modal-content .modal-content #membership #payment-method .form-radios .form-item {
+  float: none;
+  display: inline-block;
+}
+.ctools-modal-content .modal-content #membership #payment-method .form-radios .form-item {
+  margin-right: 15px;
+}
+
+.form-item-first-last .description,
+.form-item-email .description,
+.form-item-phone .description {
+  opacity:0;
+  color:#008CBA;
+}
+.form-item-first-last .description.show-blur-text,
+.form-item-email .description.show-blur-text,
+.form-item-phone .description.show-blur-text {
+  opacity:1;
+  -webkit-transition:opacity 500ms;
+  -moz-transition:opacity 500ms;
+  -o-transition:opacity 500ms;
+  transition:opacity 500ms;
+}
+
+#bei-recurly-checkout-form .form-item-coupon-code .ajax-progress-throbber {
+  position:relative;
+  top:50px;
+  left:-20px;
+}
+#plan-price-display-wrap {
+  clear:both;
+  padding-bottom:15px;
+  font-size:14px;
+  width:300px;
+}
+#plan-price-display-wrap div {
+  padding-bottom:10px; 
+}
+#plan-price-display-wrap span.cost-amount {
+  float:right;
+}
+#plan-price-display-wrap .total-cost {
+  font-size:16px;
+  font-weight:bold;
+  border-top:1px solid #ccc;
+  padding-top:10px;
+}
+#bei-recurly-checkout-form .review-header {
+  font-size:18px;
+  padding-bottom:15px;
+  margin-bottom:15px;
+  border-bottom:1px solid #ccc;
+}
+#bei-recurly-checkout-form .review-label {
+  display:inline-block;
+  width:150px;
+  padding-bottom:10px;
+}
+#bei-recurly-checkout-form .review-value {
+  display:inline-block;
+}
+#bei-recurly-checkout-form .form-item-terms {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #ccc;
+}
+.order-number {
+  font-weight:bold;
+}
+
+
+/* BEGIN SUBSCRIPTION PAGE STYLES */
+.view-subscription-plans .views-field-title {
+  font-size:22px;
+  border-bottom:1px solid #ccc;
+  padding: 10px 0;
+  margin-bottom: 10px;
+}
+.view-subscription-plans .field-brief-description {
+  min-height:125px;
+}
+.field-subscription-details ul {
+  list-style:none;
+  margin-left:0;
+}
+.field-subscription-details ul li.ico-envelope {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/ico-envelope.png);
+}
+.field-subscription-details ul li.ico-clipboard {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/ico-clipboard.png);
+}
+.field-subscription-details ul li.ico-plus {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/ico-plus.png);
+}
+.field-subscription-details ul li.ico-person {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/ico-person.png);
+}
+.field-subscription-details ul li.ico-play {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/ico-play.png);
+}
+.field-subscription-details ul li {
+  background-position: 0 4px;
+  background-repeat: no-repeat;
+  background-size: 25px 25px;
+  padding:5px 0 5px 35px;
+  margin-left:0;
+}
+.field-subscription-inclusions ul {
+  list-style:none;
+  margin-left:0;
+  -moz-column-count: 2;
+  -moz-column-gap: 20px;
+  -webkit-column-count: 2;
+  -webkit-column-gap: 20px;
+  column-count: 2;
+  column-gap: 20px;
+}
+.field-subscription-inclusions ul li {
+  background-image: url(/sites/all/modules/custom/bei_recurly/images/valid-input.png);
+  background-position: 0 6px;
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  padding:5px 0 5px 35px;
+  margin-left:0;
+}
+
+/* END SUBSCRIPTION PAGE STYLES */
+
+/* USER MEMBERSHIP DETAILS */
+#membership-details #account-type,
+#membership-details #renewal-date {
+  margin: 10px 0;
+}
+#membership-details #upgrade-link,
+#membership-details #cancel-link {
+  display: inline-block;
+}
+#membership-details #upgrade-link a {
+  display: block;
+  padding: 10px 14px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  background: none;
+  background-color: #B0B0B0;
+  margin: 10px 20px 0 0;
+  border-radius: 6px;
+}
+#membership-details #upgrade-link a:hover {
+  text-decoration: none;
+  background-color: #818181;
+}
+
+/* DASHBOARD MEMBERSHIP */
+#membership-details-dashboard #greeting {
+  border-bottom: 3px solid #8A8A8A;
+}
+#membership-details-dashboard #membership-type,
+#membership-details-dashboard #renewal-date {
+  margin: 20px 0;
+}
+
+/* MODAL STYLES */
+.page-user-edit .ctools-modal-content {
+  border: 2px solid #EBEBEB !important;
+  padding: 5px !important;
+  overflow: auto !important;
+}
+.page-user-edit .ctools-modal-content .modal-header {
+  background-color: #EBEBEB !important;
+  padding: 20px 30px !important;
+}
+.page-user-edit .ctools-modal-content .modal-header .modal-title,
+.page-user-edit .ctools-modal-content .modal-header .close {
+  color: #000000 !important;
+}
+.page-user-edit .ctools-modal-content .modal-header .close {
+  font-size: 16px !important;
+}
+.page-user-edit .ctools-modal-content .modal-content {
+  background-color: #FFFFFF !important;
+  height: auto !important;
+  width: auto !important;
+  padding: 20px 60px !important
+}
+.page-user-edit .ctools-modal-content .modal-content .ajax-progress,
+.page-user-edit .ctools-modal-content .modal-content .ajax-progress-throbber {
+  display: none;
+}
+#modalContent {
+  position: relative;
+}
+#ajax-in-progress {
+  position: absolute;
+  display: block;
+  background-color: rgba(255, 255, 255, 0.5);
+  background-image: url('images/loading-new.gif');
+  background-size: 128px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  z-index: 1000;
+}
+#modalBackdrop {
+  background: rgb(0, 0, 0) !important;
+}
+
+/* MEMBERSHIP PLANS */
+.ctools-modal-content .modal-content #membership #plans {
+  overflow: hidden;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item {
+  float: left;
+  margin: 10px 30px 20px 0;
+  width: 200px;
+  height: 40px;
+  position: relative;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item label,
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item input {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item input[type="radio"] {
+  opacity: 0.011;
+  z-index: 100;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item input[type="radio"]:checked + label {
+  border: 3px solid #0079B4;
+  color: #0079B4;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item label {
+  padding: 12px 24px;
+  border: 3px solid #E0E0E0;
+  color: #8F8D8D;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 90;
+  text-align: center;
+}
+.ctools-modal-content .modal-content #membership #plans .form-item .form-item label:hover {
+  border: 3px solid #8F8D8D;
+}
+
+/* PLAN TYPES */
+.ctools-modal-content .modal-content #membership #plan-types {
+  padding-bottom: 30px;
+  border-bottom: 1px solid #000000;
+  margin-bottom: 20px;
+}
+.ctools-modal-content .modal-content #membership #plan-types .form-item {
+  display: inline-block;
+  margin-right: 15px;
+}
+
+/* PAYMENT METHOD */
+.ctools-modal-content .modal-content #membership #payment-method label,
+.ctools-modal-content .modal-content #membership #payment-method .form-radios,
+.ctools-modal-content .modal-content #membership #payment-method .form-radios .form-item {
+  float: none;
+  display: inline-block;
+}
+.ctools-modal-content .modal-content #membership #payment-method .form-radios .form-item {
+  margin-right: 15px;
+}
+
+/* BILLING INFO */
+.ctools-modal-content .modal-content #membership #billing-info,
+.ctools-modal-content .modal-content #membership #review {
+  display: inline-block;
+  vertical-align: top;
+  width: 50%;
+}
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-fields,
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-fields td {
+  border: none;
+}
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-fields .billing-label {
+  font-weight: bold;
+  width: 1px;
+  white-space: nowrap;
+}
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-edit input,
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-cancel input {
+  padding: 10px 14px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  background: none;
+  background-color: #B0B0B0;
+  margin: 0;
+  border-radius: 6px;
+}
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-edit input:hover,
+.ctools-modal-content .modal-content #membership #billing-info #billing-info-cancel input:hover {
+  background-color: #818181;
+}
+
+/* REVIEW */
+.ctools-modal-content .modal-content #membership #review #discount #discount-apply,
+.ctools-modal-content .modal-content #membership #review #discount #discount-code,
+.ctools-modal-content .modal-content #membership #review #discount #discount-code label,
+.ctools-modal-content .modal-content #membership #review #discount #discount-code input {
+  display: inline-block;
+  width: auto;
+}
+.ctools-modal-content .modal-content #membership #review #discount #discount-code label {
+  font-size: 0.923em;
+  margin-right: 10px;
+}
+.ctools-modal-content .modal-content #membership #review #discount #discount-apply input,
+.ctools-modal-content .modal-content #membership #review #discount #discount-code .form-item-discount-code {
+  padding: 8px 2px 8px 10px;
+  margin: 0;
+}
+.ctools-modal-content .modal-content #membership #review #discount #discount-apply input {
+  padding: 3px 6px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  background: none;
+  background-color: #B0B0B0;
+  margin: 0;
+  border-radius: 0;
+  font-size: 11px;
+}
+.ctools-modal-content .modal-content #membership #review #discount #discount-apply input:hover {
+  background-color: #818181;
+}
+.ctools-modal-content .modal-content #membership #review #membership-cost,
+.ctools-modal-content .modal-content #membership #review #membership-cost td {
+  border: none;
+}
+.ctools-modal-content .modal-content #membership #review #membership-cost .invoice-label {
+  font-weight: bold;
+  width: 1px;
+  white-space: nowrap;
+}
+.ctools-modal-content .modal-content #membership #review #membership-cost .total {
+  border-top: 1px solid #000000;
+}
+.ctools-modal-content .modal-content #membership #review #membership-cost .total td {
+  padding-top: 14px;
+  font-size: 20px;
+}
+
+/* SPACER */
+.ctools-modal-content .modal-content #spacer {
+  margin: 30px 0;
+  border-top: 1px solid #000000;
+}
+
+/* UPGRADE SUBMIT */
+.ctools-modal-content .modal-content #upgrade-submit {
+  padding: 12px 16px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  background: none;
+  background-color: #B0B0B0;
+  margin: 0 10px 0 0;
+  border-radius: 6px;
+}
+.ctools-modal-content .modal-content #upgrade-submit:hover {
+  background-color: #818181;
+}
+
+/* BILLING PANE */
+#billing #billing-address .billing-label,
+#billing #payment-info-table .payment-label {
+  font-weight: bold;
+  width: 1px;
+  white-space: nowrap;
+}
+#edit-billing-link {
+  padding-top: 10px;
+}
+#edit-billing-link a,
+#billing-submit {
+  padding: 10px 14px;
+  color: #ffffff;
+  text-align: center;
+  font-weight: normal;
+  border: none;
+  background: none;
+  background-color: #B0B0B0;
+  margin: 0 10px 0 0;
+  border-radius: 6px;
+}
+#edit-billing-link a:hover,
+#billing-submit:hover {
+  text-decoration: none;
+  background-color: #818181;
+}
+#billing-edit #address-info,
+#billing-edit #payment-info {
+  padding-bottom: 20px;
+  border-bottom: 1px solid #000000;
+  margin-bottom: 20px;
+}

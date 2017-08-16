@@ -1,0 +1,4 @@
+name = Fee Estimator
+description = Custom Fee Estimator Form.
+core = 7.x
+package = Custom

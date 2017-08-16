@@ -1,0 +1,142 @@
+<?php
+
+/**
+ * Implements hook_rules_action_info().
+ */
+function rules_archive_rules_action_info() {
+    $actions['archive_files'] = array(
+      'label' => t('Generate Archive File'),
+      'parameter' => array(
+        'filename' => array(
+          'type' => 'text',
+          'label' => t('Filename'),
+          'description' => t('The name of the file'),
+          'restriction' => 'input',
+        ),
+        'file_owner' => array(
+          'type' => 'user',
+          'label' => t('File owner'),
+          'description' => t('Specify the owner of the file that is created.'),
+          'optional' => TRUE,
+        ),
+        'uri_scheme' => array(
+          'type' => 'text',
+          'label' => t('Save destination'),
+          'description' => t('Select where the final files should be stored. Private file storage has significantly more overhead than public files, but allows restricted access to files within this field.'),
+          'restriction' => 'input',
+          'options list' => 'rules_archive_scheme_options'
+        ),
+        'file_directory' => array(
+          'type' => 'text',
+          'label' => t('File directory'),
+          'description' => t('Optional subdirectory within the save destination where files will be stored. Do not include preceding or trailing slashes.'),
+          'restriction' => 'input',
+          'optional' => TRUE,
+        ),
+        'temporary' => array(
+          'type' => 'boolean',
+          'label' => t('Temporary?'),
+          'description' => t('Saves the file as temporary, useful if you just want it stored for the duration of the rules evaluation. It will be cleared on cron after an internally set period of time (aprox. 6h).'),
+          'restriction' => 'input',
+          'default value' => 0,
+        ),
+        'replace' => array(
+          'type' => 'integer',
+          'label' => t('Replace behavior'),
+          'description' => t('Replace behavior when the destination file already exists.'),
+          'restriction' => 'input',
+          'options list' => 'rules_archive_file_options_list',
+          'default value' => FILE_EXISTS_RENAME,
+        ),
+        'archive_list' => array(
+            'type' => 'list<file>',
+            'label' => t('Files to archive'),
+            'description' => t('List of files to add to the archive file.'),
+        ),
+      ),
+      'provides' => array(
+        'zipped_file' => array(
+          'type' => 'file',
+          'label' => t('Zipped File'),
+        ),
+      ),
+      'group' => t('Archive'),
+      'base' => 'rules_archive_generate_archive',
+      'callbacks' => array(
+        'validate' => 'rules_archive_action_validate',
+      ),
+    );
+  return $actions;
+}
+
+function rules_archive_generate_archive($filename, $file_owner, $uri_scheme, $file_directory, $temporary, $replace, $archive_list, $element) {
+  module_load_include('inc', 'system', 'system.archiver.inc');
+  if (function_exists('transliteration_clean_filename')) {
+    $filename = transliteration_clean_filename($filename, language_default('language'));
+  }
+  $archive_uri = 'temporary://order_' . REQUEST_TIME . '.zip';
+
+  $zip = new ZipArchive;
+  if ($zip->open(drupal_realpath($archive_uri), ZipArchive::CREATE) == TRUE) {
+    foreach ($archive_list as $file) {
+        $zip->addFile(drupal_realpath($file->uri), $file->filename);
+    }
+    $zip->close();
+  }
+  $zipped_file = file_get_contents($archive_uri);
+  $destination = $uri_scheme . '://' . trim($file_directory, '\\/') . '/' . $filename . '.zip' ;
+
+  $file = file_save_data($zipped_file, $destination, $replace);
+
+  if (empty($file)) {
+    throw new RulesEvaluationException('Error saving the downloaded content to @path', array('@path' => $destination));
+  }
+  if (isset($file_owner->uid)) {
+    $file->uid = $file_owner->uid;
+    file_save($file);
+  }
+  if ($temporary) {
+    // Make it temporary and store the file again
+    $file->status &= ~FILE_STATUS_PERMANENT;
+    file_save($file);
+  }
+
+  $file->display = 1;
+  
+  return array('zipped_file' => $file);
+}
+
+/**
+ * Rules action callback for validation.
+ *
+ * Makes sure the directory is there and writable, tries to create it as well.
+ */
+function rules_archive_action_validate($element) {
+  $destination = $element->settings['uri_scheme'] . '://' . trim($element->settings['file_directory'], '\\/');
+  if (isset($destination) && !file_prepare_directory($destination, FILE_CREATE_DIRECTORY|FILE_MODIFY_PERMISSIONS)) {
+    $error = t('The save directory %directory for the file could not be created or is not accessible.', array('%directory' => $destination));
+    throw new RulesIntegrityException($error, array($element, 'parameter', 'file_directory'));
+  }
+}
+
+/**
+ * Options list callback for file replacement methods.
+ *
+ * @see file.inc
+ */
+function rules_archive_file_options_list() {
+  return array(
+    FILE_EXISTS_RENAME => t('Rename - Append _{incrementing number} until the filename is unique'),
+    FILE_EXISTS_REPLACE => t('Replace - Replace the existing file'),
+    FILE_EXISTS_ERROR => t('Error - Do nothing and return FALSE'),
+  );
+}
+
+function rules_archive_scheme_options() {
+  $scheme_options = array();
+  foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $stream_wrapper) {
+    $scheme_options[$scheme] = $stream_wrapper['name'];
+  }
+
+  return $scheme_options;
+}

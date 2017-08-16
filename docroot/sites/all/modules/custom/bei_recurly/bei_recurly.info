@@ -1,0 +1,12 @@
+name = Recurly Customizations
+description = "Improvements and customizations to the recurly functionality"
+package = Custom
+core = 7.x
+version = 7.x-1.1
+dependencies[] = recurly
+dependencies[] = recurly_roles
+dependencies[] = ctools
+dependencies[] = creditfield
+dependencies[] = spambot
+stylesheets[all][] = bei_style.css
+scripts[] = scripts.js

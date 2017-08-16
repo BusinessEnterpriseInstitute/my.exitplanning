@@ -1,0 +1,5 @@
+name = Exit Planning Form Alters
+description = Contains various overrides for forms.
+package = Custom
+core = 7.x
+stylesheets[all][] = ep_alters.css

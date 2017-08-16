@@ -1,0 +1,125 @@
+<?php
+
+/**
+ * @file
+ * Sets up the base table for our entity and a table to store information about
+ * the entity types.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ * Automatically drops tables in hook_schema.
+ */
+function bei_campaign_uninstall() {
+
+  // remove variables
+  db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'bei_campaign_%'));
+}
+
+/**
+ * Implements hook_schema().
+ */
+function bei_campaign_schema() {
+  $schema['cache_bei_campaign'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_bei_campaign']['description'] = 'Cache table for the BEI Campaign module to store a list of campaigns.';
+  
+  $schema['bei_campaign'] = array(
+    'description' => 'Table for BEI Mailchimp campaigns',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier for a campaign',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'description' => 'Primary Key Identifier for campaign.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'headline' => array(
+        'description' => 'Email Headline Text',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'subject' => array(
+        'description' => 'Email subject text',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'from_email' => array(
+        'description' => 'From email address',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'from_name' => array(
+        'description' => 'From Name',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'lid' => array(
+        'description' => 'Referenced Entity List Id of the campaign',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'list_id' => array(
+        'description' => 'The List ID on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'campaign_id' => array(
+        'description' => 'The Campaign ID on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'campaign_status' => array(
+        'description' => 'Status of the campaign on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'schedule_date' => array(
+        'description' => 'The Unix timestamp when the campaign was scheduled.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'sent_date' => array(
+        'description' => 'The Unix timestamp when the campaign was sent.',
+        'type' => 'int',
+        'not null' => FALSE,
+        'default' => 0,
+      ),
+      'archive_url' => array(
+        'description' => 'The archive url on Mailchimp',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'nid' => array('nid'),
+      'lid' => array('lid'),
+    ),
+  );
+  return $schema;
+}

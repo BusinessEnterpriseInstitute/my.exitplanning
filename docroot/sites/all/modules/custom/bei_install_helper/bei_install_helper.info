@@ -1,0 +1,4 @@
+name = BEI Install helper
+description = "Export field defs etc."
+core = 7.x
+package = Custom

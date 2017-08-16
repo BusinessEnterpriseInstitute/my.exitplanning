@@ -1,0 +1,5 @@
+tests/composer.lock
+tests/behat/composer.lock
+tests/behat/vendor/
+tests/behat/behat.yml
+*.patch

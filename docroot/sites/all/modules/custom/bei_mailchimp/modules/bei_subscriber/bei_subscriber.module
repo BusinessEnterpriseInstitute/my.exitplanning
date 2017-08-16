@@ -1,0 +1,713 @@
+<?php
+
+/**
+ * @file
+ * Module for BEI Susbscriber.
+ */
+
+/**
+ * Implements hook_permission().
+ * Define user permissions.
+ */
+function bei_subscriber_permission() {
+   return array(
+    'create subscriber' => array(
+      'title' => t('Add a Subscriber'),
+      'description' => t('Allows users to add a subscriber.'),
+    ),
+    'view own subscribers' => array(
+      'title' => t('View own Subscribers'),
+      'description' => t('Allows user to view own subscribers.'),
+    ),
+    'edit own subscribers' => array(
+      'title' => t('Edit own Subscribers'),
+      'description' => t('Allows user to edit own subscribers.'),
+    ),
+    'edit any subscribers' => array(
+      'title' => t('Edit any subscribers'),
+      'description' => t('Allows user to edit any subscribers.'),
+      'restrict access' => TRUE,
+    ),
+    'delete own subscribers' => array(
+      'title' => t('Delete own subscribers'),
+      'description' => t('Allows user to delete own subscribers.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ * Inform the base system and the Field API about one or more entity types.
+ */
+function bei_subscriber_entity_info() {
+  $info = array();
+  $info['bei_subscriber'] = array(
+    'label' => t('Subscriber'),
+    'plural label' => t('Subscribers'),
+    'base table' => 'bei_subscriber',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'email',
+    ),
+    'static cache' => TRUE,
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'bei_subscriber' => array(
+        'label' => t('Subscriber'),
+        'admin' => array(
+          'path' => 'admin/config/bei_mailchimp/subscribers/manage',
+        ),
+      ),
+    ),
+    'entity class' => 'SubscriberEntity',
+    'controller class' => 'EntityAPIController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'bei_subscriber',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    'access callback' => 'bei_subscriber_access',
+    'admin ui' => array(
+      'path' => 'admin/config/bei_mailchimp/subscribers',
+      'controller class' => 'EntityDefaultUIController',
+      'access arguments' => array('administer bei mailchimp'),
+      'file' => 'includes/bei_subscriber.admin.inc',
+    ),
+    //'label callback' => 'entity_class_label',
+    'uri callback' => 'entity_class_uri',
+    'load hook' => 'bei_subscriber_load',
+  );
+  return $info;
+}
+/*******************************************************************************
+ ********************************* Subscriber API's ****************************
+ ******************************************************************************/
+
+/**
+ * Access callback for subscriber entities.
+ */
+function bei_subscriber_access($op, $subscriber = NULL, $account = NULL, $entity_type = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer bei mailchimp', $account) ||
+      user_access('create subscriber', $account);
+    case 'view':
+      if (isset($subscriber)) {
+         return user_access('administer bei mailchimp', $account) ||
+         (user_access('view own subscribers', $account) && ($subscriber->uid === $account->uid));
+      }
+    case 'update':
+      if (isset($subscriber)) {
+         return user_access('administer bei mailchimp', $account) ||
+         (user_access('edit own subscribers', $account) && ($subscriber->uid === $account->uid)) ||
+         user_access('edit any subscribers', $account);
+      }
+    case 'delete':
+      if (isset($subscriber)) {
+         return user_access('administer bei mailchimp', $account) ||
+         (user_access('delete own subscribers', $account) && ($subscriber->uid === $account->uid) && $subscriber->status == 'subscribed');
+      }
+  }
+}
+/**
+ *  Load a Subscriber.
+ */
+function bei_subscriber_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $subscriber = bei_subscriber_load_multiple($ids, $reset);
+  return $subscriber? reset ($subscriber) : FALSE;
+}
+function bei_subscriber_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('bei_subscriber', $ids, $conditions, $reset);
+}
+/**
+ * Save a Subscriber.
+ */
+function bei_subscriber_save($subscriber, $skip_cron = FALSE) {
+   $changed = FALSE;
+   if (!isset($subscriber->id)) {
+    $subscriber->created = REQUEST_TIME;
+    $subscriber->changed = REQUEST_TIME;
+   }
+   else {
+    $subscriber->changed = REQUEST_TIME;
+    $original = entity_load_unchanged('bei_subscriber', $subscriber->id);
+    if ($original->first_name !== $subscriber->first_name) {
+      $changed = TRUE;
+    }
+    elseif ($original->last_name !== $subscriber->last_name) {
+      $changed = TRUE;
+    }
+   }
+   entity_save('bei_subscriber', $subscriber);
+   bei_subscriber_subscribe($subscriber, $changed, $skip_cron);
+}
+/**
+ * Delete single Subscriber.
+ */
+function bei_subscriber_delete($subscriber) {
+   // Delete the subscriber entity
+   entity_delete('bei_subscriber', entity_id('bei_subscriber', $subscriber));
+}
+/**
+ * Delete multiple Subscribers.
+ */
+function bei_subscriber_delete_multiple($sids) {
+  entity_delete_multiple('bei_subscriber', $sids);
+}
+
+/**
+ * Implements hook_entity_delete().
+ * Act on entities when deleted.
+ */
+function bei_subscriber_entity_delete($entity, $type) {
+   if ($type == 'bei_subscriber') {
+      $email = $entity->email;
+      $list_id = $entity->list_id;
+      // Delete the subscriber on mailchimp
+      mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE);
+   }
+}
+
+
+/**
+ * Helper function to subscribe and/or update a subscriber on mailchimp.
+ */
+function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FALSE) {
+   if (!empty($subscriber->list_id)) {
+      $list_id = $subscriber->list_id;
+      $email = $subscriber->email;
+      // Lets make sure the user hasn't already been added.
+      if (!mailchimp_is_subscribed($list_id, $email)) {
+         // Lets sync this new subscriber with mailchimp!
+         $merge_vars = array(
+          'EMAIL' => $email,
+          'FNAME' => $subscriber->first_name,
+          'LNAME' => $subscriber->last_name,
+         );
+         $interests = array();
+         if ($skip_cron) {
+            // Subscribe the user immediately and bypass cron.
+            mailchimp_subscribe_process($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+         }
+         else {
+            // Subscribe the user via cron run if enabled.
+            mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+         }
+      }
+      elseif ($changed) {
+         $merge_vars = array(
+          'EMAIL' => $email,
+          'FNAME' => $subscriber->first_name,
+          'LNAME' => $subscriber->last_name,
+         );
+         $interests = array();
+         mailchimp_update_member($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+      }
+   }
+}
+
+/**
+ * Helper function to perform additional actions after mailchimp_subscribe()
+ */
+/*
+function bei_subscriber_mailchimp_subscribe_user($list_id, $email) {
+   $query = 'SELECT * FROM {bei_subscriber} s WHERE s.list_id = :list_id AND s.email = :email';
+   $subscriber = db_query($query, array(':list_id' => $list_id, ':email' => $email))->fetchObject();
+   if ($subscriber) {
+      $subscriber->status = 'subscribed';
+      entity_save('bei_subscriber', $subscriber);
+   }
+}*/
+
+/*
+ * Helper function to perform additional actions after mailchimp_unsubscribe().
+ */
+function bei_subscriber_mailchimp_unsubscribe_user ($list_id, $email) {
+   watchdog('bei_subscriber', 'Unsubscribed @email from @list_id', array('@email' => $email, '@list_id' => $list_id), WATCHDOG_INFO);
+}
+
+/**
+ * Implements hook_menu().
+ * Define menu items and page callbacks.
+ */
+function bei_subscriber_menu() {
+  $items = array();
+  $items['bei-subscriber/%bei_subscriber'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'View Subscriber',
+    'page callback' => 'bei_subscriber_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'bei_subscriber', 1),
+  );
+  $items['bei-subscriber/%bei_subscriber/view'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'View',
+    'weight' => -10,
+  );
+  $items['bei-subscriber/%bei_subscriber/edit'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_subscriber', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'bei_subscriber', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_subscriber.admin.inc',
+    'weight' => -9,
+  );
+  $items['node/%node/subscribers/add'] = array(
+    'type' => MENU_LOCAL_ACTION,
+    'title' => 'Add a subscriber',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_subscriber', NULL, 'add'),
+    'access callback' => '_bei_add_subscriber_access',
+    'access arguments' => array(1),
+    'file' => 'includes/bei_subscriber.admin.inc',
+  );
+  $items['bei-subscriber/%bei_subscriber/delete'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_subscriber_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'bei_subscriber', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_subscriber.admin.inc',
+    'weight' => -8,
+  );
+  $items['admin/config/bei_mailchimp/subscribers-sync'] = array(
+    'title' => 'Subscriber Batch Update',
+    'description' => 'Syncs subscribers from mailchimp to drupal.',
+    'access arguments' => array('administer bei mailchimp'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_subscriber_batch_form'),
+    'file' => 'includes/bei_subscriber.admin.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_entity_property_info()
+ */
+function bei_subscriber_entity_property_info() {
+  $info = array();
+  // BEI Subscriber Properties
+  $info['bei_subscriber']['properties']['id'] = array(
+    'label' => t('Subscriber ID'),
+    'type' => 'integer',
+    'description' => t('Entity id of the subscriber.'),
+    'schema field' => 'id',
+  );
+  $info['bei_subscriber']['properties']['email'] = array(
+    'label' => t('Email Address'),
+    'type' => 'text',
+    'description' => t('The email address of the subscriber.'),
+    'required' => TRUE,
+    'schema field' => 'email',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $info['bei_subscriber']['properties']['first_name'] = array(
+    'label' => t('First Name'),
+    'description' => t('The first name of the subscriber.'),
+    'type' => 'text',
+    'schema field' => 'first_name',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['last_name'] = array(
+    'label' => t('Last Name'),
+    'description' => t('The last name of the subscriber.'),
+    'type' => 'text',
+    'schema field' => 'last_name',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['uid'] = array(
+    'label' => t('User'),
+    'description' => t('Author id of the subscriber.'),
+    'type' => 'user',
+    'schema field' => 'uid',
+    'setter callback' => 'entity_property_verbatim_set',
+    'required' => TRUE,
+  );
+   $info['bei_subscriber']['properties']['lid'] = array(
+    'label' => t('List Node'),
+    'description' => t('Related List id of the subscriber.'),
+    'type' => 'node',
+    'schema field' => 'lid',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['status'] = array(
+    'label' => t('Status'),
+    'description' => t('The status of the subscriber.'),
+    'type' => 'text',
+    'schema field' => 'status',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['subscribed'] = array(
+    'label' => t('Subscribed'),
+    'description' => t('Boolean value indicating if subscriber is unsubscribed.'),
+    'type' => 'boolean',
+    'getter callback' => 'bei_subscriber_get_properties',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+   $info['bei_subscriber']['properties']['created'] = array(
+    'label' => t('Date Created'),
+    'type' => 'date',
+    'description' => t('The created date.'),
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['changed'] = array(
+    'label' => t('Date Updated'),
+    'type' => 'date',
+    'description' => t('The date the subsciber was most recently updated.'),
+    'schema field' => 'changed',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $info['bei_subscriber']['properties']['url'] = array(
+    'label' => t('View link'),
+    'description' => t('The URL of the subscriber.'),
+    'getter callback' => 'entity_metadata_entity_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $info['bei_subscriber']['properties']['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the subscriber\'s edit page.'),
+    'getter callback' => 'bei_subscriber_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $info['bei_subscriber']['properties']['delete_url'] = array(
+    'label' => t('Delete Link'),
+    'description' => t('The URL to delete a subscriber.'),
+    'getter callback' => 'bei_subscriber_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  return $info;
+}
+
+/**
+ * Callback for getting subscriber properties.
+ *
+ */
+function bei_subscriber_get_properties($subscriber, array $options, $name, $entity_type) {
+   switch ($name) {
+      case 'subscribed':
+         if ($subscriber->status === 'subscribed') {
+            return TRUE;
+         }
+         break;
+      case 'edit_url':
+         if ($subscriber->status === 'subscribed') {
+            $options = array('query' => drupal_get_destination());
+            return url('bei-subscriber/' . $subscriber->id . '/edit', $options);
+         }
+         break;
+      case 'delete_url':
+         if ($subscriber->status === 'subscribed') {
+            $options = array('query' => drupal_get_destination());
+            return url('bei-subscriber/' . $subscriber->id . '/delete', $options);
+         }
+         break;
+   }
+}
+
+
+/**
+ * Implements hook_feeds_presave().
+ */
+function bei_subscriber_feeds_presave($source, $entity, $item) {
+   if ($source->id == 'bei_subscribers') {
+      // Check to make sure the e-mail address is unique.
+      $mail = $entity->email;
+      $feed_nid = $entity->feeds_item->feed_nid;
+      $uid = 0;
+      if ($feed_nid !== 0) {
+         $list_node = node_load($feed_nid);
+         if ($list_node) {
+            $uid = $list_node->uid;
+            $list_id = $list_node->list_id;
+         }
+      }
+      $skip = FALSE;
+      $message = '';
+      if (!isset($item['email'])) {
+         $message = t('Import: no column found for "email".');
+         $skip = TRUE;
+      }
+      elseif (!bei_mailchimp_is_utf8($item['email'])) {
+        $mail = mb_convert_encoding($item['email'], 'UTF-8', 'UTF-8');
+        $message = t('Import: The e-mail address !mail has invalid characters denoted with "?" and cannot be imported.', array('!mail' => $mail));
+        $skip = TRUE;
+      }
+      elseif (!valid_email_address(str_replace('"', '', $mail))) {
+        $message = t('Import: The e-mail address !mail is not valid.', array('!mail' => check_plain($item['email'])));
+        $skip = TRUE;
+      }
+      elseif (!_bei_subscriber_unique_email($mail)) {
+        $message = t('Import: The e-mail address !mail was already taken.', array('!mail' => $mail));
+        $skip = TRUE;
+      }
+      elseif (_bei_subscriber_unsubscribed($mail, $feed_nid)) {
+        $message = t('Import: The e-mail address !mail was previously unsubscribed from this list and can not be added again.', array('!mail' => $mail));
+        $skip = TRUE;
+      }
+      if ($skip) {
+        _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_ERROR);
+        $entity->feeds_item->skip = TRUE;
+      }
+      else {
+         $entity->uid = $uid;
+         $entity->lid = $feed_nid;
+         $entity->list_id = $list_id;
+         $entity->status = 'subscribed';
+         if (!empty($item['last_name']) && !bei_mailchimp_is_utf8($item['last_name'])) {
+           $last_name = mb_convert_encoding($item['last_name'], 'UTF-8', 'UTF-8');
+           $message = t('Import: The last name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
+           _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
+           $entity->last_name = $last_name;
+         }
+         if (!empty($item['first_name']) && !bei_mailchimp_is_utf8($item['first_name'])) {
+           $first_name = mb_convert_encoding($item['first_name'], 'UTF-8', 'UTF-8');
+           $message = t('Import: The first name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
+           _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
+           $entity->first_name = $first_name;
+         }
+         bei_subscriber_subscribe($entity);
+      }
+   }
+}
+/**
+ * Helper function to log errors in multiple places.
+ */
+function _bei_subscriber_log_error($feed_nid, $message, $mail, $error) {
+  //drupal_set_message($message, 'error');
+  watchdog('BEI Mailchimp', $message, array(), $error);
+  feeds_log('bei_subscribers', $feed_nid, 'subscriber', $message, array(), $error);
+}
+/**
+ * Helper function to check for duplicate e-mail addresses.
+ */
+function _bei_subscriber_unique_email($email) {
+  $query = "SELECT e.email " .
+           "FROM {bei_subscriber} e " .
+           "WHERE email = :email AND e.status = :status";
+  $dupe = db_query($query, array(
+    ':email' => $email,
+    ':status' => 'subscribed',
+  ))->fetchField();
+  if (!empty($dupe)) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+/**
+ * Helper function to check if subscriber is unsubscribed from the list already.
+ */
+function _bei_subscriber_unsubscribed($email, $list) {
+   $query = 'SELECT e.email FROM {bei_subscriber} e WHERE e.email = :email AND e.lid = :lid AND e.status <> :status';
+   $exists = db_query($query, array(
+      ':email' => $email,
+      ':lid' => $list,
+      ':status' => 'unsubscribed',
+   ))->fetchField();
+   // If the query returns a value, it is unsubscribed.
+   if ($exists) {
+      return TRUE;
+   }
+   return FALSE;
+}
+
+/**
+ * Access callback to add a subscriber.
+ *
+ * @see bei_mailchimp_menu()
+ */
+function _bei_add_subscriber_access($node) {
+  $access = FALSE;
+  if ($node->type == 'subscriber_list') {
+    if (user_access('administer nodes') || (node_access('update', $node) && user_access('create subscriber'))) {
+      $access = TRUE;
+    }
+  }
+  return $access;
+}
+
+/**
+ * Helper function to get member activity for a specific list and email address.
+ */
+function bei_subscriber_get_member_activity($list_id, $email) {
+  /* @var \Mailchimp\MailchimpLists $mc_lists */
+    $mc_lists = mailchimp_get_api_object('MailchimpLists');
+
+    try {
+      if (!$mc_lists) {
+        throw new MailchimpException('Cannot get member activity without Mailchimp API. Check API key has been entered.');
+      }
+
+      $result = $mc_lists->getMemberActivity($list_id, $email);
+      if ($result->total_items > 0) {
+        return $result;
+      }
+    }
+    catch (Exception $e) {
+      drupal_set_message($e->getMessage(), 'error');
+      watchdog('bei_subscriber_activity', 'An error occurred while getting activity for email "%email": %message', array(
+        '%email' => $email,
+        '%message' => $e->getMessage(),
+        ), WATCHDOG_ERROR);
+      return NULL;
+    }
+}
+/**
+ * Helper function to get the campaign entity id for a corresponding campaign id.
+ */
+function bei_subscriber_get_campaign_entity_id($campaign_id) {
+   $id = db_query('SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id', array(':campaign_id' => $campaign_id))->fetchField();
+   if (!empty($id)) {
+      return $id;
+   }
+   return;
+}
+
+/**
+ * View a subscriber.
+ */
+function bei_subscriber_view($entity, $view_mode='full', $langcode = NULL) {
+   if (!isset($langcode)) {
+     $langcode = $GLOBALS['language_content']->language;
+   }
+   $member_info = mailchimp_get_memberinfo($entity->list_id, $entity->email);
+   if ($member_info) {
+   }
+   drupal_set_title($entity->email);
+   $entity_type = $entity->entityType();
+   $entity_id = entity_id($entity_type, $entity);
+   $entity->content = array();
+   field_attach_prepare_view($entity_type, array($entity_id => $entity), $view_mode);
+   entity_prepare_view($entity_type, array($entity_id => $entity));
+   $entity->content += field_attach_view($entity_type, $entity, $view_mode);
+   $entity->content += array(
+       //'#theme' => $entity_type,
+       '#element' => $entity,
+       '#view_mode' => $view_mode,
+       '#language' => LANGUAGE_NONE,
+   );
+   $list_node = node_load($entity->lid);
+   if ($list_node) {
+      // Set the Breadcrumb
+      $breadcrumb = array();
+      $breadcrumb[] = l(t($list_node->title), 'node/' . $list_node->nid);
+      $breadcrumb[] = l(t('Subscribers'), 'node/' . $list_node->nid . '/subscribers');
+      drupal_set_breadcrumb($breadcrumb);
+      $list_id = !empty($list_node->list_id) ? $list_node->list_id : NULL;
+      if ($list_id) {
+         $header = array(
+            array('data' => t('Campaign')),
+            array('data' => t('Action')),
+            array('data' => t('Timestamp')),
+         );
+         $rows = array();
+         $member_activity = bei_subscriber_get_member_activity($list_id, $entity->email);
+         if ($member_activity) {
+            foreach ($member_activity->activity as $activity) {
+              $timestamp = format_date(strtotime($activity->timestamp), 'short');
+              $campaign_id = bei_subscriber_get_campaign_entity_id($activity->campaign_id);
+              $campaign_entity = NULL;
+              if ($campaign_id) {
+                $campaign_entity = node_load($campaign_id);
+              }
+              $campaign = $campaign_entity ? l($campaign_entity->title, 'node/' . $campaign_entity->nid) : t($activity->campaign_id);
+              $rows[] = array(
+                array('data' => $campaign),
+                array('data' => t($activity->action)),
+                array('data' => $timestamp),
+              );
+            }
+         }
+         $entity->content['subscriber_activity'] = array(
+            '#theme' => 'table',
+            '#header' => $header,
+            '#rows' => $rows,
+            '#empty' => t('No activity history exists for this subscriber.'),
+            '#attributes' => array(
+              'id' => 'bei-mailchimp-campaigns',
+              'class' => array('bei-mailchimp-table'),
+            ),
+         );
+      }
+   }
+   /*
+   $entity->content['narrative'] = array(
+     '#theme' => 'container',
+     '#markup' => check_markup($entity->description, $entity->format),
+   );*/
+   return $entity->content;
+}
+
+function bei_subscriber_queue_import($item) {
+   $lid = $item['args']['lid'];
+   $uid = $item['args']['uid'];
+   $member = $item['args']['member_info'];
+   $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.lid = :lid';
+   $subscriber = db_query($query, array(':email' => $member->email_address, ':lid' => $lid))->fetchObject();
+   if ($subscriber) {
+      $subscriber->status = $member->status;
+      $subscriber->changed = strtotime($member->last_changed);
+      $subscriber->first_name = $member->merge_fields->FNAME;
+      $subscriber->last_name = $member->merge_fields->LNAME;
+      entity_save('bei_subscriber', $subscriber);
+   }
+   else {
+      // Create a subscriber
+      $subscriber = new stdClass('bei_subscriber');
+      $subscriber->uid = $uid;
+      $subscriber->lid = $lid;
+      $subscriber->created = strtotime($member->timestamp_opt);
+      $subscriber->changed = strtotime($member->last_changed);
+      $subscriber->email = $member->email_address;
+      $subscriber->status = $member->status;
+      $subscriber->first_name = $member->merge_fields->FNAME;
+      $subscriber->last_name = $member->merge_fields->LNAME;
+      $subscriber->list_id = $member->list_id;
+      entity_save('bei_subscriber', $subscriber);
+   }
+}
+
+function bei_subscriber_addto_queue($function, $args) {
+  $queue = DrupalQueue::get('subscriber_sync');
+  $queue->createQueue();
+  //mailchimp_update_local_cache($function, $args);
+  return $queue->createItem(array(
+    'function' => $function,
+    'args' => $args,
+  ));
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ * Declare queues holding items that need to be run periodically.
+ */
+function bei_subscriber_cron_queue_info() {
+   $queues['subscriber_sync'] = array(
+      'worker callback' => 'bei_subscriber_queue_import',
+      'time' => 15,
+   );
+   return $queues;
+}
+

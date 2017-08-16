@@ -1,0 +1,9 @@
+name = BEI MailChimp
+description = "Interacts with MailChimp to get lists, add users, and manage campaigns."
+core = 7.x
+package = BEI Mailchimp
+
+dependencies[] = mailchimp
+dependencies[] = date_api
+dependencies[] = date_popup
+dependencies[] = feeds

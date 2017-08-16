@@ -1,0 +1,212 @@
+<?php
+
+function fee_estimator_permission() {
+    return array(
+        'access fee estimator' => array(
+            'title' => t('Use fee estimator'),
+            'description' => t('Perform calculations with fee estimator.'),
+        ),
+    );
+}
+
+function fee_estimator_menu() {
+    $items = array();
+    $items['tool/fee-estimator'] = array(
+        'title' => t('Fee Estimator'),
+        'description' => t('Calculate fees'),
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('fee_estimator_form'),
+        'access arguments' => array('access fee estimator'),
+    );
+    return $items;
+}
+function fee_estimator_form($form, &$form_state) {
+    $form['question_1'] = array(
+        '#type' => 'radios',
+        '#title' => t('Number of Controlling Owners'),
+        '#options' => array(
+            15000 => t('1'),
+            24000 => t('2'),
+            33000 => t('3'),
+            42000 => t('4'),
+            50000 => t('5+'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_2'] = array(
+        '#type' => 'radios',
+        '#title' => t('Company\'s Gross Annual Revenue'),
+        '#options' => array(
+            15000 => t('Less than $5 million per year'),
+            24000 => t('$5 million to $25 million per year'),
+            33000 => t('$25 million to $75 million per year'),
+            42000 => t('$75 million to $100 million per year'),
+            50000 => t('More than $100 million'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_3'] = array(
+        '#type' => 'radios',
+        '#title' => t('Annual Net Income as a Percentage of Gross Sales'),
+        '#options' => array(
+            15000 => t('Less than 2 percent'),
+            24000 => t('2 percent to 5 percent'),
+            33000 => t('5 percent to 10 percent'),
+            42000 => t('10 percent to 20 percent'),
+            50000 => t('More than 20 percent'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_4'] = array(
+        '#type' => 'radios',
+        '#title' => t('Number of Employees (other than Controlling Owners)'),
+        '#options' => array(
+            15000 => t('0 to 20'),
+            24000 => t('21 to 50'),
+            33000 => t('51 to 100'),
+            42000 => t('101 to 150'),
+            50000 => t('150+'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_5'] = array(
+        '#type' => 'radios',
+        '#title' => t('Number of Key Employees'),
+        '#options' => array(
+            15000 => t('1'),
+            24000 => t('2 to 3'),
+            33000 => t('4 to 6'),
+            42000 => t('7 to 9'),
+            50000 => t('10+'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_6'] = array(
+        '#type' => 'radios',
+        '#title' => t('Number of Operating Entities'),
+        '#options' => array(
+            15000 => t('1'),
+            24000 => t('2'),
+            33000 => t('3'),
+            42000 => t('4'),
+            50000 => t('5+'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_7'] = array(
+        '#type' => 'radios',
+        '#title' => t('Number of family members involved in the business'),
+        '#options' => array(
+            15000 => t('0'),
+            24000 => t('1'),
+            33000 => t('2'),
+            42000 => t('3'),
+            50000 => t('4+'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_8'] = array(
+        '#type' => 'radios',
+        '#title' => t('Timing - Number of years until owner\'s completion of exit from business'),
+        '#options' => array(
+            15000 => t('More than 10 years'),
+            24000 => t('7 to 10 years'),
+            33000 => t('4 to 6 years'),
+            42000 => t('1 to 3 years'),
+            50000 => t('Less than 1 year'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['question_9'] = array(
+        '#type' => 'radios',
+        '#title' => t('How much planning has been done to date?'),
+        '#options' => array(
+            15000 => t('Business owner\'s planning is recent and complete'),
+            24000 => t('Business owner\'s planning is somewhat recent and complete'),
+            33000 => t('Business owner has completed some planning'),
+            42000 => t('Business owner has completed very limited planning'),
+            50000 => t('Business owner has done essentially no planning'),
+        ),
+        '#required' => TRUE,
+        '#description' => t('"Planning" includes strategic business activitites such as a recent business valuation, personal financial plan for the business owner, complete estate plan completed for business owner within last 3 to 4 years, company and personal insurance updates in last 2 to 3 years, etc.')
+    );
+    $form['question_10'] = array(
+        '#type' => 'radios',
+        '#title' => t('Who is the successor owner target?'),
+        '#options' => array(
+            15000 => t('Third Party'),
+            24000 => t('Single key employee'),
+            33000 => t('Multiple key employees'),
+            42000 => t('Family member(s)'),
+            50000 => t('Combination of 2 or more of the above successor owner targets'),
+        ),
+        '#required' => TRUE,
+    );
+    $form['results'] = array(
+        '#type' => 'item',
+        '#markup' => '',
+    );
+    $form['actions'] = array(
+        '#type' => 'actions',
+        'submit' => array(
+            '#type' => 'submit',
+            '#value' => t('Calculate'),
+        ),
+        'reset' => array(
+            '#type' => 'submit',
+            '#value' => t('Start over'),
+            '#submit' => array('fee_estimator_form_clear'),
+            '#limit_validation_errors' => array(),
+        ),
+    );
+    return $form;
+}
+function fee_estimator_form_validate(&$form, &$form_state) {
+    $fe_values = array(
+      $form_state['values']['question_1'],
+      $form_state['values']['question_2'],
+      $form_state['values']['question_3'],
+      $form_state['values']['question_4'],
+      $form_state['values']['question_5'],
+      $form_state['values']['question_6'],
+      $form_state['values']['question_7'],
+      $form_state['values']['question_8'],
+      $form_state['values']['question_9'],
+      $form_state['values']['question_10'],
+    );
+    if (!in_array(null, $fe_values)) {
+        unset($form['actions']['submit']);
+        unset($form['question_1']);
+        unset($form['question_2']);
+        unset($form['question_3']);
+        unset($form['question_4']);
+        unset($form['question_5']);
+        unset($form['question_6']);
+        unset($form['question_7']);
+        unset($form['question_8']);
+        unset($form['question_9']);
+        unset($form['question_10']);
+        $form['results']['#markup'] = '<p class="panel">Suggested Exit Planning Fee (for one Owner): <strong>$' . number_format((
+            $form_state['values']['question_1'] +
+            $form_state['values']['question_2'] +
+            $form_state['values']['question_3'] +
+            $form_state['values']['question_4'] +
+            $form_state['values']['question_5'] +
+            $form_state['values']['question_6'] +
+            $form_state['values']['question_7'] +
+            $form_state['values']['question_8'] +
+            $form_state['values']['question_9'] +
+            $form_state['values']['question_10'])/10, 2) . '</strong></p>
+            <h2>Additional Fee Considerations</h2>
+            <p>The following are additional factors that may cause the fees to increase beyond the initial fees estimated by the BEI Exit Planning Fee Estimator Tool.</p>
+            <p><strong>Number of Exit Plans required</strong><br />
+            The fees suggested by the Fee Estimator Tool assume that an Exit Plan will be created for only one business owner. Additional fees for a second, third or fourth business owner in the same business are usually 25 percent to 50 percent of the fee charged for the first Exit Plan.</p>
+            <p><strong>Geographic area</strong><br />
+            The Fee Estimator Tool reflects the average fees that Exit Planning Professionals are generally charging across the United States. Certain areas of the country experience consistently higher fees due to increases in costs, business standards, etc.</p>';
+        }
+    form_set_error('submit');
+}
+
+function fee_estimator_form_clear($form, &$form_state) {
+    $form_state['redirect'] = 'tool/fee-estimator';
+}

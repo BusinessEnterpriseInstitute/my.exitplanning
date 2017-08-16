@@ -1,0 +1,600 @@
+<?php
+
+/**
+ * @file
+ * Mailchimp operations using Drupal hooks and helper functions.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function bei_list_menu() {
+  $items = array();
+
+  $items['admin/config/bei_mailchimp/lists-update'] = array(
+    'title' => 'Import/Update Lists',
+    'description' => 'Updates the mailchimp cache with new/updated lists',
+    'access arguments' => array('administer bei mailchimp'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_list_batch_form'),
+    'file' => 'includes/bei_list.admin.inc',
+  );
+  $items['admin/config/bei_mailchimp/webhooks-update'] = array(
+    'title' => 'Update Webhooks',
+    'description' => 'Updates webhooks on Mailchimp',
+    'access arguments' => array('administer bei mailchimp'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_list_webhook_batch_form'),
+    'file' => 'includes/bei_list.admin.inc',
+  );
+  $items['bei-list/webhook'] = array(
+    'title' => 'BEI List webhooks endpoint',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'bei_list_webhook',
+    'access callback' => 'bei_list_webhook_access',
+    'access arguments' => array(2),
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_node_access().
+ *
+ * Lists should only be managed on MailChimp. Deleting a list on Drupal is
+ * dangerous because no API call exists to delete on MailChimp when this
+ * happens. Of course this hook doesn't apply to user 1.
+ */
+function bei_list_node_access($node, $op, $account) {
+  // Check to see if someone is trying to delete a list.
+  if ($op == 'delete' && $node->type == 'subscriber_list') {
+    //drupal_set_message(t('You can not delete lists. If you want to remove a list you must do it on MailChimp.'));
+    return FALSE;
+  }
+}
+
+/**
+ * Implements hook_node_load().
+ * Act on nodes being loaded from the database.
+ */
+function bei_list_node_load($nodes, $types) {
+   if (in_array('subscriber_list', $types)) {
+      $result = db_query('SELECT * FROM {bei_list} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
+      foreach ($result as $record) {
+         $nodes[$record->nid]->subject = $record->subject;
+         $nodes[$record->nid]->from_email = $record->from_email;
+         $nodes[$record->nid]->from_name = $record->from_name;
+         $nodes[$record->nid]->list_id = $record->list_id;
+      }
+   }
+}
+
+/**
+ * Implementation of hook_node_insert().
+ *
+ */
+function bei_list_node_insert($node) {
+  if ($node->type == 'subscriber_list') {
+     db_insert('bei_list')
+     ->fields(array(
+        'nid' => $node->nid,
+        'subject' => $node->subject,
+        'from_email' => $node->from_email,
+        'from_name' => $node->from_name,
+        'list_id' => $node->list_id,
+     ))
+     ->execute();
+  }
+}
+
+/**
+ * Implements hook_node_update().
+ */
+function bei_list_node_update($node) {
+  if ($node->type == 'subscriber_list') {
+    $nid = db_query('SELECT l.nid FROM {bei_list} l WHERE l.nid = :nid', array(':nid' => $node->nid))->fetchField();
+    if (!empty($nid)) {
+       db_update('bei_list')
+       ->fields(array(
+          'subject' => $node->subject,
+          'from_email' => $node->from_email,
+          'from_name' => $node->from_name,
+          'list_id' => $node->list_id,
+       ))
+       ->condition('nid', $node->nid)
+       ->execute();
+    }
+    else {
+       db_insert('bei_list')
+       ->fields(array(
+          'nid' => $node->nid,
+          'subject' => $node->subject,
+          'from_email' => $node->from_email,
+          'from_name' => $node->from_name,
+          'list_id' => $node->list_id,
+       ))
+       ->execute();
+    }
+  }
+}
+
+/**
+ * Implements hook_node_delete().
+ */
+function bei_list_node_delete($node) {
+  if ($node->type == 'subscriber_list') {
+    db_query('DELETE FROM {bei_list} WHERE nid = :nid', array(':nid' => $node->nid));
+  }
+}
+
+
+/**
+ * Implements hook_node_validate().
+ */
+function bei_list_node_validate($node, &$form, $form_state) {
+  if ($node->type == 'subscriber_list') {
+    // If there are no feed associations cancel out.
+    if (!$importer_id = feeds_get_importer_id($node->type)) {
+      return;
+    }
+    // Make sure that there isn't already a CSV uploaded.
+    if (isset($node->feeds) && empty($node->feeds['FeedsFileFetcher']['fid'])) {
+      // We need to put a default csv up there so that the node can be saved.
+      $fid = db_query("SELECT fid FROM {file_managed} WHERE uri = 'private://subscribers_template.csv'")->fetchField();
+      $file = file_load($fid);
+
+      $node->feeds = array(
+        'FeedsFileFetcher' => array(
+          'fid' => $file->fid,
+          'source' => $file->uri,
+        ),
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ * Perform alterations before a form is rendered.
+ */
+function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $form_id) {
+   $node = $form_state['node'];
+   $form['from_email'] = array(
+      '#type' => 'textfield',
+      '#title' => t('From e-mail'),
+      '#default_value' => isset($node->from_email) ? $node->from_email : '',
+      '#required' => TRUE,
+      '#element_validate' => array('bei_list_email_validate'),
+      '#disabled' => TRUE,
+   );
+   $form['subject'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Subject (optional)'),
+      '#description' => t('Keep it relevant and non-spammy. If you leave this
+                          blank, a default subject will be applied for each
+                          newsletter campaign sent.'),
+      '#default_value' => isset($node->subject) ? $node->subject : '',
+      '#size' => 60,
+      '#maxlength' => 128,
+   );
+   $form['from_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('From name'),
+      '#description' => t('This is who your emails will come from. Use something
+                          they\'ll instantly recognize, like your company name.'),
+      '#default_value' => isset($node->from_name) ? $node->from_name : '',
+      '#required' => TRUE,
+      '#maxlength' => 200,
+   );
+
+   // Add our own custom callback to the submit handler.
+   //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
+}
+
+/**
+ * Implementation of hook_validate().
+ *
+ * Errors should be signaled with form_set_error().
+ */
+function bei_list_email_validate($element, &$form_state, $form) {
+  if (!empty($element['#value']) && !valid_email_address($element['#value'])) {
+    form_error($element, t($element['#title'] . ' is not a valid email address.'));
+  }
+}
+
+/**
+ * Implementation of hook_field_extra_fields().
+ */
+function bei_list_field_extra_fields() {
+  $extra['node']['subscriber_list'] = array(
+    'form' => array(
+      'from_email' => array(
+        'label' => t('List: From Email'),
+        'description' => t('Default from email'),
+        'weight' => -4,
+      ),
+      'from_name' => array(
+        'label' => t('List: From Name'),
+        'description' => t('Default from name'),
+        'weight' => -3,
+      ),
+      'subject' => array(
+        'label' => t('List: Subject'),
+        'description' => t('Default subject'),
+        'weight' => -2,
+      ),
+    ),
+    'display' => array(
+    )
+  );
+
+  return $extra;
+}
+
+/**
+ * Batch processor function that will create lists if they do not exist.
+ *
+ * @see bei_list_batch_form_submit()
+ */
+function bei_list_batch_processing($lists) {
+  foreach ($lists as $list) {
+    $query = 'SELECT l.nid FROM {bei_list} l ' .
+           'WHERE l.list_id = :lid';
+    $nid = db_query($query, array(':lid' => $list->id))->fetchField();
+    // An array of events the webhook will respond to.
+    $events = array(
+      'subscribe' => TRUE,
+      'unsubscribe' => TRUE,
+      'profile' => TRUE,
+      'cleaned' => TRUE,
+      'upemail' => TRUE,
+      'campaign' => TRUE,
+    );
+    // An array of sources the webhook will respond to.
+    $sources = array(
+      'user' => TRUE,
+      'admin' => TRUE,
+      'api' => FALSE,
+    );
+    $url = bei_list_webhook_url();
+    global $base_url;
+    if (empty($nid)) {
+      // The node doesn't exist. We should create it.
+      $node = new stdClass();
+      $node->type = 'subscriber_list';
+      node_object_prepare($node);
+      $node->title = $list->name;
+      $node->language = LANGUAGE_NONE;
+      $node->list_id = $list->id;
+      $node->from_name = $list->campaign_defaults->from_name;
+      $node->from_email = $list->campaign_defaults->from_email;
+      $node->subject = $list->campaign_defaults->subject;
+      // Save the node!
+      node_save($node);
+      // Add our webhook back to mailchimp for the new list.
+      mailchimp_webhook_add($list->id, $url, $events, $sources);
+    }
+    else {
+      $node = node_load($nid);
+      if ($node->from_email !== $list->campaign_defaults->from_email) {
+        $current_email = $node->from_email;
+        $new_email = $list->campaign_defaults->from_email;
+        $node->from_email = $new_email;
+        node_save($node);
+        watchdog('bei_list', 'Updated email @old_email to @new_email for list node @nid.', array(
+          '@old_email' => $current_email,
+          '@new_email' => $new_email,
+          '@nid' => $node->nid,
+        ), WATCHDOG_INFO);
+      }
+    }
+    /*
+    // Check to see if a webhook already exists. If not, create one.
+    $webhooks = mailchimp_webhook_get($list->id);
+    // If webhooks exist, check to see if they use the same base URL.
+    if (!empty($webhooks)) {
+      // Loop through the hooks and see if there is a matching base URL.
+      $webhook_exists = TRUE;
+      foreach ($webhooks as $webhook) {
+        if ($webhook->url !== $url) {
+          $webhook_exists = FALSE;
+          mailchimp_webhook_delete($list->id, $webhook->url);
+          watchdog('bei_list', 'Removed old webhook @url for list node @nid.', array(
+            '@url' => $webhook->url,
+            '@nid' => $nid,
+          ), WATCHDOG_INFO);
+        }
+      }
+      if (!$webhook_exists) {
+        $response = mailchimp_webhook_add($list->id, $url, $events, $sources);
+      }
+    }
+    else {
+      // There were no webhooks at all so lets add ours.
+      $response = mailchimp_webhook_add($list->id, $url, $events, $sources);
+    }*/
+  }
+}
+
+/**
+ * Batch processor function that will update webhooks for lists.
+ *
+ * @see bei_list_webhook_batch_form_submit()
+ */
+function bei_list_webhook_batch_processing($lists) {
+  foreach ($lists as $list) {
+    /*
+    $query = 'SELECT l.nid FROM {bei_list} l ' .
+           'WHERE l.list_id = :lid';
+    $nid = db_query($query, array(':lid' => $list->id))->fetchField();
+    // An array of events the webhook will respond to.
+    $events = array(
+      'subscribe' => TRUE,
+      'unsubscribe' => TRUE,
+      'profile' => TRUE,
+      'cleaned' => TRUE,
+      'upemail' => TRUE,
+      'campaign' => TRUE,
+    );
+    // An array of sources the webhook will respond to.
+    $sources = array(
+      'user' => TRUE,
+      'admin' => TRUE,
+      'api' => FALSE,
+    );
+    $url = bei_list_webhook_url();
+    global $base_url;*/
+    /*
+    if (empty($nid)) {
+      // The node doesn't exist. We should create it.
+      $node = new stdClass();
+      $node->type = 'subscriber_list';
+      node_object_prepare($node);
+      $node->title = $list->name;
+      $node->list_id = $list->id;
+      $node->from_name = $list->campaign_defaults->from_name;
+      $node->from_email = $list->campaign_defaults->from_email;
+      $node->subject = $list->campaign_defaults->subject;
+      // Save the node!
+      node_save($node);
+      // Add our webhook back to mailchimp for the new list.
+      mailchimp_webhook_add($list->id, $url, $events, $sources);
+    }*/
+  }
+}
+/**
+ * Batch complete function.
+ */
+function bei_list_webhook_batch_finished() {
+  drupal_set_message(t('Webhook updates finised.'));
+}
+
+/**
+ * Batch complete function.
+ */
+function bei_list_batch_finished() {
+  drupal_set_message(t('List syncing finished.'));
+}
+
+/**
+ * Menu callback to run webhook actions from mailchimp.
+ */
+function bei_list_webhook() {
+  if (empty($_POST)) {
+    return "BEI List Webhook Endpoint.";
+  }
+  $data = $_POST['data'];
+  $type = $_POST['type'];
+  switch ($type) {
+    case 'subscribe':
+      $member = mailchimp_get_memberinfo($data['list_id'], $data['email']);
+      bei_list_webhook_member_add($member);
+      break;
+    case 'unsubscribe':
+    case 'profile':
+    case 'cleaned':
+      $member = mailchimp_get_memberinfo($data['list_id'], $data['email'], TRUE);
+      bei_list_webhook_member_update($member);
+      break;
+
+    case 'upemail':
+      $old_email = $data['old_email'];
+      mailchimp_cache_clear_member($data['list_id'], $data['old_email']);
+      $member = mailchimp_get_memberinfo($data['list_id'], $data['new_email'], TRUE);
+      bei_list_webhook_update_email($old_email, $member);
+      break;
+  }
+
+  // Log event:
+  watchdog('bei_list', 'Webhook type @type has been processed.',
+    array('@type' => $type), WATCHDOG_INFO
+  );
+  return NULL;
+}
+
+/**
+ * Webhook create subscriber helper function
+ */
+function bei_list_webhook_member_add($member) {
+  // Create a subscriber
+  $email = $member->email_address;
+  $list_id = $member->list_id;
+  $query = 'SELECT l.nid FROM {bei_list} l WHERE l.list_id = :list_id';
+  $nid = db_query($query, array(':list_id' => $list_id))->fetchField();
+  if (!empty($nid)) {
+    $list = node_load($nid);
+    $subscriber = new stdClass('bei_subscriber');
+    $subscriber->uid = $list->uid;
+    $subscriber->lid = $list->nid;
+    $subscriber->created = REQUEST_TIME;
+    $subscriber->changed = REQUEST_TIME;
+    $subscriber->email = $member->email_address;
+    $subscriber->status = $member->status;
+    $subscriber->first_name = $member->merge_fields->FNAME;
+    $subscriber->last_name = $member->merge_fields->LNAME;
+    $subscriber->list_id = $list_id;
+    entity_save('bei_subscriber', $subscriber);
+    // Log event:
+    watchdog('bei_list', 'New Subscriber @email created for list @list.',
+      array('@email' => $email, '@list' => $list_id), WATCHDOG_INFO
+    );
+  }
+}
+
+/**
+ * Webhook update subscriber helper function
+ */
+function bei_list_webhook_member_update($member) {
+  $email = $member->email_address;
+  $list_id = $member->list_id;
+  $query = 'SELECT * FROM {bei_subscriber} s ' .
+  'WHERE s.email = :email AND s.list_id = :list_id';
+  $subscriber = db_query($query, array(':email' => $email, ':list_id' => $list_id))->fetchObject();
+  if ($subscriber) {
+    $subscriber->first_name = $member->merge_fields->FNAME;
+    $subscriber->last_name = $member->merge_fields->LNAME;
+    $subscriber->status = $member->status;
+    $subscriber->changed = REQUEST_TIME;
+    entity_save('bei_subscriber', $subscriber);
+    // Log event:
+    watchdog('bei_list', 'Subscriber @email was updated for list @list.',
+      array('@email' => $email, '@list' => $list_id), WATCHDOG_INFO
+    );
+  }
+}
+
+/**
+ * Webhook update email helper function
+ */
+function bei_list_webhook_update_email($email, $member) {
+  $new_email = $member->email_address;
+  $list_id = $member->list_id;
+  $query = 'SELECT * FROM {bei_subscriber} s ' .
+  'WHERE s.email = :email AND s.list_id = :list_id';
+  $subscriber = db_query($query, array(':email' => $email, ':list_id' => $list_id))->fetchObject();
+  if ($subscriber) {
+    $subscriber->email = $new_email;
+    $subscriber->changed = REQUEST_TIME;
+    entity_save('bei_subscriber', $subscriber);
+    // Log event:
+    watchdog('bei_list', 'The e-mail address @old_email was changed to @new_email for list @list.',
+      array('@old_email' => $email, '@new_email' => $new_email, '@list' => $list_id), WATCHDOG_INFO
+    );
+  }
+}
+
+/**
+ * Access callback for bei_list_webhook().
+ *
+ * @string $key
+ */
+function bei_list_webhook_access($key) {
+  return $key == mailchimp_webhook_key();
+}
+
+/**
+ * Generate the webhook endpoint URL.
+ *
+ * @string $list_id
+ *
+ * @return string
+ *   The endpoint URL.
+ */
+function bei_list_webhook_url() {
+  $key = mailchimp_webhook_key();
+  return $GLOBALS['base_url'] . '/bei-list/webhook/' . $key;
+}
+
+/**
+ * Implements hook_entity_property_info_alter()
+ */
+function bei_list_entity_property_info_alter(&$info) {
+   $properties = &$info['node']['bundles']['subscriber_list']['properties'];
+   $properties['from_email'] = array(
+    'label' => t('List: From e-mail'),
+    'type' => 'text',
+    'description' => t('The default reply to e-mail.'),
+    'getter callback' => 'bei_list_get_properties',
+    'setter callback' => 'entity_property_verbatim_set',
+    'entity views field' => TRUE,
+   );
+   $properties['from_name'] = array(
+    'label' => t('List: From name'),
+    'type' => 'text',
+    'description' => t('The default name of the person/company sending the campaign.'),
+    'getter callback' => 'bei_list_get_properties',
+    'setter callback' => 'entity_property_verbatim_set',
+    'entity views field' => TRUE,
+   );
+   $properties['subject'] = array(
+    'label' => t('List: Subject'),
+    'type' => 'text',
+    'description' => t('The default subject field for the campaign.'),
+    'getter callback' => 'bei_list_get_properties',
+    'setter callback' => 'entity_property_verbatim_set',
+    'entity views field' => TRUE,
+   );
+   $properties['list_id'] = array(
+    'label' => t('List: List id'),
+    'type' => 'text',
+    'description' => t('The list id on Mailchimp.'),
+    'getter callback' => 'bei_list_get_properties',
+    'setter callback' => 'entity_property_verbatim_set',
+    'entity views field' => TRUE,
+   );
+}
+
+/**
+ * Callback for getting campaign extra field properties.
+ *
+ */
+function bei_list_get_properties($node, array $options, $name, $entity_type) {
+   switch ($name) {
+      case 'from_email':
+         $value = isset($node->from_email) ? $node->from_email : NULL;
+         return $value;
+      case 'from_name':
+         $value = isset($node->from_name) ? $node->from_name : NULL;
+         return $value;
+      case 'subject':
+         $value = isset($node->subject) ? $node->subject : NULL;
+         return $value;
+      case 'list_id':
+         $value = isset($node->list_id) ? $node->list_id : NULL;
+         return $value;
+   }
+}
+
+/**
+ * Helper function to get lists from cache or mailchimp.
+ */
+function bei_list_get_lists($reset = FALSE) {
+  $cache = $reset ? NULL : cache_get('lists', 'cache_mailchimp');
+  $lists = array();
+  // Return cached lists:
+  if ($cache) {
+    $lists = $cache->data;
+  }
+  else {
+    try {
+      /* @var \Mailchimp\MailchimpLists $mc_lists */
+      $mc_lists = mailchimp_get_api_object('MailchimpLists');
+      if (!$mc_lists) {
+        throw new MailchimpException('Cannot get lists without MailChimp API. Check API key has been entered.');
+      }
+      $result = $mc_lists->getLists(array('count' => 500));
+
+      if ($result->total_items > 0) {
+        foreach ($result->lists as $list) {
+          $lists[$list->id] = $list;
+        }
+      }
+      cache_set('lists', $lists, 'cache_mailchimp', CACHE_TEMPORARY);
+    }
+    catch (Exception $e) {
+      watchdog('mailchimp', 'An error occurred requesting list information from MailChimp. "%message"', array(
+        '%message' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
+    }
+  }
+  return $lists;
+}
