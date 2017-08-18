@@ -637,6 +637,15 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 if (file_exists('/var/www/site-php')) {
   require('/var/www/site-php/exitplanning/exitplanning-settings.inc');
 }
+if (isset($conf['memcache_servers'])) {
+  $conf['cache_backends'][] = './sites/all/modules/memcache/memcache.inc';
+  $conf['cache_default_class'] = 'MemCacheDrupal';
+  $conf['cache_class_cache_form'] = 'DrupalDatabaseCache';
+  # Add in stampede protection
+  $conf['memcache_stampede_protection'] = TRUE;
+  # Move semaphore out of the database and into memory for performance purposes
+  $conf['lock_inc'] = './sites/all/modules/memcache/memcache-lock.inc';
+}
 // Set private files directory for acquia
 if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
   $files_private_conf_path = conf_path();
