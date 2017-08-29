@@ -111,10 +111,9 @@ function tfa_form_submit($form, &$form_state) {
  * @return array
  */
 function _tfa_form_get_destination($context, $form_state, $account) {
-  $query = drupal_get_query_parameters();
   $options = array();
-  $destination = 'user';
-  if (!empty($query['pass-reset-token'])) {
+  $path = 'user';
+  if (!empty($_GET['pass-reset-token'])) {
     // If pass-reset-token was set then complete final process interrupted
     // from user_pass_reset().
     watchdog('tfa', 'User %name used one-time login link', array('%name' => $account->name));
@@ -122,38 +121,40 @@ function _tfa_form_get_destination($context, $form_state, $account) {
     // Let the user's password be changed without the current password check.
     $token = drupal_hash_base64(drupal_random_bytes(32));
     $_SESSION['pass_reset_' . $account->uid] = $token;
-    $query['pass-reset-token'] = $token;
+    $options['query']['pass-reset-token'] = $token;
   }
   if (!empty($form_state['redirect'])) {
     if (is_array($form_state['redirect'])) {
-      $destination = $form_state['redirect'][0];
+      $path = $form_state['redirect'][0];
       $options = $form_state['redirect'][1];
     }
     else {
-      $destination = $form_state['redirect'];
+      $path = $form_state['redirect'];
     }
   }
-  if (!empty($query['destination'])) {
-    $destination = $query['destination'];
-    unset($query['destination']);
+  if (!empty($_GET['destination']) && !url_is_external($_GET['destination'])) {
+    $destination = drupal_parse_url($_GET['destination']);
+    $path = $destination['path'];
+    $options['query'] = !empty($options['query']) ?
+      array_merge($options['query'], $destination['query']) : $destination['query'];
+    $options['fragment'] = $destination['fragment'];
     unset($_GET['destination']);
   }
   // Context redirect takes final precedence.
   if (!empty($context['redirect'])) {
     if (is_array($context['redirect'])) {
-      $destination = $context['redirect'][0];
+      $path = $context['redirect'][0];
       $options = $context['redirect'][1];
     }
     else {
-      $destination = $context['redirect'];
+      $path = $context['redirect'];
     }
   }
-  $options = array_merge($options, array('query' => $query));
   // Allow other modules to alter final destination. This is better than form
   // altering TFA forms because callers would need to check the TFA process
   // status to figure out when to act.
-  drupal_alter('tfa_complete_redirect', $destination, $options);
-  return array($destination, $options);
+  drupal_alter('tfa_complete_redirect', $path, $options);
+  return array($path, $options);
 }
 
 /**
