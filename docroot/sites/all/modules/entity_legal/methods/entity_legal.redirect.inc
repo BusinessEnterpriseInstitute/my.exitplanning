@@ -28,7 +28,7 @@ class EntityLegalMethodRedirect extends EntityLegalMethod {
       }
       
       // Do not redirect on password reset page.
-      if (isset($_GET['pass-reset-token'])) {
+      if (isset($_GET['pass-reset-token']) || drupal_match_path(current_path(), 'user/*' . PHP_EOL)) {
         return;
       }
 
