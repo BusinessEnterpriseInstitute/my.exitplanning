@@ -23,7 +23,7 @@ class EntityLegalMethodRedirect extends EntityLegalMethod {
       }
 
       // Do not redirect user logout.
-      if (current_path() == 'user/logout') {
+      if (current_path() == 'user/logout' || drupal_match_path(current_path(), 'user/*' . PHP_EOL)) {
         return;
       }
       
