@@ -799,3 +799,35 @@ function ep_alters_cas_server_user_attributes($account, $service) {
       'field_company_name' => isset($company_name) ? check_plain($company_name[0]['value']) : '',
     );
 }
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function ep_alters_entity_property_info() {
+  $info = array();
+  $properties = &$info['user']['properties'];
+  if (module_exists('tfa_basic')) {
+    $properties['tfa_enabled'] = array(
+      'label' => t('TFA Enabled'), 
+      'type' => 'boolean', 
+      'description' => t('Two-Factor Authentication is enabled for this account.'),
+      'getter callback' => 'ep_alters_entity_property_tfa_enabled',
+      'entity views field' => TRUE,
+    );
+  }
+  return $info;
+}
+/**
+ * Getter callback for entity property 'tfa_enabled'.
+ * @return boolean.
+ */
+function ep_alters_entity_property_tfa_enabled($user, array $options, $name, $entity_type) {
+  $user_id = isset($user->uid) && $user->uid !== 0 ? $user->uid : NULL;
+  if ($user_id) {
+    $tfa_enabled = db_query('SELECT u.uid FROM {tfa_user_settings} u WHERE u.uid = :uid AND u.status = :status', array(':uid' => $user_id, ':status' => 1))->fetchField();
+    if ($tfa_enabled) {
+      return TRUE;
+    }
+  }
+  return FALSE;
+}
