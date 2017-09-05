@@ -821,7 +821,7 @@ function bei_order_form_rules_panes_render_form_alter(&$form, &$form_state, $for
     $order_id = $form['parameter']['bei_order']['settings']['bei_order']['#value'];
     $form['parameter']['email']['settings']['email']['#type'] = 'textfield';
     $form['parameter']['email']['settings']['email']['#element_validate'] = array('bei_order_send_email_validation');
-    $form['parameter']['email']['settings']['email']['#default_value'] = t('amacarak@icloud.com');
+    $form['parameter']['email']['settings']['email']['#default_value'] = t('wildflowergraphics@earthlink.net');
     $form['parameter']['email_bcc']['settings']['email_bcc'] = array(
       '#type' => 'textfield',
       '#title' => t('Bcc'),
