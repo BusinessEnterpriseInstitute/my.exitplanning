@@ -671,3 +671,6 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
   }
 }
 $conf['image_allow_insecure_derivatives'] = TRUE;
+// Set views data export directory to alternate path to work with Acquia.
+// @see https://www.drupal.org/node/2365855.
+$conf['views_data_export_directory'] = 'private://';
