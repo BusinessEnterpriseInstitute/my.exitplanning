@@ -270,11 +270,11 @@ function bei_zurb_foundation_ignored_forms_alter(&$form_ids) {
 /**
 *Theme override for pagination links (originally from pager.inc)
 **/
-function phptemplate_pager_link($text, $page_new, $element, $parameters = array(), $attributes = array()) {
-    /**$page = isset($_GET['page']) ? $_GET['page'] : '';
+function bei_pager_link($text, $page_new, $element, $parameters = array(), $attributes = array()) {
+    $page = isset($_GET['page']) ? $_GET['page'] : '';
     if ($new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)))) {
         $parameters['page'] = $new_page;
-    } **/
+    }
 
     // ADDED BY MERC
     $new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)));
@@ -309,9 +309,9 @@ function phptemplate_pager_link($text, $page_new, $element, $parameters = array(
 
     // ADDED BY MERC
     $q = $_GET['q'];
-    $q = preg_replace('/(.*)\/page-(.*)/','$1',$q);
+    $q = preg_replace('/(.*)?page=(.*)/','$1',$q);
     if ($new_page) {
-        $q = $q . '/page-' . $new_page ;
+        $q = $q . '?page=' . $new_page ;
     }
 
     return l($text, $q, $attributes, count($query) ? implode('&', $query) : NULL);

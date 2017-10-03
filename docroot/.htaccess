@@ -144,7 +144,7 @@ DirectoryIndex index.php index.html index.htm
   #RewriteRule blog?page-(.*)$ node&page=$1
   #RewriteRule podcast?page-(.*)$ node&page=$1
   #RewriteRule testimonials?page-(.*)$ node&page=$1
-  RewriteRule (.*)/page-(.*)$ $1&page=$2
+  RewriteRule (.*)?page-(.*)$ $1&page=$2
   
   # Rules to correctly serve gzip compressed CSS and JS files.
   # Requires both mod_rewrite and mod_headers to be enabled.
