@@ -270,7 +270,7 @@ function bei_zurb_foundation_ignored_forms_alter(&$form_ids) {
 /**
 *Theme override for pagination links (originally from pager.inc)
 **/
-function bei_pager_link($text, $page_new, $element, $parameters = array(), $attributes = array()) {
+function phptemplate_pager_link($text, $page_new, $element, $parameters = array(), $attributes = array()) {
     $page = isset($_GET['page']) ? $_GET['page'] : '';
     if ($new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)))) {
         $parameters['page'] = $new_page;
