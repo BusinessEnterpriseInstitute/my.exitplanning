@@ -268,13 +268,13 @@ function bei_zurb_foundation_ignored_forms_alter(&$form_ids) {
   $form_ids[] = 'webform_client_form_6164';
 }
 /**
-Theme override for pagination links (originally from pager.inc)
+*Theme override for pagination links (originally from pager.inc)
 **/
 function phptemplate_pager_link($text, $page_new, $element, $parameters = array(), $attributes = array()) {
-    /$page = isset($_GET['page']) ? $_GET['page'] : '';
+    /**$page = isset($_GET['page']) ? $_GET['page'] : '';
     if ($new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)))) {
         $parameters['page'] = $new_page;
-    } */
+    } **/
 
     // ADDED BY MERC
     $new_page = implode(',', pager_load_array($page_new[$element], $element, explode(',', $page)));
