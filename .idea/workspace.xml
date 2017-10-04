@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0fe15d88-763f-45b6-9916-0113a178b651" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docroot/.htaccess" afterPath="$PROJECT_DIR$/docroot/.htaccess" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docroot/sites/all/themes/bei/template.php" afterPath="$PROJECT_DIR$/docroot/sites/all/themes/bei/template.php" />
-    </list>
+    <list default="true" id="0fe15d88-763f-45b6-9916-0113a178b651" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -145,7 +142,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1447000" />
+    <option name="totallyTimeSpent" value="1769000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="1440" y="24" width="1400" height="789" extended-state="0" />
