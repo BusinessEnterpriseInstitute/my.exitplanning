@@ -69,11 +69,11 @@ DirectoryIndex index.php index.html index.htm
   RewriteRule ^ https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
   # ensure www.
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
-  RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   # ensure https
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   # alternative robots.txt file on dev
   RewriteCond %{HTTP_HOST} ^dev\.exitplanning\.com$ [NC]
   RewriteRule ^robots\.txt$ robots_noindex.txt [L]
