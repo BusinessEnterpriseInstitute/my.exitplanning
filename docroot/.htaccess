@@ -60,6 +60,7 @@ DirectoryIndex index.php index.html index.htm
 # Various rewrite rules.
 <IfModule mod_rewrite.c>
   RewriteEngine on
+  RewriteCond %{HTTPS} off
   # redirect related sites
   RewriteCond %{HTTP_HOST} ^certifiedexitplanner\.com$ [NC,OR]
   RewriteCond %{HTTP_HOST} ^www\.certifiedexitplanner\.com$ [NC]
