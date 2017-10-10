@@ -66,7 +66,7 @@ DirectoryIndex index.php index.html index.htm
   RewriteRule ^ https://www.exitplanning.com/solutions/training/cexp-certification [L,R=301]
   RewriteCond %{HTTP_HOST} ^exitplanningforadvisors\.com$ [NC,OR]
   RewriteCond %{HTTP_HOST} ^www\.exitplanningforadvisors\.com$ [NC]
-  RewriteRule ^ https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
   # ensure www.
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
   RewriteRule ^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
