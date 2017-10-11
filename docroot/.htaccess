@@ -70,9 +70,11 @@ DirectoryIndex index.php index.html index.htm
   RewriteCond %{HTTP_HOST} ^exitplanningforadvisors\.com$ [NC,OR]
   RewriteCond %{HTTP_HOST} ^www\.exitplanningforadvisors\.com$ [NC]
   RewriteRule ^/?(.*) https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
+  #
   # ensure www.
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
   RewriteRule ^/?(.*) https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301]
+  #
   # ensure https
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
