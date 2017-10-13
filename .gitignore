@@ -3,5 +3,5 @@ docroot/files
 docroot/sites/*/files
 docroot/sites/*/private
 
-/.DS_Store
-/.idea
+.DS_Store
+.idea
