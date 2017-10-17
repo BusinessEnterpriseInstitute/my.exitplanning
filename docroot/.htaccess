@@ -73,7 +73,7 @@ DirectoryIndex index.php index.html index.htm
  
   # ensure www.
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
-  RewriteRule ^/?(.*) https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301]
+  RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [R=301]
  
   # ensure https
   RewriteCond %{HTTP_HOST} ^www\.exitplanning\.com$ [NC]
