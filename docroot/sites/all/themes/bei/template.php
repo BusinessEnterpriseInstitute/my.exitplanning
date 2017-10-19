@@ -267,3 +267,43 @@ function bei_zurb_foundation_ignored_forms_alter(&$form_ids) {
   $form_ids[] = 'masquerade_block_1';
   $form_ids[] = 'webform_client_form_6164';
 }
+/**
+ * Implements hook_html_head_alter().
+ */
+function bei_zurb_foundation_html_head_alter(&$head_elements) {
+  // HTML5 charset declaration.
+  $head_elements['system_meta_content_type']['#attributes'] = array(
+    'charset' => 'utf-8',
+  );
+
+  // Optimize mobile viewport.
+  $head_elements['mobile_viewport'] = array(
+    '#type' => 'html_tag',
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'name' => 'viewport',
+      'content' => 'width=device-width, initial-scale=1.0',
+    ),
+  );
+/**
+  // Remove image toolbar in IE.
+  $head_elements['ie_image_toolbar'] = array(
+    '#type' => 'html_tag',
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'http-equiv' => 'ImageToolbar',
+      'content' => 'false',
+    ),
+  );
+  **/
+// Use the latest (edge) version of IE's rendering engine
+// or the Chrome rendering engine if available
+$head_elements['meta_content'] = array(
+    '#type' => 'html_tag',
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'http-equiv' => 'X-UA-Compatible',
+      'content' => 'IE=edge,chrome=1'
+    ),
+  );
+}
