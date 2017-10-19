@@ -181,6 +181,7 @@ DirectoryIndex index.php index.html index.htm
 # X-XSS-Protection
 <IfModule mod_headers.c>
 	Header set X-XSS-Protection "1; mode=block"
+  Header set Access-Control-Allow-Origin "*"
 </IfModule>
 
 # SET PROPER MIME TYPES FOR FILES
