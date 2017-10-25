@@ -5,3 +5,4 @@ docroot/sites/*/private
 
 .DS_Store
 .idea
+/docroot/sites/all/themes/bei/package-lock.json

@@ -13,13 +13,6 @@
         didScroll = true;
       });
       
-      var scrollListener = self.setInterval(function() {
-        if (didScroll) {
-          processScroll();
-        }
-        didScroll = false;
-      }, 100);
-      
       function processScroll() {
         if (target === 0) {
           reached = true;
@@ -32,6 +25,14 @@
             reached = true;
           }
         }
+      var scrollListener = self.setInterval(function() {
+        if (didScroll) {
+          processScroll();
+        }
+        didScroll = false;
+      }, 100);
+      
+      
         // clear the scroll listener
         if (reached) {
           window.clearInterval(scrollListener);
