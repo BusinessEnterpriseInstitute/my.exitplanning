@@ -299,7 +299,7 @@ $drupal_hash_salt = '';
  * for you.
  */
 
-$base_url = 'https://www.exitplanning.com';  // NO trailing slash!
+//$base_url = 'https://www.exitplanning.com';  // NO trailing slash!
 
 /**
  * PHP settings:
