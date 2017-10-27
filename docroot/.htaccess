@@ -66,19 +66,19 @@ DirectoryIndex index.php index.html index.htm
   # redirect related sites
   RewriteCond %{HTTP_HOST} ^certifiedexitplanner\.com$ [NC,OR]
   RewriteCond %{HTTP_HOST} ^www\.certifiedexitplanner\.com$ [NC]
-  RewriteRule ^/?(.*) https://www.exitplanning.com/solutions/training/cexp-certification [L,R=301]
+  RewriteRule ^(.*)$ https://www.exitplanning.com/solutions/training/cexp-certification [L,R=301]
   RewriteCond %{HTTP_HOST} ^exitplanningforadvisors\.com$ [NC,OR]
   RewriteCond %{HTTP_HOST} ^www\.exitplanningforadvisors\.com$ [NC]
-  RewriteRule ^/?(.*) https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://www.exitplanning.com%{REQUEST_URI} [L,R=301]
  
   # ensure www.
   RewriteCond %{HTTP_HOST} ^exitplanning\.com$ [NC]
-  RewriteRule ^/?(.*) https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
  
   # ensure https
   RewriteCond %{HTTP_HOST} ^www\.exitplanning\.com$ [NC]
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
-  RewriteRule ^/?(.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
   # alternative robots.txt file on dev
   RewriteCond %{HTTP_HOST} ^dev\.exitplanning\.com$ [NC]
   RewriteRule ^robots\.txt$ robots_noindex.txt [L]
