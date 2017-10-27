@@ -31,7 +31,7 @@
                 <?php else: ?>
                 <?php print $linked_site_name; ?>
                 <?php endif; ?>
-              <p/>
+              </p>
             </li>
             <li class="toggle-topbar menu-icon">
               <a href="#"><span><?php print $top_bar_menu_text; ?></span></a></li>
