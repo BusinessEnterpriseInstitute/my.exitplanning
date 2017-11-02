@@ -35,7 +35,7 @@ function zurb_foundation_html_head_alter(&$head_elements) {
       'content' => 'width=device-width, initial-scale=1.0',
     ),
   );
-/**
+
   // Remove image toolbar in IE.
   $head_elements['ie_image_toolbar'] = array(
     '#type' => 'html_tag',
@@ -43,17 +43,6 @@ function zurb_foundation_html_head_alter(&$head_elements) {
     '#attributes' => array(
       'http-equiv' => 'ImageToolbar',
       'content' => 'false',
-    ),
-  );
-  **/
-// Use the latest (edge) version of IE's rendering engine
-// or the Chrome rendering engine if available
-$head_elements['meta_content'] = array(
-    '#type' => 'html_tag',
-    '#tag' => 'meta',
-    '#attributes' => array(
-      'http-equiv' => 'X-UA-Compatible',
-      'content' => 'IE=edge,chrome=1'
     ),
   );
 }
@@ -1007,31 +996,38 @@ function _zurb_foundation_add_reveals() {
 function zurb_foundation_theme_registry_alter(&$theme_registry) {
   // Add our own preprocess function to entities so we can add default classes
   // to our custom Display Suite layouts.
-  $entity_info = entity_get_info();
-  foreach ($entity_info as $entity => $info) {
-    if (isset($entity_info[$entity]['fieldable']) && $entity_info[$entity]['fieldable']) {
 
-      // User uses user_profile for theming.
-      if ($entity == 'user') {
-        $entity = 'user_profile';
-      }
+  // It has a try/catch to generate exception cleanly in case database not available.
+  try {
+    Database::getConnection();
+    $entity_info = entity_get_info();
+    foreach ($entity_info as $entity => $info) {
+      if (isset($entity_info[$entity]['fieldable']) && $entity_info[$entity]['fieldable']) {
 
-      // Only add preprocess functions if entity exposes theme function.
-      if (isset($theme_registry[$entity])) {
-        $theme_registry[$entity]['preprocess functions'][] = 'zurb_foundation_entity_variables';
+        // User uses user_profile for theming.
+        if ($entity == 'user') {
+          $entity = 'user_profile';
+        }
+
+        // Only add preprocess functions if entity exposes theme function.
+        if (isset($theme_registry[$entity])) {
+          $theme_registry[$entity]['preprocess functions'][] = 'zurb_foundation_entity_variables';
+        }
       }
     }
-  }
 
-  // Support for File Entity.
-  if (isset($theme_registry['file_entity'])) {
-    $theme_registry['file_entity']['preprocess functions'][] = 'zurb_foundation_entity_variables';
-  }
+    // Support for File Entity.
+    if (isset($theme_registry['file_entity'])) {
+      $theme_registry['file_entity']['preprocess functions'][] = 'zurb_foundation_entity_variables';
+    }
 
-  // Support for Entity API.
-  if (isset($theme_registry['entity'])) {
-    $theme_registry['entity']['preprocess functions'][] = 'zurb_foundation_entity_variables';
-  }
+    // Support for Entity API.
+    if (isset($theme_registry['entity'])) {
+      $theme_registry['entity']['preprocess functions'][] = 'zurb_foundation_entity_variables';
+    }
+  } catch (PDOException $e) {
+    return;
+  };
 }
 
 /**

@@ -22,12 +22,11 @@ function zurb_foundation_form_alter(&$form, &$form_state, $form_id) {
   }
 
   // Sexy submit buttons
-  /*
   if (!empty($form['actions']) && !empty($form['actions']['submit'])) {
     $form['actions']['submit']['#attributes']['class'] []= 'secondary';
     $form['actions']['submit']['#attributes']['class'] []=  'button';
     $form['actions']['submit']['#attributes']['class'] []=  'radius';
-  }*/
+  }
 
   // Search Block Fixes
   if (isset($form['#form_id']) && ($form['#form_id'] == 'search_block_form')) {
