@@ -29,7 +29,14 @@
 .item-list .pager li {
   padding: 0;
 }
-
+.pager-current {
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1em;
+    color: #008CBA;
+    text-decoration: none;
+    line-height: inherit;
+}
 // Allow drupal inline elements to mixin Foundation inline properties
 .inline {
   @include inline-list;
