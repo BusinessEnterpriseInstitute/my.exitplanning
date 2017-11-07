@@ -171,10 +171,12 @@ function bei_order_review($order, $view_mode='full', $langcode = NULL) {
       'empty' => t('No proofs available for review.'),
     ))
   );
-  $proofs_form = drupal_get_form('bei_order_view_form', $order);
-  $order->content['proofs_review_form'] = array(
-    '#markup' => drupal_render($proofs_form),
-  );
+  if ($order->uid === $user->uid) {
+    $proofs_form = drupal_get_form('bei_order_view_form', $order);
+    $order->content['proofs_review_form'] = array(
+      '#markup' => drupal_render($proofs_form),
+    );
+  }
   
   return $order->content;
 }

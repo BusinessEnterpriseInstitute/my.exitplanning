@@ -434,6 +434,7 @@ function bei_order_entity_property_info() {
     'description' => t('The status of the order.'),
     'schema field' => 'status',
     'options list' => 'bei_order_status_options',
+    'setter callback' => 'entity_property_verbatim_set',
   );
   $properties['edit_url'] = array(
     'label' => t('Edit URL'),
@@ -731,6 +732,7 @@ function bei_order_status_options($order) {
   return array(
     0 => t('Started'),
     1 => t('Submitted'),
+    7 => t('Design in Progress'),
     2 => t('Proofs Available'),
     3 => t('Revisions Requested'),
     4 => t('Proofs Approved'),
