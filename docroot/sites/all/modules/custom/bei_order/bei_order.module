@@ -731,6 +731,7 @@ function bei_order_status_options($order) {
   return array(
     0 => t('Started'),
     1 => t('Submitted'),
+    7 => t('Design in Progress'),
     2 => t('Proofs Available'),
     3 => t('Revisions Requested'),
     4 => t('Proofs Approved'),
