@@ -136,25 +136,15 @@
           }
         }
       
-      &.views-field {
-          margin: rem-calc(1) 0.3125;
-          display: block;
-          width: rem-calc(295); /* 300px */
-          overflow: hidden;
-           max-width: 250px;
-           font-size: 0.875rem !important;
-      }
-      &.views-field-title {
-        font-family: inherit;
-        font-weight: normal;
-        font-size: 0.875rem;
-        line-height: 1.6;
-        margin: 0 20px 1.25rem 20px;
-        
-        text-rendering: optimizeLegibility;
-
-        
-      }
+        .views-field .field-content {
+            margin: 0 0.3125rem;
+            display: block;
+            width: rem-calc(295); /* 300px */
+            overflow: hidden;
+             max-width: 250px;
+            font-family: inherit;
+            font-size: 0.8125rem;
+        }
     }
     }
     &.view-testimonials {
