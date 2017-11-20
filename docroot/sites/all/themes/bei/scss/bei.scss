@@ -723,18 +723,21 @@ table {
   height: 1px;
   overflow: hidden;
   position: absolute !important;
-  width: 1px; }
+  width: 1px;
+  }
 
 .show-on-focus {
   clip: rect(1px, 1px, 1px, 1px);
   height: 1px;
   overflow: hidden;
   position: absolute !important;
-  width: 1px; }
+  width: 1px;
+  }
   .show-on-focus:focus, .show-on-focus:active {
     position: static !important;
     height: auto;
     width: auto;
     overflow: visible;
-    clip: auto; }
+    clip: auto;
+  }
 

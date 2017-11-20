@@ -22,7 +22,7 @@
         <nav class="top-bar" data-topbar <?php print $top_bar_options; ?>>
           <ul class="title-area">
             <li class="name">
-              <div style="display: block;">
+              <h1>
                 <?php if ($linked_logo): ?>
                   <span class="hide-for-small logo"><?php print $linked_logo; ?></span>
                 <?php endif; ?>
@@ -31,7 +31,7 @@
                 <?php else: ?>
                 <?php print $linked_site_name; ?>
                 <?php endif; ?>
-              </div>
+              </h1>
             </li>
             <li class="toggle-topbar menu-icon">
               <a href="#"><span><?php print $top_bar_menu_text; ?></span></a></li>
