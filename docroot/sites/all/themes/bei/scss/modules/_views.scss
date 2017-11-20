@@ -98,65 +98,6 @@
             }
         }
     }
-    &.view-video-gallery {
-          margin: 0 auto;
-          text-align: center;
-          max-width: 100%;
-          
-        .views-row  {
-          margin: 10px auto;
-          display: inline-block;
-          
-          height: rem-calc(270); /* WITH BOTTOM DESCRIPTION: 216px */
-          width: 17.8125rem; /* 300px */
-          overflow: hidden;
-          text-align: left;
-          
-          .video-thumbnail {
-          position: relative;
-          display: inline-block;
-          cursor: pointer;
-          margin: 0.3125rem;
-        
-          &:before {
-            position:absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            -webkit-transform: translate(-50%, -50%);
-            content: "\f01d";
-            font-family: FontAwesome;
-            font-size: 3.125rem;
-            color: #fff;
-            opacity: .8;
-            text-shadow: 0px 0px 30px rgba(0, 0, 0, 0.5);
-          }
-          &:hover:before {
-            color: #eee;
-          }
-        }
-      
-      &.views-field {
-          margin: rem-calc(1) 0.3125;
-          display: block;
-          width: rem-calc(295); /* 300px */
-          overflow: hidden;
-           max-width: 250px;
-           font-size: 0.875rem !important;
-      }
-      &.views-field-title {
-        font-family: inherit;
-        font-weight: normal;
-        font-size: 0.875rem;
-        line-height: 1.6;
-        margin: 0 20px 1.25rem 20px;
-        
-        text-rendering: optimizeLegibility;
-
-        
-      }
-    }
-    }
     &.view-testimonials {
         .views-row {
             margin-bottom: rem-calc(60);
@@ -233,31 +174,6 @@
                 .views-submit-button,
                 .views-reset-button {
                     padding-bottom: 0;
-                }
-            }
-        }
-    }
-    .view.view-video-gallery {
-          margin: 0 inherit;
-          text-align: center;
-        .views-row {
-            a.video-thumbnail {
-                i {
-                    @include font-size(60);
-                    line-height: rem-calc(60);
-                }
-            }
-        }
-        .views-row:nth-of-type(even) {
-            > .row {
-                .columns:first-child {
-                    @extend .push-6;
-                    p.image {
-                        text-align: right;
-                    }
-                }
-                .columns:last-child {
-                    @extend .pull-6;
                 }
             }
         }
