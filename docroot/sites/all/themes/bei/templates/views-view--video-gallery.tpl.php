@@ -58,7 +58,7 @@
 		  ?>
 	</div>
 
-	<div class="columns small-10">
+	<div class="columns small-12 large-10">
 		
   <?php if ($rows): ?>
     <div class="view-content row" style="max-width: rem-calc(275);">
