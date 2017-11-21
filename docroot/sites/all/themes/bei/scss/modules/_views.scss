@@ -107,7 +107,7 @@
           margin: 10px auto;
           display: inline-block;
           
-          height: rem-calc(270); /* WITH BOTTOM DESCRIPTION: 216px */
+          height: rem-calc(240); /* With bottom descriptio: 216px - 24 extra pixels to catter for long titles */
           width: 17.8125rem; /* 300px */
           overflow: hidden;
           text-align: left;
