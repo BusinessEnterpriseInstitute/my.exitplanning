@@ -50,9 +50,10 @@
       <?php print $attachment_before; ?>
     </div>
   <?php endif; ?>
-  /**
+  <!--/**
   * - Inserted a menu block to display custom block contents on the left side for navigation
   **/
+  -->
 <div class="row">
 	<div class="columns small-2 hide-for-small" style="position:fixed; top: rem-calc(195); height: 20vh;">
 		<?php
@@ -60,11 +61,12 @@
 		    print render($block['content']);
 		  ?>
 	</div>
-/**
+<!--/**
 *- End of left block menu
 **/
 
 /**Added div classes to theme the views content on the right**/
+-->
 	<div class="columns small-12 large-10">
 		
   <?php if ($rows): ?>
@@ -82,7 +84,7 @@
   <?php endif; ?>
 </div>
 </div>
-/**END OF VIEW**/
+<!--/**END OF VIEW**/-->  
   <?php if ($attachment_after): ?>
     <div class="attachment attachment-after">
       <?php print $attachment_after; ?>
