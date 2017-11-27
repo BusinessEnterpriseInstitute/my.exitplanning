@@ -55,7 +55,7 @@
   **/
   -->
 <div class="row">
-	<div class="columns small-12 hide-for-small" style="position:fixed; position: -webkit-sticky; top: rem-calc(195); height: auto; overflow: hidden">
+	<div class="columns small-2 hide-for-small" style="position:fixed; position: -webkit-sticky; top: rem-calc(195); height: auto; overflow: hidden">
 		<?php
 		    $block = module_invoke('block', 'block_view', 31);
 		    print render($block['content']);
