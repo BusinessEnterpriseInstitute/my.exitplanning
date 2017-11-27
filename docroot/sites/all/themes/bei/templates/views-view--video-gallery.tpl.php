@@ -55,7 +55,7 @@
   **/
   -->
 <div class="row">
-	<div class="columns small-12" style="position:fixed; top: rem-calc(195); height: 20vh;">
+	<div class="columns small-12 hide-for-small" style="position:fixed; top: rem-calc(195); height: 20vh;">
 		<?php
 		    $block = module_invoke('block', 'block_view', 31);
 		    print render($block['content']);
@@ -94,12 +94,7 @@
   <?php if ($more): ?>
     <?php print $more; ?>
   <?php endif; ?>
-<div class="columns small-12" style="position:fixed; top: rem-calc(195); height: 20vh;">
-		<?php
-		    $block = module_invoke('views', 'block_view', 'cta-block');
-		    print render($block['content']);
-		  ?>
-	</div>
+
   <?php if ($footer): ?>
     <div class="view-footer">
       <?php print $footer; ?>
