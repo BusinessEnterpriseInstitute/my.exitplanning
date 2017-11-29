@@ -12,8 +12,11 @@
 <?php endif; ?>
 <div class="columns large-2 small-12">
 	<!-- Print custom block content -->
-	$block = module_invoke('block','block_view','31');
-	print render($block['content']);
+	<?php
+		    $block = module_invoke('block', 'block_view', 31);
+		    print render($block['content']);
+	?>
+
 </div>
 <div class="columns small-12 large-10">
 <?php foreach ($rows as $id => $row): ?>
