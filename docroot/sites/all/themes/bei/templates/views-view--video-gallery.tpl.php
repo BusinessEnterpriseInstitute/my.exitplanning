@@ -97,7 +97,7 @@
   <section class="l-cta">
   <div class="row">
   <?php
-	 $block = module_invoke('views', 'cta-block');
+	 $block = module_invoke('views', 'view' 'cta-block');
 		    print render($block['content']);
   ?>
   </div>
