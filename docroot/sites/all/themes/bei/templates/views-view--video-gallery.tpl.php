@@ -97,9 +97,7 @@
   <section class="l-cta">
   <div class="row">
   <?php
-	$block = block_load('views', 'cta-block');
-	$output = _block_get_renderable_array(_block_render_blocks(array($block)));
-	print drupal_render($output);
+	 print views_embed_view('cta', 'cta-block', $view_arg);
   ?>
   </div>
   </section> 
