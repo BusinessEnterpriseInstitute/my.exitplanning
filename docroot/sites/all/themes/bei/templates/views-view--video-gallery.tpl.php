@@ -94,7 +94,11 @@
   <?php if ($more): ?>
     <?php print $more; ?>
   <?php endif; ?>
-
+  <?php
+	$block = block_load('views', 'views/cta-block');
+	$output = _block_get_renderable_array(_block_render_blocks(array($block)));
+	print drupal_render($output);
+  ?>
   <?php if ($footer): ?>
     <div class="view-footer">
       <?php print $footer; ?>
@@ -108,3 +112,4 @@
   <?php endif; ?>
 
 </div><?php /* class view */ ?>
+ 
