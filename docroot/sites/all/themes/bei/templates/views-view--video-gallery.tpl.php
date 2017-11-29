@@ -55,7 +55,7 @@
   **/
   -->
 <div class="row">
-	<div class="columns small-2 hide-for-small" style="position:fixed; position: -webkit-sticky; top: rem-calc(195); height: auto; overflow: hidden">
+	<div class="columns small-2 hide-for-small" style="position:sticky; position: -webkit-sticky; top: rem-calc(195); height: auto; overflow: hidden">
 		<?php
 		    $block = module_invoke('block', 'block_view', 31);
 		    print render($block['content']);
@@ -94,11 +94,15 @@
   <?php if ($more): ?>
     <?php print $more; ?>
   <?php endif; ?>
+  <section class="l-cta">
+  <div class="row">
   <?php
-	$block = block_load('views', 'views/cta-block');
+	$block = block_load('views', 'cta-block');
 	$output = _block_get_renderable_array(_block_render_blocks(array($block)));
 	print drupal_render($output);
   ?>
+  </div>
+  </section> 
   <?php if ($footer): ?>
     <div class="view-footer">
       <?php print $footer; ?>
