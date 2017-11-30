@@ -25,3 +25,10 @@
   </div>
 <?php endforeach; ?>
 </div>
+<div>
+	<?php
+	$views_block = module_invoke('views','block_view','cta-block');
+	print render($views_block);
+
+	?>
+</div>
