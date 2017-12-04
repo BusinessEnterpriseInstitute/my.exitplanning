@@ -167,8 +167,8 @@
             a.colorbox-node {
                 display: inline-block;
                 position: relative;
-                  transform: translateZ(0); 
-                    -webkit-transform: translateZ(0);
+                transform: translateZ(0); 
+                -webkit-transform: translateZ(0);
                 i {
                     @include font-size(40);
                     line-height: rem-calc(40);
