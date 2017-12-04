@@ -173,6 +173,8 @@
                     color: rgba(255,255,255, .7);
                     position: absolute;
                     display: inline-block;
+                    transform: translateZ(0); 
+                    -webkit-transform: translateZ(0);
                     width: 100%;
                     text-align: center;
                     top: 33%;
