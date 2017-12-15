@@ -21,8 +21,9 @@
   position: relative;
 }
 #cboxLoadedContent {
-  overflow: auto;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
 }
 #cboxTitle {
   margin: 0;
