@@ -21,9 +21,11 @@
   position: relative;
 }
 #cboxLoadedContent {
-  overflow: hidden !important;
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none;
+  -ms-overflow-x: hidden !important;
+  -ms-overflow-y: hidden !important;
 }
 #cboxTitle {
   margin: 0;
