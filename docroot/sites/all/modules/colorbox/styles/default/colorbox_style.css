@@ -21,7 +21,7 @@
   position: relative;
 }
 #cboxLoadedContent {
-  overflow: hidden;
+  overflow: hidden !important;
   -webkit-overflow-scrolling: touch;
   -ms-overflow-style: none;
 }
