@@ -678,3 +678,4 @@ $conf['views_data_export_directory'] = 'private://';
 
 $conf['image_suppress_itok_output'] = TRUE;
 $conf['image_allow_insecure_derivatives'] = TRUE;
+$conf['x_frame_options'] = '';
