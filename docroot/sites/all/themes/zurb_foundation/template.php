@@ -37,12 +37,23 @@ function zurb_foundation_html_head_alter(&$head_elements) {
   );
 
   // Remove image toolbar in IE.
-  $head_elements['ie_image_toolbar'] = array(
+ // $head_elements['ie_image_toolbar'] = array(
+ //   '#type' => 'html_tag',
+ //  '#tag' => 'meta',
+//    '#attributes' => array(
+//      'http-equiv' => 'ImageToolbar',
+//      'content' => 'false',
+//    ),
+//  );
+
+// Use the latest (edge) version of IE's rendering engine
+// or the Chrome rendering engine if available
+$head_elements['meta_content'] = array(
     '#type' => 'html_tag',
     '#tag' => 'meta',
     '#attributes' => array(
-      'http-equiv' => 'ImageToolbar',
-      'content' => 'false',
+      'http-equiv' => 'X-UA-Compatible',
+      'content' => 'IE=edge,chrome=1'
     ),
   );
 }
