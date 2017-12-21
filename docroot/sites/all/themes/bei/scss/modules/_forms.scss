@@ -19,8 +19,9 @@ form#views-exposed-form-search-member-content-page {
 input[type="checkbox"], input[type="radio"] {
     margin: 0 0 rem-calc(3);
 }
-input.form-text {
+input.form-text::-ms-input-placeholder {
     max-width: 100%;
+    vertical-align: middle;
 }
 // Fields with suffix
 input[type="text"].with-suffix {
