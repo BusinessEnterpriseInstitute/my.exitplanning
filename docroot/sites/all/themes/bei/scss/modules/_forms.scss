@@ -440,6 +440,7 @@ div.vertical-tabs {
     input[type="text"],
     select {
         width: auto;
+        vertical-align: middle;
     }
     $sticky-height: 60px;
     form.sticky-buttons {
