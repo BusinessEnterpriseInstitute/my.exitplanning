@@ -184,10 +184,6 @@ DirectoryIndex index.php index.html index.htm
   Header set Access-Control-Allow-Origin "*"
 </IfModule>
 
-# X-Frame-Options
-<IfModule mod_headers.c>
-	Header always append X-Frame-Options SAMEORIGIN
-</IfModule>
 
 # SET PROPER MIME TYPES FOR FILES
 <IfModule mod_mime.c>
