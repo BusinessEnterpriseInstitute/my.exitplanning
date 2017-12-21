@@ -19,7 +19,7 @@ form#views-exposed-form-search-member-content-page {
 input[type="checkbox"], input[type="radio"] {
     margin: 0 0 rem-calc(3);
 }
-input.form-text::-ms-input-placeholder {
+input.form-text{
     max-width: 100%;
     vertical-align: middle;
 }
