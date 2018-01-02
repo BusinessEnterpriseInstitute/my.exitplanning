@@ -721,8 +721,12 @@ table {
       p.a2a_default_style{ display: block;}
 }   
 
-p.a2a_vertical_style {
+p.a2a_floating_style.a2a_vertical_style {
   left: 0;
+  bottom: 70vh;
+  top: 40vh;
+  height: 180px;
+  
   
 }
 /* Screen reader-specific classes */
