@@ -717,6 +717,14 @@ table {
     }
   }
 }
+@media screen and (max-width: 768px) {
+      p.a2a_default_style{ display: block;}
+}   
+
+p.a2a_vertical_style {
+  left: 0;
+  
+}
 /* Screen reader-specific classes */
 .show-for-sr {
   clip: rect(1px, 1px, 1px, 1px);
