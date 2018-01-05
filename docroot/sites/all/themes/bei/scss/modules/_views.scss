@@ -190,6 +190,12 @@
             margin-top: rem-calc(30);
         }
     }
+    &.view-related-content {
+      .view-content h3 {
+        margin-left: -20px;
+        
+      }
+    }
 }
 @media #{$medium-up} {
     .view-events {
