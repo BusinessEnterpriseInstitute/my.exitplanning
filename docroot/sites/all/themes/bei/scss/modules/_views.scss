@@ -190,6 +190,14 @@
             margin-top: rem-calc(30);
         }
     }
+    &.view-related-content {
+      .views-row {
+        .views-row-1 {
+        margin-left: 1.25rem;
+        margin-right: 1.25rem;
+        }
+      }
+    }
 }
 @media #{$medium-up} {
     .view-events {
