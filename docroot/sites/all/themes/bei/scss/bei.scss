@@ -726,8 +726,9 @@ p.a2a_floating_style.a2a_vertical_style {
   bottom: 70vh;
   top: 40vh;
   height: 180px;
-  
-  
+}
+.library-left{
+  margin-left: -1.125rem !important;
 }
 /* Screen reader-specific classes */
 .show-for-sr {
