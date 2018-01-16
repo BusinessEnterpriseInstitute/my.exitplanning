@@ -717,6 +717,7 @@ table {
     }
   }
 }
+/**Add To Any floating Social Share**/
 @media screen and (max-width: 768px) {
       p.a2a_default_style{ display: block;}
 }   
@@ -730,6 +731,15 @@ p.a2a_floating_style.a2a_vertical_style {
 .library-left{
   margin-left: -1.125rem !important;
 }
+/**Changed H1 on top-bar to P**/
+.top-bar .name p a,.top-bar .name span a {
+ font-weight:normal;
+ color:#FFFFFF;
+ width:100% !important;
+ display:block;
+ padding:0 1.0416666667rem
+}
+
 /* Screen reader-specific classes */
 .show-for-sr {
   clip: rect(1px, 1px, 1px, 1px);
