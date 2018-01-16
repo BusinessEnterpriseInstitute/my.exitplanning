@@ -24,7 +24,7 @@
             <li class="name">
               <p>
                 <?php if ($linked_logo): ?>
-                  <span class="hide-for-small logo" height="70" width="270"><?php print $linked_logo; ?></span>
+                  <span class="hide-for-small logo"><?php print $linked_logo; ?></span>
                 <?php endif; ?>
                 <?php if (!empty($mobile_version_logo)): ?>
                 <?php print $mobile_version_logo; ?>
