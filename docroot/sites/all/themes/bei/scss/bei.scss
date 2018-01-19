@@ -729,7 +729,13 @@ and (max-width: 768px) {
        text-decoration: none;
    }
 }
-
+/**Removing the tel: protocal for desktop browsers and ipads**/
+@media(min-width:768px){
+ a[href^="tel:"] {
+  pointer-events: none;
+ }
+}
+/**Align AddToAny verticle left**/
 p.a2a_floating_style.a2a_vertical_style {
   left: 0;
   bottom: 70vh;
