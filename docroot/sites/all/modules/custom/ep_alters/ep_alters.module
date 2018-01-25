@@ -1,6 +1,12 @@
 <?php
 
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
+    // User login form.
+    if ($form_id == 'user_login') {
+        if (isset($form['pass'])) {
+            $form['pass']['#attributes']['autocomplete'] = 'off';
+        }
+    }
     // Add placeholder text to views exposed search form.
     if ($form_id == 'views_exposed_form') {
         $view = $form_state['view'];
