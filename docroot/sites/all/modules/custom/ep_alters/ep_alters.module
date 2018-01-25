@@ -1,9 +1,24 @@
 <?php
-
+function ep_alters_menu_alter(&$items) {
+    $items['user/login']['title'] = 'Member Login';
+}
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
     // User login form.
     if ($form_id == 'user_login') {
         $form['#attributes']['autocomplete'] = 'off';
+        $form['forgot_password'] = array(
+            '#type' => 'markup',
+            '#markup' => '<p>' . l(t('Did you forget your password?'), 'user/password', array('attributes' => array('rel' => 'nofollow'))) . '</p>',
+            '#weight' => 100,
+        );
+    }
+    if (arg(0) == 'user') {
+        if (!arg(1)) {
+            drupal_set_title(t('Member Login'));
+        }
+        elseif (arg(1) == 'password') {
+            drupal_set_title(t('Request new password'));
+        }
     }
     // Add placeholder text to views exposed search form.
     if ($form_id == 'views_exposed_form') {
