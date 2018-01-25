@@ -262,7 +262,7 @@ function bei_recurly_checkout_contact_form($form, &$form_state) {
       '#type' => 'item',
       '#title' => t(''),
       '#markup' =>  t('Enter the information below to set up your account. <br />Already have an account? ').
-              l('Login here','/user/login',array('query' => array('r-destination'=>	current_path()))),
+              l('Login here','/user/login',array('query' => array('r-destination' => current_path()))),
       '#prefix' => '<div class="checkout-main-content">',
     );
   }
