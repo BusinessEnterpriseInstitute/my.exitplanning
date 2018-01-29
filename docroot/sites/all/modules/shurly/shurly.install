@@ -278,3 +278,11 @@ function shurly_update_7103() {
   );
   db_create_table('shurly_history', $schema['shurly_history']);
 }
+
+/**
+ * Editing a URL used to not update the hash.
+ * We re-calculate the hash for all URLs to make sure it is correct.
+ */
+function shurly_update_7104() {
+  db_query('UPDATE {shurly} SET hash = MD5(destination)');
+}

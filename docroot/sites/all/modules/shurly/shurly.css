@@ -13,6 +13,11 @@
   margin: 0;
 }
 
+.shurly-result .inline {
+  margin-right: 1em;
+  display: inline-block;
+}
+
 #shurly-copy-container {
   display:inline;
 }

@@ -28,6 +28,7 @@ Features
 - `hook_shurly_redirect_before()` and `hook_shurly_redirect_after()` allows other modules to tap in and alter the redirection, or log additional info to the database (IP tracking, anyone?)
 - Support Google Safe Browsing API (v4).
 - Google Analytics Integration.
+- 'Copy to clipboard' button if the clipboardjs module is installed (https://www.drupal.org/project/clipboardjs)
 
 USAGE
 ----------------------------
@@ -35,14 +36,14 @@ USAGE
 2. Visit admin/user/permissions to set up permissions for Shurly (see explanation of permissions below).
 3. To create a new short URL, visit /shurly or add the "Create a short URL" block to your site.
 4. To view your own URLs, visit /myurls or add the 'My URLs' block
-5. Administrators can view all users' URLs at admin/build/shurly
-6. To configure rate limiting, visit admin/build/shurly/settings
+5. Administrators can view all users' URLs at admin/structure/shurly
+6. To configure rate limiting, visit admin/structure/shurly/settings
 
 Since short URLs are created at the root path of the site (http://example.com/_myURL_), it is recommended that this module be used as the basis for a complete site, not as an add-on to an existing site. That being said, the module does its best to ensure that entered URLs don't conflict with existing menu entries and path aliases in the current Drupal installation. ShURLy should work even if Drupal is installed in a subdirectory or without clean URLs.
 
 Views
 ----------------------------
-ShURLy is completely integrated with the Views module and ShURLy links can be listed/sorted/displayed using Views. Views is a dependency of this module since all listings are created using Views, including the administrative page at admin/build/shurly. Views also provides a page at /myurls where users with "View own URL stats" can see & sort their URLs.
+ShURLy is completely integrated with the Views module and ShURLy links can be listed/sorted/displayed using Views. Views is a dependency of this module since all listings are created using Views, including the administrative page at admin/structure/shurly. Views also provides a page at /myurls where users with "View own URL stats" can see & sort their URLs.
 
 Views integration also means that you could create new pages/blocks with listings like "most popular URLs", "users with most popular URLs", "most recent URLs", "most recently clicked URLs", or a tab on a user's page to show others their most recent URLs, and that sort of thing.
 

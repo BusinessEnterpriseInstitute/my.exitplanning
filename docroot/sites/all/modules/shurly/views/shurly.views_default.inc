@@ -493,7 +493,7 @@ function shurly_views_default_views() {
     'default' => 'created_1',
   ));
   $handler = $view->new_display('page', 'Administer short URLs', 'page_1');
-  $handler->override_option('path', 'admin/build/shurly/list');
+  $handler->override_option('path', 'admin/structure/shurly/list');
   $handler->override_option('menu', array(
     'type' => 'default tab',
     'title' => 'Short URLs',

@@ -6,15 +6,19 @@ configure = admin/config/system/shurly
 core = 7.x
 project = "shurly"
 
+; Tests
+files[] = shurly.test
+files[] = tests/admin.test
 ; Views Handlers
 files[] = views/shurly_handler_field_short_url.inc
 files[] = views/shurly_handler_field_shurly_link_edit.inc
 files[] = views/shurly_handler_field_shurly_link_delete.inc
 files[] = views/shurly.views.inc
 files[] = views/shurly.views_default.inc
-; Information added by Drupal.org packaging script on 2017-04-16
-version = "7.x-1.4"
+
+; Information added by Drupal.org packaging script on 2018-01-17
+version = "7.x-1.4+12-dev"
 core = "7.x"
 project = "shurly"
-datestamp = "1492302844"
+datestamp = "1516202886"
 
