@@ -4,7 +4,7 @@ function ep_alters_menu_alter(&$items) {
 }
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
     // User login form.
-    if ($form_id == 'user_login') {
+    if ($form_id == 'user_login' || $form_id == 'user_login_block') {
         $form['#attributes']['autocomplete'] = 'off';
         $form['forgot_password'] = array(
             '#type' => 'markup',
