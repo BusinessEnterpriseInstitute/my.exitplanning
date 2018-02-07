@@ -7,9 +7,9 @@ dependencies[] = jquery_update
 dependencies[] = libraries
 dependencies[] = colorfield
 
-; Information added by Drupal.org packaging script on 2014-09-10
-version = "7.x-1.1+1-dev"
+; Information added by Drupal.org packaging script on 2018-01-31
+version = "7.x-1.2"
 core = "7.x"
 project = "colorfield"
-datestamp = "1410355446"
+datestamp = "1517403487"
 

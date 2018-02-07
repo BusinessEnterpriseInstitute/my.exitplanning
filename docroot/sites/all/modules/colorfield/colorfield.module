@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  * A simple color field module with a color picker.
@@ -11,7 +12,8 @@ function colorfield_theme() {
   return array(
     'colorfield_colored_message' => array(
       'variables' => array(
-        'text_color' => 'black', 'text_message' => '',
+        'text_color' => 'black',
+        'text_message' => '',
       ),
       'template' => 'templates/colorfield-colored-message',
     ),
@@ -30,8 +32,10 @@ function colorfield_field_info() {
     'default_widget' => 'colorfield_unified_textfield',
     'default_formatter' => 'colorfield_color_swatch',
     'instance_settings' => array(
-      'colorfield_enable_colorpicker' => TRUE,
-      'colorfield_colorpicker_type' => 'farbtastic',
+      'colorfield_options' => array(
+        'colorfield_enable_colorpicker' => TRUE,
+        'colorfield_colorpicker_type' => 'farbtastic',
+      ),
     ),
   );
 
@@ -69,7 +73,7 @@ function colorfield_element_info() {
 }
 
 /**
- * Define the colour picker with Javascript popup element processing.
+ * Define the color picker with Javascript popup element processing.
  * Add popup attributes to $element.
  */
 function colorfield_picker_element_process($element, &$form_state, $form) {
@@ -90,7 +94,7 @@ function colorfield_picker_element_process($element, &$form_state, $form) {
 }
 
 /**
- * Define the colour picker with Javascript popup element processing.
+ * Define the color picker with Javascript popup element processing.
  * Add popup attributes to $element.
  */
 function colorfield_picker_minicolors_element_process($element, &$form_state, $form) {
@@ -188,7 +192,7 @@ function colorfield_field_validate($entity_type, $entity, $field, $instance, $la
       foreach ($item['rgb'] as $key => $color_component) {
         // Check if every color component is a valid hexadecimal value.
         if (!preg_match('@^[0-9a-f]{2}$@i', $color_component)) {
-          $errors[$field['field_name']][$langcode][$delta]['rgb'][$key] = array(
+          $errors[$field['field_name']][$langcode][$delta][] = array(
             'error' => 'colorfield_invalid_component_value',
             'message' => t('%name: the color component you specified is not valid, you must use a hexadecimal value (eg: 00, 5D, FF...).', array('%name' => $instance['label'])),
           );
@@ -256,7 +260,6 @@ function colorfield_field_formatter_info() {
     ),
   );
 }
-
 
 /**
  * Implements hook_field_formatter_settings_form().
@@ -374,7 +377,7 @@ function colorfield_field_formatter_view($entity_type, $entity, $field, $instanc
       }
       break;
 
-    // Adds an empty DIV, the background of which uses the selected colour.
+    // Adds an empty DIV, the background of which uses the selected color.
     // Could be used, for example, to display a swatch of the color.
     case 'colorfield_color_swatch':
       foreach ($items as $delta => $item) {
@@ -410,13 +413,15 @@ function colorfield_field_widget_info() {
       'label' => t('Color code (eg: #FFAA77)'),
       'field types' => array('colorfield'),
       'settings' => array(
-        'colorfield_enable_colorpicker' => TRUE,
-        'colorfield_colorpicker_type' => 'farbtastic'
+        'colorfield_options' => array(
+          'colorfield_enable_colorpicker' => TRUE,
+          'colorfield_colorpicker_type' => 'farbtastic',
+        ),
       ),
       'weight' => 0,
     ),
     'colorfield_split_textfield' => array(
-      'label' => t('Split Red, Green and Blue text fields'),
+      'label' => t('Split hex code text based on RGB (eg: FF AA 77)'),
       'field types' => array('colorfield'),
       'weight' => 1,
     ),
@@ -440,13 +445,13 @@ function colorfield_field_widget_form(&$form, &$form_state, $field, $instance, $
         '#maxlength' => 7,
       );
       // Prepare the base markup for the color picker if enabled.
-      if ($instance['widget']['settings']['colorfield_enable_colorpicker']) {
+      if ($instance['widget']['settings']['colorfield_options']['colorfield_enable_colorpicker']) {
         $widget += array(
           '#suffix' => '<div class="colorfield-picker"></div>',
           '#attributes' => array('class' => array('colorfield-colorpicker')),
         );
         // Attach Farbtastic color picker when it's the color picker selected.
-        if ($instance['widget']['settings']['colorfield_colorpicker_type'] == 'farbtastic') {
+        if ($instance['widget']['settings']['colorfield_options']['colorfield_colorpicker_type'] == 'farbtastic') {
           $widget['#attached'] = array(
             'library' => array(array('system', 'farbtastic')),
             'js' => array(drupal_get_path('module', 'colorfield') . '/js/colorfield-farbtastic.js'),
@@ -518,19 +523,20 @@ function colorfield_field_widget_settings_form($field, $instance) {
   $form = array();
   $widget = $instance['widget'];
   $settings = $instance['settings'];
+
   if ($widget['type'] == 'colorfield_unified_textfield') {
     $form['colorfield_options'] = array(
       '#type' => 'fieldset',
       '#title' => t('Color selection options'),
     );
-    $default_value_colorpicker = (isset($widget['settings']['colorfield_enable_colorpicker'])) ? $widget['settings']['colorfield_enable_colorpicker'] : $settings['colorfield_enable_colorpicker'];
+    $default_value_colorpicker = (isset($widget['settings']['colorfield_options']['colorfield_enable_colorpicker'])) ? $widget['settings']['colorfield_options']['colorfield_enable_colorpicker'] : $settings['colorfield_options']['colorfield_enable_colorpicker'];
     $form['colorfield_options']['colorfield_enable_colorpicker'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable the color picker.'),
       '#description' => t('If you enable this option the user will be able to select a color via a user friendly widget.'),
       '#default_value' => $default_value_colorpicker,
     );
-    $default_value_colorpicker_type = (isset($widget['settings']['colorfield_colorpicker_type'])) ? $widget['settings']['colorfield_colorpicker_type'] : $settings['colorfield_colorpicker_type'];
+    $default_value_colorpicker_type = (isset($widget['settings']['colorfield_options']['colorfield_colorpicker_type'])) ? $widget['settings']['colorfield_options']['colorfield_colorpicker_type'] : $settings['colorfield_options']['colorfield_colorpicker_type'];
     $form['colorfield_options']['colorfield_colorpicker_type'] = array(
       '#type' => 'select',
       '#title' => t('Select the color picker'),
