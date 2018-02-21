@@ -199,13 +199,20 @@ DirectoryIndex index.php index.html index.htm
 	
 	# FONTS
 	AddType font/opentype otf
-	AddType application/font-woff woff
-	AddType application/x-font-woff woff
+	AddType application/font-woff woff 
+	AddType application/x-font-woff woff 
 	AddType application/vnd.ms-fontobject eot
 	AddType application/x-font-ttf ttc ttf
 	AddType image/svg+xml svg svgz
 	AddEncoding gzip svgz
 	
+  <FilesMatch "\.(ttf|ttc|otf|eot|woff|woff2|font.css)$">
+    <IfModule mod_headers.c>
+        Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+  </FilesMatch>
+  
+  
 	# AUDIO
 	AddType audio/mp4 m4a f4a f4b
 	AddType audio/ogg oga ogg
@@ -235,3 +242,4 @@ DirectoryIndex index.php index.html index.htm
   AddType image/jpeg .jpeg .jpg .jpe .JPG 
 	
 </IfModule>
+
