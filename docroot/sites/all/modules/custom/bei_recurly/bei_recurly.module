@@ -217,6 +217,7 @@ function bei_recurly_checkout_membership_validate($form, &$form_state) {
 
 //contact information page
 function bei_recurly_checkout_contact_form($form, &$form_state) {
+  $form['#attributes']['autocomplete'] = 'off';
   spambot_add_form_protection($form,
     array(
       'mail' => 'email',
