@@ -220,6 +220,25 @@ body {
             }
         }
     }
+    .a2a_floating_vert {
+      left: 0;
+      bottom: 70vh;
+      top: 40vh;
+      height: 180px;
+      animation: a2aFadeIn .2s ease-in;
+      padding: 4px;
+      background-color: #fff;
+      border-radius: 6px;
+      position: fixed;
+      z-index: 9999995;
+      a {
+        clear: left;
+        display: block;
+        overflow: hidden;
+        padding: 4px;
+        text-decoration: none;
+      }
+    }
 }
 @media #{$large-up} {
     #mini-panel-solutions {
