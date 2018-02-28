@@ -94,6 +94,260 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             $form['#redirect'] = 'node/' . $nid . '/import';
         }
     }
+    if ($form_id == 'webform_client_form_156896') {
+      $form['#submit'][] = 'ep_alters_webform_wizard_submit';
+      $storage = isset($form_state['storage']) ? $form_state['storage'] : NULL;
+      $current_page = $storage ? $storage['page_num'] : 1;
+      if ($current_page == 2) {
+        $form['submitted']['q6']['#states'] = array(
+          'visible' => array(
+            ':input[name="submitted[q5]"]' => array('value' => '1'),
+          ),
+        );
+        $form['submitted']['q6_1']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q5]"]' => array('value' => '2'),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q5]"]' => array('value' => '3'),
+            ),
+          ),
+        );
+        $form['submitted']['q6_2']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q5]"]' => array('value' => '2'),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q5]"]' => array('value' => '3'),
+            ),
+          ),
+        );
+        $form['submitted']['q7']['#states'] = array(
+          'visible' => array(
+            ':input[name="submitted[q5]"]' => array('value' => '1'),
+            ':input[name="submitted[q6]"]' => array('value' => '1'),
+          ),
+        );
+        $form['submitted']['q8']['#states'] = array(
+          'visible' => array(
+            ':input[name="submitted[q5]"]' => array('value' => '1'),
+            ':input[name="submitted[q6]"]' => array('value' => '1'),
+          ),
+        );
+        $form['submitted']['q9']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q5]"]' => array('value' => '1'),
+              ':input[name="submitted[q6]"]' => array('value' => '1'),
+              ':input[name="submitted[q7]"]' => array('value' => '1'),
+              ':input[name="submitted[q8]"]' => array('value' => '1'),
+            ),
+            'or',
+            array(
+              array(
+                array(
+                  ':input[name="submitted[q5]"]' => array('value' => '2'),
+                ),
+                'or',
+                array(
+                  ':input[name="submitted[q5]"]' => array('value' => '3'),
+                ),
+              ),
+              ':input[name="submitted[q6_1]"]' => array('value' => '3'),
+              ':input[name="submitted[q6_2]"]' => array('value' => '3'),
+            ),
+          ),
+        );
+        $form['actions']['next']['#states'] = array(
+          'visible' => array(
+            ':input[name="submitted[q4]"]' => array('!value' => FALSE),
+            array(
+              array(
+                ':input[name="submitted[q5]"]' => array('value' => '1'),
+                array(
+                  array(
+                    ':input[name="submitted[q6]"]' => array('value' => '2'),
+                  ),
+                  'xor',
+                  array(
+                    ':input[name="submitted[q6]"]' => array('value' => '1'),
+                    array(
+                      ':input[name="submitted[q7]"]' => array('value' => '2'),
+                      ':input[name="submitted[q8]"]' => array('value' => '2'),
+                    ),
+                  ),
+                ),
+              ),
+              array(
+                ':input[name="submitted[q5]"]' => array('value' => '2'), 
+              ),
+              array(
+                ':input[name="submitted[q5]"]' => array('value' => '3'), 
+              ),
+            ),
+          ),
+        );
+      }
+      // Planning questions.
+      elseif ($current_page == 3) {
+        $form['submitted']['q11']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ),
+            
+          ),
+        );
+        $form['submitted']['q12']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ),
+          ),
+        );
+        $form['submitted']['q13']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ),
+          ),
+        );
+        $form['submitted']['q14']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ),
+          ),
+        );
+        $form['submitted']['q15']['#states'] = array(
+          'visible' => array(
+            array(
+              array(
+                ':input[name="submitted[q10]"]' => array('value' => 1),
+                array(
+                  array(
+                    ':input[name="submitted[q14]"]' => array('value' => 1),
+                  ),
+                  'or',
+                  array(
+                    ':input[name="submitted[q14]"]' => array('value' => 3),
+                  ),
+                ),
+              ),
+              'or',
+              array(
+                ':input[name="submitted[q10]"]' => array('value' => 2),
+                array(
+                  array(
+                    ':input[name="submitted[q14]"]' => array('value' => 1),
+                  ),
+                  'or',
+                  array(
+                    ':input[name="submitted[q14]"]' => array('value' => 3),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+        $form['submitted']['q16']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ),
+            'or',
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ),
+          ),
+        );
+        $form['actions']['next']['#states'] = array(
+          'visible' => array(
+            array(
+              ':input[name="submitted[q10]"]' => array('value' => 3),
+            ),
+            'or',
+            array(
+              array(
+                array(
+                  ':input[name="submitted[q10]"]' => array('value' => 1),
+                ),
+                'or',
+                array(
+                  ':input[name="submitted[q10]"]' => array('value' => 2),
+                ),
+              ),
+              ':input[name="submitted[q13]"]' => array('!value' => FALSE),
+              ':input[name="submitted[q14]"]' => array('!value' => FALSE),
+            ),
+          ),
+        );
+      }
+    }
+}
+function ep_alters_webform_wizard_submit(&$form, &$form_state) {
+    $submitted = $form_state['complete form']['submitted'];
+    $details = $form_state['values']['details'];
+    $last_page = $details['page_count'];
+    $op = $form_state['clicked_button']['#parents'][0];
+    $next_page = $form_state['storage']['page_num'];
+    $current_page = $details['page_num'];
+    /*
+    if ($op == 'next') {
+        if ($current_page == 2) {
+            // Skip to end.
+            if ($submitted['q5']['#value'] == 2) {
+                $form_state['storage']['page_num'] = $last_page;
+                $form_state['rebuild'] = TRUE;
+            }
+            elseif ($submitted['q5']['#value'] == 3) {
+                $form_state['storage']['page_num'] = 
+            }
+        }
+        elseif ($current_page == 4 && ($submitted['']))
+    }
+    if ($next_page == 3) {
+        if ($op == 'next') {
+            if ($current_page == 2) {
+                // Skip to Page 4.
+                if ($submitted['q5']['#value'] == 2 || $submitted['q5']['#value'] == 3) {
+                    $form_state['storage']['page_num'] = 4;
+                    $form_state['rebuild'] = TRUE;
+                }
+            }
+        }
+        if ($op == 'previous') {
+            if ($current_page == 4) {
+                $form_state['storage']['page_num'] = 2;
+                $form_state['rebuild'] = TRUE;
+            }
+        }
+    }
+    elseif ($next_page == 5) {
+        if ($op == 'next') {
+            
+        }
+    }*/
 }
 /**
  * Implementation of hook_validate().
