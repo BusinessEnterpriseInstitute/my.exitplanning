@@ -106,23 +106,17 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         );
         $form['submitted']['q6_1']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q5]"]' => array('value' => '2'),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q5]"]' => array('value' => '3'),
+            ':input[name="submitted[q5]"]' => array(
+              array('value' => '2'),
+              array('value' => '3'),
             ),
           ),
         );
         $form['submitted']['q6_2']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q5]"]' => array('value' => '2'),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q5]"]' => array('value' => '3'),
+            ':input[name="submitted[q5]"]' => array(
+              array('value' => '2'),
+              array('value' => '3'),
             ),
           ),
         );
@@ -148,14 +142,9 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             ),
             'or',
             array(
-              array(
-                array(
-                  ':input[name="submitted[q5]"]' => array('value' => '2'),
-                ),
-                'or',
-                array(
-                  ':input[name="submitted[q5]"]' => array('value' => '3'),
-                ),
+              ':input[name="submitted[q5]"]' => array(
+                array('value' => '2'),
+                array('value' => '3'),
               ),
               ':input[name="submitted[q6_1]"]' => array('value' => '3'),
               ':input[name="submitted[q6_2]"]' => array('value' => '3'),
@@ -173,14 +162,9 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
               ),
               'or',
               array(
-                array(
-                  array(
-                    ':input[name="submitted[q5]"]' => array('value' => '2'),
-                  ),
-                  'or',
-                  array(
-                    ':input[name="submitted[q5]"]' => array('value' => '3'),
-                  ),
+                ':input[name="submitted[q5]"]' => array(
+                  array('value' => '2'),
+                  array('value' => '3'),
                 ),
                 ':input[name="submitted[q6_1]"]' => array('value' => '3'),
                 ':input[name="submitted[q6_2]"]' => array('value' => '3'),
@@ -203,7 +187,6 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   'xor',
                   array(
                     ':input[name="submitted[q6]"]' => array('value' => '1'),
-                    // Make sure they answer these 2 questions.
                     ':input[name="submitted[q7]"]' => array('!value' => false),
                     ':input[name="submitted[q8]"]' => array('!value' => false),
                     array(
@@ -229,7 +212,6 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
               array(
                 ':input[name="submitted[q5]"]' => array(
                   array('value' => '2'),
-                  'or',
                   array('value' => '3'),
                 ),
                 // Make sure these 2 questions are answered.
@@ -239,9 +221,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   array(
                     ':input[name="submitted[q6_1]"]' => array(
                       array('value' => '1'),
-                      'or',
                       array('value' => '2'),
-                      'or',
                       array('value' => '4'),
                     ),
                   ),
@@ -249,9 +229,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   array(
                     ':input[name="submitted[q6_2]"]' => array(
                       array('value' => '1'),
-                      'or',
                       array('value' => '2'),
-                      'or',
                       array('value' => '4'),
                     ),
                   ),
@@ -271,101 +249,66 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       elseif ($current_page == 3) {
         $form['submitted']['q11']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 1),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
             ),
-            'or',
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 2),
-            ),
-            
           ),
         );
         $form['submitted']['q12']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 1),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
             ),
           ),
         );
         $form['submitted']['q13']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 1),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
             ),
           ),
         );
         $form['submitted']['q14']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 1),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
             ),
           ),
         );
         $form['submitted']['q15']['#states'] = array(
           'visible' => array(
-            array(
-              array(
-                ':input[name="submitted[q10]"]' => array('value' => 1),
-                array(
-                  array(
-                    ':input[name="submitted[q14]"]' => array('value' => 1),
-                  ),
-                  'or',
-                  array(
-                    ':input[name="submitted[q14]"]' => array('value' => 3),
-                  ),
-                ),
-              ),
-              'or',
-              array(
-                ':input[name="submitted[q10]"]' => array('value' => 2),
-                array(
-                  array(
-                    ':input[name="submitted[q14]"]' => array('value' => 1),
-                  ),
-                  'or',
-                  array(
-                    ':input[name="submitted[q14]"]' => array('value' => 3),
-                  ),
-                ),
-              ),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
+            ),
+            ':input[name="submitted[q14]"]' => array(
+              array('value' => '1'),
+              array('value' => '3'),
             ),
           ),
         );
         $form['submitted']['q16']['#states'] = array(
           'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 1),
-            ),
-            'or',
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => 2),
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
             ),
           ),
         );
         $form['actions']['next']['#states'] = array(
           'visible' => array(
             array(
-              ':input[name="submitted[q10]"]' => array('value' => 3),
+              ':input[name="submitted[q10]"]' => array('value' => '3'),
             ),
             'or',
             array(
               ':input[name="submitted[q10]"]' => array(
-                array('value' => 1),
-                array('value' => 2),
+                array('value' => '1'),
+                array('value' => '2'),
               ),
               ':input[name="submitted[q13]"]' => array('!value' => false),
               array(
@@ -394,6 +337,11 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
     $op = $form_state['clicked_button']['#parents'][0];
     $next_page = $form_state['storage']['page_num'];
     $current_page = $details['page_num'];
+    if ($current_page == 2) {
+      if ($op == 'next') {
+        dpm($form_state);
+      }
+    }
     /*
     if ($op == 'next') {
         if ($current_page == 2) {
