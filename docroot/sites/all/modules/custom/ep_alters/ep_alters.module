@@ -163,8 +163,9 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           ),
         );
         $form['actions']['next']['#states'] = array(
+          /*
           'visible' => array(
-            ':input[name="submitted[q4]"]' => array('!value' => FALSE),
+            ':input[name="submitted[q4]"]' => array('!value' => false),
             array(
               array(
                 ':input[name="submitted[q5]"]' => array('value' => '1'),
@@ -189,6 +190,9 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                 ':input[name="submitted[q5]"]' => array('value' => '3'), 
               ),
             ),
+          ),*/
+          'invisible' => array(
+            ':input[name="submitted[q4]"]' => array('value' => false),
           ),
         );
       }
@@ -297,8 +301,8 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   ':input[name="submitted[q10]"]' => array('value' => 2),
                 ),
               ),
-              ':input[name="submitted[q13]"]' => array('!value' => FALSE),
-              ':input[name="submitted[q14]"]' => array('!value' => FALSE),
+              ':input[name="submitted[q13]"]' => array('!value' => false),
+              ':input[name="submitted[q14]"]' => array('!value' => false),
             ),
           ),
         );
