@@ -164,7 +164,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         );
         $form['actions']['next']['#states'] = array(
           'visible' => array(
-            ':input[name="submitted[q4]"]' => array('!value' => FALSE),
+            ':input[name="submitted[q4]"]' => array('!value' => false),
             array(
               array(
                 ':input[name="submitted[q5]"]' => array('value' => '1'),
@@ -176,17 +176,57 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   array(
                     ':input[name="submitted[q6]"]' => array('value' => '1'),
                     array(
-                      ':input[name="submitted[q7]"]' => array('value' => '2'),
-                      ':input[name="submitted[q8]"]' => array('value' => '2'),
+                      // If they answer NO to either of these questions.
+                      array(
+                        ':input[name="submitted[q7]"]' => array('value' => '2'),
+                        ':input[name="submitted[q8]"]' => array('!value' => false),
+                      ),
+                      'or',
+                      array(
+                        ':input[name="submitted[q7]"]' => array('!value' => false),
+                        ':input[name="submitted[q8]"]' => array('value' => '2'),
+                      ),
                     ),
                   ),
                 ),
               ),
+              'or',
               array(
-                ':input[name="submitted[q5]"]' => array('value' => '2'), 
-              ),
-              array(
-                ':input[name="submitted[q5]"]' => array('value' => '3'), 
+                ':input[name="submitted[q5]"]' => array(
+                  array('value' => '2'),
+                  'or',
+                  array('value' => '3'),
+                ),
+                // Make sure these 2 questions are answered.
+                ':input[name="submitted[q6_1]"]' => array('!value' => false),
+                ':input[name="submitted[q6_2]"]' => array('!value' => false),
+                array(
+                  array(
+                    ':input[name="submitted[q6_1]"]' => array(
+                      array('value' => '1'),
+                      'or',
+                      array('value' => '2'),
+                      'or',
+                      array('value' => '4'),
+                    ),
+                  ),
+                  'or',
+                  array(
+                    ':input[name="submitted[q6_2]"]' => array(
+                      array('value' => '1'),
+                      'or',
+                      array('value' => '2'),
+                      'or',
+                      array('value' => '4'),
+                    ),
+                  ),
+                  'or',
+                  array(
+                    ':input[name="submitted[q6_1]"]' => array('value' => '3'),
+                    ':input[name="submitted[q6_2]"]' => array('value' => '3'),
+                    ':input[name="submitted[q9]"]' => array('!value' => false),
+                  ),
+                ),
               ),
             ),
           ),
@@ -297,8 +337,8 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
                   ':input[name="submitted[q10]"]' => array('value' => 2),
                 ),
               ),
-              ':input[name="submitted[q13]"]' => array('!value' => FALSE),
-              ':input[name="submitted[q14]"]' => array('!value' => FALSE),
+              ':input[name="submitted[q13]"]' => array('!value' => false),
+              ':input[name="submitted[q14]"]' => array('!value' => false),
             ),
           ),
         );
