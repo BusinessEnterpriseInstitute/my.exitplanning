@@ -78,7 +78,7 @@ function bei_preprocess_html(&$variables) {
           'telephone' => '+1-303-321-2242',
           'contactType' => 'customer service'
                                 ),
-        'logo' => $logo,
+        'logo' => 'http://www.exitplanning.com/sites/default/files/bei_logo_mobile.png',
         'sameAs' => array(
                           'https://www.facebook.com/BEIExitplanning',
                           'https://www.linkedin.com/company/business-enterprise-institute',
