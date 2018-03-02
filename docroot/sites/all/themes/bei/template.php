@@ -69,11 +69,23 @@ function bei_preprocess_html(&$variables) {
     );
     drupal_add_html_head($android_icon, 'bei_android_icon_192');
         $logo = theme_get_setting('logo');
-    $structured_data = array(
+        $structured_data = array(
         '@context' => 'http://schema.org',
         '@type' => 'Organization',
         'url' => 'https://www.exitplanning.com',
+        'contactPoint' => array(
+          '@type' => 'ContactPoint',
+          'telephone' => '+1-303-321-2242',
+          'contactType' => 'customer service'
+                                ),
         'logo' => $logo,
+        'sameAs' => array(
+                          'https://www.facebook.com/BEIExitplanning',
+                          'https://www.linkedin.com/company/business-enterprise-institute',
+                          'https://twitter.com/beiexitplanning?lang=en',
+                          'https://plus.google.com/+Exitplanningforadvisors',
+                          'https://www.youtube.com/user/ExitPlanningExperts',
+                          ),
     );
 
     $structured_data = defined('JSON_UNESCAPED_SLASHES') ? json_encode($structured_data, JSON_UNESCAPED_SLASHES) : json_encode($structured_data);
