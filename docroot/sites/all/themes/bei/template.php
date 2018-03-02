@@ -68,6 +68,21 @@ function bei_preprocess_html(&$variables) {
       ),
     );
     drupal_add_html_head($android_icon, 'bei_android_icon_192');
+        $logo = theme_get_setting('logo');
+    $structured_data = array(
+        '@context' => 'http://schema.org',
+        '@type' => 'Organization',
+        'url' => 'https://www.exitplanning.com',
+        'logo' => $logo,
+    );
+
+    $structured_data = defined('JSON_UNESCAPED_SLASHES') ? json_encode($structured_data, JSON_UNESCAPED_SLASHES) : json_encode($structured_data);
+
+    $json_ld_script = array(
+      '#type' => 'markup',
+      '#markup' => '<script type="application/ld+json">'.$structured_data.'</script>'."\n"
+    );
+    drupal_add_html_head($json_ld_script, 'structured_data_schemaorg_json_ld');
 }
 
 /**
