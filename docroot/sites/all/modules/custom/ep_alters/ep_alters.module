@@ -328,56 +328,85 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           ),
         );
       }
+      elseif ($current_page == 4) {
+        $suggestion = 1;
+        $membership_markup = 'Network membership for you!';
+        $marketing = $form_state['storage']['marketing'];
+        $planning = $form_state['storage']['planning'];
+        if ($marketing && !$planning) {
+          $suggestion = 2;
+          $membership_markup = 'Marketing membership for you!';
+        }
+        elseif ($planning && !$marketing) {
+          $suggestion = 3;
+          $membership_markup = 'Planning membership for you!';
+        }
+        elseif ($marketing && $planning) {
+          $suggestion = 4;
+          $membership_markup = 'Full membership for you!';
+        }
+        $form['submitted']['suggested_membership']['#value'] = $suggestion;
+        
+        $form['membership_markup'] = array(
+          '#type' => 'markup',
+          '#markup' => '<div class="panel">' . $membership_markup . '</div>',
+        );
+      }
     }
 }
 function ep_alters_webform_wizard_submit(&$form, &$form_state) {
-    $submitted = $form_state['complete form']['submitted'];
-    $details = $form_state['values']['details'];
-    $last_page = $details['page_count'];
-    $op = $form_state['clicked_button']['#parents'][0];
-    $next_page = $form_state['storage']['page_num'];
-    $current_page = $details['page_num'];
+  $submitted = $form_state['input']['submitted'];
+  $details = $form_state['values']['details'];
+  $last_page = $details['page_count'];
+  $op = $form_state['clicked_button']['#parents'][0];
+  $next_page = $form_state['storage']['page_num'];
+  $current_page = $details['page_num'];
+  $marketing = FALSE;
+  $planning = TRUE;
+  if ($op == 'next') {
+    // Marketing
     if ($current_page == 2) {
-      if ($op == 'next') {
-        dpm($form_state);
+      if ($submitted['q5'] == 1) {
+        if ($submitted['q6'] == 1) {
+          if ($submitted['q7'] == 2 || $submitted['q8'] == 2) {
+            $marketing = TRUE;
+          }
+          elseif ($submitted['q7'] == 1 && $submitted['q8'] == 1 && ($submitted['q9'] == 2 || $submitted['q9'] == 3)) {
+            $marketing = TRUE;
+          }
+        }
       }
+      elseif ($submitted['q5'] == 2 || $submitted['q5'] == 3) {
+        $matches = array(1, 2, 4);
+        if (in_array($submitted['q6_1'], $matches) || in_array($submitted['q6_2'], $matches)) {
+          $marketing = TRUE;
+        }
+        elseif ($submitted['q6_1'] == 3 && $submitted['q6_2'] == 3 && ($submitted['q9'] == 2 || $submitted['q9'] == 3)) {
+          $marketing = TRUE;
+        }
+      }
+      $form_state['storage']['marketing'] = $marketing;
     }
-    /*
-    if ($op == 'next') {
-        if ($current_page == 2) {
-            // Skip to end.
-            if ($submitted['q5']['#value'] == 2) {
-                $form_state['storage']['page_num'] = $last_page;
-                $form_state['rebuild'] = TRUE;
+    // Planning
+    elseif ($current_page == 3) {
+      if ($submitted['q10'] == 3) {
+        $planning = FALSE;
+      }
+      if ($submitted['q10'] == 1 || $submitted['q10'] == 2) {
+        if ($submitted['q13'] == 1) {
+          if ($submitted['q14'] ==  2) {
+            $planning = FALSE;
+          }
+          elseif ($submitted['q14'] == 1 || $submitted['q14'] == 2) {
+            if ($submitted['q15'] == 1) {
+              $planning = FALSE;
             }
-            elseif ($submitted['q5']['#value'] == 3) {
-                $form_state['storage']['page_num'] = 
-            }
+          }
         }
-        elseif ($current_page == 4 && ($submitted['']))
+      }
+      $form_state['storage']['planning'] = $planning;
     }
-    if ($next_page == 3) {
-        if ($op == 'next') {
-            if ($current_page == 2) {
-                // Skip to Page 4.
-                if ($submitted['q5']['#value'] == 2 || $submitted['q5']['#value'] == 3) {
-                    $form_state['storage']['page_num'] = 4;
-                    $form_state['rebuild'] = TRUE;
-                }
-            }
-        }
-        if ($op == 'previous') {
-            if ($current_page == 4) {
-                $form_state['storage']['page_num'] = 2;
-                $form_state['rebuild'] = TRUE;
-            }
-        }
-    }
-    elseif ($next_page == 5) {
-        if ($op == 'next') {
-            
-        }
-    }*/
+  }
 }
 /**
  * Implementation of hook_validate().
