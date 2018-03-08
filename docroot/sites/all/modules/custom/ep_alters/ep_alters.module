@@ -332,20 +332,20 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       }
       elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
         $suggestion = 1;
-        $membership_markup = 'Network membership for you!';
+        $membership_markup = 'The Network membership is perfect for you!';
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
           $suggestion = 2;
-          $membership_markup = 'Marketing membership for you!';
+          $membership_markup = 'The Marketing membership is perfect for you!';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
-          $membership_markup = 'Planning membership for you!';
+          $membership_markup = 'The Planning membership is perfect for you!';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
-          $membership_markup = 'Full membership for you!';
+          $membership_markup = 'The Full membership is perfect for you!';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
