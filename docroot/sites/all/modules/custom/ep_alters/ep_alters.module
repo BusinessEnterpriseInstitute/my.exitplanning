@@ -332,21 +332,24 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       }
       elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
         $suggestion = 1;
-        $membership_markup = '<h3>The Network membership is perfect for you!</h3><br>
+        $membership_markup = '<h3>The Network membership is perfect for you!</h3>
         <p>Designed for advisors who want to collaborate with a diverse network of sophisticated planning professionals.</p>';
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
           $suggestion = 2;
-          $membership_markup = 'The Marketing membership is perfect for you!';
+          $membership_markup = '<h3>The Marketing membership is perfect for you!</h3>
+          <p>Designed for advisors who are looking to get an injection of new clients and increase awareness for their Exit Planning work.</p>';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
-          $membership_markup = 'The Planning membership is perfect for you!';
+          $membership_markup = '<h3>The Planning membership is perfect for you!</h3>
+          <p>Designed for advisors who are comfortable with their client base and are looking for the tools to streamline the plan-creation process.</p>';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
-          $membership_markup = 'The Full membership is perfect for you!';
+          $membership_markup = '<h3>The Full membership is perfect for you!</h3>
+          <p>Designed for advisors who want access to the tools, materials and support to attract and engage clients in the Exit Planning Process.</p>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
