@@ -68,18 +68,16 @@ function bei_preprocess_html(&$variables) {
       ),
     );
     drupal_add_html_head($android_icon, 'bei_android_icon_192');
-    /**
+    
         $logo = theme_get_setting('logo');
         $structured_data = array(
         '@context' => 'http://schema.org',
         '@type' => 'Organization',
+        '@id' => 'https://www.exitplanning.com/#organization',
+        'name' => 'BEI Exit Planning',
+        'alternateName' => 'Business Enterprise Institute, Inc.',
         'url' => 'https://www.exitplanning.com',
-        'contactPoint' => array(
-          '@type' => 'ContactPoint',
-          'telephone' => '+1-303-321-2242',
-          'contactType' => 'customer service'
-                                ),
-        'logo' => 'https://www.exitplanning.com/sites/default/files/exitplanning.com.png',
+                'logo' => 'https://www.exitplanning.com/sites/default/files/exitplanning.com.png',
         'sameAs' => array(
                           'https://www.facebook.com/BEIExitplanning',
                           'https://www.linkedin.com/company/business-enterprise-institute',
@@ -87,6 +85,38 @@ function bei_preprocess_html(&$variables) {
                           'https://plus.google.com/+Exitplanningforadvisors',
                           'https://www.youtube.com/user/ExitPlanningExperts',
                           ),
+        'address' => array(
+          '@type' => 'PostalAddress',
+          'streetAddress' => '2000 South Colorado Blvd., Suite A-460',
+          'addressLocality' => 'Denver',
+          'addressRegion' => 'CO',
+          'postalCode' => '80222-7900',
+                           ),
+        'contactPoint' => array(
+          '@type' => 'ContactPoint',
+          'telephone' => '+1-303-321-2242',
+          'contactType' => 'customer service'
+                                ),
+    );
+        $structured_data = array(
+        '@context' => 'http://schema.org',
+        '@type' => 'Website',
+        '@id' => 'https://www.exitplanning.com/#website',
+        'name' => 'BEI Exit Planning',
+        'alternateName' => 'Business Enterprise Institute, Inc.',
+        'url' => 'https://www.exitplanning.com',
+        'potentialAction' => array(
+          '@type'	=> 'SearchAction',
+          'target' => array(
+            '@type' => 'EntryPoint',
+            'urlTemplate' => 'https://www.exitplanning.com/?s={search_term_string}',
+                            ),
+          'query-input' => array(
+            '@type' => 'PropertyValueSpecification',
+            'valueRequired' => 'http://schema.org/True',
+            'valueName' => 'search_term_string',
+                                 ),
+                                   ),                         
     );
 
     $structured_data = defined('JSON_UNESCAPED_SLASHES') ? json_encode($structured_data, JSON_UNESCAPED_SLASHES) : json_encode($structured_data);
@@ -96,7 +126,7 @@ function bei_preprocess_html(&$variables) {
       '#markup' => '<script type="application/ld+json">'.$structured_data.'</script>'."\n"
     );
     drupal_add_html_head($json_ld_script, 'structured_data_schemaorg_json_ld');
-    **/
+
 }
 
 /**
