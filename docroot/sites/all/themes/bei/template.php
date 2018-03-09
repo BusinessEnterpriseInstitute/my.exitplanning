@@ -98,6 +98,13 @@ function bei_preprocess_html(&$variables) {
                                 ),
     );
     $structured_data = defined('JSON_UNESCAPED_SLASHES') ? json_encode($structured_data, JSON_UNESCAPED_SLASHES) : json_encode($structured_data);
+      
+      $json_ld_script = array(
+      '#type' => 'markup',
+      '#markup' => '<script type="application/ld+json">'.$structured_data.'</script>'."\n"
+    );
+    drupal_add_html_head($json_ld_script, 'structured_data_schemaorg_json_ld');
+    
         $structured_data = array(
         '@context' => 'http://schema.org',
         '@type' => 'Website',
