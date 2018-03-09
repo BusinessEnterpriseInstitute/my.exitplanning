@@ -76,7 +76,7 @@ function bei_preprocess_html(&$variables) {
         'name' => 'BEI Exit Planning',
         'alternateName' => 'Business Enterprise Institute, Inc.',
         'url' => 'https://www.exitplanning.com',
-                'logo' => 'https://www.exitplanning.com/sites/default/files/exitplanning.com.png',
+        'logo' => 'https://www.exitplanning.com/sites/default/files/exitplanning.com.png',
         'sameAs' => array(
                           'https://www.facebook.com/BEIExitplanning',
                           'https://www.linkedin.com/company/business-enterprise-institute',
@@ -112,6 +112,14 @@ function bei_preprocess_html(&$variables) {
         'name' => 'BEI Exit Planning',
         'alternateName' => 'Business Enterprise Institute, Inc.',
         'url' => 'https://www.exitplanning.com',
+        'logo' => 'https://www.exitplanning.com/sites/default/files/exitplanning.com.png',
+        'sameAs' => array(
+                          'https://www.facebook.com/BEIExitplanning',
+                          'https://www.linkedin.com/company/business-enterprise-institute',
+                          'https://twitter.com/beiexitplanning?lang=en',
+                          'https://plus.google.com/+Exitplanningforadvisors',
+                          'https://www.youtube.com/user/ExitPlanningExperts',
+                          ),
         'potentialAction' => array(
           '@type'	=> 'SearchAction',
           'target' => array(
