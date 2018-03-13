@@ -100,6 +100,10 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       $form['#submit'][] = 'ep_alters_webform_wizard_submit';
       $storage = isset($form_state['storage']) ? $form_state['storage'] : NULL;
       $current_page = $storage ? $storage['page_num'] : 1;
+      $membership_markup = '<h3>Let\'s Get Started</h3>
+        <p>You’ll answer straightforward questions about your goals, client base and business profile.
+        We’ll recommend a membership based on your responses.
+        From there it’s easy to sign up, manage your account and use our resources.</p>';   
       if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
         $form['submitted']['q6']['#states'] = array(
           'visible' => array(
@@ -334,6 +338,19 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         $suggestion = 1;
         $membership_markup = '<h3>The Network membership is perfect for you!</h3>
         <p>Designed for advisors who want to collaborate with a diverse network of sophisticated planning professionals.</p>
+        <ul class="benefits network medium-block-grid-3"><li>
+        <h3>Advisor Network Access</h3>
+        Connect with top Exit Planners and to learn about cutting edge planning techniques.
+        </li>
+        <li>
+        <h3>Member Directory Listing</h3>
+        BEI\'s exclusive Member Directory allows advisors to connect and collaborate based on location and area of expertise.
+        </li>
+        <li>
+        <h3>National Technical Webcasts</h3>
+        Access to live monthly webinars focused on strategic planning techniques, taught by the industry’s top thought leaders.
+        </li>
+        </ul><h2>Network Membership Benefits at a Glance</h2>
         <ul class="checks">
           <li>BEI Member Advisor Directory</li>
           <li>Public website <a href="/resources/find-advisor">Find an Advisor</a> Directory </li>
