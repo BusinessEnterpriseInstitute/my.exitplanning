@@ -385,7 +385,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           <ul class="benefits planning medium-block-grid-3">
             <li>
             <h3>EPIC&trade; Software</h3>
-            The industry's only plan creation software, EPIC, developed exclusively by BEI, for BEI members, so you don't have to reinvent the wheel with every plan.
+            The industry\'s only plan creation software, EPIC, developed exclusively by BEI, for BEI members, so you don\'t have to reinvent the wheel with every plan.
             </li>
             <li>
             <h3>Implementation Support</h3>
@@ -434,7 +434,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           <ul class="checks">
             <li>BEI Member Advisor Directory</li>
             <li>Public website <a href="/resources/find-advisor">Find an Advisor</a> Directory</li>
-            <li>BEI's <a href="/node/31">Newsletter Automated Marketing System</a></li>
+            <li>BEI\'s <a href="/node/31">Newsletter Automated Marketing System</a></li>
             <li>Introduction to Exit Planning and Needs Assessment Brochures</li>
             <li>Speaking Kit</li>
             <li>White Papers</li>
