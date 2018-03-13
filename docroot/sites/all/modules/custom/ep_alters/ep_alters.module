@@ -340,8 +340,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           <li>Monthly <a href="/solutions/training/webinars">Technical Webcasts</a></li>
           <li>Member Collaboration</li>
           <li><a href="/alliances">Strategic Alliances</a></li>
-        </ul>
-        <strong>Not sure if the Network Membership is for you? Check out <a href="/node/108759">different Membership options</a>.</strong>';        
+        </ul>';        
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
@@ -375,8 +374,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
             <li><a href="/alliances">Strategic Alliances</a></li>
-          </ul>
-          <strong>Not sure if the Marketing Membership is for you? Check out <a href="/node/108759">different Membership options</a>.</strong>';
+          </ul>';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
@@ -409,8 +407,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
             <li><a href="/alliances">Strategic Alliances</a></li>
-          </ul>
-          <strong>Not sure if the Planning Membership is for you? Check out <a href="/node/108759">different Membership options</a>.</strong>';
+          </ul>';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
@@ -448,8 +445,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
             <li><a href="/alliances">Strategic Alliances</a></li>
-          </ul>
-            <strong>Not sure if the Full Membership is for you? Check out <a href="/node/108759">different Membership options</a>.</strong>';
+          </ul>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
