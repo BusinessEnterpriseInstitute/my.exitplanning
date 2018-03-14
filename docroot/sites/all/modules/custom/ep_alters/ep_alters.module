@@ -381,16 +381,16 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           <h2>Marketing Membership Benefits at a Glance</h2>
           <ul class="checks">
             <li>BEI Member Advisor Directory</li>
-            <li>Public website <a href="/resources/find-advisor">Find an Advisor</a> Directory</li>
-            <li>BEI’s <a href="/solutions/marketing/exit-planning-enewsletter">Newsletter Automated Marketing System</a></li>
+            <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory</li>
+            <li>BEI\'s ' . l(t('Newsletter Automated Marketing System'), 'solutions/marketing/exit-planning-enewsletter') . ' </li>
             <li>Introduction to Exit Planning and Needs Assessment Brochures</li>
             <li>Speaking Kit</li>
             <li>White Papers</li>
             <li>One-on-One Coaching</li>
-            <li>Monthly <a href="/solutions/training/webinars">Technical Webcasts</a></li>
+            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
-            <li><a href="/alliances">Strategic Alliances</a></li>
+            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
           </ul>';
         }
         elseif ($planning && !$marketing) {
@@ -415,15 +415,15 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           <ul class="checks">
             <li>BEI Member Advisor Directory</li>
             <li>Needs Assessment Brochures</li>
-            <li>Monthly <a href="/solutions/training/webinars">Technical Webcasts</a></li>
+            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
             <li>Comprehensive Implementation and Plan Design Support</li>
             <li>Engagement Proposals</li>
-            <li><a href="/node/37">EPIC Software</a></li>
+            <li>' . l(t('EPIC Software'), 'node/37') . '</li>
             <li>Exit Plan Mapping Tool</li>
             <li>Project Management Tools</li>
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
-            <li><a href="/alliances">Strategic Alliances</a></li>
+            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
           </ul>';
         }
         elseif ($marketing && $planning) {
@@ -447,21 +447,21 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
             <h2>Full Membership Benefits at a Glance</h2>
           <ul class="checks">
             <li>BEI Member Advisor Directory</li>
-            <li>Public website <a href="/resources/find-advisor">Find an Advisor</a> Directory</li>
-            <li>BEI\'s <a href="/node/31">Newsletter Automated Marketing System</a></li>
+            <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory</li>
+            <li>BEI\'s ' . l(t('Newsletter Automated Marketing System'), 'node/31') . '</li>
             <li>Introduction to Exit Planning and Needs Assessment Brochures</li>
             <li>Speaking Kit</li>
             <li>White Papers</li>
             <li>One-on-One Coaching</li>
-            <li>Monthly <a href="/solutions/training/webinars">Technical Webcasts</a></li>
+            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
             <li>Comprehensive Implementation and Plan Design Support</li>
             <li>Engagement Proposals</li>
-            <li><a href="/node/37">EPIC Software</a></li>
+            <li>' . l(t('EPIC Software'), 'node/37') . '</li>
             <li>Exit Plan Mapping Tool</li>
             <li>Project Management Tools</li>
             <li>Workbooks and Assessment Software</li>
             <li>Member Collaboration and Practice Groups</li>
-            <li><a href="/alliances">Strategic Alliances</a></li>
+            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
           </ul>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
