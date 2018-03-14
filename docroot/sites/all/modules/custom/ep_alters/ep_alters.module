@@ -348,15 +348,15 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         </li>
         <li>
         <h3>National Technical Webcasts</h3>
-        Access to live monthly webinars focused on strategic planning techniques, taught by the industry’s top thought leaders.
+        Access to live monthly webinars focused on strategic planning techniques, taught by the industry\'s top thought leaders.
         </li>
         </ul><h2>Network Membership Benefits at a Glance</h2>
         <ul class="checks">
           <li>BEI Member Advisor Directory</li>
-          <li>Public website <a href="/resources/find-advisor">Find an Advisor</a> Directory </li>
-          <li>Monthly <a href="/solutions/training/webinars">Technical Webcasts</a></li>
+          <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory </li>
+          <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
           <li>Member Collaboration</li>
-          <li><a href="/alliances">Strategic Alliances</a></li>
+          <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
         </ul>';        
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
