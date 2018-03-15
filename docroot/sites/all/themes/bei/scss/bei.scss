@@ -285,12 +285,12 @@ h1#page-title {
   margin-top: rem-calc(15);
 }
 .page-header h1, h2.pane-title, h2.block-title {
-    font-family: $roboto-condensed;
+  font-family: $roboto-condensed;
 }
 
 // Lists
 ul, ol, dl {
-    font-size: unset;
+  font-size: unset;
 }
 ol.ep-process {
   counter-reset:li; /* Initiate a counter */
@@ -329,29 +329,29 @@ ul.about-team {
   }
 }
 ul.accordion {
-    margin: 0;
-    &#faq-list {
-        li {
-            @include accordion-navigation;
-            border-bottom: 2px solid $red;
-            &:last-child {
-                border: none;
-            }
-            > a {
-                background: #fff;
-                font-weight: bold;
-                &:after {
-                    @include font-size(20);
-                    float: right;
-                    @extend .bei-icon:before;
-                    @extend .icon-arrow-right22:before;
-                }
-            }
-            &.active > a:after {
-                @extend .icon-arrow-down2:before;
-            }
+  margin: 0;
+  &#faq-list {
+    li {
+      @include accordion-navigation;
+      border-bottom: 2px solid $red;
+      &:last-child {
+        border: none;
+      }
+      > a {
+        background: #fff;
+        font-weight: bold;
+        &:after {
+          @include font-size(20);
+          float: right;
+          @extend .bei-icon:before;
+          @extend .icon-arrow-right22:before;
         }
+      }
+      &.active > a:after {
+        @extend .icon-arrow-down2:before;
+      }
     }
+  }
 }
 ul.checks {
   list-style: none;
@@ -434,7 +434,7 @@ ul.benefits {
   }
 }
 #faq-callout {
-    @include font-size(30);
+  @include font-size(30);
 }
 // Breadcrumbs
 ul.breadcrumbs {
@@ -464,43 +464,43 @@ ul.breadcrumbs {
 }
 // Messages
 .alert-box {
-    margin: 1.25rem 0;
+  margin: 1.25rem 0;
 }
 // Book
 .book-navigation {
-    margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 .row.full-width,
 .row.full-width .row {
-    max-width: 100% !important;
+  max-width: 100% !important;
 }
 // Misc.
 .text-upper {
   text-transform: uppercase;
 }
 .scrollable {
-    overflow-y: scroll;
-    -webkit-overflow-scrolling: touch;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
 }
 .no-bg {
   background: none;
 }
 .more-link {
-    text-transform: uppercase;
+  text-transform: uppercase;
+  text-align: center;
+  font-family: $roboto-condensed;
+  font-weight: 700;
+  a {
+    display: inline-block;
     text-align: center;
-    font-family: $roboto-condensed;
-    font-weight: 700;
-    a {
-        display: inline-block;
-        text-align: center;
-        padding: rem-calc(10) rem-calc(20);
-        color: $blue;
-        border: 1px solid;
-        &:hover {
-            background: $blue;
-            color: #fff;
-        }
+    padding: rem-calc(10) rem-calc(20);
+    color: $blue;
+    border: 1px solid;
+    &:hover {
+      background: $blue;
+      color: #fff;
     }
+  }
 }
 // Devel styles
 div.krumo-preview {
@@ -508,60 +508,58 @@ div.krumo-preview {
 }
 
 table {
-    width: 100%;
-    &.draggable,
-    tr.draggable {
-        a.tabledrag-handle {
-            margin: 2px 0 0;
-            height: 13px;
-            .handle {
-                background-position: 0 0;
-                margin: 0 .5em 0 0;
-            }
-            &:hover .handle {
-                background-position: 0 -20px;
-            }
-        }
+  width: 100%;
+  &.draggable,
+  tr.draggable {
+    a.tabledrag-handle {
+      margin: 2px 0 0;
+      height: 13px;
+      .handle {
+        background-position: 0 0;
+        margin: 0 .5em 0 0;
+      }
+      &:hover .handle {
+        background-position: 0 -20px;
+      }
     }
-    td.icon {
-        width: 40px;
-        text-align: center;
-        padding: 0 !important;
-        a {
-            display: block;
-            padding: .75em;
-        }
-        i.disabled {
-          color: #aaa;
-          cursor: not-allowed;
-        }
+  }
+  td.icon {
+    width: 40px;
+    text-align: center;
+    padding: 0 !important;
+    a {
+      display: block;
+      padding: .75em;
     }
-    .form-item, .form-actions {
-      margin: 0;
+    i.disabled {
+      color: #aaa;
+      cursor: not-allowed;
     }
-    button, .button {
-      margin-bottom: 0;
-    }
+  }
+  .form-item, .form-actions {
+    margin: 0;
+  }
+  button, .button {
+    margin-bottom: 0;
+  }
 }
-
-
 .landing-teaser {
-    margin-bottom: 1em;
-    @include box-shadow(0, 22px, 8px, -20px, rgba(50, 50, 50, 0.6));
-    padding: 1.5em;
-    border: 1px solid $gainsboro;
-    h2.pane-title,
-    h2.block-title {
-        text-align: center;
-        font-size: rem-calc(20);
-        margin: 0 0 .75em;
-        padding-bottom: 5px;
-        border-bottom: 2px solid $red;
-        color: #00334d;
-        a {
-            color: #00334d;
-        }
+  margin-bottom: 1em;
+  @include box-shadow(0, 22px, 8px, -20px, rgba(50, 50, 50, 0.6));
+  padding: 1.5em;
+  border: 1px solid $gainsboro;
+  h2.pane-title,
+  h2.block-title {
+    text-align: center;
+    font-size: rem-calc(20);
+    margin: 0 0 .75em;
+    padding-bottom: 5px;
+    border-bottom: 2px solid $red;
+    color: #00334d;
+    a {
+      color: #00334d;
     }
+  }
 }
 // Break a div outside its container.
 .breakout {
@@ -613,7 +611,6 @@ table {
     }
   }
 }
-
 @media #{$medium-up} {
   .top-bar {
     padding: 0 $column-gutter/2;
@@ -643,29 +640,21 @@ table {
       padding-top: $topbar-height;
       &.admin-menu {
         div.fixed {
-            top: $admin-menu-height;
+          top: $admin-menu-height;
         }
       }
       &.top-header-enabled {
         padding-top: calc(#{$topbar-height} + #{$header-top-height});
-        /*
-        .l-header-top {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 99;
-        }*/
         div.fixed {
-            top: $header-top-height;
+          top: $header-top-height;
         }
         &.admin-menu {
-            .l-header-top {
-                top: $admin-menu-height;
-            }
-            div.fixed {
-                top: calc(#{$admin-menu-height} + #{$header-top-height});
-            }
+          .l-header-top {
+            top: $admin-menu-height;
+          }
+          div.fixed {
+            top: calc(#{$admin-menu-height} + #{$header-top-height});
+          }
         }
       }
     }
@@ -702,7 +691,6 @@ table {
     }
   }
 }
-
 @media #{$large-up} {
   .breakout {
     padding: 0;
@@ -719,21 +707,20 @@ table {
 }
 /**Add To Any floating Social Share**/
 @media screen and (max-width: 768px) {
-      p.a2a_default_style{ display: block;}
+  p.a2a_default_style{ display: block;}
 }
-@media screen
-and (max-width: 768px) {
-   a[href*="tel:"] {
-       pointer-events: none;
-       cursor:default;
-       text-decoration: none;
-   }
+@media screen and (max-width: 768px) {
+  a[href*="tel:"] {
+    pointer-events: none;
+    cursor:default;
+    text-decoration: none;
+  }
 }
 /**Removing the tel: protocal for desktop browsers and ipads**/
 @media(min-width:768px){
- a[href^="tel:"] {
-  pointer-events: none;
- }
+  a[href^="tel:"] {
+    pointer-events: none;
+  }
 }
 /**Align AddToAny verticle left**/
 p.a2a_floating_style.a2a_vertical_style {
@@ -751,9 +738,7 @@ p.a2a_floating_style.a2a_vertical_style {
  color:#FFFFFF;
  width:100% !important;
  display:block;
- 
 }
-
 /* Screen reader-specific classes */
 .show-for-sr {
   clip: rect(1px, 1px, 1px, 1px);
@@ -761,7 +746,6 @@ p.a2a_floating_style.a2a_vertical_style {
   overflow: hidden;
   position: absolute !important;
   width: 1px; }
-
 .show-on-focus {
   clip: rect(1px, 1px, 1px, 1px);
   height: 1px;
@@ -774,11 +758,8 @@ p.a2a_floating_style.a2a_vertical_style {
     width: auto;
     overflow: visible;
     clip: auto;
-    }
-
+  }
 .tag-list-row {
-        margin-left: 1.25rem;
-        margin-right: 1.25rem;
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
 }
-      
-  
