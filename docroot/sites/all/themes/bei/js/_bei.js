@@ -38,7 +38,14 @@
           window.clearInterval(scrollListener);
         }
       }
-      
+      $('#abtestbutton').click(function() {
+        if (Math.random() > 0.5) {
+          window.location.href = "/wizard";
+        }
+        else {
+          window.location.href = "/wizard-b";
+        }
+      });
 
     }
   };     
