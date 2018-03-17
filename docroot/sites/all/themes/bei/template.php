@@ -179,13 +179,15 @@ function bei_preprocess_page(&$variables) {
     $variables['sidebar_first_grid'] = '';
     $variables['sidebar_sec_grid'] = '';
   }
-  // Unset the normal theme messages so we can display in our panel template.
+  // Add our custom page template for campaigns and newsletter lists.
   $design_forms = array(
     'subscriber_list',
     'campaign',
   );
   if (isset($variables['node']) && in_array($variables['node']->type, $design_forms) && arg(2) == 'edit' && !arg(3)) {
+    // Unset the normal theme messages so we can display in our panel template.
     $variables['show_messages'] = FALSE;
+    $variables['theme_hook_suggestions'][] = 'page__form__design';
   }
 }
 
