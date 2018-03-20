@@ -337,132 +337,23 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
         $suggestion = 1;
         $membership_markup = '<h3>The Network membership is perfect for you!</h3>
-        <p>Designed for advisors who want to collaborate with a diverse network of sophisticated planning professionals.</p>
-        <ul class="benefits network medium-block-grid-3"><li>
-        <h3>Advisor Network Access</h3>
-        Connect with top Exit Planners and to learn about cutting edge planning techniques.
-        </li>
-        <li>
-        <h3>Member Directory Listing</h3>
-        BEI\'s exclusive Member Directory allows advisors to connect and collaborate based on location and area of expertise.
-        </li>
-        <li>
-        <h3>National Technical Webcasts</h3>
-        Access to live monthly webinars focused on strategic planning techniques, taught by the industry\'s top thought leaders.
-        </li>
-        </ul><h2>Network Membership Benefits at a Glance</h2>
-        <ul class="checks">
-          <li>BEI Member Advisor Directory</li>
-          <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory </li>
-          <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
-          <li>Member Collaboration</li>
-          <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
-        </ul>';        
+        <p>Thank you for your submission! Because you are not currently looking to grow your business, we encourage you to consider networking opportunities through BEI’s Network Membership, and learn more about how Exit Planning can impact your business with our Education & Training Programs.</p>';        
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
           $suggestion = 2;
           $membership_markup = '<h3>The Marketing membership is perfect for you!</h3>
-          <p>Designed for advisors who are looking to get an injection of new clients and increase awareness for their Exit Planning work.</p>
-          <ul class="benefits marketing medium-block-grid-3">
-            <li>
-            <h3>Automated Marketing System</h3>
-            Tools, materials and support to attract and engage clients in Exit Planning.
-            </li>
-            <li>
-            <h3>Assessment Software</h3>
-            Marketing resources provided only through BEI to add value to clients and increase practice revenue.
-            </li>
-            <li>
-            <h3>Practice Groups</h3>
-            Connections with top Exit Planners to learn about cutting-edge planning techniques.
-            </li>
-          </ul>
-          <h2>Marketing Membership Benefits at a Glance</h2>
-          <ul class="checks">
-            <li>BEI Member Advisor Directory</li>
-            <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory</li>
-            <li>BEI\'s ' . l(t('Newsletter Automated Marketing System'), 'solutions/marketing/exit-planning-enewsletter') . ' </li>
-            <li>Introduction to Exit Planning and Needs Assessment Brochures</li>
-            <li>Speaking Kit</li>
-            <li>White Papers</li>
-            <li>One-on-One Coaching</li>
-            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
-            <li>Workbooks and Assessment Software</li>
-            <li>Member Collaboration and Practice Groups</li>
-            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
-          </ul>';
+          <p>Thank you for your submission! BEI’s Marketing Membership is a good fit for you because you need a consistent marketing process, or want to reduce the amount of time and/or money you’re currently spending on your marketing efforts.</p>';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
           $membership_markup = '<h3>The Planning membership is perfect for you!</h3>
-          <p>Designed for advisors who are comfortable with their client base and are looking for the tools to streamline the plan-creation process.</p>
-          <ul class="benefits planning medium-block-grid-3">
-            <li>
-            <h3>EPIC&trade; Software</h3>
-            The industry\'s only plan creation software, EPIC, developed exclusively by BEI, for BEI members, so you don\'t have to reinvent the wheel with every plan.
-            </li>
-            <li>
-            <h3>Implementation Support</h3>
-            Implementation tools specifically developed to keep the advisor team moving together.
-            </li>
-            <li>
-            <h3>Plan Design Support</h3>
-            Personal, individual training and support on plan design concepts.
-            </li>
-          </ul>
-          <h2>Planning Membership Benefits at a Glance</h2>
-          <ul class="checks">
-            <li>BEI Member Advisor Directory</li>
-            <li>Needs Assessment Brochures</li>
-            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
-            <li>Comprehensive Implementation and Plan Design Support</li>
-            <li>Engagement Proposals</li>
-            <li>' . l(t('EPIC Software'), 'node/37') . '</li>
-            <li>Exit Plan Mapping Tool</li>
-            <li>Project Management Tools</li>
-            <li>Workbooks and Assessment Software</li>
-            <li>Member Collaboration and Practice Groups</li>
-            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
-          </ul>';
+          <p>Thank you for your submission! BEI’s Planning Membership is a good fit for you because there are areas of planning work that you’d like to change or improve, including collecting data, turning those data into actionable steps, and leading a team of advisors.</p>';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
           $membership_markup = '<h3>The Full membership is perfect for you!</h3>
-          <p>Designed for advisors who want access to the tools, materials and support to attract and engage clients in the Exit Planning Process.</p>
-          <ul class="benefits full medium-block-grid-3">
-            <li>
-            <h3>Networking Benefits</h3>
-            All the benefits of the Network Membership, including: Advisor Network Access, Member Directory Listing, and National Technical Webcasts.
-            </li>
-            <li>
-            <h3>Marketing Benefits</h3>
-            All the benefits of the Marketing Membership, including: Newsletter Automated Marketing System, Assessment Software, and Practice Groups.
-            </li>
-            <li>
-            <h3>Planning Benefits</h3>
-            All the benefits of the Planning Membership, including: EPIC™ Software, Comprehensive Implementation, and Plan Design Support.
-            </li>
-          </ul>
-            <h2>Full Membership Benefits at a Glance</h2>
-          <ul class="checks">
-            <li>BEI Member Advisor Directory</li>
-            <li>Public website ' . l(t('Find an Advisor'), 'resources/find-advisor') . ' Directory</li>
-            <li>BEI\'s ' . l(t('Newsletter Automated Marketing System'), 'node/31') . '</li>
-            <li>Introduction to Exit Planning and Needs Assessment Brochures</li>
-            <li>Speaking Kit</li>
-            <li>White Papers</li>
-            <li>One-on-One Coaching</li>
-            <li>Monthly ' . l(t('Technical Webcasts'), 'solutions/training/webinars') . '</li>
-            <li>Comprehensive Implementation and Plan Design Support</li>
-            <li>Engagement Proposals</li>
-            <li>' . l(t('EPIC Software'), 'node/37') . '</li>
-            <li>Exit Plan Mapping Tool</li>
-            <li>Project Management Tools</li>
-            <li>Workbooks and Assessment Software</li>
-            <li>Member Collaboration and Practice Groups</li>
-            <li>' . l(t('Strategic Alliances'), 'alliances') . '</li>
-          </ul>';
+          <p>Thank you for your submission! BEI’s Full Membership is best for you because you expressed a need and desire to formalize your marketing and planning processes </p>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
