@@ -362,6 +362,8 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
           '#markup' => '<div class="panel">' . $membership_markup . '</div>',
           '#weight' => -1,
         );
+        unset($form['actions']['previous']);
+        $form['actions']['submit']['#attributes']['class'][] = 'alert';
       }
     }
 }
@@ -376,8 +378,13 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
   $wizard1 = 'webform_client_form_156896';
   $wizard2 = 'webform_client_form_156906';
   if ($op == 'next') {
+    $skip_to_last = FALSE;
     // Marketing
     if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
+      // Determine skip to Last
+      if ($submitted['q4'] == 1 && $submitted['q5'] == 1 && $submitted['q6'] == 2) {
+        $skip_to_last = TRUE;
+      }
       if ($submitted['q5'] == 1) {
         if ($submitted['q6'] == 1) {
           if ($submitted['q7'] == 2 || $submitted['q8'] == 2) {
@@ -398,6 +405,11 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
         }
       }
       $form_state['storage']['marketing'] = $marketing;
+      // If this is true, skip to the last page as we don't need planning section.
+      if ($skip_to_last) {
+        $form_state['storage']['planning'] = FALSE;
+        $form_state['storage']['page_num'] = $form_state['storage']['page_count'];
+      }
     }
     // Planning
     elseif (($form_id == $wizard1 && $current_page == 3) || ($form_id == $wizard2 && $current_page == 2)) {
