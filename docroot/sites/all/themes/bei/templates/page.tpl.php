@@ -167,6 +167,11 @@
         </div>
       <?php endif; ?>
       <div class="<?php print $main_grid; ?> main columns">
+        <?php if ($action_links): ?>
+          <ul class="action-links">
+            <?php print render($action_links); ?>
+          </ul>
+        <?php endif; ?>
         <?php if (!empty($page['highlighted'])): ?>
           <div class="highlight panel callout">
             <?php print render($page['highlighted']); ?>
