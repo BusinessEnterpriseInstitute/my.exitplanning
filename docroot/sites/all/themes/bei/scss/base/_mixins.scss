@@ -25,7 +25,16 @@
   //top: calc(40px + 60px);
   top: page_top_adjust($topheader-height, $topbar-large-height);
 }
-
+@mixin push-6() {
+  position: relative;
+  left: 50%;
+  right: auto;
+}
+@mixin pull-6() {
+  position: relative;
+  right: 50%;
+  left: auto;
+}
 
 /// Slightly lighten a color
 /// @access public

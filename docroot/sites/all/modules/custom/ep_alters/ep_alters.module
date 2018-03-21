@@ -1,6 +1,10 @@
 <?php
 function ep_alters_menu_alter(&$items) {
     $items['user/login']['title'] = 'Member Login';
+    if (module_exists('forum')) {
+        $items['forum']['access arguments'] = array('create forum content');
+        $items['forum/%forum_forum']['access arguments'] = array('create forum content');
+    }
 }
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
     // User login form.

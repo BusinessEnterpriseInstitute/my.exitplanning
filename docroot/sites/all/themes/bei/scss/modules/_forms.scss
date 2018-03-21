@@ -103,144 +103,6 @@ div.vertical-tabs {
     .form-type-textfield input {
         width: 100%;
     }
-    .form-navigation {
-        background: #484848;
-        width: 100%;
-        display: table;
-        table-layout: fixed;
-        &.top {
-            @include side-radius(top, 3px);
-        }
-        &.bottom {
-            @include side-radius(bottom, 3px);
-        }
-        a, a:hover, .heading {
-            color: rgba(255,255,255,.8);
-        }
-        .prev-tab,
-        .next-tab,
-        .heading {
-            display: table-cell;
-            padding: .4em;
-            vertical-align: middle;
-        }
-        .heading {
-            text-align:center;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            font-size: rem-calc(13);
-            width: 100%;
-        }
-        .prev-tab, .next-tab {
-            font-size: rem-calc(20);
-            width: 40px;
-            text-align: center;
-            span {
-                display: none;
-            }
-            &:before {
-                @extend .epic-icon:before;
-            }
-            &:hover {
-                color: #fff;
-            }
-        }
-        .prev-tab {
-            &:before {
-                @extend .icon-arrow-left4:before;
-            }
-        }
-        .next-tab {
-            &:before {
-                @extend .icon-arrow-right5:before;
-            }
-        }
-    }
-    ul.vertical-tabs-list {
-        display: none;
-        margin: 0 0 1em;
-        @include grid-column(12);
-        padding: 0;
-        border: none;
-        z-index: 10;
-        font-size: rem-calc(13);
-        li {
-            border: none;
-            overflow: hidden;
-            background: $blue_medium;
-            border-top: 1px solid rgba(255,255,255,.2);
-            > ul {
-                background: inherit;
-                margin: 0;
-                li {
-                    background: rgba(255,255,255,.3);
-                    padding-left: rem-calc(10);
-                    &.selected {
-                        border-top: none;
-                    }
-                }
-            }
-            a {
-                padding: rem-calc(10) rem-calc(20);
-                color: rgba(255,255,255,.8);
-            }
-            &.selected {
-                //background: darken($blue_medium, 10%);
-                background: #F04124;
-                border-top: none;
-                a {
-                    border-top: none;
-                }
-                a, strong {
-                    color: #fff;
-                }
-            }
-            a:hover,
-            a:hover strong,
-            a:active,
-            a:active strong,
-            a:focus strong {
-                text-decoration: none;
-            }
-            &.child {
-                font-size: rem-calc(12);
-                a strong { font-weight: normal; }
-            }
-        }
-        > li {
-            &:first-child {
-                border-top: none;
-                @include side-radius(top, 3px);
-            }
-            &:last-child {
-                @include side-radius(bottom, 3px);
-            }
-        }
-    }
-    .vertical-tabs-panes {
-        @include grid-column(12);
-        border: none;
-        padding: 0;
-        margin: 0 0 1em;
-    }
-    fieldset.vertical-tabs-pane {
-        padding: 0;
-        > .fieldset-wrapper {
-            padding: 0 1em;
-            @extend .clearfix;
-            background: $secondary-color;
-            border-width: 0 1px 0;
-            border-style: solid;
-            border-color: darken($secondary-color, 15%);
-            fieldset {
-                border-color: darken($secondary-color, 15%);
-                legend {
-                    background: inherit;
-                }
-            }
-        }
-    }
 }
 // Recurly checkout form
 #bei-recurly-checkout-form {
@@ -389,11 +251,6 @@ div.vertical-tabs {
             margin-right: 5px;
         }
     }
-    .form-item-year {
-        label {
-            @extend .element-invisible;
-        }
-    }
     .form-item-verification-value {
         padding-left: $column-gutter/2;
     }
@@ -462,7 +319,7 @@ div.vertical-tabs {
             @include grid-column(12);
             .form-submit {
                 margin: 0;
-                @extend .button.small;
+                @include button-size($padding:$button-sml);
                 font-weight: bold;
             }
         }
@@ -506,10 +363,6 @@ div.vertical-tabs {
             padding-top: 15px;
        }
     }
-}
-
-@media #{$small-range} {
-    
 }
 
 body.page-node-edit {
