@@ -196,7 +196,6 @@ function bei_preprocess_page(&$variables) {
         'class' => array('button', 'alert', 'small'),
       );
     }
-    dpm($variables['action_links']);
   }
 }
 
