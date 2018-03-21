@@ -359,7 +359,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         
         $form['submitted']['membership_markup'] = array(
           '#type' => 'markup',
-          '#markup' => '<div class="panel" style="background-color:#fff;>' . $membership_markup . '</div>',
+          '#markup' => '<div class="panel" style="background-color:#fff;">' . $membership_markup . '</div>',
           '#weight' => -10,
         );
         unset($form['actions']['previous']);
