@@ -357,10 +357,10 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
-        $form['membership_markup'] = array(
+        $form['submitted']['membership_markup'] = array(
           '#type' => 'markup',
           '#markup' => '<div class="panel">' . $membership_markup . '</div>',
-          '#weight' => -1,
+          '#weight' => -10,
         );
         unset($form['actions']['previous']);
         $form['actions']['submit']['#attributes']['class'][] = 'alert';
