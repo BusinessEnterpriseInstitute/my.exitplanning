@@ -189,6 +189,15 @@ function bei_preprocess_page(&$variables) {
     $variables['show_messages'] = FALSE;
     $variables['theme_hook_suggestions'][] = 'page__form__design';
   }
+  // Theme action links as buttons.
+  if (!empty($variables['action_links'])) {
+    foreach (element_children($variables['action_links']) as $key) {
+      $variables['action_links'][$key]['#link']['localized_options']['attributes'] = array(
+        'class' => array('button', 'alert', 'small'),
+      );
+    }
+    dpm($variables['action_links']);
+  }
 }
 
 /**
