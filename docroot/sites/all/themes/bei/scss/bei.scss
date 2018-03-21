@@ -292,6 +292,10 @@ h1#page-title {
 ul, ol, dl {
   font-size: unset;
 }
+ul.action-links {
+  list-style: none;
+  margin: 0;
+}
 ol.ep-process {
   counter-reset:li; /* Initiate a counter */
   margin-left:0; /* Remove the default left margin */

@@ -228,7 +228,7 @@
                     margin-bottom: 0;
                 }
                 button {
-                    @extend .postfix;
+                    @include prefix-postfix-base;
                 }
                 .views-submit-button,
                 .views-reset-button {
@@ -251,13 +251,13 @@
         .views-row:nth-of-type(even) {
             > .row {
                 .columns:first-child {
-                    @extend .push-6;
+                    @include push-6;
                     p.image {
                         text-align: right;
                     }
                 }
                 .columns:last-child {
-                    @extend .pull-6;
+                    @include pull-6;
                 }
             }
         }
@@ -274,13 +274,13 @@
         .views-row:nth-of-type(even) {
             > .row {
                 .columns:first-child {
-                    @extend .push-6;
+                    @include push-6;
                     p.image {
                         text-align: right;
                     }
                 }
                 .columns:last-child {
-                    @extend .pull-6;
+                    @include pull-6;
                 }
             }
         }

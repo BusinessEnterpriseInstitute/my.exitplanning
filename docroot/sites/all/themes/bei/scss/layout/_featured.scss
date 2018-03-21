@@ -15,13 +15,13 @@
         .views-row-odd {
             > .row {
                 .columns:first-child {
-                    @extend .push-6;
+                    @include push-6;
                     div.image {
                         text-align: right;
                     }
                 }
                 .columns:last-child {
-                    @extend .pull-6;
+                    @include pull-6;
                 }
             }
         }
