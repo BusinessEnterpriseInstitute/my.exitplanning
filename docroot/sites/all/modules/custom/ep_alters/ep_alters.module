@@ -336,30 +336,30 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       }
       elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
         $suggestion = 1;
-        $membership_markup = '<h3>The Network membership is perfect for you!</h3>
+        $membership_markup = '<h3>The Network Membership is perfect for you!</h3>
         <p>Thank you for your submission! Because you are not currently looking to grow your business, we encourage you to consider networking opportunities through BEI’s Network Membership, and learn more about how Exit Planning can impact your business with our Education & Training Programs.</p>';        
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
           $suggestion = 2;
-          $membership_markup = '<h3>The Marketing membership is perfect for you!</h3>
+          $membership_markup = '<h3>The Marketing Membership is perfect for you!</h3>
           <p>Thank you for your submission! BEI’s Marketing Membership is a good fit for you because you need a consistent marketing process, or want to reduce the amount of time and/or money you’re currently spending on your marketing efforts.</p>';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
-          $membership_markup = '<h3>The Planning membership is perfect for you!</h3>
+          $membership_markup = '<h3>The Planning Membership is perfect for you!</h3>
           <p>Thank you for your submission! BEI’s Planning Membership is a good fit for you because there are areas of planning work that you’d like to change or improve, including collecting data, turning those data into actionable steps, and leading a team of advisors.</p>';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
-          $membership_markup = '<h3>The Full membership is perfect for you!</h3>
+          $membership_markup = '<h3>The Full Membership is perfect for you!</h3>
           <p>Thank you for your submission! BEI’s Full Membership is best for you because you expressed a need and desire to formalize your marketing and planning processes </p>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
         $form['submitted']['membership_markup'] = array(
           '#type' => 'markup',
-          '#markup' => '<div class="panel">' . $membership_markup . '</div>',
+          '#markup' => '<div class="panel" style="background-color:#fff;>' . $membership_markup . '</div>',
           '#weight' => -10,
         );
         unset($form['actions']['previous']);
