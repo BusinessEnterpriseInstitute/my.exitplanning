@@ -161,12 +161,10 @@
     <?php endif; ?>
     
     <div class="row">
-      <?php if ($breadcrumb): ?>
-        <div class="columns small-12">
-          <?php print $breadcrumb; ?>
-        </div>
-      <?php endif; ?>
       <div class="<?php print $main_grid; ?> main columns">
+        <?php if ($breadcrumb): ?>
+            <?php print $breadcrumb; ?>
+        <?php endif; ?>
         <?php if ($action_links): ?>
           <ul class="action-links">
             <?php print render($action_links); ?>
