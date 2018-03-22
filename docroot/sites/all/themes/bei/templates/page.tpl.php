@@ -132,7 +132,7 @@
     <!-- /.l-search -->
     <?php endif; ?>
 
-    <?php if (!empty($page['page_banner']) || ($title)): ?>
+    <?php if (!empty($page['page_banner'])): ?>
       <div class="page-header">
         <div class="row">
           <div class="columns">
@@ -161,9 +161,16 @@
     <?php endif; ?>
     
     <div class="row">
+      <?php if ($breadcrumb): ?>
+        <div class="columns small-12">
+          <?php print $breadcrumb; ?>
+        </div>
+      <?php endif; ?>
       <div class="<?php print $main_grid; ?> main columns">
-        <?php if ($breadcrumb): ?>
-            <?php print $breadcrumb; ?>
+        <?php if (empty($page['page_banner']) && $title): ?>
+          <?php print render($title_prefix); ?>
+          <h1 id="page-title" class="title"><?php print $title; ?></h1>
+          <?php print render($title_suffix); ?>
         <?php endif; ?>
         <?php if ($action_links): ?>
           <ul class="action-links">
