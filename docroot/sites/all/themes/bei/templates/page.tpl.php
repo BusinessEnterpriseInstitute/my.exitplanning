@@ -243,7 +243,7 @@
 
     <?php if ($site_name) : ?>
       <div class="copyright columns">
-        &copy; <?php print date('Y') . ' ' . $site_name . ' ' . t('All rights reserved.'); ?>
+        &copy; <?php print date('Y') . ' ' . t('Exitplanning.com') . ' ' . t('All rights reserved.'); ?>
       </div>
     <?php endif; ?>
   </footer>
