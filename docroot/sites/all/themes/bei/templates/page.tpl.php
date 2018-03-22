@@ -240,12 +240,6 @@
           <?php print render($page['footer']); ?>
       </section>
     <?php endif; ?>
-
-    <?php if ($site_name) : ?>
-      <div class="copyright columns">
-        &copy; <?php print date('Y') . ' ' . t('Exitplanning.com') . ' ' . t('All rights reserved.'); ?>
-      </div>
-    <?php endif; ?>
   </footer>
   <!--/.l-footer -->
 
