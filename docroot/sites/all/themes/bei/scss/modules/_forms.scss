@@ -103,6 +103,90 @@ div.vertical-tabs {
     .form-type-textfield input {
         width: 100%;
     }
+    ul.vertical-tabs-list {
+        display: none;
+        margin: 0 0 1em;
+        @include grid-column(12);
+        padding: 0;
+        border: none;
+        z-index: 10;
+        font-size: rem-calc(13);
+        li {
+            border: none;
+            overflow: hidden;
+            background: $blue_medium;
+            border-top: 1px solid rgba(255,255,255,.2);
+            > ul {
+                background: inherit;
+                margin: 0;
+                li {
+                    background: rgba(255,255,255,.3);
+                    padding-left: rem-calc(10);
+                    &.selected {
+                        border-top: none;
+                    }
+                }
+            }
+            a {
+                padding: rem-calc(10) rem-calc(20);
+                color: rgba(255,255,255,.8);
+            }
+            &.selected {
+                //background: darken($blue_medium, 10%);
+                background: #F04124;
+                border-top: none;
+                a {
+                    border-top: none;
+                }
+                a, strong {
+                    color: #fff;
+                }
+            }
+            a:hover,
+            a:hover strong,
+            a:active,
+            a:active strong,
+            a:focus strong {
+                text-decoration: none;
+            }
+            &.child {
+                font-size: rem-calc(12);
+                a strong { font-weight: normal; }
+            }
+        }
+        > li {
+            &:first-child {
+                border-top: none;
+                @include side-radius(top, 3px);
+            }
+            &:last-child {
+                @include side-radius(bottom, 3px);
+            }
+        }
+    }
+    .vertical-tabs-panes {
+        @include grid-column(12);
+        border: none;
+        padding: 0;
+        margin: 0 0 1em;
+    }
+    fieldset.vertical-tabs-pane {
+        padding: 0;
+        > .fieldset-wrapper {
+            padding: 0 1em;
+            @extend .clearfix;
+            background: $secondary-color;
+            border-width: 0 1px 0;
+            border-style: solid;
+            border-color: darken($secondary-color, 15%);
+            fieldset {
+                border-color: darken($secondary-color, 15%);
+                legend {
+                    background: inherit;
+                }
+            }
+        }
+    }
 }
 // Recurly checkout form
 #bei-recurly-checkout-form {
