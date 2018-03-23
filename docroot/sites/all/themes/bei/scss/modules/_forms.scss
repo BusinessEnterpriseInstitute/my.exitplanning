@@ -16,6 +16,13 @@ form#views-exposed-form-search-member-content-page {
         @include font-size(20);
     }
 }
+form#views-exposed-form-public-search-content-page {
+    input, button {
+        height: rem-calc(50);
+        line-height: rem-calc(50);
+        @include font-size(20);
+    }
+}
 input[type="checkbox"], input[type="radio"] {
     margin: 0 0 rem-calc(3);
 }

@@ -341,23 +341,23 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
         $suggestion = 1;
         $membership_markup = '<h3>The Network Membership is perfect for you!</h3>
-        <p>Thank you for your submission! Because you are not currently looking to grow your business, we encourage you to consider networking opportunities through BEI’s Network Membership, and learn more about how Exit Planning can impact your business with our Education & Training Programs.</p>';        
+        <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Network Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Network Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
         $marketing = $form_state['storage']['marketing'];
         $planning = $form_state['storage']['planning'];
         if ($marketing && !$planning) {
           $suggestion = 2;
           $membership_markup = '<h3>The Marketing Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI’s Marketing Membership is a good fit for you because you need a consistent marketing process, or want to reduce the amount of time and/or money you’re currently spending on your marketing efforts.</p>';
+          <p>Thank you for your submission! BEI\'s Marketing Membership is a great fit for advisors who would like a consistent marketing process, or want to reduce the amount of time and/or money they currently spend on marketing efforts. BEI takes the complex challenges of marketing and turns them into easy-to-implement solutions.</p>';
         }
         elseif ($planning && !$marketing) {
           $suggestion = 3;
           $membership_markup = '<h3>The Planning Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI’s Planning Membership is a good fit for you because there are areas of planning work that you’d like to change or improve, including collecting data, turning those data into actionable steps, and leading a team of advisors.</p>';
+          <p>Thank you for your submission! BEI\'s Planning Membership is a great fit for advisors who are looking to provide a consistent client experience, from the collection of data to turning those data points into actionable steps. Whether you are looking to lead a team of advisors or simply manage your core service offerings as a part of the process, BEI\'s planning tools provide a consistent methodology to collect data, present solutions, and manage the implementation process. </p>';
         }
         elseif ($marketing && $planning) {
           $suggestion = 4;
           $membership_markup = '<h3>The Full Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI’s Full Membership is best for you because you expressed a need and desire to formalize your marketing and planning processes </p>';
+          <p>Thank you for your submission! BEI\'s Full Service Membership is best for advisors who are looking to implement new or enhance existing Exit Planning services. Whether you are an experienced Exit Planner or an advisor looking to differentiate yourself in a crowded market, BEI\'s Full Membership will give you the tools to set your firm apart through proven marketing resources, a process to simplify the complex for your owners, and the implementation of actionable steps to help those owners accomplish their unique objectives without recreating the wheel.</p>';
         }
         $form['submitted']['suggested_membership']['#value'] = $suggestion;
         
