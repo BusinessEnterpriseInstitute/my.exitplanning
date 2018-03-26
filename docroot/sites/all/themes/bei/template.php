@@ -67,7 +67,7 @@ function bei_preprocess_html(&$variables) {
     '@context' => 'http://schema.org',
     '@type' => 'Website',
     '@id' => 'https://www.exitplanning.com/#website',
-    'name' => 'BEI Exit Planning',
+    'name' => 'Exit Planning - BEI',
     'alternateName' => 'Business Enterprise Institute, Inc.',
     'url' => 'https://www.exitplanning.com',
     'potentialAction' => array(
