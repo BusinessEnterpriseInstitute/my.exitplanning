@@ -28,8 +28,9 @@ input.form-text{
 form#views-exposed-form-public-search-content-page {
     input, button {
         height: rem-calc(50);
-        line-height: rem-calc(50);
+        line-height: 1.125rem;
         @include font-size(20);
+        margin-top: 1rem;
     }
 }
 
