@@ -81,6 +81,7 @@ Disallow: /user/logout/
 Disallow: /bei-list/
 Disallow: /file/
 Disallow: /print/
+Disallow: /pacificlife
 # Paths (no clean URLs)
 Disallow: /?q=admin/
 Disallow: /?q=comment/reply/
