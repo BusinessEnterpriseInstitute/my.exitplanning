@@ -3,3 +3,4 @@ description = Contains various overrides for forms.
 package = Custom
 core = 7.x
 stylesheets[all][] = ep_alters.css
+files[] = views/ep_alters.views.inc
