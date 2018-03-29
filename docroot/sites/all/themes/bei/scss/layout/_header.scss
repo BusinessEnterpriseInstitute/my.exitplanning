@@ -77,7 +77,7 @@ body.maintenance-page {
                 //line-height: inherit;
                 padding: rem-calc(5) 0;
                 img {
-                    height: rem-calc(70);
+                    height: rem-calc(75); //changed this from 70 to accomodate the blue background logo with padding
                     max-height: 100%;
                     display: block;
                 }
