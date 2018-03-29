@@ -18,7 +18,7 @@
   background-color: black;
 }
 #popup-announcement-wrap {
-  position: absolute;
+  position: fixed;
   z-index: 9999;
   overflow: auto;
   background: white;
