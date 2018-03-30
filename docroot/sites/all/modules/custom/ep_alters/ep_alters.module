@@ -1182,9 +1182,10 @@ function ep_alters_cas_server_user_attributes($account, $service) {
  */
 function ep_alters_entity_property_info() {
   $info = array();
-  $properties = &$info['user']['properties'];
+  $user_properties = &$info['user']['properties'];
+  $series_article_properties = &$info['node']['bundles']['series_article']['properties'];
   if (module_exists('tfa_basic')) {
-    $properties['tfa_enabled'] = array(
+    $user_properties['tfa_enabled'] = array(
       'label' => t('TFA Enabled'), 
       'type' => 'boolean', 
       'description' => t('Two-Factor Authentication is enabled for this account.'),
@@ -1193,6 +1194,14 @@ function ep_alters_entity_property_info() {
       'entity views field' => TRUE,
     );
   }
+  $series_article_properties['membership_days'] = array(
+    'label' => t('Membership days count'),
+    'type' => 'integer',
+    'description' => t('Conversion from membership start date to number of days for current logged in user.'),
+    'getter callback' => 'ep_alters_get_membership_days',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
   return $info;
 }
 /**
@@ -1208,4 +1217,29 @@ function ep_alters_entity_property_tfa_enabled($user, array $options, $name, $en
     }
   }
   return FALSE;
+}
+/**
+ * Getter callback for entity property 'membership_days'.
+ * @return integer.
+ */
+function ep_alters_get_membership_days($entity, array $options, $name, $entity_type) {
+    global $user;
+    if (isset($user->uid) && $user->uid !== 0) {
+        $time_zone = date_default_timezone();
+        $now = new DateTime();
+        $date = DateTime::createFromFormat('U', $user->created);
+        $days = $now->diff($date)->format('%a');
+        return $days;
+    }
+    return;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function ep_alters_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'ep_alters') . '/views',
+  );
 }
