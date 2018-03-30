@@ -52,6 +52,21 @@ Drupal.behaviors.popup_announcement = {
         });
 
       }
+      if($(document).width() > 480) {
+          announcement.show().css({
+            'width': Drupal.settings.popup_announcement.width,
+            'height': Drupal.settings.popup_announcement.height,
+            'left': left,
+            'top': top
+          });
+        } else {
+          announcement.show().css({
+           'width': 320,
+            'height': 320,
+           'left': 0,
+            'top': top
+          });
+       }
 
       /**
        * Logic
