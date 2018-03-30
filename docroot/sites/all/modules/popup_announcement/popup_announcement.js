@@ -19,6 +19,10 @@ Drupal.behaviors.popup_announcement = {
        */
       function popup_announcement_create() {
 
+        if (Drupal.settings.popup_announcement.width > $( window ).width()) {
+          Drupal.settings.popup_announcement.width = $( window ).width() - 10;
+        }
+
         var left = Math.floor(($(window).width() - Drupal.settings.popup_announcement.width) / 2);
         var top = Math.floor(($(window).height() - Drupal.settings.popup_announcement.height) / 2);
 
