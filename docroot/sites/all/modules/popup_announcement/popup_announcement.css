@@ -27,6 +27,7 @@
   -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.3);
   box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
+
 #popup-announcement {
   padding: 8px;
 }
@@ -41,4 +42,12 @@
 #popup-announcement-close:hover {
   background: url('images/popup-announcement-icons.png') 0 -28px;
   cursor: pointer;
+}
+@media(min-width:768px){
+  #popup-announcement-wrap {
+    width: 70vw;
+    height: auto;
+    left: 0;
+    top: auto;
+  }
 }
