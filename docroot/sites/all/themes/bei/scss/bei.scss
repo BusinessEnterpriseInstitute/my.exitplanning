@@ -725,8 +725,6 @@ table {
     pointer-events: none;
   }
 }
-
-
 /**Align AddToAny verticle left**/
 p.a2a_floating_style.a2a_vertical_style {
   left: 0;
@@ -773,7 +771,6 @@ p.a2a_floating_style.a2a_vertical_style {
   #popup-announcement-wrap {
     height: 31.250em !important;
     position: absolute !important;
-    margin: rem-calc(80) !important;
   }
 }  
 #popup-announcement-wrap {
