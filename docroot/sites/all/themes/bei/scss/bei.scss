@@ -778,7 +778,7 @@ p.a2a_floating_style.a2a_vertical_style {
 /***Popup Announcement***/
 @media only screen and (max-width: 600px) {
   #popup-announcement-wrap {
-    height: inherit !important;
+    height: 31.250em !important;
     position: absolute !important;
     margin: rem-calc(80) !important;
   }
