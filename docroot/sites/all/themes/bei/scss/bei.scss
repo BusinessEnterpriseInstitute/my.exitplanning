@@ -783,12 +783,11 @@ p.a2a_floating_style.a2a_vertical_style {
   background: #5C7F92;
   color: #fff;
   border-color: #527182;
-  &.benefits{
-    ul{
+  &ul{
       padding: .2rem !important;
       li{
         padding: .5rem !important
       }
     }
-  }
+  
 }
