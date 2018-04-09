@@ -707,6 +707,9 @@ table {
       }
     }
   }
+  .mem-left-panel{
+    height: 484px;
+  }
 }
 /**Add To Any floating Social Share**/
 @media screen and (max-width: 768px) {
@@ -775,4 +778,17 @@ p.a2a_floating_style.a2a_vertical_style {
 }  
 #popup-announcement-wrap {
   position: fixed !important;
+}
+.mem-left-panel {
+  background: #5C7F92;
+  color: #fff;
+  border-color: #527182;
+  &.benefits{
+    ul{
+      padding: .2rem !important;
+      li{
+        padding: .5rem !important
+      }
+    }
+  }
 }
