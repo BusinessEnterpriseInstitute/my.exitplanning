@@ -823,7 +823,7 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
   if (in_array($node->type, $types_with_cover) && $view_mode == 'print') {
     $member = entity_load_single('user', $user->uid);
     $member_company_field = field_get_items('user', $member, 'field_company_name');
-    $member_company = $member_company_field ? $member_company_field[0]['safe_value'] : '';
+    $preparer_company = $member_company_field ? $member_company_field[0]['safe_value'] : '';
     $member_name_field = field_get_items('user', $member, 'field_display_name');
     $member_name = $member_name_field ? $member_name_field[0]['safe_value'] : '';
     $member_address_field = field_get_items('user', $member, 'field_address');
@@ -844,7 +844,7 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
         'height' => $logo[0]['height'],
         'alt' => '',
       );
-      $logo_output = '<div id="cover-logo">' . theme_image_style($logo_attributes) . '</div>';
+      $logo_output = theme_image_style($logo_attributes);
       $logo_classes = ' logo';
     }
     else {
@@ -852,18 +852,22 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
       $logo_classes = '';
     }
     // Member Address
-    $member_address = '';
-    if ($member_address_field) {
-      $street = !empty($member_address_field[0]['street']) ? check_plain($member_address_field[0]['street']) . '<br />' : '';
-      $street2 = !empty($member_address_field[0]['additional']) && !empty($street) ? check_plain($member_address_field[0]['additional']) . '<br />' : '';
-      $city_state = !empty($member_address_field[0]['city']) ? check_plain($member_address_field[0]['city']) . ', ' . check_plain($member_address_field[0]['province']) . '<br />' : check_plain($member_address_field[0]['province']) . '<br />';
-      $zip = !empty($member_address_field[0]['postal_code']) ? $member_address_field[0]['postal_code'] : '';
-      $member_address = $street . $street2 . $city_state . $zip;
-      // Member Phone
-      if ($member_phone) {
-        $member_address .= '<br />Phone: ' . check_plain($member_phone[0]['value']);
+    if (!empty($preparer_company) && $member_address_field) {
+      if (!empty($member_address_field[0]['street'])) {
+        $preparer_company .= '<br />' . check_plain($member_address_field[0]['street']);
+        if (!empty($member_address_field[0]['additional'])) {
+          '<br />' . check_plain($member_address_field[0]['additional']);
+        }
       }
-      // Member Website
+      if (!empty($member_address_field[0]['city']) && !empty($member_address_field[0]['province'])) {
+        $preparer_company .= '<br />' . check_plain($member_address_field[0]['city']) . ', ' . check_plain($member_address_field[0]['province']);
+      }
+      if (!empty($member_address_field[0]['postal_code'])) {
+        $preparer_company .= ' ' . $member_address_field[0]['postal_code'];
+      }
+      if ($member_phone) {
+        $preparer_company .= '<br />Phone: ' . check_plain($member_phone[0]['value']);
+      }
       if ($member_website) {
         $web_url = check_plain($member_website[0]['url']);
         $web_title = check_plain($member_website[0]['title']);
@@ -873,10 +877,10 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
         if (!preg_match('/^http:\/\//',$web_url)) {
           $web_url = 'http://' . $web_url;
         }
-        $member_address .= '<br />' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
+        $preparer_company .= '<br />' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
       }
     }
-    $cover_title_wrapper = '<div id="cover-title"><h1 title="Cover">' . check_plain($node->title). '</h1><h2 class="notoc no-bookmark">WHITE PAPER</h2></div>';
+    $cover_title_wrapper = '<h1 title="Cover">' . check_plain($node->title). '</h1><h2 class="notoc no-bookmark">WHITE PAPER</h2>';
     // Cover Page
     $show_bookmarks = !in_array($node->type, $no_bookmarks) ? 'show-bookmarks' : 'auto';
     // Extra Styles
@@ -900,12 +904,18 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
       '#weight' => -9,
       '#markup' => '
       <div id="cover-top">
+        <div id="cover-title">
       ' . $cover_title_wrapper . '
+        </div>
       </div>
-      <div id="cover-bottom"><div id="cover-branding">
-        ' . $logo_output . '
-        <div id="cover-preparer">' . $member_name . '<br />' . $member_company . '<br />' . $member_address . '</div>
-      </div></div>',
+      <div id="cover-bottom">
+        <div id="cover-bottom-inner">
+          <div id="cover-logo">' . $logo_output . '</div>
+          <div id="cover-preparer">
+            <div>' . $member_name . '<br />' . $preparer_company . '</div>
+          </div>
+        </div>
+      </div>',
     );
     $copyright = date('Y');
     if ($node->type == 'whitepaper') {
