@@ -1,149 +1,168 @@
 <?php
 function ep_alters_menu_alter(&$items) {
-    $items['user/login']['title'] = 'Member Login';
-    if (module_exists('forum')) {
-        $items['forum']['access arguments'] = array('create forum content');
-        $items['forum/%forum_forum']['access arguments'] = array('create forum content');
-    }
+  $items['user/login']['title'] = 'Member Login';
+  if (module_exists('forum')) {
+    $items['forum']['access arguments'] = array('create forum content');
+    $items['forum/%forum_forum']['access arguments'] = array('create forum content');
+  }
 }
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
-    // User login form.
-    if ($form_id == 'user_login' || $form_id == 'user_login_block') {
-        $form['#attributes']['autocomplete'] = 'off';
-        $form['forgot_password'] = array(
-            '#type' => 'markup',
-            '#markup' => '<p>' . l(t('Did you forget your password?'), 'user/password', array('attributes' => array('rel' => 'nofollow'))) . '</p>',
-            '#weight' => 100,
+  // User login form.
+  if ($form_id == 'user_login' || $form_id == 'user_login_block') {
+    $form['#attributes']['autocomplete'] = 'off';
+    $form['forgot_password'] = array(
+      '#type' => 'markup',
+      '#markup' => '<p>' . l(t('Did you forget your password?'), 'user/password', array('attributes' => array('rel' => 'nofollow'))) . '</p>',
+      '#weight' => 100,
+    );
+  }
+  if (arg(0) == 'user') {
+    if (!arg(1)) {
+      drupal_set_title(t('Member Login'));
+    }
+    elseif (arg(1) == 'password') {
+      drupal_set_title(t('Request new password'));
+    }
+  }
+  // Add placeholder text to views exposed search form.
+  if ($form_id == 'views_exposed_form') {
+    $view = $form_state['view'];
+    if ($view->name == 'search_member_content' && $view->current_display == 'page') {
+      $form['keywords']['#attributes']['placeholder'] = t('Search');
+      $form['keywords']['#theme_wrappers'] = array();
+      $form['submit']['#attributes']['class'][] = 'postfix expand alert';
+      $form['submit']['#attributes']['aria-label'] = 'Submit search';
+    }
+    if ($view->name == 'member_directory') {
+      // reorder the distance fields
+      $form['distance']['country']['#weight'] = 1;
+      $form['distance']['country']['#options'] = array(
+        'ca' => 'Canada',
+        'us' => 'United States',
+      );
+      $form['distance']['search_distance']['#weight'] = 2;
+      $form['distance']['search_units']['#weight'] = 3;
+      $form['distance']['postal_code']['#weight'] = 4;
+      $form['distance']['#prefix'] = '<div class="wrapper">';
+      $form['distance']['#suffix'] = '</div>';
+      $form['submit']['#attributes']['aria-label'] = 'Submit search';
+      $form['submit']['#states'] = array(
+        'enabled' => array(
+          ':input[name="distance[postal_code]"]' => array('filled' => TRUE),
+        ),
+      );
+      if (empty($form_state['view']->exposed_input) || empty($form_state['view']->exposed_input['distance']['postal_code'])) {
+        unset($form['reset']);
+      }
+    }
+    if ($view->name == 'member_directory' && $view->current_display == 'panel_pane_1') {
+      $form['name']['#attributes']['placeholder'] = t('Enter some keywords');
+      $form['distance']['search_distance']['#access'] = FALSE;
+      $form['distance']['search_units']['#access'] = FALSE;
+    }
+    $form['date_filter']['min']['#title'] = t('From');
+    $form['date_filter']['max']['#title'] = t('To');
+  }
+  // Alter the feeds import form
+  if ($form_id == 'feeds_import_form') {
+    $form['feeds']['FeedsCSVParser']['delimiter']['#disabled'] = TRUE;
+  }
+  // If message type is 'Private Message'.
+  // Make cancel link a button on message form and route to destination parameter or unset if unavailable.
+  if ($form_id == 'message_ui_instance_message_manage') {
+    $query_parameters = drupal_get_query_parameters();
+    $form['owner']['#access'] = user_access('edit any message type');
+    if ($form['#bundle'] == 'private_message') {
+      if (isset($form['text']['#type'])) {
+        $form['text']['#type'] = 'hidden';
+      }
+      $form['actions']['submit']['#value'] = t('Send');
+      if (!empty($query_parameters) && isset($_GET['destination'])) {
+        $form['actions']['cancel'] = array(
+          '#type' => 'submit',
+          '#value' => t('Cancel'),
+          '#submit' => array('callback_for_cancel_button'),
         );
+      }
+      else {
+        unset($form['actions']['cancel']);
+      }
     }
-    if (arg(0) == 'user') {
-        if (!arg(1)) {
-            drupal_set_title(t('Member Login'));
-        }
-        elseif (arg(1) == 'password') {
-            drupal_set_title(t('Request new password'));
-        }
+  }
+  // Alter the Feeds import tab form.
+  if ($form_id == 'feeds_import_tab_form') {
+    if ($form['#importer_id'] == 'subscribers' && $form['#feed_nid']) {
+      $nid = $form['#feed_nid'];
+      $form['actions']['cancel']['#title'] = t('Return to Dashboard');
+      $form['#redirect'] = 'node/' . $nid . '/import';
     }
-    // Add placeholder text to views exposed search form.
-    if ($form_id == 'views_exposed_form') {
-        $view = $form_state['view'];
-        if ($view->name == 'search_member_content' && $view->current_display == 'page') {
-            $form['keywords']['#attributes']['placeholder'] = t('Search');
-            $form['keywords']['#theme_wrappers'] = array();
-            $form['submit']['#attributes']['class'][] = 'postfix expand alert';
-            $form['submit']['#attributes']['aria-label'] = 'Submit search';
-        }
-        if ($view->name == 'member_directory') {
-            // reorder the distance fields
-            $form['distance']['country']['#weight'] = 1;
-            $form['distance']['country']['#options'] = array(
-                'ca' => 'Canada',
-                'us' => 'United States',
-            );
-            $form['distance']['search_distance']['#weight'] = 2;
-            $form['distance']['search_units']['#weight'] = 3;
-            $form['distance']['postal_code']['#weight'] = 4;
-            $form['distance']['#prefix'] = '<div class="wrapper">';
-            $form['distance']['#suffix'] = '</div>';
-            $form['submit']['#attributes']['aria-label'] = 'Submit search';
-            $form['submit']['#states'] = array(
-                'enabled' => array(
-                    ':input[name="distance[postal_code]"]' => array('filled' => TRUE),
-                ),
-            );
-            if (empty($form_state['view']->exposed_input) || empty($form_state['view']->exposed_input['distance']['postal_code'])) {
-                unset($form['reset']);
-            }
-            //array_unshift($form['#validate'], 'ep_alters_postal_code_validate');
-        }
-        if ($view->name == 'member_directory' && $view->current_display == 'panel_pane_1') {
-            $form['name']['#attributes']['placeholder'] = t('Enter some keywords');
-            $form['distance']['search_distance']['#access'] = FALSE;
-            $form['distance']['search_units']['#access'] = FALSE;
-        }
-        $form['date_filter']['min']['#title'] = t('From');
-        $form['date_filter']['max']['#title'] = t('To');
-    }
-    // Alter the feeds import form
-    if ($form_id == 'feeds_import_form') {
-        $form['feeds']['FeedsCSVParser']['delimiter']['#disabled'] = TRUE;
-    }
-    // If message type is 'Private Message'.
-    // Make cancel link a button on message form and route to destination parameter or unset if unavailable.
-    if ($form_id == 'message_ui_instance_message_manage') {
-        $query_parameters = drupal_get_query_parameters();
-        $form['owner']['#access'] = user_access('edit any message type');
-        if ($form['#bundle'] == 'private_message') {
-            if (isset($form['text']['#type'])) {
-                $form['text']['#type'] = 'hidden';
-            }
-            $form['actions']['submit']['#value'] = t('Send');
-            if (!empty($query_parameters) && isset($_GET['destination'])) {
-                $form['actions']['cancel'] = array(
-                  '#type' => 'submit',
-                  '#value' => t('Cancel'),
-                  '#submit' => array('callback_for_cancel_button'),
-                );
-            }
-            else {
-                unset($form['actions']['cancel']);
-            }
-        }
-    }
-    // Alter the Feeds import tab form.
-    if ($form_id == 'feeds_import_tab_form') {
-        if ($form['#importer_id'] == 'subscribers' && $form['#feed_nid']) {
-            $nid = $form['#feed_nid'];
-            $form['actions']['cancel']['#title'] = t('Return to Dashboard');
-            $form['#redirect'] = 'node/' . $nid . '/import';
-        }
-    }
-    if ($form_id == 'webform_client_form_156896' || $form_id == 'webform_client_form_156906') {
-      $wizard1 = 'webform_client_form_156896';
-      $wizard2 = 'webform_client_form_156906';
-      $form['#submit'][] = 'ep_alters_webform_wizard_submit';
-      $storage = isset($form_state['storage']) ? $form_state['storage'] : NULL;
-      $current_page = $storage ? $storage['page_num'] : 1;
-      $membership_markup = '<h3>Let\'s Get Started</h3>
-        <p>You’ll answer straightforward questions about your goals, client base and business profile.
-        We’ll recommend a membership based on your responses.
-        From there it’s easy to sign up, manage your account and use our resources.</p>';   
-      if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
-        $form['submitted']['q6']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q5]"]' => array('value' => '1'),
+  }
+  if ($form_id == 'webform_client_form_156896' || $form_id == 'webform_client_form_156906') {
+    $wizard1 = 'webform_client_form_156896';
+    $wizard2 = 'webform_client_form_156906';
+    $form['#submit'][] = 'ep_alters_webform_wizard_submit';
+    $storage = isset($form_state['storage']) ? $form_state['storage'] : NULL;
+    $current_page = $storage ? $storage['page_num'] : 1;
+    $membership_markup = '<h3>Let\'s Get Started</h3>
+      <p>You’ll answer straightforward questions about your goals, client base and business profile.
+      We’ll recommend a membership based on your responses.
+      From there it’s easy to sign up, manage your account and use our resources.</p>';
+    if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
+      $form['submitted']['q6']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q5]"]' => array('value' => '1'),
+        ),
+      );
+      $form['submitted']['q6_1']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q5]"]' => array(
+            array('value' => '2'),
+            array('value' => '3'),
           ),
-        );
-        $form['submitted']['q6_1']['#states'] = array(
-          'visible' => array(
+        ),
+      );
+      $form['submitted']['q6_2']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q5]"]' => array(
+            array('value' => '2'),
+            array('value' => '3'),
+          ),
+        ),
+      );
+      $form['submitted']['q7']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q5]"]' => array('value' => '1'),
+          ':input[name="submitted[q6]"]' => array('value' => '1'),
+        ),
+      );
+      $form['submitted']['q8']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q5]"]' => array('value' => '1'),
+          ':input[name="submitted[q6]"]' => array('value' => '1'),
+        ),
+      );
+      $form['submitted']['q9']['#states'] = array(
+        'visible' => array(
+          array(
+            ':input[name="submitted[q5]"]' => array('value' => '1'),
+            ':input[name="submitted[q6]"]' => array('value' => '1'),
+            ':input[name="submitted[q7]"]' => array('value' => '1'),
+            ':input[name="submitted[q8]"]' => array('value' => '1'),
+          ),
+          'or',
+          array(
             ':input[name="submitted[q5]"]' => array(
               array('value' => '2'),
               array('value' => '3'),
             ),
+            ':input[name="submitted[q6_1]"]' => array('value' => '3'),
+            ':input[name="submitted[q6_2]"]' => array('value' => '3'),
           ),
-        );
-        $form['submitted']['q6_2']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q5]"]' => array(
-              array('value' => '2'),
-              array('value' => '3'),
-            ),
-          ),
-        );
-        $form['submitted']['q7']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q5]"]' => array('value' => '1'),
-            ':input[name="submitted[q6]"]' => array('value' => '1'),
-          ),
-        );
-        $form['submitted']['q8']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q5]"]' => array('value' => '1'),
-            ':input[name="submitted[q6]"]' => array('value' => '1'),
-          ),
-        );
-        $form['submitted']['q9']['#states'] = array(
-          'visible' => array(
+        ),
+      );
+      $form['submitted']['q9_other']['#states'] = array(
+        'visible' => array(
+          array(
             array(
               ':input[name="submitted[q5]"]' => array('value' => '1'),
               ':input[name="submitted[q6]"]' => array('value' => '1'),
@@ -160,216 +179,196 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
               ':input[name="submitted[q6_2]"]' => array('value' => '3'),
             ),
           ),
-        );
-        $form['submitted']['q9_other']['#states'] = array(
-          'visible' => array(
+          // The other option is selected.
+          ':input[name="submitted[q9]"]' => array('value' => '3'),
+        ),
+      );
+      $form['actions']['next']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q4]"]' => array('!value' => false),
+          array(
             array(
+              ':input[name="submitted[q5]"]' => array('value' => '1'),
               array(
-                ':input[name="submitted[q5]"]' => array('value' => '1'),
-                ':input[name="submitted[q6]"]' => array('value' => '1'),
-                ':input[name="submitted[q7]"]' => array('value' => '1'),
-                ':input[name="submitted[q8]"]' => array('value' => '1'),
-              ),
-              'or',
-              array(
-                ':input[name="submitted[q5]"]' => array(
-                  array('value' => '2'),
-                  array('value' => '3'),
-                ),
-                ':input[name="submitted[q6_1]"]' => array('value' => '3'),
-                ':input[name="submitted[q6_2]"]' => array('value' => '3'),
-              ),
-            ),
-            // The other option is selected.
-            ':input[name="submitted[q9]"]' => array('value' => '3'),
-          ),
-        );
-        $form['actions']['next']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q4]"]' => array('!value' => false),
-            array(
-              array(
-                ':input[name="submitted[q5]"]' => array('value' => '1'),
                 array(
+                  ':input[name="submitted[q6]"]' => array('value' => '2'),
+                ),
+                'xor',
+                array(
+                  ':input[name="submitted[q6]"]' => array('value' => '1'),
+                  ':input[name="submitted[q7]"]' => array('!value' => false),
+                  ':input[name="submitted[q8]"]' => array('!value' => false),
                   array(
-                    ':input[name="submitted[q6]"]' => array('value' => '2'),
-                  ),
-                  'xor',
-                  array(
-                    ':input[name="submitted[q6]"]' => array('value' => '1'),
-                    ':input[name="submitted[q7]"]' => array('!value' => false),
-                    ':input[name="submitted[q8]"]' => array('!value' => false),
+                    // If they answer NO to either of these questions.
                     array(
-                      // If they answer NO to either of these questions.
-                      array(
-                        ':input[name="submitted[q7]"]' => array('value' => '2'),
-                      ),
-                      'or',
-                      array(
-                        ':input[name="submitted[q8]"]' => array('value' => '2'),
-                      ),
-                      'or',
-                      array(
-                        ':input[name="submitted[q7]"]' => array('value' => '1'),
-                        ':input[name="submitted[q8]"]' => array('value' => '1'),
-                        ':input[name="submitted[q9]"]' => array('!value' => false),
-                      ),
+                      ':input[name="submitted[q7]"]' => array('value' => '2'),
+                    ),
+                    'or',
+                    array(
+                      ':input[name="submitted[q8]"]' => array('value' => '2'),
+                    ),
+                    'or',
+                    array(
+                      ':input[name="submitted[q7]"]' => array('value' => '1'),
+                      ':input[name="submitted[q8]"]' => array('value' => '1'),
+                      ':input[name="submitted[q9]"]' => array('!value' => false),
                     ),
                   ),
                 ),
               ),
-              'or',
-              array(
-                ':input[name="submitted[q5]"]' => array(
-                  array('value' => '2'),
-                  array('value' => '3'),
-                ),
-                // Make sure these 2 questions are answered.
-                ':input[name="submitted[q6_1]"]' => array('!value' => false),
-                ':input[name="submitted[q6_2]"]' => array('!value' => false),
-                array(
-                  array(
-                    ':input[name="submitted[q6_1]"]' => array(
-                      array('value' => '1'),
-                      array('value' => '2'),
-                      array('value' => '4'),
-                    ),
-                  ),
-                  'or',
-                  array(
-                    ':input[name="submitted[q6_2]"]' => array(
-                      array('value' => '1'),
-                      array('value' => '2'),
-                      array('value' => '4'),
-                    ),
-                  ),
-                  'or',
-                  array(
-                    ':input[name="submitted[q6_1]"]' => array('value' => '3'),
-                    ':input[name="submitted[q6_2]"]' => array('value' => '3'),
-                    ':input[name="submitted[q9]"]' => array('!value' => false),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      }
-      // Planning questions.
-      elseif (($form_id == $wizard1 && $current_page == 3) || ($form_id == $wizard2 && $current_page == 2)) {
-        $form['submitted']['q11']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-          ),
-        );
-        $form['submitted']['q12']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-          ),
-        );
-        $form['submitted']['q13']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-          ),
-        );
-        $form['submitted']['q14']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-          ),
-        );
-        $form['submitted']['q15']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-            ':input[name="submitted[q14]"]' => array(
-              array('value' => '1'),
-              array('value' => '3'),
-            ),
-          ),
-        );
-        $form['submitted']['q16']['#states'] = array(
-          'visible' => array(
-            ':input[name="submitted[q10]"]' => array(
-              array('value' => '1'),
-              array('value' => '2'),
-            ),
-          ),
-        );
-        $form['actions']['next']['#states'] = array(
-          'visible' => array(
-            array(
-              ':input[name="submitted[q10]"]' => array('value' => '3'),
             ),
             'or',
             array(
-              ':input[name="submitted[q10]"]' => array(
-                array('value' => '1'),
+              ':input[name="submitted[q5]"]' => array(
                 array('value' => '2'),
+                array('value' => '3'),
               ),
-              ':input[name="submitted[q13]"]' => array('!value' => false),
+              // Make sure these 2 questions are answered.
+              ':input[name="submitted[q6_1]"]' => array('!value' => false),
+              ':input[name="submitted[q6_2]"]' => array('!value' => false),
               array(
                 array(
-                  ':input[name="submitted[q14]"]' => array('value' => '2'),
+                  ':input[name="submitted[q6_1]"]' => array(
+                    array('value' => '1'),
+                    array('value' => '2'),
+                    array('value' => '4'),
+                  ),
                 ),
                 'or',
                 array(
-                  ':input[name="submitted[q14]"]' => array(
+                  ':input[name="submitted[q6_2]"]' => array(
                     array('value' => '1'),
-                    array('value' => '3'),
+                    array('value' => '2'),
+                    array('value' => '4'),
                   ),
-                  ':input[name="submitted[q15]"]' => array('!value' => false),
+                ),
+                'or',
+                array(
+                  ':input[name="submitted[q6_1]"]' => array('value' => '3'),
+                  ':input[name="submitted[q6_2]"]' => array('value' => '3'),
+                  ':input[name="submitted[q9]"]' => array('!value' => false),
                 ),
               ),
             ),
           ),
-        );
-      }
-      elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
-        $suggestion = 1;
-        $membership_markup = '<h3>The Network Membership is perfect for you!</h3>
-        <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Network Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Network Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
-        $marketing = $form_state['storage']['marketing'];
-        $planning = $form_state['storage']['planning'];
-        if ($marketing && !$planning) {
-          $suggestion = 2;
-          $membership_markup = '<h3>The Marketing Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI\'s Marketing Membership is a great fit for advisors who would like a consistent marketing process, or want to reduce the amount of time and/or money they currently spend on marketing efforts. BEI takes the complex challenges of marketing and turns them into easy-to-implement solutions.</p>';
-        }
-        elseif ($planning && !$marketing) {
-          $suggestion = 3;
-          $membership_markup = '<h3>The Planning Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI\'s Planning Membership is a great fit for advisors who are looking to provide a consistent client experience, from the collection of data to turning those data points into actionable steps. Whether you are looking to lead a team of advisors or simply manage your core service offerings as a part of the process, BEI\'s planning tools provide a consistent methodology to collect data, present solutions, and manage the implementation process. </p>';
-        }
-        elseif ($marketing && $planning) {
-          $suggestion = 4;
-          $membership_markup = '<h3>The Full Membership is perfect for you!</h3>
-          <p>Thank you for your submission! BEI\'s Full Service Membership is best for advisors who are looking to implement new or enhance existing Exit Planning services. Whether you are an experienced Exit Planner or an advisor looking to differentiate yourself in a crowded market, BEI\'s Full Membership will give you the tools to set your firm apart through proven marketing resources, a process to simplify the complex for your owners, and the implementation of actionable steps to help those owners accomplish their unique objectives without recreating the wheel.</p>';
-        }
-        $form['submitted']['suggested_membership']['#value'] = $suggestion;
-        
-        $form['submitted']['membership_markup'] = array(
-          '#type' => 'markup',
-          '#markup' => '<div class="panel" style="background-color:#fff;">' . $membership_markup . '</div>',
-          '#weight' => -10,
-        );
-        unset($form['actions']['previous']);
-        $form['actions']['submit']['#attributes']['class'][] = 'alert';
-      }
+        ),
+      );
     }
+    // Planning questions.
+    elseif (($form_id == $wizard1 && $current_page == 3) || ($form_id == $wizard2 && $current_page == 2)) {
+      $form['submitted']['q11']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+        ),
+      );
+      $form['submitted']['q12']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+        ),
+      );
+      $form['submitted']['q13']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+        ),
+      );
+      $form['submitted']['q14']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+        ),
+      );
+      $form['submitted']['q15']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+          ':input[name="submitted[q14]"]' => array(
+            array('value' => '1'),
+            array('value' => '3'),
+          ),
+        ),
+      );
+      $form['submitted']['q16']['#states'] = array(
+        'visible' => array(
+          ':input[name="submitted[q10]"]' => array(
+            array('value' => '1'),
+            array('value' => '2'),
+          ),
+        ),
+      );
+      $form['actions']['next']['#states'] = array(
+        'visible' => array(
+          array(
+            ':input[name="submitted[q10]"]' => array('value' => '3'),
+          ),
+          'or',
+          array(
+            ':input[name="submitted[q10]"]' => array(
+              array('value' => '1'),
+              array('value' => '2'),
+            ),
+            ':input[name="submitted[q13]"]' => array('!value' => false),
+            array(
+              array(
+                ':input[name="submitted[q14]"]' => array('value' => '2'),
+              ),
+              'or',
+              array(
+                ':input[name="submitted[q14]"]' => array(
+                  array('value' => '1'),
+                  array('value' => '3'),
+                ),
+                ':input[name="submitted[q15]"]' => array('!value' => false),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
+      $suggestion = 1;
+      $membership_markup = '<h3>The Network Membership is perfect for you!</h3>
+      <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Network Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Network Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
+      $marketing = $form_state['storage']['marketing'];
+      $planning = $form_state['storage']['planning'];
+      if ($marketing && !$planning) {
+        $suggestion = 2;
+        $membership_markup = '<h3>The Marketing Membership is perfect for you!</h3>
+        <p>Thank you for your submission! BEI\'s Marketing Membership is a great fit for advisors who would like a consistent marketing process, or want to reduce the amount of time and/or money they currently spend on marketing efforts. BEI takes the complex challenges of marketing and turns them into easy-to-implement solutions.</p>';
+      }
+      elseif ($planning && !$marketing) {
+        $suggestion = 3;
+        $membership_markup = '<h3>The Planning Membership is perfect for you!</h3>
+        <p>Thank you for your submission! BEI\'s Planning Membership is a great fit for advisors who are looking to provide a consistent client experience, from the collection of data to turning those data points into actionable steps. Whether you are looking to lead a team of advisors or simply manage your core service offerings as a part of the process, BEI\'s planning tools provide a consistent methodology to collect data, present solutions, and manage the implementation process. </p>';
+      }
+      elseif ($marketing && $planning) {
+        $suggestion = 4;
+        $membership_markup = '<h3>The Full Membership is perfect for you!</h3>
+        <p>Thank you for your submission! BEI\'s Full Service Membership is best for advisors who are looking to implement new or enhance existing Exit Planning services. Whether you are an experienced Exit Planner or an advisor looking to differentiate yourself in a crowded market, BEI\'s Full Membership will give you the tools to set your firm apart through proven marketing resources, a process to simplify the complex for your owners, and the implementation of actionable steps to help those owners accomplish their unique objectives without recreating the wheel.</p>';
+      }
+      $form['submitted']['suggested_membership']['#value'] = $suggestion;
+      
+      $form['submitted']['membership_markup'] = array(
+        '#type' => 'markup',
+        '#markup' => '<div class="panel" style="background-color:#fff;">' . $membership_markup . '</div>',
+        '#weight' => -10,
+      );
+      unset($form['actions']['previous']);
+      $form['actions']['submit']['#attributes']['class'][] = 'alert';
+    }
+  }
 }
 function ep_alters_webform_wizard_submit(&$form, &$form_state) {
   $submitted = $form_state['input']['submitted'];
@@ -459,44 +458,44 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
  * Errors should be signaled with form_set_error().
  */
 function ep_alters_postal_code_validate(&$form, &$form_state) {
-    if (!empty($form_state['values']['distance']['postal_code'])) {
-        $zip = trim($form_state['values']['distance']['postal_code']);
-        $country = trim($form_state['values']['distance']['country']);
-        $lookup = db_query('SELECT z.zip FROM {zipcodes} z WHERE z.zip = :zip AND z.country = :country', array(':zip' => $zip, ':country' => $country))->fetchField();
-        if (!$lookup) {
-            form_set_error('form', t('The postal code %zip is invalid.', array('%zip' => $zip)));
-        }
+  if (!empty($form_state['values']['distance']['postal_code'])) {
+    $zip = trim($form_state['values']['distance']['postal_code']);
+    $country = trim($form_state['values']['distance']['country']);
+    $lookup = db_query('SELECT z.zip FROM {zipcodes} z WHERE z.zip = :zip AND z.country = :country', array(':zip' => $zip, ':country' => $country))->fetchField();
+    if (!$lookup) {
+      form_set_error('form', t('The postal code %zip is invalid.', array('%zip' => $zip)));
     }
+  }
 }
 // Alter node form.
 function ep_alters_form_node_form_alter(&$form, &$form_state, $form_id) {
-    if ($form['#form_id'] == 'subscriber_list_node_form' || $form['#form_id'] == 'campaign_node_form') {
-        global $user;
-        $is_administrator = in_array('administrator', array_values($user->roles)) || in_array('BEI Administrator', array_values($user->roles));
+  if ($form['#form_id'] == 'subscriber_list_node_form' || $form['#form_id'] == 'campaign_node_form') {
+    global $user;
+    $is_administrator = in_array('administrator', array_values($user->roles)) || in_array('BEI Administrator', array_values($user->roles));
 
-        if (!$is_administrator) {
-            form_disable_vertical_tabs_member($form);
-        }
-        else {
-            form_disable_vertical_tabs($form);
-        }
-        if ($form['#form_id'] == 'subscriber_list_node_form') {
-            if (isset($form['feeds'])) {
-                $form['feeds']['#title'] = t('Import Settings');
-                if ($form['#node_edit_form'] && arg(3) == 'import') {
-                    $nid = $form['nid']['#value'];
-                    if ($form['actions']['save_and_edit']) {
-                        unset($form['actions']['save_and_edit']);
-                    }
-                    $form['actions']['submit']['#value'] = t('Next');
-                }
-                $form['feeds']['FeedsCSVParser']['encoding']['#default_value'] = 'auto';
-                if (!$is_administrator) {
-                    $form['feeds']['FeedsCSVParser']['encoding']['#access'] = FALSE;
-                }
-            }
-        }
+    if (!$is_administrator) {
+      form_disable_vertical_tabs_member($form);
     }
+    else {
+      form_disable_vertical_tabs($form);
+    }
+    if ($form['#form_id'] == 'subscriber_list_node_form') {
+      if (isset($form['feeds'])) {
+        $form['feeds']['#title'] = t('Import Settings');
+        if ($form['#node_edit_form'] && arg(3) == 'import') {
+          $nid = $form['nid']['#value'];
+          if ($form['actions']['save_and_edit']) {
+            unset($form['actions']['save_and_edit']);
+          }
+          $form['actions']['submit']['#value'] = t('Next');
+        }
+        $form['feeds']['FeedsCSVParser']['encoding']['#default_value'] = 'auto';
+        if (!$is_administrator) {
+          $form['feeds']['FeedsCSVParser']['encoding']['#access'] = FALSE;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -504,38 +503,24 @@ function ep_alters_form_node_form_alter(&$form, &$form_state, $form_id) {
  * @see https://drupal.org/node/1048644
  */
 function form_disable_vertical_tabs(&$form){
-    // originally $form['additional_settings']['#type'] equals to 'vertical_tabs'
-    if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
-        $form['additional_settings']['#type'] = 'fieldset';
-    }
+  // originally $form['additional_settings']['#type'] equals to 'vertical_tabs'
+  if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
+    $form['additional_settings']['#type'] = 'fieldset';
+  }
 }
 function form_disable_vertical_tabs_member(&$form) {
-    if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
-        $form['additional_settings']['#type'] = 'fieldset';
-        $form['additional_settings']['#attributes']['class'][] = 'element-invisible';
-    }
+  if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
+    $form['additional_settings']['#type'] = 'fieldset';
+    $form['additional_settings']['#attributes']['class'][] = 'element-invisible';
+  }
 }
-
-/**
- * Implements hook_node_presave().
- * Act on a node being inserted or updated.
- */
-/*
-function ep_alters_node_presave($node) {
-    if ($node->type == 'print_order') {
-        if (empty($node->title)) {
-            $node->title = 'Order #' . $node->nid;
-            node_save($node);
-        }
-    }
-}*/
 
 /**
  * Implements hook_admin_paths_alter(&$paths).
  */
 function ep_alters_admin_paths_alter(&$paths) {
-    // Set the node import page to default theme.
-    $paths['node/*/import'] = FALSE;
+  // Set the node import page to default theme.
+  $paths['node/*/import'] = FALSE;
 }
 
 function callback_for_cancel_button($form, &$form_state) {
@@ -549,413 +534,408 @@ function callback_for_cancel_button($form, &$form_state) {
  * Add Cancel button to Rules pane form
  */
 function ep_alters_form_rules_panes_render_form_alter(&$form, &$form_state, $form_id) {
-    $query_parameters = drupal_get_query_parameters();
-    if ($form['component']['#value'] == 'rules_email_node' || $form['component']['#value'] == 'rules_email_node_branded') {
-        // rules_email_node is for Blog & rules_email_node_branded is for newsletter articles
-        global $user;
-        $subject = '';
-        if (arg(0) == 'node' && is_numeric(arg(1))) {
-            // Get the nid
-            $nid = arg(1);
+  $query_parameters = drupal_get_query_parameters();
+  if ($form['component']['#value'] == 'rules_email_node' || $form['component']['#value'] == 'rules_email_node_branded') {
+    // rules_email_node is for Blog & rules_email_node_branded is for newsletter articles
+    global $user;
+    $subject = '';
+    if (arg(0) == 'node' && is_numeric(arg(1))) {
+      // Get the nid
+      $nid = arg(1);
 
-            // Load the node if you need to
-            $node = node_load($nid);
-            $subject = $node->title;
-        }
-        $member_email = '';
-        $member_name = '';
-        if ($user->uid) {
-            $member = entity_load_single('user', $user->uid);
-            $member_email = check_plain($member->mail);
-            $member_display_name = field_get_items('user', $member, 'field_display_name');
-            if ($member_display_name) {
-                $member_name = $member_display_name[0]['safe_value'];
-            }
-        }
-        // Change the textarea field to textfield.
-        $form['parameter']['email']['settings']['email'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Send To'),
-            '#required' => TRUE,
-            '#description' => t('Enter a single valid email address to send this page to.'),
-            '#element_validate' => array('ep_alters_email_validation'),
-        );
-        $form['parameter']['email_bcc']['settings']['email_bcc'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Bcc'),
-            '#required' => FALSE,
-            '#description' => t('Enter a single valid email address to blind carbon copy to.'),
-            '#element_validate' => array('ep_alters_email_bcc_validation'),
-            '#default_value' => $member_email,
-        );
-        $form['parameter']['subject']['settings']['subject'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Subject'),
-            '#required' => TRUE,
-            '#default_value' => $subject
-        );
-        $form['parameter']['from_name']['settings']['from_name'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Your Name'),
-            '#required' => TRUE,
-            '#default_value' => $member_name
-        );
-        $form['parameter']['message']['settings']['message'] = array(
-            '#type' => 'textarea',
-            '#title' => t('Personal Message'),
-            '#required' => FALSE,
-            '#description' => t('A personal message will be prepended to the body of the article.'),
-        );
+      // Load the node if you need to
+      $node = node_load($nid);
+      $subject = $node->title;
     }
-    if ($form['component']['#value'] == 'rules_create_custom_campaign') {
-        $form['parameter']['title']['settings']['title'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Administrative Title'),
-            '#required' => TRUE,
-            //'#default_value' => $member_name
-            '#description' => t('Enter a name for this campaign to identify this Campaign internally.')
-        );
-        $form['parameter']['headline']['settings']['headline'] = array(
-            '#type' => 'textfield',
-            '#title' => t('Article Headline'),
-            '#required' => TRUE,
-            '#description' => t('Enter the title of the article for this Campaign.')
-        );
-        if (!empty($query_parameters)) {
-            $form['actions']['cancel'] = array(
-                '#type'   => 'submit',
-                '#value'  => t('Cancel'),
-                '#submit' => array('callback_for_cancel_button'),
-                '#limit_validation_errors' => array(),
-                '#weight' => 10000,
-            );
-        }
+    $member_email = '';
+    $member_name = '';
+    if ($user->uid) {
+      $member = entity_load_single('user', $user->uid);
+      $member_email = check_plain($member->mail);
+      $member_display_name = field_get_items('user', $member, 'field_display_name');
+      if ($member_display_name) {
+        $member_name = $member_display_name[0]['safe_value'];
+      }
     }
+    // Change the textarea field to textfield.
+    $form['parameter']['email']['settings']['email'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Send To'),
+      '#required' => TRUE,
+      '#description' => t('Enter a single valid email address to send this page to.'),
+      '#element_validate' => array('ep_alters_email_validation'),
+    );
+    $form['parameter']['email_bcc']['settings']['email_bcc'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Bcc'),
+      '#required' => FALSE,
+      '#description' => t('Enter a single valid email address to blind carbon copy to.'),
+      '#element_validate' => array('ep_alters_email_bcc_validation'),
+      '#default_value' => $member_email,
+    );
+    $form['parameter']['subject']['settings']['subject'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Subject'),
+      '#required' => TRUE,
+      '#default_value' => $subject
+    );
+    $form['parameter']['from_name']['settings']['from_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Your Name'),
+      '#required' => TRUE,
+      '#default_value' => $member_name
+    );
+    $form['parameter']['message']['settings']['message'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Personal Message'),
+      '#required' => FALSE,
+      '#description' => t('A personal message will be prepended to the body of the article.'),
+    );
+  }
+  if ($form['component']['#value'] == 'rules_create_custom_campaign') {
+    $form['parameter']['title']['settings']['title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Administrative Title'),
+      '#required' => TRUE,
+      '#description' => t('Enter a name for this campaign to identify this Campaign internally.')
+    );
+    $form['parameter']['headline']['settings']['headline'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Article Headline'),
+      '#required' => TRUE,
+      '#description' => t('Enter the title of the article for this Campaign.')
+    );
+    if (!empty($query_parameters)) {
+      $form['actions']['cancel'] = array(
+        '#type'   => 'submit',
+        '#value'  => t('Cancel'),
+        '#submit' => array('callback_for_cancel_button'),
+        '#limit_validation_errors' => array(),
+        '#weight' => 10000,
+      );
+    }
+  }
 }
 function ep_alters_email_validation($element, &$form_state) {
-    $mail = $form_state['values']['parameter']['email']['settings']['email'];
-    if (!valid_email_address($mail)) {
-        form_error($element, t('Please enter a valid email address to send to.'));
-    }
+  $mail = $form_state['values']['parameter']['email']['settings']['email'];
+  if (!valid_email_address($mail)) {
+    form_error($element, t('Please enter a valid email address to send to.'));
+  }
 }
 function ep_alters_email_bcc_validation($element, &$form_state) {
-    $mail = $form_state['values']['parameter']['email_bcc']['settings']['email_bcc'];
-    if (!empty($mail) && !valid_email_address($mail)) {
-        form_error($element, t('Please enter a valid email address to Bcc to.'));
-    }
+  $mail = $form_state['values']['parameter']['email_bcc']['settings']['email_bcc'];
+  if (!empty($mail) && !valid_email_address($mail)) {
+    form_error($element, t('Please enter a valid email address to Bcc to.'));
+  }
 }
 
 /**
  * Alter Views bulk operations.
  */
 function ep_alters_views_bulk_operations_form_alter(&$form, &$form_state, $vbo) {
-    $form['select']['#type'] = 'container';
-    if(!empty($vbo->view->result) && $vbo->view->plugin_name != 'table') {
-        $vbo_id = $vbo->view->vid;
-        if ($form_state['step'] == 'views_form_views_form') {
-            // Alter the first step of the VBO form (the selection page).
-            $selectallmarkup = $form['select_all_markup']['#markup'];
-            $selectallmarkup = str_replace('<input class="vbo-select-this-page form-checkbox"', '<input class="vbo-select-this-page form-checkbox" id="vbo-select-this-page-' . $vbo_id . '"', $selectallmarkup);
-            $selectallmarkup = str_replace('<input class="vbo-select-all form-checkbox"', '<input class="vbo-select-all form-checkbox" id="vbo-select-all-' . $vbo_id . '"', $selectallmarkup);
-            $selectallmarkup = preg_replace('/<label class="option">/', '<label class="option" for="vbo-select-this-page-' . $vbo_id . '">', $selectallmarkup, 1);
-            $selectallmarkup = preg_replace('/<label class="option">/', '<label class="option" for="vbo-select-all-' . $vbo_id . '">', $selectallmarkup, 1);
-            $form['select_all_markup']['#markup'] = $selectallmarkup;
-        }
+  $form['select']['#type'] = 'container';
+  if(!empty($vbo->view->result) && $vbo->view->plugin_name != 'table') {
+    $vbo_id = $vbo->view->vid;
+    if ($form_state['step'] == 'views_form_views_form') {
+      // Alter the first step of the VBO form (the selection page).
+      $selectallmarkup = $form['select_all_markup']['#markup'];
+      $selectallmarkup = str_replace('<input class="vbo-select-this-page form-checkbox"', '<input class="vbo-select-this-page form-checkbox" id="vbo-select-this-page-' . $vbo_id . '"', $selectallmarkup);
+      $selectallmarkup = str_replace('<input class="vbo-select-all form-checkbox"', '<input class="vbo-select-all form-checkbox" id="vbo-select-all-' . $vbo_id . '"', $selectallmarkup);
+      $selectallmarkup = preg_replace('/<label class="option">/', '<label class="option" for="vbo-select-this-page-' . $vbo_id . '">', $selectallmarkup, 1);
+      $selectallmarkup = preg_replace('/<label class="option">/', '<label class="option" for="vbo-select-all-' . $vbo_id . '">', $selectallmarkup, 1);
+      $form['select_all_markup']['#markup'] = $selectallmarkup;
     }
+  }
 }
 
 /**
  * Implements hook_entity_info_alter().
  */
 function ep_alters_entity_info_alter(&$info) {
-    $info['node']['view modes'] += array(
-        'landing_teaser' => array(
-            'label' => 'Landing Teaser',
-            'custom settings' => FALSE,
-        ),
-    );
-    $info['user']['view modes'] += array(
-        'teaser' => array(
-            'label' => 'Teaser',
-            'custom settings' => FALSE,
-        ),
-    );
+  $info['node']['view modes'] += array(
+    'landing_teaser' => array(
+      'label' => 'Landing Teaser',
+      'custom settings' => FALSE,
+    ),
+  );
+  $info['user']['view modes'] += array(
+    'teaser' => array(
+      'label' => 'Teaser',
+      'custom settings' => FALSE,
+    ),
+  );
 }
 
 /**
  * Implements hook_node_view().
  */
 function ep_alters_node_view($node, $view_mode, $langcode) {
-    global $user;
-    if ($node->type == 'newsletter' && $view_mode == 'print') {
-        if ($user->uid) {
-            $member = entity_load_single('user', $user->uid);
-            $member_address = field_get_items('user', $member, 'field_address');
-            $member_disclaimer = field_get_items('user', $member, 'field_mc_disclaimer');
-            $member_display_name = field_get_items('user', $member, 'field_display_name');
-            $member_website = field_get_items('user', $member, 'field_website');
-            $member_name = '';
-            $logo = field_get_items('user', $member, 'field_company_logo');
-            $profile_pic = field_get_items('user', $member, 'field_user_photo');
-            $output = '';
-            $profile = '';
-            if ($logo) {
-                $logo_attributes = array(
-                  'style_name' => 'high_res_640x480',
-                  'path' => $logo[0]['uri'],
-                  'width' => NULL,
-                  'height' => NULL,
-                  'alt' => '',
-                  );
-                $header_bg = field_get_items('user', $member, 'field_mc_color_primary');
-                if ($header_bg) {
-                    $header_color = 'background-color: ' . $header_bg[0]['rgb'] . ';';
-                }
-                else {
-                    $header_color = '';
-                }
-                $node->content['header'] = array(
-                    '#weight' => 1,
-                    '#theme_wrappers' => array('container'),
-                    '#attributes' => array(
-                      'id' => array('article-header'),
-                      'style' => array($header_color)
-                    ),
-                    '#markup' => theme_image_style($logo_attributes)
-                );
-            }
-            if ($profile_pic) {
-                $profile_attributes = array(
-                    'style_name' => 'high_res_640x480',
-                    'path' => $profile_pic[0]['uri'],
-                    'width' => null,
-                    'height' => null,
-                    //'alt' => '',
-                );
-                $profile .= '<p>' . theme_image_style($profile_attributes) . '</p>';
-            }
-            if ($member_display_name) {
-                $member_name = $member_display_name[0]['safe_value'];
-            }
-            else {
-                $member_fname = field_get_items('user', $member, 'field_first_name');
-                $member_lname = field_get_items('user', $member, 'field_last_name');
-                if ($member_fname && $member_lname) {
-                    $member_name = $member_fname[0]['safe_value'] . ' ' . $member_lname[0]['safe_value'];
-                }
-            }
-            if (!empty($member_name)) {
-                $profile .= '<p><strong>' . $member_name . '</strong><br />';
-                $profile .= l($member->mail, 'mailto:' . $member->mail, array('external' => TRUE)) . '</p>';
-            }
-            // Company info
-            $member_company = field_get_items('user', $member, 'field_company_name');
-            if ($member_company) {
-                $profile .= '<div><strong>' . $member_company[0]['safe_value'] . '</strong></div>';
-            }
-            if ($member_website) {
-                $web_url = $member_website[0]['url'];
-                $web_title = $member_website[0]['title'];
-                if (empty($web_title)) {
-                    $web_title = $web_url;
-                }
-                if (!preg_match('/^http:\/\//',$web_url)) {
-                    $web_url = 'http://' . $web_url;
-                }
-                $profile .= '<div>' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank'))) . '</div>';
-            }
-            if ($member_address) {
-                $address = '';
-                if (!empty($member_address[0]['street'])) {
-                    $address .= check_plain($member_address[0]['street']) . '<br />';
-                }
-                if (!empty($member_address[0]['additional'])) {
-                    $address .= check_plain($member_address[0]['additional']) . '<br />';
-                }
-                if (!empty($member_address[0]['province'])) {
-                    if (!empty($member_address[0]['city'])) {
-                        $address .= check_plain($member_address[0]['city']) . ', ';
-                    }
-                    $address .= $member_address[0]['province'];
-                    if (!empty($member_address[0]['postal_code'])) {
-                        $address .= ' ' . $member_address[0]['postal_code'];
-                    }
-                    if ($member_address[0]['country'] != 'us') {
-                        $address .= '<br />' . check_plain($member_address[0]['country_name']);
-                    }
-                }
-                $profile .= $address;
-                $member_phone = field_get_items('user', $member, 'field_phone');
-                if ($member_phone) {
-                    $profile .= '<div>' . l($member_phone[0]['safe_value'], 'tel:' . $member_phone[0]['safe_value'], array('external' => TRUE)) . '</div>';
-                }
-            }
-            if (!empty($profile)) {
-                $output .= '<div id="article-profile">' . $profile . '</div>';
-            }
-            $template_body = field_get_items('node', $node, 'body');
-            if ($template_body) {
-                $bei_disclaimer = module_invoke('block', 'block_view', '9');
-                $output .= '<div><h1>' . check_plain($node->title) . '</h1>' . $template_body[0]['safe_value'];
-                if ($bei_disclaimer) {
-                    $output .= '<div id="article-corporate-disclaimer">' . render($bei_disclaimer['content']) . '</div>';
-                }
-                $output .= '</div>';
-            }
-            if ($member_disclaimer) {
-                $node->content['disclaimer'] = array(
-                  '#weight' => 4,
-                  '#theme_wrappers' => array('container'),
-                  '#attributes' => array(
-                    'id' => array('article-disclaimer'),
-                  ),
-                  '#markup' => '<div class="wrapper">' . $member_disclaimer[0]['value'] . '</div>'
-                );
-            }
-        }
-        $node->content['output'] = array(
-            '#weight' => 2,
-            '#theme_wrappers' => array('container'),
-            '#attributes' => array(
-              'id' => array('article-content'),
-            ),
-            '#markup' => $output
+  global $user;
+  if ($node->type == 'newsletter' && $view_mode == 'print') {
+    if ($user->uid) {
+      $member = entity_load_single('user', $user->uid);
+      $member_address = field_get_items('user', $member, 'field_address');
+      $member_disclaimer = field_get_items('user', $member, 'field_mc_disclaimer');
+      $member_display_name = field_get_items('user', $member, 'field_display_name');
+      $member_website = field_get_items('user', $member, 'field_website');
+      $member_name = '';
+      $logo = field_get_items('user', $member, 'field_company_logo');
+      $profile_pic = field_get_items('user', $member, 'field_user_photo');
+      $output = '';
+      $profile = '';
+      if ($logo) {
+        $logo_attributes = array(
+          'style_name' => 'high_res_640x480',
+          'path' => $logo[0]['uri'],
+          'width' => NULL,
+          'height' => NULL,
+          'alt' => '',
         );
-        $node->content['copyright'] = array(
-            '#weight' => 5,
-            '#theme_wrappers' => array('container'),
-            '#attributes' => array(
-                'id' => array('article-copyright'),
-            ),
-            '#markup' => '&copy;' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.'
-        );
-    }
-    // White papers
-    $no_bookmarks = array(
-      'whitepaper',
-    );
-    $types_with_cover = array(
-        'whitepaper',
-    );
-    if (in_array($node->type, $types_with_cover) && $view_mode == 'print') {
-        $member = entity_load_single('user', $user->uid);
-        $member_company_field = field_get_items('user', $member, 'field_company_name');
-        $member_company = $member_company_field ? $member_company_field[0]['safe_value'] : '';
-        $member_name_field = field_get_items('user', $member, 'field_display_name');
-        $member_name = $member_name_field ? $member_name_field[0]['safe_value'] : '';
-        $member_address_field = field_get_items('user', $member, 'field_address');
-        $member_website = field_get_items('user', $member, 'field_website');
-        $member_phone = field_get_items('user', $member, 'field_phone');
-        $cover_title = $node->title;
-        $cover_bg = field_get_items('user', $member, 'field_mc_color_email_bg');
-        $cover_fg = field_get_items('user', $member, 'field_mc_color_primary');
-        $cover_style = $cover_bg ? 'background:' . $cover_bg[0]['rgb'] . ';' : '';
-        $logo = field_get_items('user', $member, 'field_company_logo');
-        $disclaimer_field = field_get_items('user', $member, 'field_mc_disclaimer');
-        //$cover_class = getContrast($cover_bg[0]['rgb']);
-        //$header_bg = field_get_items('user', $member, 'field_header_background');
-        //$header_fg = field_get_items('user', $member, 'field_header_foreground');
-        // Logo
-        if ($logo) {
-          $logo_attributes = array(
-            'style_name' => 'high_res_640x480',
-            'path' => $logo[0]['uri'],
-            'width' => $logo[0]['width'],
-            'height' => $logo[0]['height'],
-            'alt' => '',
-            );
-          $logo_output = '<div id="cover-logo">' . theme_image_style($logo_attributes) . '</div>';
-          $logo_classes = ' logo';
+        $header_bg = field_get_items('user', $member, 'field_mc_color_primary');
+        if ($header_bg) {
+          $header_color = 'background-color: ' . $header_bg[0]['rgb'] . ';';
         }
         else {
-         $logo_output = '';
-         $logo_classes = '';
+          $header_color = '';
         }
-        // Member Address
-        $member_address = '';
-        if ($member_address_field) {
-            $street = !empty($member_address_field[0]['street']) ? check_plain($member_address_field[0]['street']) . '<br />' : '';
-            $street2 = !empty($member_address_field[0]['additional']) && !empty($street) ? check_plain($member_address_field[0]['additional']) . '<br />' : '';
-            $city_state = !empty($member_address_field[0]['city']) ? check_plain($member_address_field[0]['city']) . ', ' . check_plain($member_address_field[0]['province']) . '<br />' : check_plain($member_address_field[0]['province']) . '<br />';
-            $zip = !empty($member_address_field[0]['postal_code']) ? $member_address_field[0]['postal_code'] : '';
-            $member_address = $street . $street2 . $city_state . $zip;
-            // Member Phone
-            if ($member_phone) {
-                $member_address .= '<br />Phone: ' . check_plain($member_phone[0]['value']);
-            }
-            // Member Website
-            if ($member_website) {
-                $web_url = check_plain($member_website[0]['url']);
-                $web_title = check_plain($member_website[0]['title']);
-                if (empty($web_title)) {
-                    $web_title = $web_url;
-                }
-                if (!preg_match('/^http:\/\//',$web_url)) {
-                    $web_url = 'http://' . $web_url;
-                }
-                $member_address .= '<br />' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
-            }
+        $node->content['header'] = array(
+          '#weight' => 1,
+          '#theme_wrappers' => array('container'),
+          '#attributes' => array(
+            'id' => array('article-header'),
+            'style' => array($header_color)
+          ),
+          '#markup' => theme_image_style($logo_attributes)
+        );
+      }
+      if ($profile_pic) {
+        $profile_attributes = array(
+          'style_name' => 'high_res_640x480',
+          'path' => $profile_pic[0]['uri'],
+          'width' => null,
+          'height' => null,
+        );
+        $profile .= '<p>' . theme_image_style($profile_attributes) . '</p>';
+      }
+      if ($member_display_name) {
+        $member_name = $member_display_name[0]['safe_value'];
+      }
+      else {
+        $member_fname = field_get_items('user', $member, 'field_first_name');
+        $member_lname = field_get_items('user', $member, 'field_last_name');
+        if ($member_fname && $member_lname) {
+          $member_name = $member_fname[0]['safe_value'] . ' ' . $member_lname[0]['safe_value'];
         }
-        $cover_title_wrapper = '<div id="cover-title"><h1 title="Cover">' . check_plain($node->title). '</h1><h2 class="notoc no-bookmark">WHITE PAPER</h2></div>';
-        // Cover Page
-        $show_bookmarks = !in_array($node->type, $no_bookmarks) ? 'show-bookmarks' : 'auto';
-        // Extra Styles
-        $node->content['styles'] = array(
-          '#prefix' => '<style>',
-          '#suffix' => '</style>',
-          '#markup' => '
-          @prince-pdf {
-            prince-pdf-page-mode: ' . $show_bookmarks . ';
+      }
+      if (!empty($member_name)) {
+        $profile .= '<p><strong>' . $member_name . '</strong><br />';
+        $profile .= l($member->mail, 'mailto:' . $member->mail, array('external' => TRUE)) . '</p>';
+      }
+      // Company info
+      $member_company = field_get_items('user', $member, 'field_company_name');
+      if ($member_company) {
+        $profile .= '<div><strong>' . $member_company[0]['safe_value'] . '</strong></div>';
+      }
+      if ($member_website) {
+        $web_url = $member_website[0]['url'];
+        $web_title = $member_website[0]['title'];
+        if (empty($web_title)) {
+          $web_title = $web_url;
+        }
+        if (!preg_match('/^http:\/\//',$web_url)) {
+          $web_url = 'http://' . $web_url;
+        }
+        $profile .= '<div>' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank'))) . '</div>';
+      }
+      if ($member_address) {
+        $address = '';
+        if (!empty($member_address[0]['street'])) {
+          $address .= check_plain($member_address[0]['street']) . '<br />';
+        }
+        if (!empty($member_address[0]['additional'])) {
+          $address .= check_plain($member_address[0]['additional']) . '<br />';
+        }
+        if (!empty($member_address[0]['province'])) {
+          if (!empty($member_address[0]['city'])) {
+            $address .= check_plain($member_address[0]['city']) . ', ';
           }
-          ',
-          '#weight' => -10,
-        );
-        $node->content['cover_page'] = array(
-            '#theme_wrappers' => array('container'),
-            '#attributes' => array(
-              'id' => array('cover-page'),
-              'class' => array('page'),
-              'style' => array($cover_style),
-            ),
-            '#weight' => -9,
-            '#markup' => '
-            <div id="cover-top">
-            ' . $cover_title_wrapper . '
-            </div>
-            <div id="cover-bottom"><div id="cover-branding">
-              ' . $logo_output . '
-              <div id="cover-preparer">' . $member_name . '<br />' . $member_company . '<br />' . $member_address . '</div>
-            </div></div>',
-        );
-        $copyright = date('Y');
-        if ($node->type == 'whitepaper') {
-            $copyright_field = field_get_items('node', $node, 'field_copyright');
-            if ($copyright_field) {
-                $date_start = format_date(strtotime($copyright_field[0]['value']), 'custom', 'Y');
-                $date_end = format_date(strtotime($copyright_field[0]['value2']), 'custom', 'Y');
-                $copyright = $date_start == $date_end ? $date_start : $date_start . '-' . $date_end;
-            }
+          $address .= $member_address[0]['province'];
+          if (!empty($member_address[0]['postal_code'])) {
+            $address .= ' ' . $member_address[0]['postal_code'];
+          }
+          if ($member_address[0]['country'] != 'us') {
+            $address .= '<br />' . check_plain($member_address[0]['country_name']);
+          }
         }
-        // Make copyright higher weight to flow into pdf footer.
-        $node->content['copyright'] = array(
-            '#weight' => -8,
-            '#theme_wrappers' => array('container'),
-            '#attributes' => array(
-                'id' => array('copyright'),
-            ),
-            '#markup' => '&copy;' . $copyright . ' Business Enterprise Institute, Inc. All rights reserved.'
-        );
-        if ($disclaimer_field) {
-            $node->content['disclaimer'] = array(
-                '#theme_wrappers' => array('container'),
-                '#attributes' => array(
-                    'id' => array('disclaimer'),
-                ),
-                '#weight' => 30,
-                '#markup' => '<h2 class="notoc no-bookmark">Disclaimer</h2><div id="disclaimer-text">' . check_markup($disclaimer_field[0]['value'], $disclaimer_field[0]['format']) . '</div>',
-            );
+        $profile .= $address;
+        $member_phone = field_get_items('user', $member, 'field_phone');
+        if ($member_phone) {
+          $profile .= '<div>' . l($member_phone[0]['safe_value'], 'tel:' . $member_phone[0]['safe_value'], array('external' => TRUE)) . '</div>';
         }
+      }
+      if (!empty($profile)) {
+        $output .= '<div id="article-profile">' . $profile . '</div>';
+      }
+      $template_body = field_get_items('node', $node, 'body');
+      if ($template_body) {
+        $bei_disclaimer = module_invoke('block', 'block_view', '9');
+        $output .= '<div><h1>' . check_plain($node->title) . '</h1>' . $template_body[0]['safe_value'];
+        if ($bei_disclaimer) {
+          $output .= '<div id="article-corporate-disclaimer">' . render($bei_disclaimer['content']) . '</div>';
+        }
+        $output .= '</div>';
+      }
+      if ($member_disclaimer) {
+        $node->content['disclaimer'] = array(
+          '#weight' => 4,
+          '#theme_wrappers' => array('container'),
+          '#attributes' => array(
+            'id' => array('article-disclaimer'),
+          ),
+          '#markup' => '<div class="wrapper">' . $member_disclaimer[0]['value'] . '</div>'
+        );
+      }
     }
+    $node->content['output'] = array(
+      '#weight' => 2,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'id' => array('article-content'),
+      ),
+      '#markup' => $output
+    );
+    $node->content['copyright'] = array(
+      '#weight' => 5,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+          'id' => array('article-copyright'),
+      ),
+      '#markup' => '&copy;' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.'
+    );
+  }
+  // White papers
+  $no_bookmarks = array(
+    'whitepaper',
+  );
+  $types_with_cover = array(
+    'whitepaper',
+  );
+  if (in_array($node->type, $types_with_cover) && $view_mode == 'print') {
+    $member = entity_load_single('user', $user->uid);
+    $member_company_field = field_get_items('user', $member, 'field_company_name');
+    $member_company = $member_company_field ? $member_company_field[0]['safe_value'] : '';
+    $member_name_field = field_get_items('user', $member, 'field_display_name');
+    $member_name = $member_name_field ? $member_name_field[0]['safe_value'] : '';
+    $member_address_field = field_get_items('user', $member, 'field_address');
+    $member_website = field_get_items('user', $member, 'field_website');
+    $member_phone = field_get_items('user', $member, 'field_phone');
+    $cover_title = $node->title;
+    $cover_bg = field_get_items('user', $member, 'field_mc_color_email_bg');
+    $cover_fg = field_get_items('user', $member, 'field_mc_color_primary');
+    $cover_style = $cover_bg ? 'background:' . $cover_bg[0]['rgb'] . ';' : '';
+    $logo = field_get_items('user', $member, 'field_company_logo');
+    $disclaimer_field = field_get_items('user', $member, 'field_mc_disclaimer');
+    // Logo
+    if ($logo) {
+      $logo_attributes = array(
+        'style_name' => 'high_res_640x480',
+        'path' => $logo[0]['uri'],
+        'width' => $logo[0]['width'],
+        'height' => $logo[0]['height'],
+        'alt' => '',
+      );
+      $logo_output = '<div id="cover-logo">' . theme_image_style($logo_attributes) . '</div>';
+      $logo_classes = ' logo';
+    }
+    else {
+      $logo_output = '';
+      $logo_classes = '';
+    }
+    // Member Address
+    $member_address = '';
+    if ($member_address_field) {
+      $street = !empty($member_address_field[0]['street']) ? check_plain($member_address_field[0]['street']) . '<br />' : '';
+      $street2 = !empty($member_address_field[0]['additional']) && !empty($street) ? check_plain($member_address_field[0]['additional']) . '<br />' : '';
+      $city_state = !empty($member_address_field[0]['city']) ? check_plain($member_address_field[0]['city']) . ', ' . check_plain($member_address_field[0]['province']) . '<br />' : check_plain($member_address_field[0]['province']) . '<br />';
+      $zip = !empty($member_address_field[0]['postal_code']) ? $member_address_field[0]['postal_code'] : '';
+      $member_address = $street . $street2 . $city_state . $zip;
+      // Member Phone
+      if ($member_phone) {
+        $member_address .= '<br />Phone: ' . check_plain($member_phone[0]['value']);
+      }
+      // Member Website
+      if ($member_website) {
+        $web_url = check_plain($member_website[0]['url']);
+        $web_title = check_plain($member_website[0]['title']);
+        if (empty($web_title)) {
+          $web_title = $web_url;
+        }
+        if (!preg_match('/^http:\/\//',$web_url)) {
+          $web_url = 'http://' . $web_url;
+        }
+        $member_address .= '<br />' . l($web_title, $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
+      }
+    }
+    $cover_title_wrapper = '<div id="cover-title"><h1 title="Cover">' . check_plain($node->title). '</h1><h2 class="notoc no-bookmark">WHITE PAPER</h2></div>';
+    // Cover Page
+    $show_bookmarks = !in_array($node->type, $no_bookmarks) ? 'show-bookmarks' : 'auto';
+    // Extra Styles
+    $node->content['styles'] = array(
+      '#prefix' => '<style>',
+      '#suffix' => '</style>',
+      '#markup' => '
+      @prince-pdf {
+        prince-pdf-page-mode: ' . $show_bookmarks . ';
+      }
+      ',
+      '#weight' => -10,
+    );
+    $node->content['cover_page'] = array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'id' => array('cover-page'),
+        'class' => array('page'),
+        'style' => array($cover_style),
+      ),
+      '#weight' => -9,
+      '#markup' => '
+      <div id="cover-top">
+      ' . $cover_title_wrapper . '
+      </div>
+      <div id="cover-bottom"><div id="cover-branding">
+        ' . $logo_output . '
+        <div id="cover-preparer">' . $member_name . '<br />' . $member_company . '<br />' . $member_address . '</div>
+      </div></div>',
+    );
+    $copyright = date('Y');
+    if ($node->type == 'whitepaper') {
+      $copyright_field = field_get_items('node', $node, 'field_copyright');
+      if ($copyright_field) {
+        $date_start = format_date(strtotime($copyright_field[0]['value']), 'custom', 'Y');
+        $date_end = format_date(strtotime($copyright_field[0]['value2']), 'custom', 'Y');
+        $copyright = $date_start == $date_end ? $date_start : $date_start . '-' . $date_end;
+      }
+    }
+    // Make copyright higher weight to flow into pdf footer.
+    $node->content['copyright'] = array(
+      '#weight' => -8,
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array(
+        'id' => array('copyright'),
+      ),
+      '#markup' => '&copy;' . $copyright . ' Business Enterprise Institute, Inc. All rights reserved.'
+    );
+    if ($disclaimer_field) {
+      $node->content['disclaimer'] = array(
+        '#theme_wrappers' => array('container'),
+        '#attributes' => array(
+          'id' => array('disclaimer'),
+        ),
+        '#weight' => 30,
+        '#markup' => '<h2 class="notoc no-bookmark">Disclaimer</h2><div id="disclaimer-text">' . check_markup($disclaimer_field[0]['value'], $disclaimer_field[0]['format']) . '</div>',
+      );
+    }
+  }
 }
 
  /**
@@ -987,79 +967,79 @@ function ep_alters_block_view($delta = '') {
         $actions_drop = '';
         $export = array();
         if ($node->type == 'subscriber_list') {
-            $manage_campaigns = field_get_items('node', $node, 'field_campaign_management');
-            $subscribers_view = views_get_view_result('bei_subscribers_export', 'default', $nid);
-            // Lets make sure the user has access to edit the node.
-            if (node_access('update', $node)) {
-                // Lets make tabs everything beyond the default page.
-                if (arg(2) && arg(2) != 'edit') {
-                    $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Dashboard'), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Dashboard'))));
-                    if (arg(2) == 'campaigns' && !arg(3)) {
-                        // Lets make sure the list is flagged as "Email Verified".
-                        // If we don't check for this, we get problems on the mailchimp side at time of scheduling or sending a campaign.
-                        $email_verified = flag_get_flag('email_verified');
-                        if ($email_verified->is_flagged($nid)) {
-                            // Since email is verified, we can let someone create campaigns.
-                            $campaign_actions = array();
-                            // Lets check for some additional permissions before we create the links.
-                            if ($manage_campaigns[0]['value'] == 1) {
-                                // Check to see if user can access template library page.
-                                if (user_access('bei_mailchimp_access_campaign_templates')) {
-                                    $campaign_actions[] = l(t('Use a BEI Article'), 'node/' . $nid . '/campaigns/templates', array('attributes' => array('title' => t('Create campaigns from BEI article content'))));
-                                }
-                                // Check to see if user can create a custom campaign.
-                                if (user_access('bei_mailchimp_create_campaign')) {
-                                    $campaign_actions[] = l(t('Use my own Article'), 'node/' . $nid . '/create-campaign', array('attributes' => array('title' => t('Create a campaign with your own article content')), 'query' => array(drupal_get_destination())));
-                                }
-                                if (!empty($campaign_actions)) {
-                                    $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Create Campaign') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'campaign-actions', 'class' => array('button success split'))));
-                                    $actions_drop .= ep_alters_item_list(array('items' => $campaign_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'campaign-actions', 'class' => 'f-dropdown')));
-                                }
-                            }
-                        }
-                        $tabs[] = l('<i class="icon-calendar3">&nbsp;&nbsp;</i>' . t('Scheduled'), 'node/' . $nid . '/campaigns/scheduled', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('View scheduled campaigns'))));
+          $manage_campaigns = field_get_items('node', $node, 'field_campaign_management');
+          $subscribers_view = views_get_view_result('bei_subscribers_export', 'default', $nid);
+          // Lets make sure the user has access to edit the node.
+          if (node_access('update', $node)) {
+            // Lets make tabs everything beyond the default page.
+            if (arg(2) && arg(2) != 'edit') {
+              $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Dashboard'), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Dashboard'))));
+              if (arg(2) == 'campaigns' && !arg(3)) {
+                // Lets make sure the list is flagged as "Email Verified".
+                // If we don't check for this, we get problems on the mailchimp side at time of scheduling or sending a campaign.
+                $email_verified = flag_get_flag('email_verified');
+                if ($email_verified->is_flagged($nid)) {
+                  // Since email is verified, we can let someone create campaigns.
+                  $campaign_actions = array();
+                  // Lets check for some additional permissions before we create the links.
+                  if ($manage_campaigns[0]['value'] == 1) {
+                    // Check to see if user can access template library page.
+                    if (user_access('bei_mailchimp_access_campaign_templates')) {
+                      $campaign_actions[] = l(t('Use a BEI Article'), 'node/' . $nid . '/campaigns/templates', array('attributes' => array('title' => t('Create campaigns from BEI article content'))));
                     }
-                    if (arg(3) == 'templates' || arg(3) == 'scheduled') {
-                        $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Campaigns'), 'node/' . $nid . '/campaigns', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Campaigns'))));
+                    // Check to see if user can create a custom campaign.
+                    if (user_access('bei_mailchimp_create_campaign')) {
+                      $campaign_actions[] = l(t('Use my own Article'), 'node/' . $nid . '/create-campaign', array('attributes' => array('title' => t('Create a campaign with your own article content')), 'query' => array(drupal_get_destination())));
                     }
-                    if (arg(2) == 'subscribers' && !arg(3)) {
-                        if (user_access('create subscriber')) {
-                            $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscribers') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'subscriber-actions', 'class' => array('button success split'))));
-                            $subscriber_actions = array();
-                            $subscriber_actions[] = l(t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('attributes' => array('title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
-                            if (user_access('import bei_subscribers feeds')) {
-                                $subscriber_actions[] = l(t('Import a List'), 'node/' . $nid . '/edit/import', array('query' => array('destination' => 'node/' . $nid . '/import')));
-                                $subscriber_actions[] = l(t('Import Status'), 'node/' . $nid . '/import', array('attributes' => array('title' => 'View the status of recent imports')));
-                           }
-                            $actions_drop .= ep_alters_item_list(array('items' => $subscriber_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'subscriber-actions', 'class' => 'f-dropdown')));
-                        }
-                        if ($subscribers_view) {
-                            $export[] = l('<i class="icon-download">&nbsp;&nbsp;</i>' . t('Export') . '<span></span>', '', array('html' => TRUE, 'fragment' => '', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'export-actions', 'class' => array('button split'))));
-                            $export_actions = array(
-                              l(t('Export to CSV'), 'node/' . $nid . '/export/subscribers-csv', array('attributes' => array('title' => 'Export to comma delimited file'))),
-                              l(t('Export to Excel'), 'node/' . $nid . '/export/subscribers-xls', array('attributes' => array('title' => 'Export to Excel file')))
-                            );
-                            $actions_drop .= ep_alters_item_list(array('items' => $export_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'export-actions', 'class' => 'f-dropdown')));
-                        }
+                    if (!empty($campaign_actions)) {
+                      $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Create Campaign') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'campaign-actions', 'class' => array('button success split'))));
+                      $actions_drop .= ep_alters_item_list(array('items' => $campaign_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'campaign-actions', 'class' => 'f-dropdown')));
                     }
+                  }
                 }
+                $tabs[] = l('<i class="icon-calendar3">&nbsp;&nbsp;</i>' . t('Scheduled'), 'node/' . $nid . '/campaigns/scheduled', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('View scheduled campaigns'))));
+              }
+              if (arg(3) == 'templates' || arg(3) == 'scheduled') {
+                $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Campaigns'), 'node/' . $nid . '/campaigns', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Campaigns'))));
+              }
+              if (arg(2) == 'subscribers' && !arg(3)) {
+                if (user_access('create subscriber')) {
+                  $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscribers') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'subscriber-actions', 'class' => array('button success split'))));
+                  $subscriber_actions = array();
+                  $subscriber_actions[] = l(t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('attributes' => array('title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
+                  if (user_access('import bei_subscribers feeds')) {
+                    $subscriber_actions[] = l(t('Import a List'), 'node/' . $nid . '/edit/import', array('query' => array('destination' => 'node/' . $nid . '/import')));
+                    $subscriber_actions[] = l(t('Import Status'), 'node/' . $nid . '/import', array('attributes' => array('title' => 'View the status of recent imports')));
+                  }
+                  $actions_drop .= ep_alters_item_list(array('items' => $subscriber_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'subscriber-actions', 'class' => 'f-dropdown')));
+                }
+                if ($subscribers_view) {
+                  $export[] = l('<i class="icon-download">&nbsp;&nbsp;</i>' . t('Export') . '<span></span>', '', array('html' => TRUE, 'fragment' => '', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'export-actions', 'class' => array('button split'))));
+                  $export_actions = array(
+                    l(t('Export to CSV'), 'node/' . $nid . '/export/subscribers-csv', array('attributes' => array('title' => 'Export to comma delimited file'))),
+                    l(t('Export to Excel'), 'node/' . $nid . '/export/subscribers-xls', array('attributes' => array('title' => 'Export to Excel file')))
+                  );
+                  $actions_drop .= ep_alters_item_list(array('items' => $export_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'export-actions', 'class' => 'f-dropdown')));
+                }
+              }
             }
+          }
         }
         if (!empty($tabs) || !empty($actions)) {
-            $block['content'] = '<div class="button-bar">';
-            if (!empty($tabs)) {
-                $block['content'] .= ep_alters_item_list(array('items' => $tabs, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group')));
-            }
-            if (!empty($actions)) {
-                $block['content'] .= ep_alters_item_list(array('items' => $actions, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
-            }
-            if (!empty($export)) {
-                $block['content'] .= ep_alters_item_list(array('items' => $export, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
-            }
-            $block['content'] .= '</div>';
+          $block['content'] = '<div class="button-bar">';
+          if (!empty($tabs)) {
+            $block['content'] .= ep_alters_item_list(array('items' => $tabs, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group')));
+          }
+          if (!empty($actions)) {
+            $block['content'] .= ep_alters_item_list(array('items' => $actions, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
+          }
+          if (!empty($export)) {
+            $block['content'] .= ep_alters_item_list(array('items' => $export, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
+          }
+          $block['content'] .= '</div>';
         }
       }
-      break;
+    break;
   }
   return $block;
 }
@@ -1137,27 +1117,25 @@ function ep_alters_item_list($variables) {
 
 // Hide the text format selector for certain fields.
 function ep_alters_element_info_alter(&$type) {
-    if (isset($type['text_format']['#process'])) {
-        foreach ($type['text_format']['#process'] as &$callback) {
-            if ($callback === 'filter_process_format') {
-                $callback = 'ep_alters_process_format';
-            }
-        }
+  if (isset($type['text_format']['#process'])) {
+    foreach ($type['text_format']['#process'] as &$callback) {
+      if ($callback === 'filter_process_format') {
+        $callback = 'ep_alters_process_format';
+      }
     }
+  }
 }
 function ep_alters_process_format($element) {
-    // array of field names to restrict (add more here as needed)
-    $fields = array(
-        'parameter_body',
-    );
-
-    $element = filter_process_format($element);
-
-    // Hide the 'text format' pane below certain text area fields.
-    if (isset($element['#field_name']) && in_array($element['#field_name'], $fields)){
-        $element['format']['#access'] = FALSE;
-    }
-    return $element;
+  // array of field names to restrict (add more here as needed)
+  $fields = array(
+    'parameter_body',
+  );
+  $element = filter_process_format($element);
+  // Hide the 'text format' pane below certain text area fields.
+  if (isset($element['#field_name']) && in_array($element['#field_name'], $fields)){
+    $element['format']['#access'] = FALSE;
+  }
+  return $element;
 }
 
 /**
@@ -1166,15 +1144,15 @@ function ep_alters_process_format($element) {
  * Returns the user's additional fields as attributes.
  */
 function ep_alters_cas_server_user_attributes($account, $service) {
-    $user = user_load($account->uid);
-    $first_name = field_get_items('user', $user, 'field_first_name');
-    $last_name = field_get_items('user', $user, 'field_last_name');
-    $company_name = field_get_items('user', $user, 'field_company_name');
-    return array(
-      'field_first_name' => isset($first_name) ? check_plain($first_name[0]['value']) : '',
-      'field_last_name' => isset($last_name) ? check_plain($last_name[0]['value']) : '',
-      'field_company_name' => isset($company_name) ? check_plain($company_name[0]['value']) : '',
-    );
+  $user = user_load($account->uid);
+  $first_name = field_get_items('user', $user, 'field_first_name');
+  $last_name = field_get_items('user', $user, 'field_last_name');
+  $company_name = field_get_items('user', $user, 'field_company_name');
+  return array(
+    'field_first_name' => isset($first_name) ? check_plain($first_name[0]['value']) : '',
+    'field_last_name' => isset($last_name) ? check_plain($last_name[0]['value']) : '',
+    'field_company_name' => isset($company_name) ? check_plain($company_name[0]['value']) : '',
+  );
 }
 
 /**
@@ -1223,15 +1201,15 @@ function ep_alters_entity_property_tfa_enabled($user, array $options, $name, $en
  * @return integer.
  */
 function ep_alters_get_membership_days($entity, array $options, $name, $entity_type) {
-    global $user;
-    if (isset($user->uid) && $user->uid !== 0) {
-        $time_zone = date_default_timezone();
-        $now = new DateTime();
-        $date = DateTime::createFromFormat('U', $user->created);
-        $days = $now->diff($date)->format('%a');
-        return $days;
-    }
-    return;
+  global $user;
+  if (isset($user->uid) && $user->uid !== 0) {
+    $time_zone = date_default_timezone();
+    $now = new DateTime();
+    $date = DateTime::createFromFormat('U', $user->created);
+    $days = $now->diff($date)->format('%a');
+    return $days;
+  }
+  return;
 }
 
 /**
