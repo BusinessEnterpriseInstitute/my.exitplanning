@@ -593,7 +593,7 @@ table {
       .live, .online {
         padding-top: rem-calc(30);
         padding-bottom: rem-calc(30);
-        h2 {
+        h2, h3 {
           &:before {
             content: "";
             height: 70px;
@@ -605,10 +605,12 @@ table {
           }
         }
       }
-      .live h2:before {
+      .live h2:before,
+      .live h3:before {
         background-image: url(../images/bootcamp_live.png);
       }
-      .online h2:before {
+      .online h2:before,
+      .online h3:before {
         background-image: url(../images/bootcamp_online.png);
       }
     }
