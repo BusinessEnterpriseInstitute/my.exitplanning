@@ -268,7 +268,7 @@ function bei_menu_link__menu_advisor_menu($vars){
     $sub_menu = drupal_render($element['#below']);
   }
   $output = l($element['#title'], $element['#href'], $element['#localized_options']);
-  dpm($vars);
+  //dpm($vars);
   return '<li' . drupal_attributes($element['#attributes']) . '>' . $output . $sub_menu . "</li>\n";
 }
 /**
