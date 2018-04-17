@@ -63,6 +63,7 @@ function theme_panels_extra_styles_wrapper_render_pane(&$vars) {
         $content->title .
         $title_wrapper['suffix'];
   }
+
   if (!empty($content->content)) {
     $content_wrapper = _panels_extra_styles_wrapper_wrap(!empty($settings['content']) ? $settings['content'] : array());
     $content->content
@@ -71,14 +72,18 @@ function theme_panels_extra_styles_wrapper_render_pane(&$vars) {
         $content_wrapper['suffix'];
   }
 
+  $pane_wrapper = _panels_extra_styles_wrapper_wrap(!empty($settings['pane_wrapper']) ? $settings['pane_wrapper'] : array());
+
   // Theme.
   if (!empty($settings['theme']) && $settings['theme']) {
+    $content->pane_prefix = $pane_wrapper['prefix'];
+    $content->pane_suffix = $pane_wrapper['suffix'];
     $output = theme('panels_pane', $vars);
   }
   else {
     $title = !empty($content->title) ? $content->title : NULL;
     $content = !empty($content->content) ? $content->content : NULL;
-    $output = $title . $content;
+    $output = $pane_wrapper['prefix'] . $title . $content . $pane_wrapper['suffix'];
   }
 
   return $output;
