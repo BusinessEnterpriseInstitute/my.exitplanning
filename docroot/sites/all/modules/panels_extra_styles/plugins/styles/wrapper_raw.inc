@@ -35,13 +35,6 @@ function panels_extra_styles_wrapper_raw_region_settings_form($style_settings) {
  * Pane settings form callback.
  */
 function panels_extra_styles_wrapper_raw_pane_settings_form($style_settings) {
-  // Pane wrapper.
-  $settings_default_value = isset($style_settings['pane_wrapper']) ? $style_settings['pane_wrapper'] : '';
-  $form['pane_wrapper'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Pane'),
-    ) + _panels_extra_styles_wrapper_raw_prefix_suffix_options($settings_default_value);
-
   $settings_default_value = isset($style_settings['title']) ? $style_settings['title'] : array();
   $form['title'] = array(
     '#type' => 'fieldset',

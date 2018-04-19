@@ -42,19 +42,6 @@ function panels_extra_styles_wrapper_element_region_settings_form($style_setting
  * Pane settings form callback.
  */
 function panels_extra_styles_wrapper_element_pane_settings_form($style_settings) {
-  // Pane wrapper.
-  $element_default_value = isset($style_settings['pane_wrapper']['element']) ? $style_settings['pane_wrapper']['element'] : '';
-  $form['pane_wrapper']['element'] = array(
-      '#title' => t('Pane Wrapper'),
-      '#description' => t('HTML element to wrap the title and content.'),
-    ) + _panels_extra_styles_wrapper_element_options($element_default_value);
-
-  // Pane wrapper attributes.
-  $attributes_default_value = isset($style_settings['pane_wrapper']['attributes']) ? $style_settings['pane_wrapper']['attributes'] : array();
-  $form['pane_wrapper']['attributes'] = array(
-      '#title' => t('Pane Wrapper Attributes'),
-    ) + _panels_extra_styles_wrapper_attribute_options($attributes_default_value);
-
   // Title.
   $element_default_value = isset($style_settings['title']['element']) ? $style_settings['title']['element'] : '';
   $form['title']['element'] = array(
