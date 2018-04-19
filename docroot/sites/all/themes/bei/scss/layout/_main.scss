@@ -31,36 +31,50 @@ body.page-node-31 {
 body.member-dashboard {
     .dashboard {
         .panel-pane {
-            padding: $column-gutter/2;
-            &:before {
-                content: "";
-                display: block;
-                text-align: center;
-                height: 100px;
-                margin-bottom: rem-calc(30);
-                background-repeat: no-repeat;
-                background-position: center top;
-                background-size: contain;
+            @include grid-column(4);
+            &:last-child {
+                float: left;
             }
-            &.training:before {
-                background-image: url(../images/training.png);
+            .panel {
+                background: none;
+                margin: 0;
+                &:before {
+                    content: "";
+                    display: block;
+                    text-align: center;
+                    height: 100px;
+                    margin-bottom: rem-calc(30);
+                    background-repeat: no-repeat;
+                    background-position: center top;
+                    background-size: contain;
+                }
+                &.training:before {
+                    background-image: url(../images/training_blue.png);
+                }
+                &.marketing:before {
+                    background-image: url(../images/marketing_blue.png);
+                }
+                &.planning:before {
+                    background-image: url(../images/planning_blue.png);
+                }
+                &.engagement:before {
+                    background-image: url(../images/engagement_blue.png);
+                }
+                &.community:before {
+                    background-image: url(../images/community.png);
+                }
             }
-            &.marketing:before {
-                background-image: url(../images/marketing.png);
-            }
-            &.planning:before {
-                background-image: url(../images/planning.png);
-            }
-            &.engagement:before {
-                background-image: url(../images/engagement.png);
-            }
-            &.community:before {
-                background-image: url(../images/community.png);
+            ul {
+                margin-bottom: 0;
+                list-style: none;
+                li ul {
+                }
             }
         }
         .pane-title {
             text-transform: uppercase;
             text-align: center;
+            font-size: rem-calc(28);
         }
     }
 }
