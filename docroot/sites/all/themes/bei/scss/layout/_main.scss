@@ -31,13 +31,14 @@ body.page-node-31 {
 body.member-dashboard {
     .dashboard {
         .panel-pane {
-            @include grid-column(4);
             &:last-child {
                 float: left;
             }
             .panel {
                 background: none;
                 margin: 0;
+                border-width: 10px;
+                /*
                 &:before {
                     content: "";
                     display: block;
@@ -62,7 +63,40 @@ body.member-dashboard {
                 }
                 &.community:before {
                     background-image: url(../images/community.png);
+                }*/
+            }
+            .pane-title {
+                text-transform: uppercase;
+                text-align: center;
+                font-size: rem-calc(28);
+                > a {
+                    display: block;
+                    &:before {
+                        content: "";
+                        display: block;
+                        text-align: center;
+                        height: 100px;
+                        margin-bottom: rem-calc(30);
+                        background-repeat: no-repeat;
+                        background-position: center top;
+                        background-size: contain;
+                    }
                 }
+            }
+            &.training .pane-title > a:before {
+                background-image: url(../images/training_blue.png);
+            }
+            &.marketing .pane-title > a:before {
+                background-image: url(../images/marketing_blue.png);
+            }
+            &.planning .pane-title > a:before {
+                background-image: url(../images/planning_blue.png);
+            }
+            &.engagement .pane-title > a:before {
+                background-image: url(../images/engagement_blue.png);
+            }
+            &.community .pane-title > a:before {
+                background-image: url(../images/community.png);
             }
             ul {
                 margin-bottom: 0;
@@ -70,11 +104,6 @@ body.member-dashboard {
                 li ul {
                 }
             }
-        }
-        .pane-title {
-            text-transform: uppercase;
-            text-align: center;
-            font-size: rem-calc(28);
         }
     }
 }
