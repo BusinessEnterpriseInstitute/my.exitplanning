@@ -37,36 +37,8 @@ body.member-dashboard {
             .panel {
                 background: none;
                 margin: 0;
-<<<<<<< HEAD
-                border-width: 10px;
-=======
->>>>>>> 838483d6613f55dee632ab926373eea515538b19
-                /*
-                &:before {
-                    content: "";
-                    display: block;
-                    text-align: center;
-                    height: 100px;
-                    margin-bottom: rem-calc(30);
-                    background-repeat: no-repeat;
-                    background-position: center top;
-                    background-size: contain;
-                }
-                &.training:before {
-                    background-image: url(../images/training_blue.png);
-                }
-                &.marketing:before {
-                    background-image: url(../images/marketing_blue.png);
-                }
-                &.planning:before {
-                    background-image: url(../images/planning_blue.png);
-                }
-                &.engagement:before {
-                    background-image: url(../images/engagement_blue.png);
-                }
-                &.community:before {
-                    background-image: url(../images/community.png);
-                }*/
+                border-width: 6px;
+                border-color: #E7EBEE;
             }
             .pane-title {
                 text-transform: uppercase;
@@ -99,7 +71,7 @@ body.member-dashboard {
                 background-image: url(../images/engagement_blue.png);
             }
             &.community .pane-title > a:before {
-                background-image: url(../images/community.png);
+                background-image: url(../images/community_blue.png);
             }
             ul {
                 margin-bottom: 0;
