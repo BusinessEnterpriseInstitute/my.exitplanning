@@ -46,7 +46,6 @@
           window.location.href = "/wizard-b";
         }
       });
-
     }
   };     
 }(jQuery));
