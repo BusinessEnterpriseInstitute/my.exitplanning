@@ -28,6 +28,52 @@ body.page-node-31 {
         }
     }
 }
+.l-main .block-menu-block.panel {
+    background: none;
+    border-width: 6px;
+    border-color: #B6C2CC;
+    .block-title {
+        text-transform: uppercase;
+        text-align: center;
+    }
+    &.training,
+    &.marketing,
+    &.planning,
+    &.engagement,
+    &.community {
+        .block-title:before {
+            content: "";
+            display: block;
+            text-align: center;
+            height: 100px;
+            margin-bottom: rem-calc(30);
+            background-repeat: no-repeat;
+            background-position: center top;
+            background-size: contain;
+        }
+    }
+    &.training .block-title:before {
+        background-image: url(../images/training_blue.png);
+    }
+    &.marketing .block-title:before {
+        background-image: url(../images/marketing_blue.png);
+    }
+    &.planning .block-title:before {
+        background-image: url(../images/planning_blue.png);
+    }
+    &.engagement .block-title:before {
+        background-image: url(../images/engagement_blue.png);
+    }
+    &.community .block-title:before {
+        background-image: url(../images/community_blue.png);
+    }
+    ul {
+        margin-bottom: 0;
+        list-style: none;
+        li ul {
+        }
+    }
+}
 body.member-dashboard {
     .dashboard {
         .panel-pane {
