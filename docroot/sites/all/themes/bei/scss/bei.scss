@@ -799,8 +799,31 @@ p.a2a_floating_style.a2a_vertical_style {
 }
 .pane-conference-tabs .tabs dd>a, .tabs .tab-title>a {
     padding: 1rem !important;
-    border-right: 1px solid #fff;
+    border-right: 1px solid #fff !important;
 }
 .has-tip{
   cursor: pointer !important;
 }
+.view div.post-news {
+    float: left;
+    border-right: 1px solid #c12017;
+    padding-top: 1rem;
+    padding-right: 0.75rem;
+    padding-bottom: 0.75rem;
+    margin-right: 11px;
+    font-family: "HelveticaLight";
+    width: 2.5rem;
+    height: 6rem;
+    clear: both;
+    p:first-child  {
+          font-size: 1.875rem;
+          line-height: 23px;
+          margin-bottom: 0 !important;
+    }
+    p:nth-child(2) {
+      text-transform: uppercase;
+      text-align: right;
+      font-size: .85rem;
+    }
+}
+  
