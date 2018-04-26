@@ -798,7 +798,8 @@ p.a2a_floating_style.a2a_vertical_style {
   
 }
 .pane-conference-tabs .tabs dd>a, .tabs .tab-title>a {
-    padding: 1rem !important
+    padding: 1rem !important;
+    border-right: 1px solid #fff;
 }
 .has-tip{
   cursor: pointer !important;
