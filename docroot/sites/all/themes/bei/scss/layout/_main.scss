@@ -119,6 +119,9 @@ body.member-dashboard {
             &.community .pane-title > a:before {
                 background-image: url(../images/community_blue.png);
             }
+            &.my_bei .pane-title > a:before {
+                background-image: url(../images/my_bei_blue.png);
+            }
             ul {
                 margin-bottom: 0;
                 list-style: none;
