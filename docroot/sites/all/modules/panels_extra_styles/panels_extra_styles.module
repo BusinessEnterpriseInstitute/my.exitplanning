@@ -14,6 +14,25 @@ function panels_extra_styles_ctools_plugin_directory($owner, $plugin_type) {
 }
 
 /**
+ * Allow theme hook suggestions to differentiate between raw and element.
+ * Otherwise raw may get themed first and include_once the wrapper_element.inc
+ * before ctools has a chance to load the config and examine the $plugin
+ * value.
+ */
+function theme_panels_extra_styles_wrapper_raw_render_region($vars) {
+  return theme_panels_extra_styles_wrapper_render_region($vars);
+}
+function theme_panels_extra_styles_wrapper_element_render_region($vars) {
+  return theme_panels_extra_styles_wrapper_render_region($vars);
+}
+function theme_panels_extra_styles_wrapper_raw_render_pane(&$vars) {
+  return theme_panels_extra_styles_wrapper_render_pane($vars);
+}
+function theme_panels_extra_styles_wrapper_element_render_pane(&$vars) {
+  return theme_panels_extra_styles_wrapper_render_pane($vars);
+}
+
+/**
  * Render region callback.
  *
  * - Wrapper: Element.

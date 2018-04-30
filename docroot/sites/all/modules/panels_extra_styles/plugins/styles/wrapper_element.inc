@@ -8,8 +8,8 @@
 $plugin = array(
   'title' => t('Wrapper: Element'),
   'description' => t('Wrap regions and panes with HTML elements.'),
-  'render region' => 'panels_extra_styles_wrapper_render_region',
-  'render pane' => 'panels_extra_styles_wrapper_render_pane',
+  'render region' => 'panels_extra_styles_wrapper_element_render_region',
+  'render pane' => 'panels_extra_styles_wrapper_element_render_pane',
   'settings form' => 'panels_extra_styles_wrapper_element_region_settings_form',
   'pane settings form' => 'panels_extra_styles_wrapper_element_pane_settings_form',
 );

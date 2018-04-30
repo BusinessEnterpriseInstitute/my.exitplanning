@@ -8,8 +8,8 @@
 $plugin = array(
   'title' => t('Wrapper: Raw'),
   'description' => t('Wrap regions and panes with raw HTML.'),
-  'render region' => 'panels_extra_styles_wrapper_render_region',
-  'render pane' => 'panels_extra_styles_wrapper_render_pane',
+  'render region' => 'panels_extra_styles_wrapper_raw_render_region',
+  'render pane' => 'panels_extra_styles_wrapper_raw_render_pane',
   'settings form' => 'panels_extra_styles_wrapper_raw_region_settings_form',
   'pane settings form' => 'panels_extra_styles_wrapper_raw_pane_settings_form',
 );
