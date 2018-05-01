@@ -40,7 +40,8 @@ body.page-node-31 {
     &.marketing,
     &.planning,
     &.engagement,
-    &.community {
+    &.community,
+    &.my_bei {
         .block-title:before {
             content: "";
             display: block;
@@ -66,6 +67,9 @@ body.page-node-31 {
     }
     &.community .block-title:before {
         background-image: url(../images/community_blue.png);
+    }
+    &.my_bei .block-title:before {
+        background-image: url(../images/my_bei_blue.png);
     }
     ul {
         margin-bottom: 0;
