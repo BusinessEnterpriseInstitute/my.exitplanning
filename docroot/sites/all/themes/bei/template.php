@@ -216,10 +216,8 @@ function bei_preprocess_flag(&$vars) {
     if ($vars['flag_name_css'] == 'favorites') {
       $vars['flag_classes_array'][] = 'button';
       $current_text = $vars['link_text'];
-      if ($vars['status'] == 'unflagged') {
-        // Add an icon to the link text.
-        $vars['link_text'] = '<i class="icon-star3"></i> ' . $current_text;
-      }
+      $icon_class = $vars['status'] == 'unflagged' ? 'icon-star3' : 'icon-remove';
+      $vars['link_text'] = '<i class="' . $icon_class . '"></i> ' . $current_text;
     }
   }
 }
