@@ -215,11 +215,13 @@ function bei_preprocess_flag(&$vars) {
   if (arg(0) == 'node' && is_numeric(arg(1))) {
     if ($vars['flag_name_css'] == 'favorites') {
       $vars['flag_classes_array'][] = 'button';
-      $current_text = $vars['link_text'];
-      if ($vars['status'] == 'unflagged') {
-        // Add an icon to the link text.
-        $vars['link_text'] = '<i class="icon-star3"></i> ' . $current_text;
+      $icon_class = 'icon-star3';
+      if ($vars['status'] == 'flagged') {
+        $icon_class = 'icon-remove';
+        $vars['flag_classes_array'][] = 'secondary';
       }
+      $current_text = $vars['link_text'];
+      $vars['link_text'] = '<i class="' . $icon_class . '"></i> ' . $current_text;
     }
   }
 }
