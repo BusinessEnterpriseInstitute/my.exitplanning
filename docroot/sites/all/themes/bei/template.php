@@ -206,6 +206,23 @@ function bei_preprocess_page(&$variables) {
 function bei_preprocess_node(&$variables) {
 }
 */
+
+/**
+ * Implements hook_preprocess_flag()
+ */
+function bei_preprocess_flag(&$vars) {
+  // Adding text to the flag specific to a node
+  if (arg(0) == 'node' && is_numeric(arg(1))) {
+    if ($vars['flag_name_css'] == 'favorites') {
+      $vars['flag_classes_array'][] = 'button';
+      $current_text = $vars['link_text'];
+      if ($vars['status'] == 'unflagged') {
+        // Add an icon to the link text.
+        $vars['link_text'] = '<i class="icon-star3"></i> ' . $current_text;
+      }
+    }
+  }
+}
 /**
  * Implements hook_form_alter().
  * Perform alterations before a form is rendered.
