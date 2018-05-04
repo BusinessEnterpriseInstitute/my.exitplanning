@@ -28,7 +28,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
   if ($form_id == 'views_exposed_form') {
     $view = $form_state['view'];
     if ($view->name == 'search_member_content' && $view->current_display == 'page') {
-      $form['keywords']['#attributes']['placeholder'] = t('Search');
+      $form['keywords']['#attributes']['placeholder'] = t('What can we help you find?');
       $form['keywords']['#theme_wrappers'] = array();
       $form['submit']['#attributes']['class'][] = 'postfix expand alert';
       $form['submit']['#attributes']['aria-label'] = 'Submit search';
