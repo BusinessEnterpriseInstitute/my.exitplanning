@@ -1,8 +1,12 @@
 // Non-modular or client styles for .l-search region.
 .l-search {
-    background: #888C98;
-    padding: rem-calc(20) 0;
+    background: #B6C2CC;
+    padding: rem-calc(8) 0;
     form {
+        input {
+            border-color: scale-color($blue-medium, $lightness: 10%);
+            border-right: none;
+        }
         input, button {
             margin: 0;
         }
