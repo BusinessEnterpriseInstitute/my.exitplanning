@@ -1,0 +1,12 @@
+#comments {
+    .comment {
+        border: 1px solid $gainsboro;
+        padding: rem-calc(15);
+        margin-bottom: rem-calc(15);
+        .submitted {
+            margin-bottom: rem-calc(20);
+            @include font-size(14);
+            color: #888;
+        }
+    }
+}
