@@ -296,6 +296,9 @@ ul.action-links {
   list-style: none;
   margin: 0;
 }
+ul.square {
+  list-style: square;
+}
 ol.ep-process {
   counter-reset:li; /* Initiate a counter */
   margin-left:0; /* Remove the default left margin */
@@ -807,7 +810,7 @@ p.a2a_floating_style.a2a_vertical_style {
 }
 .view div.post-news {
     float: left;
-    border-right: 1px solid #c12017;
+    border-right: 1px solid #923d46;
     padding-top: 1rem;
     padding-right: 0.75rem;
     padding-bottom: 0.75rem;
