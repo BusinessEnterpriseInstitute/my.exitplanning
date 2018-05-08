@@ -1,9 +1,20 @@
 <?php
+/**
+ * Implements hook_permission().
+ * Define user permissions.
+ */
+function ep_alters_permission() {
+   return array(
+    'access forum pages' => array(
+      'title' => t('Access forum pages'),
+    ),
+  );
+}
 function ep_alters_menu_alter(&$items) {
   $items['user/login']['title'] = 'Member Login';
   if (module_exists('forum')) {
-    $items['forum']['access arguments'] = array('create forum content');
-    $items['forum/%forum_forum']['access arguments'] = array('create forum content');
+    $items['forum']['access arguments'] = array('access forum pages');
+    $items['forum/%forum_forum']['access arguments'] = array('access forum pages');
   }
 }
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
