@@ -265,7 +265,7 @@ function bei_subscriber_menu() {
     'weight' => -9,
   );
   $items['node/%node/subscribers/add'] = array(
-    'type' => MENU_LOCAL_ACTION,
+    'type' => MENU_CALLBACK,
     'title' => 'Add a subscriber',
     'page callback' => 'entity_ui_get_form',
     'page arguments' => array('bei_subscriber', NULL, 'add'),
