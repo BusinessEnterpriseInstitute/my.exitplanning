@@ -746,13 +746,6 @@ function bei_order_status_options($order) {
 function bei_order_material_list() {
   return array(
     array(
-      'title' => t('How to run your business so you can leave it in style (book)'),
-      'pricing' => array(
-        50 => 16.00,
-        100 => 14.50,
-      ),
-    ),
-    array(
       'title' => t('Exit Planning: The Definitive Guide (book)'),
       'pricing' => array(
         50 => 15.00,

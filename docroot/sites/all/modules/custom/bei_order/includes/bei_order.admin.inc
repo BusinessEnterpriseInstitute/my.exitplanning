@@ -471,6 +471,7 @@ function bei_order_form($form, &$form_state, $order) {
     $form['field_mission']['und'][0]['#format'] = $defaults['mission']['format'];
   }
   $form['wrapper']['branding_wrapper']['field_order_file'] = $form['field_order_file'];
+  $form['wrapper']['branding_wrapper']['field_order_file']['#weight'] = -10;
   $form['wrapper']['branding_wrapper']['field_mission'] = $form['field_mission'];
   $form['wrapper']['branding_wrapper']['field_disclaimers'] = $form['field_disclaimers'];
   if ($existing_order) {
