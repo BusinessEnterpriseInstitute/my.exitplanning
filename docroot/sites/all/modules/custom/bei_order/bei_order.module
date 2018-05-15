@@ -642,6 +642,16 @@ function bei_order_get_properties($order, array $options, $name, $entity_type) {
             'colspan' => 2,
           ),
         );
+        $rows[] = array(
+          array(
+            'data' => t('Comments'),
+            'header' => TRUE,
+          ),
+          array(
+            'data' => check_plain($data['branding']['comments']),
+            'colspan' => 2,
+          ),
+        );
         $disclaimer_field = field_get_items('bei_order', $order, 'field_disclaimers');
         $mission_field = field_get_items('bei_order', $order, 'field_mission');
         if ($disclaimer_field) {

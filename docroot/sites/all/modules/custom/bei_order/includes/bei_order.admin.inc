@@ -262,6 +262,12 @@ function bei_order_form($form, &$form_state, $order) {
     '#element_validate' => array('bei_order_color_validate'),
     '#required' => TRUE,
   );
+  $form['wrapper']['branding_wrapper']['branding']['comments'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Comments'),
+    '#description' => t('Enter any additional instructions regarding colors that may deem helpful to the designer.'),
+    '#default_value' => isset($data['branding']['comments']) ? $data['branding']['comments'] : '',
+  );
   // Materials
   $form['wrapper']['materials'] = array(
     '#type' => 'fieldset',
