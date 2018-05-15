@@ -102,7 +102,7 @@ module.exports = function(grunt) {
           jsFoundation,
           '<%= jshint.all %>'
         ],
-        tasks: ['jshint', 'uglify']
+        tasks: ['uglify']
       }
     }
   });
