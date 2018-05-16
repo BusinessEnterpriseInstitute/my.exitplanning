@@ -82,6 +82,7 @@ Disallow: /bei-list/
 Disallow: /file/
 Disallow: /print/
 Disallow: /pacificlife
+Disallow: /buy-membership/*
 # Paths (no clean URLs)
 Disallow: /?q=admin/
 Disallow: /?q=comment/reply/
