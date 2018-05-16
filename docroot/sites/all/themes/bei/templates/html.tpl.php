@@ -55,6 +55,7 @@
   <!--[if lt IE 9]>
 		<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
 	<![endif]-->
+  <meta name="msvalidate.01" content="EB206DC730CF6182E61B3A6D6971070F" />
 </head>
 <body class="<?php print $classes; ?>" <?php print $attributes;?>>
   <div class="skip-link">
