@@ -13,7 +13,6 @@
 # For more information about the robots.txt standard, see:
 # http://www.robotstxt.org/robotstxt.html
 
-
 User-agent: *
 Crawl-delay: 10
 # CSS, JS, Images
@@ -83,7 +82,6 @@ Disallow: /bei-list/
 Disallow: /file/
 Disallow: /print/
 Disallow: /pacificlife
-Disallow: /buy-membership/*
 # Paths (no clean URLs)
 Disallow: /?q=admin/
 Disallow: /?q=comment/reply/
