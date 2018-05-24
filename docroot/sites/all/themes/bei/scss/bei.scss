@@ -832,4 +832,46 @@ p.a2a_floating_style.a2a_vertical_style {
       color: #2B3A51;
     }
 }
+.view-display-id-block_2 ul.about-team img {
+  border-radius: 100%;
+  height: 240px;
+  width: 210px;
+}
+.spen-panel {
+  background-image:url(https://www.exitplanning.com/sites/default/files/man_standing_at_podium_with_computer.jpg);
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+  background-position: top right;
+  border: 0 !important;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  z-index: 102;
+}
+.spen-panel-inner {
+  background-color: #fff;
+  background-size: cover;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  z-index: 101;
+}
+.spen-pane {
+  border: 1.25rem solid white;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 10px;
+  height: 100%;
+}
+.spen-pane-inner {
+  background-color:rgba(0, 0, 0, 0.4);
+  height: 26.25rem;
+  color:#fff;
+  z-index: 101;
+    h3 {
+      text-transform: uppercase;
+      color:#fff !important;
+      text-align: center;
+    }
+} 
   
