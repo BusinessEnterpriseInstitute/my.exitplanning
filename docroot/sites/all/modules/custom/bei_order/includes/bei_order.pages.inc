@@ -68,27 +68,51 @@ function bei_order_view($order, $view_mode='full', $langcode = NULL) {
     );
   }
   // Branding
+  $color_theme = isset($data['branding']['color_chooser']) ? $data['branding']['color_chooser'] : 1;
   $summary_rows[] = array(
     'data' => array(
-      array('data' => t('BACKGROUND COLOR'), 'header' => TRUE),
-      array('data' => $data['branding']['background_color']['colorfield_picker']),
+      array('data' => t('COLOR SCHEME'), 'header' => TRUE),
+      array('data' => $color_theme ? 'Custom theme' : 'Default theme'),
     ),
     'no_striping' => TRUE,
   );
-  $summary_rows[] = array(
-    'data' => array(
-      array('data' => t('PRIMARY COLOR'), 'header' => TRUE),
-      array('data' => $data['branding']['primary_color']['colorfield_picker']),
-    ),
-    'no_striping' => TRUE,
-  );
-  $summary_rows[] = array(
-    'data' => array(
-      array('data' => t('SECONDARY COLOR'), 'header' => TRUE),
-      array('data' => $data['branding']['secondary_color']['colorfield_picker']),
-    ),
-    'no_striping' => TRUE,
-  );
+  if ($color_theme) {
+    $summary_rows[] = array(
+      'data' => array(
+        array('data' => t('BACKGROUND COLOR'), 'header' => TRUE),
+        array('data' => $data['branding']['background_color']['colorfield_picker']),
+      ),
+      'no_striping' => TRUE,
+    );
+    $summary_rows[] = array(
+      'data' => array(
+        array('data' => t('PRIMARY COLOR'), 'header' => TRUE),
+        array('data' => $data['branding']['primary_color']['colorfield_picker']),
+      ),
+      'no_striping' => TRUE,
+    );
+    $summary_rows[] = array(
+      'data' => array(
+        array('data' => t('SECONDARY COLOR'), 'header' => TRUE),
+        array('data' => $data['branding']['secondary_color']['colorfield_picker']),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
+  if (!empty($data['branding']['comments'])) {
+    $summary_rows[] = array(
+      'data' => array(
+        array('data' => t('COMMENTS'), 'colspan' => '2', 'header' => TRUE),
+      ),
+      'no_striping' => TRUE,
+    );
+    $summary_rows[] = array(
+      'data' => array(
+        array('data' => check_plain($data['branding']['comments'])),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
   $disclaimer_field = field_get_items('bei_order', $order, 'field_disclaimers');
   $mission_field = field_get_items('bei_order', $order, 'field_mission');
   if ($disclaimer_field) {

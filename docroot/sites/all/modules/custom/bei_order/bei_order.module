@@ -612,46 +612,61 @@ function bei_order_get_properties($order, array $options, $name, $entity_type) {
           );
         }
         // Branding
+        $color_theme = isset($data['branding']['color_chooser']) ? $data['branding']['color_chooser'] : 1;
         $rows[] = array(
           array(
-            'data' => t('Background Color'),
-            'header' => TRUE,
+            'data' => t('Color scheme'),
+            'header' => TRUE
           ),
           array(
-            'data' => $data['branding']['background_color']['colorfield_picker'],
+            'data' => $color_theme ? 'Custom theme' : 'Default theme',
             'colspan' => 2,
           ),
         );
-        $rows[] = array(
-          array(
-            'data' => t('Primary Color'),
-            'header' => TRUE,
-          ),
-          array(
-            'data' => $data['branding']['primary_color']['colorfield_picker'],
-            'colspan' => 2,
-          ),
-        );
-        $rows[] = array(
-          array(
-            'data' => t('Secondary Color'),
-            'header' => TRUE,
-          ),
-          array(
-            'data' => $data['branding']['secondary_color']['colorfield_picker'],
-            'colspan' => 2,
-          ),
-        );
-        $rows[] = array(
-          array(
-            'data' => t('Comments'),
-            'header' => TRUE,
-          ),
-          array(
-            'data' => check_plain($data['branding']['comments']),
-            'colspan' => 2,
-          ),
-        );
+        if ($color_theme) {
+          $rows[] = array(
+            array(
+              'data' => t('Background Color'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => $data['branding']['background_color']['colorfield_picker'],
+              'colspan' => 2,
+            ),
+          );
+          $rows[] = array(
+            array(
+              'data' => t('Primary Color'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => $data['branding']['primary_color']['colorfield_picker'],
+              'colspan' => 2,
+            ),
+          );
+          $rows[] = array(
+            array(
+              'data' => t('Secondary Color'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => $data['branding']['secondary_color']['colorfield_picker'],
+              'colspan' => 2,
+            ),
+          );
+        }
+        if (!empty($data['branding']['comments'])) {
+          $rows[] = array(
+            array(
+              'data' => t('Comments'),
+              'header' => TRUE,
+            ),
+            array(
+              'data' => check_plain($data['branding']['comments']),
+              'colspan' => 2,
+            ),
+          );
+        }
         $disclaimer_field = field_get_items('bei_order', $order, 'field_disclaimers');
         $mission_field = field_get_items('bei_order', $order, 'field_mission');
         if ($disclaimer_field) {

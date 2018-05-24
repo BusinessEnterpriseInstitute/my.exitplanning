@@ -226,7 +226,41 @@ function bei_order_form($form, &$form_state, $order) {
     '#type' => 'container',
     '#tree' => TRUE,
   );
-  $form['wrapper']['branding_wrapper']['branding']['background_color'] = array(
+  $form['wrapper']['branding_wrapper']['branding']['color_chooser'] = array(
+    '#type' => 'radios',
+    '#title' => t('Color Scheme'),
+    '#options' => array(
+      1 => t('Custom theme'),
+      0 => t('Default theme'),
+    ),
+    '#default_value' => isset($data['branding']['color_chooser']) ? $data['branding']['color_chooser'] : 1,
+  );
+  $preview_style = 'display:block; border:1px solid; padding:10px;';
+  $preview_markup = '
+  <ul class="block-grid-3">
+  <li><span style="background-color:#242424; color:#fff; ' . $preview_style . '">Background Color</span></li>
+  <li><span style="background-color:#d39c29; ' . $preview_style . '">Primary Color</span></li>
+  <li><span style="background-color:#fff; ' . $preview_style . '">Secondary Color</span></li>
+  </ul>
+  ';
+  $form['wrapper']['branding_wrapper']['branding']['default_preview'] = array(
+    '#type' => 'item',
+    '#markup' => $preview_markup,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="branding[color_chooser]"]' => array('value' => '0'),
+      ),
+    ),
+  );
+  $form['wrapper']['branding_wrapper']['branding']['colors'] = array(
+    '#type' => 'container',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="branding[color_chooser]"]' => array('value' => '1'),
+      ),
+    ),
+  );
+  $form['wrapper']['branding_wrapper']['branding']['colors']['background_color'] = array(
     '#type' => 'colorfield_picker',
     '#title' => t('Background Color'),
     '#description' => t('The background color should be your firm\'s primary
@@ -236,9 +270,8 @@ function bei_order_form($form, &$form_state, $order) {
       'colorfield_picker' => isset($data['branding']['background_color']['colorfield_picker']) ? $data['branding']['background_color']['colorfield_picker'] : $defaults['branding']['background'],
     ),
     '#element_validate' => array('bei_order_color_validate'),
-    '#required' => TRUE,
   );
-  $form['wrapper']['branding_wrapper']['branding']['primary_color'] = array(
+  $form['wrapper']['branding_wrapper']['branding']['colors']['primary_color'] = array(
     '#type' => 'colorfield_picker',
     '#title' => t('Primary Color'),
     '#description' => t('This color should contrast with the background color.
@@ -248,9 +281,8 @@ function bei_order_form($form, &$form_state, $order) {
       'colorfield_picker' => isset($data['branding']['primary_color']['colorfield_picker']) ? $data['branding']['primary_color']['colorfield_picker'] : $defaults['branding']['primary'],
     ),
     '#element_validate' => array('bei_order_color_validate'),
-    '#required' => TRUE,
   );
-  $form['wrapper']['branding_wrapper']['branding']['secondary_color'] = array(
+  $form['wrapper']['branding_wrapper']['branding']['colors']['secondary_color'] = array(
     '#type' => 'colorfield_picker',
     '#title' => t('Secondary Color'),
     '#description' => t('This color should contrast with the background color
@@ -260,7 +292,6 @@ function bei_order_form($form, &$form_state, $order) {
       'colorfield_picker' => isset($data['branding']['secondary_color']['colorfield_picker']) ? $data['branding']['secondary_color']['colorfield_picker'] : $defaults['branding']['secondary'],
     ),
     '#element_validate' => array('bei_order_color_validate'),
-    '#required' => TRUE,
   );
   $form['wrapper']['branding_wrapper']['branding']['comments'] = array(
     '#type' => 'textarea',
@@ -414,7 +445,7 @@ function bei_order_form($form, &$form_state, $order) {
   );
   $form['wrapper']['shipping_address']['copy'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Copy from address'),
+    '#title' => t('Copy from contact information'),
     '#ajax' => array(
       'callback' => 'bei_order_ajax_copy_address',
       'wrapper' => 'shipping-address-wrapper',
@@ -526,6 +557,14 @@ function bei_order_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $data['address'] = $values['address'];
   $data['shipping_address'] = $values['shipping_address'];
+  // Remove the colors container from the saved values to work with existing data.
+  // Needed container for visibility rules.
+  if (isset($values['branding']['colors'])) {
+    foreach($values['branding']['colors'] as $key => $color) {
+      $values['branding'][$key] = $color;
+    }
+    unset($values['branding']['colors']);
+  }
   $data['branding'] = $values['branding'];
   $data['materials'] = $values['materials'];
   $order->data = $data;
