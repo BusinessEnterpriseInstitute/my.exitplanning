@@ -193,6 +193,7 @@ function bei_subscriber_batch_form_submit($form, &$form_state) {
       'members.timestamp_opt',
       'members.last_changed',
       'members.list_id',
+      'members.unique_email_id',
     );
     $options = array(
       'offset' => 0,

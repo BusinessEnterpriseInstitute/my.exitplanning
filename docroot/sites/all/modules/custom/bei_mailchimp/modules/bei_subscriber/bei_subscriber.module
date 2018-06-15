@@ -230,7 +230,7 @@ function bei_subscriber_mailchimp_subscribe_user($list_id, $email) {
 /*
  * Helper function to perform additional actions after mailchimp_unsubscribe().
  */
-function bei_subscriber_mailchimp_unsubscribe_user ($list_id, $email) {
+function bei_subscriber_mailchimp_unsubscribe_user($list_id, $email) {
    watchdog('bei_subscriber', 'Unsubscribed @email from @list_id', array('@email' => $email, '@list_id' => $list_id), WATCHDOG_INFO);
 }
 
@@ -350,6 +350,12 @@ function bei_subscriber_entity_property_info() {
     'type' => 'text',
     'schema field' => 'status',
     'setter callback' => 'entity_property_verbatim_set',
+  );
+   $info['bei_subscriber']['properties']['unique_email_id'] = array(
+    'label' => t(' Unique Email ID'),
+    'description' => t('An identifier for the address across all of MailChimp.'),
+    'type' => 'text',
+    'schema field' => 'unique_email_id',
   );
    $info['bei_subscriber']['properties']['subscribed'] = array(
     'label' => t('Subscribed'),
@@ -671,6 +677,7 @@ function bei_subscriber_queue_import($item) {
       $subscriber->changed = strtotime($member->last_changed);
       $subscriber->first_name = $member->merge_fields->FNAME;
       $subscriber->last_name = $member->merge_fields->LNAME;
+      $subscriber->unique_email_id = $member->unique_email_id;
       entity_save('bei_subscriber', $subscriber);
    }
    else {
@@ -684,6 +691,7 @@ function bei_subscriber_queue_import($item) {
       $subscriber->status = $member->status;
       $subscriber->first_name = $member->merge_fields->FNAME;
       $subscriber->last_name = $member->merge_fields->LNAME;
+      $subscriber->unique_email_id = $member->unique_email_id;
       $subscriber->list_id = $member->list_id;
       entity_save('bei_subscriber', $subscriber);
    }
@@ -710,4 +718,3 @@ function bei_subscriber_cron_queue_info() {
    );
    return $queues;
 }
-
