@@ -91,6 +91,11 @@ function bei_subscriber_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'unique_email_id' => array(
+        'description' => 'A unique identifier for the email address across all MailChimp lists.',
+        'type' => 'varchar',
+        'default' => '',
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -99,4 +104,19 @@ function bei_subscriber_schema() {
     ),
   );
   return $schema;
+}
+
+/**
+ * Add unique_email_id field to bei_subscriber table.
+ */
+function bei_subscriber_update_7001() {
+  db_add_field(
+    'bei_subscriber',
+    'unique_email_id',
+    array(
+      'description' => 'A unique identifier for the email address across all MailChimp lists.',
+      'type' => 'varchar',
+      'default' => '',
+    )
+  );
 }
