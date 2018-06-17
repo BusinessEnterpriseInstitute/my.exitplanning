@@ -237,10 +237,12 @@ function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
 function bei_mailchimp_user_key_form_submit($form, &$form_state) {
   $user = $form_state['user'];
   $key_exists = bei_mailchimp_load_key_by_user($user->uid);
+  $encrypt = module_exists('encrypt') ? TRUE : FALSE;
+  $mc_key = $encrypt ? encrypt(trim($form_state['values']['mc_key'])) : trim($form_state['values']['mc_key']);
   if ($key_exists) {
     db_update('bei_mc_keys')
     ->fields(array(
-      'mc_key' => trim($form_state['values']['mc_key']),
+      'mc_key' => $mc_key,
     ))
     ->condition('uid', $user->uid)
     ->execute();
@@ -249,7 +251,7 @@ function bei_mailchimp_user_key_form_submit($form, &$form_state) {
     db_insert('bei_mc_keys')
     ->fields(array(
       'uid' => $user->uid,
-      'mc_key' => trim($form_state['values']['mc_key']),
+      'mc_key' => $mc_key,
     ))
     ->execute();
   }
