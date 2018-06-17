@@ -64,7 +64,14 @@ function bei_mailchimp_menu() {
     'access callback' => TRUE,
     'page callback' => 'bei_mailchimp_newsletter_autocomplete',
   );
-
+  $items['user/%user/mc-key'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Mailchimp',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_mailchimp_user_key_form', 1),
+    'access arguments' => array('administer bei mailchimp'),
+    'weight' => 30,
+  );
   return $items;
 }
 
@@ -201,4 +208,57 @@ function bei_mailchimp_get_lists($show_nid = FALSE) {
   asort($lists);
 
   return $lists;
+}
+/**
+ * Menu callback form.
+ *
+ * @see bei_mailchimp_menu()
+ */
+function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
+  $form_state['user'] = $user;
+  $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
+  $form['mc_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mailchimp API key'),
+    '#default_value' => $existing_key,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+  return $form;
+}
+/**
+ * Submit callback for bei_mailchimp_user_key_form().
+ */
+function bei_mailchimp_user_key_form_submit($form, &$form_state) {
+  $user = $form_state['user'];
+  $key_exists = bei_mailchimp_load_key_by_user($user->uid);
+  if ($key_exists) {
+    db_update('bei_mc_keys')
+    ->fields(array(
+      'mc_key' => trim($form_state['values']['mc_key']),
+    ))
+    ->condition('uid', $user->uid)
+    ->execute();
+  }
+  else {
+    db_insert('bei_mc_keys')
+    ->fields(array(
+      'uid' => $user->uid,
+      'mc_key' => trim($form_state['values']['mc_key']),
+    ))
+    ->execute();
+  }
+  
+}
+/**
+ * Helper function to load mailchimp api key by user id.
+ */
+function bei_mailchimp_load_key_by_user($uid) {
+  $key = db_query('SELECT k.mc_key FROM {bei_mc_keys} k WHERE k.uid = :uid', array(':uid' => $uid))->fetchField();
+  return $key;
 }

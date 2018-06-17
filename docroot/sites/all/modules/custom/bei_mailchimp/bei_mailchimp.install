@@ -23,3 +23,75 @@ function bei_mailchimp_uninstall() {
     file_delete($file);
   }
 }
+
+/**
+ * Implements hook_schema().
+ */
+function bei_mailchimp_schema() {
+  $schema['bei_mc_keys'] = array(
+    'description' => 'Table for BEI Mailchimp keys',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The user id associated with the key.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'mc_key' => array(
+        'description' => 'Key value',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Create table to store mailchimp api keys per user.
+ */
+function bei_mailchimp_update_7000() {
+  $table = array(
+    'description' => 'Table for BEI Mailchimp keys',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'uid' => array(
+        'description' => 'The user id associated with the key.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'mc_key' => array(
+        'description' => 'Key value',
+        'type' => 'varchar',
+        'length' => 256,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+    ),
+  );
+  db_create_table('bei_mc_keys', $table);
+}
