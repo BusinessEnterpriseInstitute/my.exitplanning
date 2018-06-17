@@ -217,10 +217,14 @@ function bei_mailchimp_get_lists($show_nid = FALSE) {
 function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
   $form_state['user'] = $user;
   $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
+  $mc_key = NULL;
+  if ($existing_key) {
+    $mc_key = module_exists('encrypt') ? decrypt($existing_key) : $existing_key;
+  }
   $form['mc_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Mailchimp API key'),
-    '#default_value' => $existing_key,
+    '#default_value' => $mc_key,
   );
   $form['actions'] = array(
     '#type' => 'actions',
