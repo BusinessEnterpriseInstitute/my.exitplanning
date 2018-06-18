@@ -195,7 +195,7 @@ function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FA
          $interests = array();
          if ($skip_cron) {
             // Subscribe the user immediately and bypass cron.
-            mailchimp_subscribe_process($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+            bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, FALSE, 'html');
          }
          else {
             // Subscribe the user via cron run if enabled.
@@ -212,6 +212,91 @@ function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FA
          mailchimp_update_member($list_id, $email, $merge_vars, $interests, FALSE, 'html');
       }
    }
+}
+
+/**
+ * Wrapper around MailchimpLists::addOrUpdateMember().
+ *
+ * @see MailchimpLists::addOrUpdateMember()
+ *
+ * @return object
+ *   On success a result object will be returned from Mailchimp. On failure an
+ *   object will be returned with the property success set to FALSE, the
+ *   response code as a property, and the message as a property. To check for
+ *   a failure, look for the property 'success' of the object returned to
+ *   be set to FALSE.
+ */
+function bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars = NULL, $interests = array(), $double_optin = FALSE, $format = 'html') {
+  $result = FALSE;
+  try {
+    /* @var \Mailchimp\MailchimpLists $mc_lists */
+    $mc_lists = mailchimp_get_api_object('MailchimpLists');
+    if (!$mc_lists) {
+      throw new MailchimpException('Cannot subscribe to list without MailChimp API. Check API key has been entered.');
+    }
+
+    $parameters = array(
+      // If double opt-in is required, set member status to 'pending', but only
+      // if the user isn't already subscribed.
+      'status' => ($double_optin && !mailchimp_is_subscribed($list_id, $email)) ? \Mailchimp\MailchimpLists::MEMBER_STATUS_PENDING : \Mailchimp\MailchimpLists::MEMBER_STATUS_SUBSCRIBED,
+      'email_type' => $format,
+    );
+
+    // Set interests.
+    if (!empty($interests)) {
+      $parameters['interests'] = (object) $interests;
+    }
+
+    // Set merge fields.
+    if (!empty($merge_vars)) {
+      $parameters['merge_fields'] = (object) $merge_vars;
+    }
+
+    // Add member to list.
+    $result = $mc_lists->addOrUpdateMember($list_id, $email, $parameters);
+
+    if (isset($result->id)) {
+      $subscriber->status = $result->status;
+      $subscriber->unique_email_id = $result->unique_email_id;
+      $subscriber->changed = REQUEST_TIME;
+      entity_save('bei_subscriber', $subscriber);
+      //module_invoke_all('mailchimp_subscribe_user', $list_id, $email, $merge_vars);
+      // Clear user cache, just in case there's some cruft leftover:
+      mailchimp_cache_clear_member($list_id, $email);
+      watchdog('bei_mailchimp', '@email was subscribed to list @list.',
+        array('@email' => $email, '@list' => $list_id), WATCHDOG_NOTICE
+      );
+    }
+    else {
+      if (!variable_get('mailchimp_test_mode')) {
+        watchdog('bei_mailchimp', 'A problem occurred subscribing @email to list @list.', array(
+          '@email' => $email,
+          '@list' => $list_id,
+        ), WATCHDOG_WARNING);
+      }
+    }
+  }
+  catch (Exception $e) {
+    if ($e->getCode() == '400' && strpos($e->getMessage(), 'Member In Compliance State') !== false && !$double_optin) {
+      watchdog('bei_mailchimp', 'Detected "Member In Compliance State" subscribing @email to list @list.  Trying again using double-opt in.', array(
+        '@email' => $email,
+        '@list' => $list_id,
+      ), WATCHDOG_INFO);
+      return bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, TRUE, $format);
+    }
+
+    watchdog('bei_mailchimp', 'An error occurred subscribing @email to list @list. Status code @code. "%message"', array(
+      '@email' => $email,
+      '@list' => $list_id,
+      '%message' => $e->getMessage(),
+      '@code' => $e->getCode(),
+    ), WATCHDOG_ERROR);
+    $result = new stdClass();
+    $result->success = FALSE;
+    $result->status = $e->getCode();
+    $result->message = $e->getMessage();
+  }
+  return $result;
 }
 
 /**
