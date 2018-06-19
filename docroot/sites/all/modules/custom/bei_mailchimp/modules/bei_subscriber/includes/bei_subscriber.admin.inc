@@ -70,8 +70,8 @@ function bei_subscriber_email_validate($element, &$form_state, $form) {
 function bei_subscriber_form_submit($form, &$form_state) {
   $subscriber = entity_ui_form_submit_build_entity($form, $form_state);
   $skip_cron = FALSE;
-  $is_new = FALSE;
-  if (isset($subscriber->is_new)) {
+  $is_new = isset($subscriber->is_new) || !isset($subscriber->id);
+  if ($is_new) {
     $list = $form_state['bei_list'];
     $subscriber->lid = $list->nid;
     $subscriber->uid = $list->uid;
@@ -79,11 +79,9 @@ function bei_subscriber_form_submit($form, &$form_state) {
     $subscriber->status = 'subscribed';
     // Add to mailchimp immediately instead of waiting for cron run.
     $skip_cron = TRUE;
-    $is_new = TRUE;
   }
   // Save and go back.
   bei_subscriber_save($subscriber, $skip_cron, $is_new);
-  //$form_state['redirect'] = 'admin/config/lms/case-studies';
   drupal_set_message(t('Your changes have been saved.'));
 }
 /*

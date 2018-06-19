@@ -129,14 +129,12 @@ function bei_subscriber_load_multiple($ids = array(), $conditions = array(), $re
 /**
  * Save a Subscriber.
  */
-function bei_subscriber_save($subscriber, $skip_cron = FALSE) {
+function bei_subscriber_save($subscriber, $skip_cron = FALSE, $is_new = FALSE) {
    $changed = FALSE;
-   if (!isset($subscriber->id)) {
+   if ($is_new) {
     $subscriber->created = REQUEST_TIME;
-    $subscriber->changed = REQUEST_TIME;
    }
    else {
-    $subscriber->changed = REQUEST_TIME;
     $original = entity_load_unchanged('bei_subscriber', $subscriber->id);
     if ($original->first_name !== $subscriber->first_name) {
       $changed = TRUE;
@@ -145,6 +143,7 @@ function bei_subscriber_save($subscriber, $skip_cron = FALSE) {
       $changed = TRUE;
     }
    }
+   $subscriber->changed = REQUEST_TIME;
    entity_save('bei_subscriber', $subscriber);
    bei_subscriber_subscribe($subscriber, $changed, $skip_cron);
 }
