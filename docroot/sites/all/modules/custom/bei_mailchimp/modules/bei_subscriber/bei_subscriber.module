@@ -171,7 +171,9 @@ function bei_subscriber_entity_delete($entity, $type) {
       $email = $entity->email;
       $list_id = $entity->list_id;
       // Delete the subscriber on mailchimp
-      mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE);
+      if (!empty($entity->unique_email_id)) {
+         mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE);
+      }
    }
 }
 
