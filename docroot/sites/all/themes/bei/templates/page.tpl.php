@@ -196,7 +196,7 @@
       <?php endif; ?>
 
       <?php if (!empty($page['sidebar_second'])): ?>
-        <aside role="complementary" class="<?php print $sidebar_sec_grid; ?> sidebar-second columns sidebar">
+        <aside class="<?php print $sidebar_sec_grid; ?> sidebar-second columns sidebar">
           <?php print render($page['sidebar_second']); ?>
         </aside>
       <?php endif; ?>
