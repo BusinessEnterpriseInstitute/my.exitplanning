@@ -2,7 +2,7 @@
 <div role="document" class="page">
 
   <!--.l-header -->
-  <header role="banner" class="l-header">
+  <header class="l-header">
     <?php if (!empty($page['header_top'])): ?>
       <section class="l-header-top hide-for-small sticky">
         <!--.l-header-top-region -->
@@ -119,7 +119,7 @@
   <?php endif; ?>
 
   <!--.l-main -->
-  <main role="main" class="l-main">
+  <main class="l-main">
     <?php if (!empty($page['search'])): ?>
     <!-- .l-search -->
     <section class="l-search">
@@ -190,7 +190,7 @@
       <!--/.l-main region -->
 
       <?php if (!empty($page['sidebar_first'])): ?>
-        <aside role="complementary" class="<?php print $sidebar_first_grid; ?> sidebar-first columns sidebar">
+        <aside class="<?php print $sidebar_first_grid; ?> sidebar-first columns sidebar">
           <?php print render($page['sidebar_first']); ?>
         </aside>
       <?php endif; ?>
@@ -239,7 +239,7 @@
     <!--/.l-action-bar -->
   <?php endif; ?>
   <!--.l-footer -->
-  <footer class="l-footer" role="contentinfo">
+  <footer class="l-footer">
     <?php if (!empty($page['footer'])): ?>
       <section class="l-footer-region">
           <?php print render($page['footer']); ?>
