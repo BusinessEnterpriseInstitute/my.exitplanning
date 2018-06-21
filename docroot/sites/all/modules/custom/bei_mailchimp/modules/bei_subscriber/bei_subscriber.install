@@ -41,8 +41,9 @@ function bei_subscriber_schema() {
       'email' => array(
         'description' => 'Email Address',
         'type' => 'varchar',
-        'length' => 256,
-        'not null' => TRUE,
+        'length' => 100,
+        'not null' => FALSE,
+        'default' => '',
       ),
       'first_name' => array(
         'description' => 'First Name',
@@ -103,6 +104,7 @@ function bei_subscriber_schema() {
     'indexes' => array(
       'uid' => array('uid'),
       'lid' => array('lid'),
+      'email' => array('email'),
     ),
   );
   return $schema;
@@ -123,4 +125,21 @@ function bei_subscriber_update_7001() {
       'default' => '',
     )
   );
+}
+
+/**
+ * Add email field to be indexed.
+ */
+function bei_subscriber_update_7002() {
+  db_change_field(
+    'bei_subscriber', 'email', 'email',
+    array(
+      'description' => 'Email Address',
+      'type' => 'varchar',
+      'length' => 100,
+      'not null' => FALSE,
+      'default' => '',
+    )
+  );
+  db_add_index('bei_subscriber', 'email', array('email'));
 }
