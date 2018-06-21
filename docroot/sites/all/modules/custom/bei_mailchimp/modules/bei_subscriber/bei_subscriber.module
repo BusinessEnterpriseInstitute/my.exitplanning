@@ -547,14 +547,29 @@ function bei_subscriber_feeds_presave($source, $entity, $item) {
         $message = t('Import: The e-mail address !mail is not valid.', array('!mail' => check_plain($item['email'])));
         $skip = TRUE;
       }
-      elseif (!_bei_subscriber_unique_email($mail)) {
+      else {
+         $unique = _bei_subscriber_unique_email($mail, $list_id);
+         if (is_array($unique)) {
+            $skip = TRUE;
+            $status = $unique['status'];
+            // Email is already on the current list.
+            if ($unique['match'] == 'self') {
+               $message = t('Import: The e-mail address !mail already exists on your list with a status of !status.', array('!mail' => $mail, '!status' => $status));
+            }
+            elseif ($unique['match'] == 'other') {
+               $message = t('Import: The e-mail address !mail was already taken.', array('!mail' => $mail));
+            }
+         }
+      }
+      /*
+      elseif (!_bei_subscriber_unique_email($mail, $list_id)) {
         $message = t('Import: The e-mail address !mail was already taken.', array('!mail' => $mail));
         $skip = TRUE;
       }
       elseif (_bei_subscriber_unsubscribed($mail, $feed_nid)) {
         $message = t('Import: The e-mail address !mail was previously unsubscribed from this list and can not be added again.', array('!mail' => $mail));
         $skip = TRUE;
-      }
+      }*/
       if ($skip) {
         _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_ERROR);
         $entity->feeds_item->skip = TRUE;
@@ -591,19 +606,35 @@ function _bei_subscriber_log_error($feed_nid, $message, $mail, $error) {
 /**
  * Helper function to check for duplicate e-mail addresses.
  */
-function _bei_subscriber_unique_email($email) {
-  $query = "SELECT e.email " .
+function _bei_subscriber_unique_email($email, $list_id) {
+  $query = "SELECT e.email, e.list_id, e.status " .
            "FROM {bei_subscriber} e " .
-           "WHERE email = :email AND e.status = :status";
-  $dupe = db_query($query, array(
+           "WHERE email = :email";
+  $email_items = db_query($query, array(
     ':email' => $email,
-    ':status' => 'subscribed',
-  ))->fetchField();
-  if (!empty($dupe)) {
-    return FALSE;
+  ))->fetchAll();
+  if (!empty($email_items)) {
+      //return FALSE;
+      $my_list = FALSE;
+      $other_list = FALSE;
+      foreach($email_items as $item) {
+        if ($item->list_id == $list_id) {
+           $my_list = TRUE;
+           break;
+        }
+        if ($item->status == 'subscribed') {
+           $other_list = TRUE;
+           break;
+        }
+      }
+      if ($my_list) {
+         return array('match' => 'self', 'status' => $item->status);
+      }
+      elseif ($other_list) {
+         return array('match' => 'other', 'status' => 'subscribed');
+      }
   }
-
-  return TRUE;
+  return;
 }
 /**
  * Helper function to check if subscriber is unsubscribed from the list already.

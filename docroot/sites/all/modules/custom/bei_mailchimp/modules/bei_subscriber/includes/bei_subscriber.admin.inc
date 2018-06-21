@@ -58,13 +58,29 @@ function bei_subscriber_form($form, &$form_state, $subscriber) {
  */
 function bei_subscriber_email_validate($element, &$form_state, $form) {
   $subscriber = $form_state['bei_subscriber'];
+  $list = $form_state['bei_list'];
   if (isset($subscriber->is_new)) {
     if (!valid_email_address($element['#value'])) {
       form_error($element, t($element['#title'] . ' is not a valid email address.'));
     }
-    elseif (!_bei_subscriber_unique_email($element['#value'])) {
-      form_error($element, t($element['#title'] . ' already exists on another list.'));
+    else {
+      $unique = _bei_subscriber_unique_email($element['#value'], $list->list_id);
+      if (is_array($unique)) {
+        $status = $unique['status'];
+        // Email is already on the current list.
+        if ($unique['match'] == 'self') {
+          $message = t($element['#title'] . ' already exists on your list with a status of !status.', array('!status' => $status));
+        }
+        elseif ($unique['match'] == 'other') {
+          $message = t($element['#title'] . ' already exists on another list.');
+        }
+        form_error($element, $message);
+      }
     }
+    /*
+    elseif (!_bei_subscriber_unique_email($element['#value'], $list->list_id)) {
+      form_error($element, t($element['#title'] . ' already exists on another list.'));
+    }*/
   }
 }
 function bei_subscriber_form_submit($form, &$form_state) {
