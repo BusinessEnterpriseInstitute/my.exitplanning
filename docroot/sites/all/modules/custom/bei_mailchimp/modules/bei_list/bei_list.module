@@ -80,9 +80,10 @@ function bei_list_node_insert($node) {
         'subject' => $node->subject,
         'from_email' => $node->from_email,
         'from_name' => $node->from_name,
-        'list_id' => $node->list_id,
+        'list_id' => isset($node->list_id) ? $node->list_id : NULL,
      ))
      ->execute();
+     //bei_list_add_list($node);
   }
 }
 
@@ -110,11 +111,57 @@ function bei_list_node_update($node) {
           'subject' => $node->subject,
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
-          'list_id' => $node->list_id,
+          'list_id' => isset($node->list_id) ? $node->list_id : NULL,
        ))
        ->execute();
     }
   }
+}
+
+function bei_list_add_list($node) {
+   /* @var \Mailchimp\MailchimpLists $mc_lists */
+   $mc_lists = mailchimp_get_api_object('MailchimpLists');
+   try {
+     if (!$mc_lists) {
+       throw new MailchimpException('Cannot create a list without Mailchimp API. Check API key has been entered.');
+     }
+     $contact = array(
+       'company' => 'ABC Company',
+       'address1' => '2000 S. Colorado Blvd.',
+       'address2' => 'Suite 460',
+       'city' => 'Denver',
+       'state' => 'CO',
+       'zip' => '80012',
+       'country' => 'US',
+       'phone' => '',
+     );
+     // Build options.
+     $campaign_defaults = array(
+       'subject' => 'Subject',
+       'from_name' => 'Andy',
+       'from_email' => 'amarquis@exitplanning.com',
+       'language' => 'en',
+     );
+     $result = $mc_lists->addList($node->title, $contact, $campaign_defaults);
+
+     if (!empty($result->id)) {
+      db_update('bei_list')
+      ->fields(array(
+         'list_id' => $result->id,
+      ))
+      ->condition('nid', $node->nid)
+      ->execute();
+     }
+   }
+   catch (Exception $e) {
+     drupal_set_message($e->getMessage(), 'error');
+     watchdog('bei_list', 'An error occurred while creating this list: %message', array(
+       '%message' => $e->getMessage(),
+       ), WATCHDOG_ERROR);
+     return NULL;
+   }
+   drupal_set_message('Created a list and sent it to mailchimp.');
+   watchdog('bei_list', t('A new list !title added', array('!title' => $node->title)));
 }
 
 /**
@@ -158,13 +205,14 @@ function bei_list_node_validate($node, &$form, $form_state) {
  */
 function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $form_id) {
    $node = $form_state['node'];
+   $is_new = isset($node->is_new) || !isset($node->nid);
    $form['from_email'] = array(
       '#type' => 'textfield',
       '#title' => t('From e-mail'),
       '#default_value' => isset($node->from_email) ? $node->from_email : '',
       '#required' => TRUE,
       '#element_validate' => array('bei_list_email_validate'),
-      '#disabled' => TRUE,
+      '#disabled' => $is_new ? FALSE : TRUE,
    );
    $form['subject'] = array(
       '#type' => 'textfield',
@@ -432,6 +480,7 @@ function bei_list_webhook_member_add($member) {
     $subscriber->first_name = $member->merge_fields->FNAME;
     $subscriber->last_name = $member->merge_fields->LNAME;
     $subscriber->list_id = $list_id;
+    $subscriber->unique_email_id = $member->unique_email_id;
     entity_save('bei_subscriber', $subscriber);
     // Log event:
     watchdog('bei_list', 'New Subscriber @email created for list @list.',
