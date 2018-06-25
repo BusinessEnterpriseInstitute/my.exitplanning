@@ -647,3 +647,13 @@ function bei_list_get_lists($reset = FALSE) {
   }
   return $lists;
 }
+
+/**
+ * Implements hook_views_api().
+ */
+function bei_list_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'bei_list') . '/views',
+  );
+}
