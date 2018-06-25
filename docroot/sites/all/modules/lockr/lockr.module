@@ -1,0 +1,300 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations and callbacks for lockr.
+ */
+
+use Lockr\KeyClient;
+use Lockr\Lockr;
+use Lockr\NullPartner;
+use Lockr\Partner;
+use Lockr\SiteClient;
+use Lockr\Exception\LockrClientException;
+use Lockr\Exception\LockrException;
+use Lockr\Exception\LockrServerException;
+
+/**
+ * Include our autoloader.
+ */
+require_once __DIR__ . '/autoload.php';
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function lockr_ctools_plugin_directory($module, $plugin) {
+  if ($module === 'key') {
+    return "plugins/{$plugin}";
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function lockr_menu() {
+  $items = array();
+
+  $items['admin/config/system/lockr'] = array(
+    'title' => 'Lockr',
+    'description' => 'Store keys securely off-site.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lockr_admin_form'),
+    'access arguments' => array('administer keys'),
+    'file' => 'lockr.admin.inc',
+  );
+
+  $items['admin/config/system/lockr/login'] = array(
+    'title' => 'Login to Lockr',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lockr_login_form'),
+    'access arguments' => array('administer keys'),
+    'file' => 'lockr.login.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Returns the detected partner, if available.
+ */
+function lockr_get_partner() {
+  if (defined('PANTHEON_BINDING')) {
+    $desc = <<<EOL
+The Pantheor is strong with this one.
+We're detecting you're on Pantheon and a friend of theirs is a friend of ours.
+Welcome to Lockr.
+EOL;
+    return array(
+      'name' => 'pantheon',
+      'title' => t('Pantheon'),
+      'description' => $desc,
+      'cert' => '/srv/bindings/' . PANTHEON_BINDING . '/certs/binding.pem',
+    );
+  }
+
+  return NULL;
+}
+
+/**
+ * Returns the Lockr site client.
+ */
+function lockr_site_client() {
+  $client = &drupal_static(__FUNCTION__, NULL);
+
+  if ($client === NULL) {
+    $base_client = lockr_client();
+
+    if ($base_client === FALSE) {
+      return FALSE;
+    }
+
+    $client = new SiteClient($base_client);
+  }
+
+  return $client;
+}
+
+/**
+ * Returns the Lockr key client.
+ */
+function lockr_key_client() {
+  $base_client = lockr_client();
+
+  if ($base_client === FALSE) {
+    return FALSE;
+  }
+
+  return new KeyClient($base_client);
+}
+
+/**
+ * Returns the Lockr client for this site.
+ */
+function lockr_client() {
+  $client = &drupal_static(__FUNCTION__, NULL);
+
+  if ($client === NULL) {
+    $client = Lockr::create(lockr_partner());
+  }
+
+  return $client;
+}
+
+/**
+ * Returns the current partner for this site.
+ */
+function lockr_partner() {
+  $partner = &drupal_static(__FUNCTION__, NULL);
+
+  if ($partner !== NULL) {
+    return $partner;
+  }
+
+  $region = variable_get('lockr_region', 'us');
+
+  if (variable_get('lockr_custom', FALSE)) {
+    $cert_path = variable_get('lockr_cert');
+    if ($cert_path) {
+      $partner = new Partner($cert_path, 'custom', $region);
+      return $partner;
+    }
+
+    $partner = new NullPartner($region);
+    return $partner;
+  }
+
+  $detected_partner = lockr_get_partner();
+  if (!$detected_partner) {
+    $partner = new NullPartner($region);
+    return $partner;
+  }
+
+  $partner = new Partner(
+    $detected_partner['cert'],
+    $detected_partner['name'],
+    $region
+  );
+  return $partner;
+}
+
+/**
+ * Returns if this site is currently registered with Lockr.
+ *
+ * @return bool
+ *   TRUE if this site is registered, FALSE if not.
+ */
+function lockr_check_registration() {
+  $status = drupal_static(__FUNCTION__);
+
+  if (!$status) {
+    $status = array(
+      'cert_valid' => FALSE,
+      'exists' => FALSE,
+      'available' => FALSE,
+      'has_cc' => FALSE,
+      'info' => array('partner' => NULL),
+    );
+
+    $client = lockr_site_client();
+    try {
+      if ($client) {
+        $status = $client->exists();
+      }
+    }
+    catch (LockrClientException $e) {
+      watchdog_exception('lockr', $e);
+    }
+  }
+
+  return $status;
+}
+
+/**
+ * Gets a key from Lockr.
+ *
+ * @param string $key_name
+ *   The key name.
+ *
+ * @return string | FALSE
+ *   Returns the key value, or FALSE on failure.
+ */
+function _lockr_get_key($key_name, $encoded) {
+  $client = lockr_key_client();
+  try {
+    if ($client) {
+      return $client->encrypted($encoded)->get($key_name);
+    }
+    else {
+      return FALSE;
+    }
+  }
+  catch (\Exception $e) {
+    watchdog_exception('lockr', $e);
+    return FALSE;
+  }
+}
+
+/**
+ * Sets a key value in lockr.
+ *
+ * @param string $key_name
+ *   The key name.
+ * @param string $key_value
+ *   The key value.
+ * @param string $key_label
+ *   The key label.
+ * @param string|NULL $encoded
+ *   The encryption settings to use, or let Lockr generate new ones.
+ *
+ * @return bool
+ *   TRUE if they key set successfully, FALSE if not.
+ */
+function _lockr_set_key($key_name, $key_value, $key_label, $encoded = NULL) {
+  $client = lockr_key_client();
+  if ($client === FALSE) {
+    return FALSE;
+  }
+  $client = $client->encrypted();
+  try {
+    return $client->set($key_name, $key_value, $key_label, $encoded);
+  }
+  catch (LockrClientException $e) {
+    watchdog_exception('lockr', $e);
+    if ($e->title === 'Not paid') {
+      drupal_set_message(t('NOTE: Key was not set. Please go to <a href="@link">Lockr</a> and add a payment method.',
+        array('@link' => 'https://lockr.io/user/add-card')
+      ), 'error');
+    }
+  }
+  catch (\Exception $e) {
+    watchdog_exception('lockr', $e);
+  }
+  return FALSE;
+}
+
+/**
+ * Deletes a key from Lockr.
+ *
+ * @param string $key_name
+ *   The key name.
+ */
+function _lockr_delete_key($key_name) {
+  $client = lockr_key_client();
+  if ($client) {
+    try {
+      $client->delete($key_name);
+    }
+    catch (\Exception $e) {
+      watchdog_exception('lockr', $e);
+    }
+  }
+}
+
+/**
+ * Writes key files.
+ *
+ * @param string $dir
+ * @param array $texts
+ */
+function _lockr_write_key_files($dir, array $texts) {
+  mkdir($dir, 0700, TRUE);
+
+  $key_file = "{$dir}/key.pem";
+  $key_fd = fopen($key_file, 'w');
+  fwrite($key_fd, $texts['key_text']);
+  fclose($key_fd);
+  chmod($key_file, 0600);
+
+  $cert_file = "{$dir}/crt.pem";
+  $cert_fd = fopen($cert_file, 'w');
+  fwrite($cert_fd, $texts['cert_text']);
+  fclose($cert_fd);
+  chmod($cert_file, 0600);
+
+  $pair_file = "{$dir}/pair.pem";
+  $pair_fd = fopen($pair_file, 'w');
+  fwrite($pair_fd, $texts['key_text']);
+  fwrite($pair_fd, $texts['cert_text']);
+  fclose($pair_fd);
+  chmod($pair_file, 0600);
+}

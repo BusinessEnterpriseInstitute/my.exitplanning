@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * Hook implementations and callbacks for Lockr Field Encryption.
+ */
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function lockr_field_encrypt_entity_info_alter(&$entity_info) {
+  // If Field Encryption is not enabled, bail.
+  if (!module_exists('field_encrypt')) {
+    return;
+  }
+
+  $disable_caching = array();
+
+  // Retrieve an array of field definitions, keyed by machine name.
+  $fields = field_info_field_map();
+
+  foreach (array_keys($fields) as $field_id) {
+    if (!isset($fields[$field_id]['bundles'])) {
+      return;
+    }
+
+    foreach (array_keys($fields[$field_id]['bundles']) as $entity_id) {
+      // If the caching for this entity is not already marked for disabling.
+      if (!in_array($entity_id, $disable_caching)) {
+        // Load the field info.
+        $field = field_info_field($field_id);
+
+        // If encryption is enabled for the field.
+        if (isset($field['settings']['field_encrypt']['encrypt'])
+          && $field['settings']['field_encrypt']['encrypt']) {
+          // Mark the entity to disable caching.
+          $disable_caching[] = $entity_id;
+        }
+      }
+    }
+  }
+
+  // Disable caching for marked entities.
+  foreach (array_keys($entity_info) as $entity_id) {
+    if (in_array($entity_id, $disable_caching)) {
+      if (isset($entity_info[$entity_id]['static cache'])) {
+        $entity_info[$entity_id]['static cache'] = FALSE;
+      }
+      if (isset($entity_info[$entity_id]['field cache'])) {
+        $entity_info[$entity_id]['field cache'] = FALSE;
+      }
+    }
+  }
+}

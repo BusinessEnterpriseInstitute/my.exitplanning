@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Implements hook_enable().
+ */
+function lockr_field_encrypt_enable() {
+  // Clear the cache of existing data.
+  cache_clear_all('*', 'cache_field', TRUE);
+
+  // Get the current cache class.
+  $old_cache = variable_get('cache_class_cache_field', NULL);
+
+  // If the current cache class was provided by FieldEncrypt.
+  if (substr($old_cache, 0, 12) == 'FieldEncrypt') {
+    // Save the cache class, then remove it.
+    variable_set('lockr_field_encrypt_old_cache', $old_cache);
+    variable_del('cache_class_cache_field');
+  }
+}
+
+/**
+ * Implements hook_disable().
+ */
+function lockr_field_encrypt_disable() {
+  // Clear the cache of existing data.
+  cache_clear_all('*', 'cache_field', TRUE);
+
+  // Set the old cache class if there was one.
+  $old_cache = variable_get('lockr_field_encrypt_old_cache', NULL);
+  if ($old_cache === NULL) {
+    variable_del('cache_class_cache_field');
+  }
+  else {
+    variable_set('cache_class_cache_field', $old_cache);
+  }
+
+  // Delete the variable that held the old cache class.
+  variable_del('lockr_field_encrypt_old_cache');
+}

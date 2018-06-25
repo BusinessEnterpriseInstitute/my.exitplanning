@@ -1,0 +1,14 @@
+name = Lockr Field Encryption
+description = Integrates Lockr with Field Encryption.
+package = Encryption
+core = 7.x
+
+dependencies[] = lockr
+dependencies[] = field_encrypt
+
+; Information added by Drupal.org packaging script on 2017-10-03
+version = "7.x-2.4"
+core = "7.x"
+project = "lockr"
+datestamp = "1507065851"
+

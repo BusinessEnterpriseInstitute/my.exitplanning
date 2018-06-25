@@ -1,0 +1,13 @@
+name = Lockr
+description = Connect to Lockr: a secure off-site key management service.
+package = Security
+core = 7.x
+
+dependencies[] = key (>= 7.x-3.4)
+
+; Information added by Drupal.org packaging script on 2017-10-03
+version = "7.x-2.4"
+core = "7.x"
+project = "lockr"
+datestamp = "1507065851"
+
