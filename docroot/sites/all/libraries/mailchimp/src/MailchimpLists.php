@@ -184,6 +184,32 @@ class MailchimpLists extends Mailchimp {
   }
 
   /**
+   * Gets information about a member of a MailChimp list.
+   *
+   * @param string $list_id
+   *   The ID of the list.
+   * @param string $mc_eid
+   *   The member's unique ID.
+   * @param array $parameters
+   *   Associative array of optional request parameters.
+   *
+   * @return object
+   *
+   * @see https://developer.mailchimp.com/documentation/mailchimp/guides/getting-started-with-ecommerce/
+   */
+  public function getMemberInfoById($list_id, $mc_eid, $parameters = []) {
+    $tokens = [
+        'list_id' => $list_id,
+    ];
+
+    $parameters = [
+        'unique_email_id' => $mc_eid,
+    ];
+
+    return $this->request('GET', '/lists/{list_id}/members/', $tokens, $parameters);
+  }
+
+  /**
    * Gets activity related to a member of a MailChimp list.
    *
    * @param string $list_id
@@ -583,8 +609,7 @@ class MailchimpLists extends Mailchimp {
           if ($e->getCode() !== 404) {
             // 404 indicates the email address is not subscribed to this list
             // and can be safely ignored. Surface all other exceptions.
-            throw new MailchimpAPIException($e->getResponse()
-              ->getBody(), $e->getCode(), $e);
+            throw new MailchimpAPIException($e->getMessage(), $e->getCode(), $e);
           }
         }
       }

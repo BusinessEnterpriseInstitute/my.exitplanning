@@ -73,22 +73,5 @@ class MailchimpReports extends Mailchimp {
 
     return $this->request('GET', '/reports/{campaign_id}/{type}', $tokens, $parameters);
   }
-  /** Gets a details about a specific link that was clicked.
-   *
-   * @param string $campaign_id
-   *  The ID of the campaign.
-   * @param string $link_id
-   *  The id for the link
-   * @return object
-   *
-   * @see http://developer.mailchimp.com/documentation/mailchimp/reference/reports/click-details
-   */
-  public function getClickDetailsLink($campaign_id, $link_id, $parameters = []) {
-    $tokens = [
-      'campaign_id' => $campaign_id,
-      'link_id' => $link_id,
-    ];
 
-    return $this->request('GET', '/reports/{campaign_id}/click-details/{link_id}', $tokens, $parameters);
-  }
 }
