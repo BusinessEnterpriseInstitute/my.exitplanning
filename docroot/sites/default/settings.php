@@ -666,6 +666,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
       // Disable Easy cron.
       $conf['easycron_status'] = 0;
       $conf['file_private_path'] = '/mnt/files/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/' . $files_private_conf_path . '/files-private';
+      $conf['lockr_cert'] = '/mnt/gfs/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/nobackup/apikeys/lockr/prod/pair.pem';
       break;
     case 'prod':
       $base_url = 'https://www.exitplanning.com';
