@@ -5,96 +5,60 @@
  * Module for BEI Campaign.
  */
 
-
 /**
  * Implements hook_form_alter().
  * Perform alterations before a form is rendered.
  */
 function bei_campaign_form_campaign_node_form_alter(&$form, &$form_state, $form_id) {
-   $node = $form_state['node'];
-   $disabled = FALSE;
-   if (isset($node->nid)) {
-      $disabled = $node->campaign_status == 'save' ? FALSE : TRUE;
-   }
-   $form['headline'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Headline'),
-      '#description' => t('The headline is the title of the article as it appears above the body of the article.'),
-      '#default_value' => isset($node->headline) ? $node->headline : '',
-      //'#required' => TRUE,
-      '#size' => 60,
-      '#maxlength' => 128,
-      '#disabled' => $disabled,
-   );
-   $form['from_email'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From e-mail'),
-      '#default_value' => isset($node->from_email) ? $node->from_email : '',
-      //'#required' => TRUE,
-      '#element_validate' => array('bei_campaign_email_validate'),
-      '#disabled' => TRUE,
-   );
-   $form['subject'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Subject'),
-      '#description' => t('Keep it relevant and non-spammy.'),
-      '#default_value' => isset($node->subject) ? $node->subject : '',
-      '#required' => TRUE,
-      '#size' => 60,
-      '#maxlength' => 128,
-      '#disabled' => $disabled,
-   );
-   $form['from_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From name'),
-      '#description' => t('This is who your emails will come from. Use something
-                          they\'ll instantly recognize, like your company name.'),
-      '#default_value' => isset($node->from_name) ? $node->from_name : '',
-      '#disabled' => $disabled,
-   );
-   /*
-   $form['list_id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('List Id'),
-      '#default_value' => isset($node->list_id) ? $node->list_id : '',
-      '#disabled' => TRUE,
-   );
-   $form['campaign_id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Campaign Id'),
-      '#default_value' => isset($node->campaign_id) ? $node->campaign_id : '',
-      '#disabled' => TRUE,
-   );
-   $form['campaign_status'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Status'),
-      '#default_value' => isset($node->campaign_status) ? $node->campaign_status : '',
-      '#disabled' => TRUE,
-   );
-   $form['archive_url'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Archive URL'),
-      '#default_value' => isset($node->archive_url) ? $node->archive_url : '',
-      '#disabled' => TRUE,
-   );*/
-   // Alter some fields if a newsletter is referenced;
-   if (!empty($form['field_newsletter_ref'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
-      $form['body']['#attributes']['class'][] = 'element-invisible';
-      $form['headline']['#disabled'] = TRUE;
-   }
-   // Add our own custom callback to the submit handler.
-   //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
-   if ($disabled) {
-      $form['actions']['#access'] = FALSE;
-   }
+  $node = $form_state['node'];
+  $disabled = FALSE;
+  if (isset($node->nid)) {
+    $disabled = $node->campaign_status == 'save' ? FALSE : TRUE;
+  }
+  $form['headline'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Headline'),
+    '#description' => t('The headline is the title of the article as it appears above the body of the article.'),
+    '#default_value' => isset($node->headline) ? $node->headline : '',
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#disabled' => $disabled,
+  );
+  $form['from_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From e-mail'),
+    '#default_value' => isset($node->from_email) ? $node->from_email : '',
+    '#element_validate' => array('bei_campaign_email_validate'),
+    '#disabled' => TRUE,
+  );
+  $form['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#description' => t('Keep it relevant and non-spammy.'),
+    '#default_value' => isset($node->subject) ? $node->subject : '',
+    '#required' => TRUE,
+    '#size' => 60,
+    '#maxlength' => 128,
+    '#disabled' => $disabled,
+  );
+  $form['from_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From name'),
+    '#description' => t('This is who your emails will come from. Use something
+                        they\'ll instantly recognize, like your company name.'),
+    '#default_value' => isset($node->from_name) ? $node->from_name : '',
+    '#disabled' => $disabled,
+  );
+  // Alter some fields if a newsletter is referenced;
+  if (!empty($form['field_newsletter_ref'][LANGUAGE_NONE][0]['target_id']['#default_value'])) {
+    $form['body']['#attributes']['class'][] = 'element-invisible';
+    $form['headline']['#disabled'] = TRUE;
+  }
+  if ($disabled) {
+    $form['actions']['#access'] = FALSE;
+  }
 }
 
-/**
- * Custom callback to save active tab.
- */
-function bei_campaign_submit_callback($form, &$form_state) {
-   $node = $form_state['node'];
-}
 /**
  * Implementation of hook_validate().
  *
@@ -136,7 +100,6 @@ function bei_campaign_field_extra_fields() {
     'display' => array(
     )
   );
-
   return $extra;
 }
 
@@ -145,21 +108,21 @@ function bei_campaign_field_extra_fields() {
  * Act on nodes being loaded from the database.
  */
 function bei_campaign_node_load($nodes, $types) {
-   if (in_array('campaign', $types)) {
-      $result = db_query('SELECT * FROM {bei_campaign} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
-      foreach ($result as $record) {
-         $nodes[$record->nid]->headline = $record->headline;
-         $nodes[$record->nid]->subject = $record->subject;
-         $nodes[$record->nid]->from_email = $record->from_email;
-         $nodes[$record->nid]->from_name = $record->from_name;
-         $nodes[$record->nid]->list_id = $record->list_id;
-         $nodes[$record->nid]->campaign_id = $record->campaign_id;
-         $nodes[$record->nid]->campaign_status = $record->campaign_status;
-         $nodes[$record->nid]->archive_url = $record->archive_url;
-         $nodes[$record->nid]->schedule_date = $record->schedule_date;
-         $nodes[$record->nid]->sent_date = $record->sent_date;
-      }
-   }
+  if (in_array('campaign', $types)) {
+    $result = db_query('SELECT * FROM {bei_campaign} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
+    foreach ($result as $record) {
+      $nodes[$record->nid]->headline = $record->headline;
+      $nodes[$record->nid]->subject = $record->subject;
+      $nodes[$record->nid]->from_email = $record->from_email;
+      $nodes[$record->nid]->from_name = $record->from_name;
+      $nodes[$record->nid]->list_id = $record->list_id;
+      $nodes[$record->nid]->campaign_id = $record->campaign_id;
+      $nodes[$record->nid]->campaign_status = $record->campaign_status;
+      $nodes[$record->nid]->archive_url = $record->archive_url;
+      $nodes[$record->nid]->schedule_date = $record->schedule_date;
+      $nodes[$record->nid]->sent_date = $record->sent_date;
+    }
+  }
 }
 
 /**
@@ -168,50 +131,50 @@ function bei_campaign_node_load($nodes, $types) {
  * Insert a new company into the database.
  */
 function bei_campaign_node_insert($node) {
-   if ($node->type == 'campaign') {
-      db_insert('bei_campaign')
-      ->fields(array(
-         'nid' => $node->nid,
-         'headline' => $node->headline,
-         'subject' => $node->subject,
-         'from_email' => $node->from_email,
-         'from_name' => $node->from_name,
-         'list_id' => $node->list_id,
-         'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
-         'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
-         'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
-      ))
-      ->execute();
-      bei_campaign_add_campaign($node);
-   }
+  if ($node->type == 'campaign') {
+    db_insert('bei_campaign')
+    ->fields(array(
+       'nid' => $node->nid,
+       'headline' => $node->headline,
+       'subject' => $node->subject,
+       'from_email' => $node->from_email,
+       'from_name' => $node->from_name,
+       'list_id' => $node->list_id,
+       'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
+       'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
+       'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
+    ))
+    ->execute();
+    bei_campaign_add_campaign($node);
+  }
 }
 function bei_campaign_add_campaign($node) {
-   /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-   $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-   try {
-     if (!$mc_campaigns) {
-       throw new MailchimpException('Cannot create campaign without Mailchimp API. Check API key has been entered.');
-     }
-     $recipients = array(
-       'list_id' => $node->list_id,
-     );
-     // Build options.
-     $settings = array(
-       'subject_line' => !empty($node->subject) ? $node->subject : 'Subject',
-       'reply_to' => !empty($node->from_email) ? $node->from_email : 'email@examples123.com',
-       'from_name' => !empty($node->from_name) ? $node->from_name : 'From Name',
-       'to_name' => '*|FNAME|* *|LNAME|*',
-       'inline_css' => TRUE,
-       'generate_text' => TRUE, // Tells mailchimp to generate plain text version.
-     );
+  /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+  try {
+    if (!$mc_campaigns) {
+      throw new MailchimpException('Cannot create campaign without Mailchimp API. Check API key has been entered.');
+    }
+    $recipients = array(
+      'list_id' => $node->list_id,
+    );
+    // Build options.
+    $settings = array(
+      'subject_line' => !empty($node->subject) ? $node->subject : 'Subject',
+      'reply_to' => !empty($node->from_email) ? $node->from_email : 'email@examples123.com',
+      'from_name' => !empty($node->from_name) ? $node->from_name : 'From Name',
+      'to_name' => '*|FNAME|* *|LNAME|*',
+      'inline_css' => TRUE,
+      'generate_text' => TRUE, // Tells mailchimp to generate plain text version.
+    );
 
-     // Build content.
-     $content = array(
-       'html' => $node->field_mc_output[LANGUAGE_NONE][0]['value'],
-     );
-     $result = $mc_campaigns->addCampaign(\Mailchimp\MailchimpCampaigns::CAMPAIGN_TYPE_REGULAR, $recipients, $settings);
+    // Build content.
+    $content = array(
+      'html' => $node->field_mc_output[LANGUAGE_NONE][0]['value'],
+    );
+    $result = $mc_campaigns->addCampaign(\Mailchimp\MailchimpCampaigns::CAMPAIGN_TYPE_REGULAR, $recipients, $settings);
 
-     if (!empty($result->id)) {
+    if (!empty($result->id)) {
       db_update('bei_campaign')
       ->fields(array(
          'campaign_id' => $result->id,
@@ -221,17 +184,17 @@ function bei_campaign_add_campaign($node) {
       ->condition('nid', $node->nid)
       ->execute();
       $mc_campaigns->setCampaignContent($result->id, $content);
-     }
-   }
-   catch (Exception $e) {
-     drupal_set_message($e->getMessage(), 'error');
-     watchdog('bei_campaign', 'An error occurred while creating this campaign: %message', array(
-       '%message' => $e->getMessage(),
-       ), WATCHDOG_ERROR);
-     return NULL;
-   }
-   drupal_set_message('Created a campaign and sent it to mailchimp.');
-   watchdog('bei_campaign', t('A new campaign !title added', array('!title' => $node->title)));
+    }
+  }
+  catch (Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog('bei_campaign', 'An error occurred while creating this campaign: %message', array(
+      '%message' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
+    return NULL;
+  }
+  drupal_set_message('Created a campaign and sent it to mailchimp.');
+  watchdog('bei_campaign', t('A new campaign !title added', array('!title' => $node->title)));
 }
 /**
  * Implementation of hook_node_update().
@@ -240,73 +203,72 @@ function bei_campaign_add_campaign($node) {
  * database updates.
  */
 function bei_campaign_node_update($node) {
-   if ($node->type == 'campaign') {
-      $nid = db_query('SELECT n.nid FROM {bei_campaign} n WHERE n.nid = :nid', array(':nid' => $node->nid))->fetchField();
-      if (!empty($nid)) {
-         db_update('bei_campaign')
-         ->fields(array(
-            'headline' => isset($node->headline) ? $node->headline : NULL,
-            'subject' => $node->subject,
-            'from_email' => $node->from_email,
-            'from_name' => $node->from_name,
-            'list_id' => $node->list_id,
-            'campaign_id' => $node->campaign_id,
-            'campaign_status' => isset($node->campaign_status) ? $node->campaign_status : '',
-            'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
-            'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
-            'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
-         ))
-         ->condition('nid', $node->nid)
-         ->execute();
-      }
-      else {
-         db_insert('bei_campaign')
-         ->fields(array(
-            'nid' => $node->nid,
-            'headline' => isset($node->headline) ? $node->headline : NULL,
-            'subject' => $node->subject,
-            'from_email' => $node->from_email,
-            'from_name' => $node->from_name,
-            'list_id' => $node->list_id,
-            'campaign_id' => $node->campaign_id,
-            'campaign_status' => isset($node->campaign_status) ? $node->campaign_status : '',
-            'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
-            'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
-            'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
-         ))
-         ->execute();
-      }
-      if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
-         // Update on mailchimp only if the status is 'save' and content has changed.
-         try {
-            $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-            if (!$mc_campaigns) {
-              throw new MailchimpException('Cannot update a campaign without Mailchimp API. Check API key has been entered.');
-            }
-            $campaign = $mc_campaigns->getCampaign($node->campaign_id);
-            if ($campaign) {
-              $settings = array();
-              if ($node->field_mc_output[LANGUAGE_NONE][0]['value'] !== $node->original->field_mc_output[LANGUAGE_NONE][0]['value']) {
-                $content = array(
-                  'html' => $node->field_mc_output[LANGUAGE_NONE][0]['value'],
-                );
-                $mc_campaigns->setCampaignContent($node->campaign_id, $content);
-              }
-              $settings['subject_line'] = !empty($node->subject) ? check_plain($node->subject) : 'Newsletter';
-              $settings['from_name'] = check_plain($node->from_name);
-              $settings['reply_to'] = $node->from_email;
-              $mc_campaigns->updateCampaign($node->campaign_id, $campaign->type, $campaign->recipients, $settings);
-              watchdog('bei_campaign', t('The campaign !title was updated on Mailchimp.', array('!title' => $node->title)));
-            }
+  if ($node->type == 'campaign') {
+    $nid = db_query('SELECT n.nid FROM {bei_campaign} n WHERE n.nid = :nid', array(':nid' => $node->nid))->fetchField();
+    if (!empty($nid)) {
+      db_update('bei_campaign')
+      ->fields(array(
+         'headline' => isset($node->headline) ? $node->headline : NULL,
+         'subject' => $node->subject,
+         'from_email' => $node->from_email,
+         'from_name' => $node->from_name,
+         'list_id' => $node->list_id,
+         'campaign_id' => $node->campaign_id,
+         'campaign_status' => isset($node->campaign_status) ? $node->campaign_status : '',
+         'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
+         'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
+         'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
+      ))
+      ->condition('nid', $node->nid)
+      ->execute();
+    }
+    else {
+      db_insert('bei_campaign')
+      ->fields(array(
+        'nid' => $node->nid,
+        'headline' => isset($node->headline) ? $node->headline : NULL,
+        'subject' => $node->subject,
+        'from_email' => $node->from_email,
+        'from_name' => $node->from_name,
+        'list_id' => $node->list_id,
+        'campaign_id' => $node->campaign_id,
+        'campaign_status' => isset($node->campaign_status) ? $node->campaign_status : '',
+        'archive_url' => isset($node->archive_url) ? $node->archive_url : '',
+        'schedule_date' => isset($node->schedule_date) ? $node->schedule_date : NULL,
+        'sent_date' => isset($node->sent_date) ? $node->sent_date : NULL,
+      ))
+      ->execute();
+    }
+    if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
+      // Update on mailchimp only if the status is 'save' and content has changed.
+      try {
+        $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+        if (!$mc_campaigns) {
+          throw new MailchimpException('Cannot update a campaign without Mailchimp API. Check API key has been entered.');
+        }
+        $campaign = $mc_campaigns->getCampaign($node->campaign_id);
+        if ($campaign) {
+          $settings = array();
+          if ($node->field_mc_output[LANGUAGE_NONE][0]['value'] !== $node->original->field_mc_output[LANGUAGE_NONE][0]['value']) {
+            $content = array(
+              'html' => $node->field_mc_output[LANGUAGE_NONE][0]['value'],
+            );
+            $mc_campaigns->setCampaignContent($node->campaign_id, $content);
           }
-          catch (Exception $e) {
-            drupal_set_message($e->getMessage(), 'error');
-            watchdog('bei_campaign', 'An error occurred while trying to update this campaign: %message', array(
-              '%message' => $e->getMessage(),
-              ), WATCHDOG_ERROR);
-         }
+          $settings['subject_line'] = !empty($node->subject) ? check_plain($node->subject) : 'Newsletter';
+          $settings['from_name'] = check_plain($node->from_name);
+          $settings['reply_to'] = $node->from_email;
+          $mc_campaigns->updateCampaign($node->campaign_id, $campaign->type, $campaign->recipients, $settings);
+          watchdog('bei_campaign', t('The campaign !title was updated on Mailchimp.', array('!title' => $node->title)));
+        }
       }
-   }
+      catch (Exception $e) {
+        drupal_set_message($e->getMessage(), 'error');
+        watchdog('bei_campaign', 'An error occurred while trying to update this campaign: %message', array(
+          '%message' => $e->getMessage()), WATCHDOG_ERROR);
+      }
+    }
+  }
 }
 /**
  * Implementation of hook_node_delete().
@@ -314,13 +276,13 @@ function bei_campaign_node_update($node) {
  * When a node is deleted, delete the corresponding custom table record.
  */
 function bei_campaign_node_delete($node) {
-   if ($node->type == 'campaign') {
-      db_query("DELETE FROM {bei_campaign} WHERE nid = :nid", array(':nid' => $node->nid));
-      // Delete it from Mailchimp only if status is 'save';
-      if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
-         bei_campaign_delete_campaign($node->campaign_id);
-      }
-   }
+  if ($node->type == 'campaign') {
+    db_query("DELETE FROM {bei_campaign} WHERE nid = :nid", array(':nid' => $node->nid));
+    // Delete it from Mailchimp only if status is 'save';
+    if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
+      bei_campaign_delete_campaign($node->campaign_id);
+    }
+  }
 }
 
 
@@ -329,22 +291,22 @@ function bei_campaign_node_delete($node) {
  * Define user permissions.
  */
 function bei_campaign_permission() {
-   return array(
-      'schedule a campaign' => array(
-        'title' => t('Schedule a Campaign'),
-        'description' => t('Allows user to schedule a campaign on Mailchimp.'),
-        'restrict access' => TRUE,
-      ),
-      'unschedule a campaign' => array(
-        'title' => t('Unschedule a Campaign'),
-        'description' => t('Allows user to unschedule a campaign on Mailchimp.'),
-        'restrict access' => TRUE,
-      ),
-      'send a campaign' => array(
-        'title' => t('Send a Campaign'),
-        'description' => t('Allows user to send a campaign on Mailchimp.'),
-        'restrict access' => TRUE,
-      ),
+  return array(
+    'schedule a campaign' => array(
+      'title' => t('Schedule a Campaign'),
+      'description' => t('Allows user to schedule a campaign on Mailchimp.'),
+      'restrict access' => TRUE,
+    ),
+    'unschedule a campaign' => array(
+      'title' => t('Unschedule a Campaign'),
+      'description' => t('Allows user to unschedule a campaign on Mailchimp.'),
+      'restrict access' => TRUE,
+    ),
+    'send a campaign' => array(
+      'title' => t('Send a Campaign'),
+      'description' => t('Allows user to send a campaign on Mailchimp.'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -390,7 +352,6 @@ function bei_campaign_menu() {
     'file' => 'includes/bei_campaign.pages.inc',
     'weight' => 49,
   );
-
   $items['node/%node/unsubscribed'] = array(
     'title' => 'Unsubscribes',
     'access callback' => '_bei_campaign_stat_access',
@@ -400,7 +361,6 @@ function bei_campaign_menu() {
     'file' => 'includes/bei_campaign.pages.inc',
     'weight' => 50,
   );
-
   $items['node/%node/clicked'] = array(
     'title' => 'Clicked',
     'access callback' => '_bei_campaign_stat_access',
@@ -410,7 +370,6 @@ function bei_campaign_menu() {
     'file' => 'includes/bei_campaign.pages.inc',
     'weight' => 50,
   );
-
   $items['node/%node/click-details'] = array(
     'title' => 'Click Details',
     'access callback' => '_bei_campaign_stat_access',
@@ -451,84 +410,84 @@ function _bei_campaign_stat_access($node) {
  * Implements hook_entity_property_info_alter()
  */
 function bei_campaign_entity_property_info_alter(&$info) {
-   $properties = &$info['node']['bundles']['campaign']['properties'];
-   $properties['headline'] = array(
+  $properties = &$info['node']['bundles']['campaign']['properties'];
+  $properties['headline'] = array(
     'label' => t('Campaign: Headline'),
     'type' => 'text',
     'description' => t('The headline text for the campaign.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['from_email'] = array(
+  );
+  $properties['from_email'] = array(
     'label' => t('Campaign: From e-mail'),
     'type' => 'text',
     'description' => t('The reply to e-mail.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['from_name'] = array(
+  );
+  $properties['from_name'] = array(
     'label' => t('Campaign: From name'),
     'type' => 'text',
     'description' => t('The name of the person/company sending the campaign.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['subject'] = array(
+  );
+  $properties['subject'] = array(
     'label' => t('Campaign: Subject'),
     'type' => 'text',
     'description' => t('The subject field for the campaign.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['list_id'] = array(
+  );
+  $properties['list_id'] = array(
     'label' => t('Campaign: List id'),
     'type' => 'text',
     'description' => t('The list id on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['campaign_id'] = array(
+  );
+  $properties['campaign_id'] = array(
     'label' => t('Campaign: Campaign id'),
     'type' => 'text',
     'description' => t('The campaign id on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'setter callback' => 'entity_property_verbatim_set',
     'entity views field' => TRUE,
-   );
-   $properties['campaign_status'] = array(
+  );
+  $properties['campaign_status'] = array(
     'label' => t('Campaign: Campaign status'),
     'type' => 'text',
     'description' => t('The campaign status on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'entity views field' => TRUE,
     'queryable' => TRUE,
-   );
-   $properties['archive_url'] = array(
+  );
+  $properties['archive_url'] = array(
     'label' => t('Campaign: Archive URL'),
     'type' => 'uri',
     'description' => t('The archive url on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'entity views field' => TRUE,
-   );
-   $properties['schedule_date'] = array(
+  );
+  $properties['schedule_date'] = array(
     'label' => t('Campaign: Schedule Date'),
     'type' => 'date',
     'description' => t('The date scheduled for the campaign on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'entity views field' => TRUE,
-   );
-   $properties['sent_date'] = array(
+  );
+  $properties['sent_date'] = array(
     'label' => t('Campaign: Sent Date'),
     'type' => 'date',
     'description' => t('The date sent for the campaign on Mailchimp.'),
     'getter callback' => 'bei_campaign_get_properties',
     'entity views field' => TRUE,
-   );
+  );
 }
 
 /**
@@ -536,39 +495,49 @@ function bei_campaign_entity_property_info_alter(&$info) {
  *
  */
 function bei_campaign_get_properties($node, array $options, $name, $entity_type) {
-   switch ($name) {
-      case 'headline':
-         $value = isset($node->headline) ? $node->headline : NULL;
-         return $value;
-      case 'from_email':
-         $value = isset($node->from_email) ? $node->from_email : NULL;
-         return $value;
-      case 'from_name':
-         $value = isset($node->from_name) ? $node->from_name : NULL;
-         return $value;
-      case 'subject':
-         $value = isset($node->subject) ? $node->subject : NULL;
-         return $value;
-      case 'list_id':
-         $value = isset($node->list_id) ? $node->list_id : NULL;
-         return $value;
-      case 'campaign_id':
-         $value = isset($node->campaign_id) ? $node->campaign_id : NULL;
-         return $value;
-      case 'campaign_status':
-         $value = isset($node->campaign_status) ? $node->campaign_status : NULL;
-         return $value;
-      case 'archive_url':
-         $options = array('absolute' => TRUE, 'external' => TRUE, 'target' => '_blank');
-         $value = isset($node->archive_url) ? url($node->archive_url, $options) : NULL;
-         return $value;
-      case 'schedule_date':
-         $value = isset($node->schedule_date) ? $node->schedule_date : NULL;
-         return $value;
-      case 'sent_date':
-         $value = isset($node->sent_date) ? $node->sent_date : NULL;
-         return $value;
-   }
+  switch ($name) {
+    case 'headline':
+      $value = isset($node->headline) ? $node->headline : NULL;
+      return $value;
+      break;
+    case 'from_email':
+      $value = isset($node->from_email) ? $node->from_email : NULL;
+      return $value;
+      break;
+    case 'from_name':
+      $value = isset($node->from_name) ? $node->from_name : NULL;
+      return $value;
+      break;
+    case 'subject':
+      $value = isset($node->subject) ? $node->subject : NULL;
+      return $value;
+      break;
+    case 'list_id':
+      $value = isset($node->list_id) ? $node->list_id : NULL;
+      return $value;
+      break;
+    case 'campaign_id':
+      $value = isset($node->campaign_id) ? $node->campaign_id : NULL;
+      return $value;
+      break;
+    case 'campaign_status':
+      $value = isset($node->campaign_status) ? $node->campaign_status : NULL;
+      return $value;
+      break;
+    case 'archive_url':
+      $options = array('absolute' => TRUE, 'external' => TRUE, 'target' => '_blank');
+      $value = isset($node->archive_url) ? url($node->archive_url, $options) : NULL;
+      return $value;
+      break;
+    case 'schedule_date':
+      $value = isset($node->schedule_date) ? $node->schedule_date : NULL;
+      return $value;
+      break;
+    case 'sent_date':
+      $value = isset($node->sent_date) ? $node->sent_date : NULL;
+      return $value;
+      break;
+  }
 }
 
 
@@ -592,256 +561,251 @@ function _bei_add_campaign_access($node) {
  */
 function bei_campaign_node_view($node, $view_mode, $langcode) {
   if ($view_mode == 'full' && $node->type == 'campaign') {
-      $cid = !empty($node->campaign_id) ? $node->campaign_id : NULL;
-      if ($cid && $node->campaign_status == 'sent') {
-         // Try to load stats from cache first.
-         $cache = cache_get('campaign-summary-' . $cid, 'cache_mailchimp');
-         if ($cache && $cache->expire >= REQUEST_TIME) {
-            if ($cache->expire > REQUEST_TIME) {
-               $response = $cache->data;
-               //$expire = format_date($cache->expire, 'long');
-               //drupal_set_message(t('These stats will expire on @expire.', array('@expire' => $expire)), 'warning');
-            }
-            else {
-               cache_clear_all('campaign-summary-' . $cid, 'cache_mailchimp');
-               $response = bei_campaign_get_campaign_report($cid);
-            }
-         }
-         else {
-            $response = bei_campaign_get_campaign_report($cid);
-         }
-
-         if ($response) {
-            // Load our CSS.
-            drupal_add_css(drupal_get_path('module', 'bei_mailchimp') . '/css/bei_mailchimp.css');
-            $emails_sent = $response->emails_sent;
-            $emails_opened_total = $response->opens->opens_total;
-            $emails_opened_unique = $response->opens->unique_opens;
-            $emails_opened_rate = $response->opens->open_rate;
-            $emails_opened_last_open = $response->opens->last_open;
-            $emails_bounced_hard = $response->bounces->hard_bounces;
-            $emails_bounced_soft = $response->bounces->soft_bounces;
-            $emails_bounced_errors = $response->bounces->syntax_errors;
-            $emails_bounced_total = $emails_bounced_hard + $emails_bounced_soft + $emails_bounced_errors;
-            $emails_forwards_count = $response->forwards->forwards_count;
-            $emails_forwards_opens = $response->forwards->forwards_opens;
-            $emails_clicks_total = $response->clicks->clicks_total;
-            $emails_clicks_unique = $response->clicks->unique_clicks;
-            $emails_clicks_unique_subscriber = $response->clicks->unique_subscriber_clicks;
-            $emails_clicks_rate = $response->clicks->click_rate;
-            $emails_clicks_last_click = $response->clicks->last_click;
-            $emails_unsubscribed = $response->unsubscribed;
-
-            // Set table variables.
-            $opened_per = 0;
-            $unopened_per = 0;
-            $clicked_per = 0;
-            $forwarded_per = 0;
-            $bounced_per = 0;
-            $spam_per = 0;
-            $unsubscribe_per = 0;
-
-            // Set summary variables.
-            $unsubscribe_was = t('0 unsubscribed');
-            $opened_was = t('0 opened');
-            $unopened_was = t('0 unopened');
-            $bounced_was = t('0 bounced');
-            $clicked_was = t('0 clicked');
-
-            if ($emails_sent > 0) {
-               // Unsubscribed
-               if ($response->unsubscribed > 0) {
-                  $unsubscribe_calc = ($response->unsubscribed / $emails_sent) * 100;
-                  $unsubscribe_per = $unsubscribe_calc < 1 ? '&lt;1' : round($unsubscribe_calc);
-                  $unsubscribe_was = l(t('!count unsubscribed', array('!count' => $response->unsubscribed)),
-                                       'node/' . $node->nid . '/unsubscribed', array('attributes' => array('class' => array('trigger'))));
-               }
-               if ($response->opens->unique_opens > 0) {
-                  // Opened
-                  $opened_calc = ($response->opens->unique_opens / $emails_sent) * 100;
-                  $opened_per = $opened_calc < 1 ? '&lt;1' : round($opened_calc);
-                  $opened_was = l(t('!count opened', array('!count' => $response->opens->unique_opens)),
-                                  'node/' . $node->nid . '/opened', array('attributes' => array('class' => array('trigger'))));
-                  // Unopened
-                  $unopened_total = ($emails_sent - $emails_opened_unique) - $emails_bounced_total;
-                  $unopened_calc = ($unopened_total / $emails_sent) * 100;
-                  $unopened_per = $unopened_calc < 1 && $unopened_calc > 0 ? '&lt;1' : round($unopened_calc);
-                  $unopened_was = $unopened_total > 0 ? l(t('!count unopened', array('!count' => $unopened_total)),
-                                                         'node/' . $node->nid . '/unopened', array('attributes' => array('class' => array('trigger')))) : $unopened_total . ' unopened';
-               }
-               // Bounced
-               if ($emails_bounced_total > 0) {
-                  $bounced_calc = ($emails_bounced_total / $emails_sent) * 100;
-                  $bounced_per = $bounced_calc < 1 && $bounced_calc > 0 ? '&lt;1' : round($bounced_calc);
-                  $bounced_was = $emails_bounced_total <= 100 ? l(t('!count bounced', array('!count' => $emails_bounced_total)),
-                                                        'node/' . $node->nid . '/bounced', array('attributes' => array(
-                                                         'class' => array('trigger')))) : $emails_bounced_total . ' bounced';
-               }
-               // Clicks
-               if ($emails_clicks_total > 0) {
-                  $clicked_calc = ($emails_clicks_unique / $emails_sent) * 100;
-                  $clicked_per = $clicked_calc < 1 ? '&lt;1' : round($clicked_calc);
-                  $clicked_was = l(t('!count clicked', array('!count' => $emails_clicks_unique)),
-                                                        'node/' . $node->nid . '/click-details', array('attributes' => array('class' => array('trigger'))));
-               }
-               // Forwarded
-               $forwarded_calc = ($emails_forwards_count / $emails_sent) * 100;
-               $forwarded_per = $forwarded_calc < 1 && $forwarded_calc > 0 ? '&lt;1' : round($forwarded_calc);
-            }
-            $spam_per = $emails_sent > 0 ? round(($response->abuse_reports / $emails_sent) * 100) : 0;
-
-            $spam_was = $response->abuse_reports != 1 ? 'were' : 'was';
-            $clicked_report = '<span class="details">' . ($emails_clicks_unique > 0 ? l(t('View Details'), 'node/' . $node->nid . '/clicked') : '') . '</span>';
-            $spam_report = '<span class="details">' . ($response->abuse_reports > 0 ? l(t('View Details'), 'node/' . $node->nid . '/spam') : '') . '</span>';
-            $rows = array(
-              // Opened.
-              array(
-                array(
-                  'data' => t('Opens') . '<br><span>' . $opened_per . '%</span>',
-                  'class' => 'cell cell-1 opens',
-                ),
-                array(
-                  'data' => $opened_was,
-                  'class' => 'cell cell-2 opens',
-                ),
-              ),
-              // Clicked.
-              array(
-                array(
-                  'data' => t('Clicks') . ' <br><span>' . $clicked_per . '%</span>',
-                  'class' => 'cell cell-1 clicks',
-                ),
-                array(
-                  'data' => $clicked_was,
-                  'class' => 'cell cell-2 clicks',
-                ),
-              ),
-              // Forwards.
-              array(
-                array(
-                  'data' => t('Forwards') . '<br><span>' . $forwarded_per . '%</span>',
-                  'class' => 'cell cell-1 forwarded',
-                ),
-                array(
-                  'data' => $emails_forwards_count . ' ' . t(' forwarded'),
-                  'class' => 'cell cell-2 forwarded',
-                ),
-              ),
-              // Bounces.
-              array(
-                array(
-                  'data' => t('Bounces') . '<br><span>' . $bounced_per . '%</span>',
-                  'class' => 'cell cell-1 bounces',
-                ),
-                array(
-                  'data' => $bounced_was,
-                  'class' => 'cell cell-2 bounces',
-                ),
-              ),
-              // Spam.
-              array(
-                array(
-                  'data' => t('Spam') . '<br><span>' . $spam_per . '%</span>',
-                  'class' => 'cell cell-1 spam',
-                ),
-                array(
-                  'data' => $response->abuse_reports . ' ' . t(' flagged as spam'),
-                  'class' => 'cell cell-2 spam',
-                ),
-              ),
-              // Unsubscribed.
-              array(
-                array(
-                  'data' => t('Unsubscribed') . ' <br><span>' . $unsubscribe_per . '%</span>',
-                  'class' => 'cell cell-1 unsubscribed',
-                ),
-                array(
-                  'data' => $unsubscribe_was,
-                  'class' => 'cell cell-2 unsubscribed',
-                ),
-              ),
-              // Unopened.
-              array(
-                array(
-                  'data' => t('Unopen') . ' <br><span>' . $unopened_per . '%</span>',
-                  'class' => 'cell cell-1 unopened',
-                ),
-                array(
-                  'data' => $unopened_was,
-                  'class' => 'cell cell-2 unopened',
-                ),
-              ),
-            );
-            // Add table header.
-            $email_count = $emails_sent == 1 ? '<span><em>1 </em></span> email was sent' : '<span><em>' . number_format($emails_sent) . ' </em></span>emails were sent';
-            $node->content['bei_mailchimp_stats_table'] = array(
-              '#theme_wrappers' => array('container'),
-              '#attributes' => array('class' => array('bei_mailchimp_stats_wrapper columns large-4 small-12')),
-              'header' => array(
-                '#prefix' => '<div class="table-header">',
-                '#markup' => t($email_count),
-                '#suffix' => '</div>',
-                '#weight' => 29,
-              ),
-              'table' => array(
-                '#markup' => theme('table', array(
-                  'header' => array(),
-                  'rows' => $rows,
-                  'attributes' => array(
-                    'id' => 'bei-mailchimp-stats',
-                  ),
-                )),
-                '#weight' => 30,
-              ),
-              '#weight' => 30,
-            );
-
-           // This only works if the google chart tools module is enabled and
-           // emails were sent for this campaign.
-           if (module_exists('google_chart_tools') && $emails_sent > 0) {
-             $unopened = ($emails_sent - $emails_opened_unique) - $emails_bounced_total;
-             // Build each pie chart for easier viewing.
-             $settings['chart']['bei_mailchimp_chart'] = array(
-               'header' => array(t('Opened'), t('Unopened'), t('Bounces'), t('Unsubscribed')),
-               'rows' => array(array($emails_opened_unique, $unopened, $emails_bounced_total, $emails_unsubscribed)),
-               'columns' => array('Distribution of Emails'),
-               'chartType' => 'PieChart',
-               'containerId' =>  'bei_mailchimp_chart',
-               'options' => array(
-                 'forceIFrame' => FALSE,
-                 'title' => t('Distribution of Emails'),
-                 'is3D' => TRUE,
-                 //'width' => '500',
-                 'height' => '500',
-                 'slices' => array(
-                   0 => array('color' => '#24CBE5'),
-                   1 => array('color' => '#5D5D5D'),
-                   2 => array('color' => '#FFC001'),
-                   3 => array('color' => '#ED561B'),
-                 ),
-                 'legend' => array(
-                  'position' => 'bottom',
-                 ),
-               ),
-             );
-             // Draw the charts into memory.
-             draw_chart($settings);
-
-             // Create containers that will allow the charts to be printed.
-             $node->content['bei_mailchimp_chart'] = array(
-               '#markup' => '<div id="bei_mailchimp_chart" class="columns large-8 small-12"></div>',
-               '#weight' => 25,
-             );
-           }
-         }
+    $cid = !empty($node->campaign_id) ? $node->campaign_id : NULL;
+    if ($cid && $node->campaign_status == 'sent') {
+      // Try to load stats from cache first.
+      $cache = cache_get('campaign-summary-' . $cid, 'cache_mailchimp');
+      if ($cache && $cache->expire >= REQUEST_TIME) {
+        if ($cache->expire > REQUEST_TIME) {
+          $response = $cache->data;
+        }
+        else {
+          cache_clear_all('campaign-summary-' . $cid, 'cache_mailchimp');
+          $response = bei_campaign_get_campaign_report($cid);
+        }
       }
       else {
-         $node->content['bei_campaign_not_sent'] = array(
-            '#markup' => '<div class="panel">Stats are not available for campaigns until they are sent.</div>',
-            '#weight' => 26,
-         );
+        $response = bei_campaign_get_campaign_report($cid);
       }
-   }
+      if ($response) {
+        // Load our CSS.
+        drupal_add_css(drupal_get_path('module', 'bei_mailchimp') . '/css/bei_mailchimp.css');
+        $emails_sent = $response->emails_sent;
+        $emails_opened_total = $response->opens->opens_total;
+        $emails_opened_unique = $response->opens->unique_opens;
+        $emails_opened_rate = $response->opens->open_rate;
+        $emails_opened_last_open = $response->opens->last_open;
+        $emails_bounced_hard = $response->bounces->hard_bounces;
+        $emails_bounced_soft = $response->bounces->soft_bounces;
+        $emails_bounced_errors = $response->bounces->syntax_errors;
+        $emails_bounced_total = $emails_bounced_hard + $emails_bounced_soft + $emails_bounced_errors;
+        $emails_forwards_count = $response->forwards->forwards_count;
+        $emails_forwards_opens = $response->forwards->forwards_opens;
+        $emails_clicks_total = $response->clicks->clicks_total;
+        $emails_clicks_unique = $response->clicks->unique_clicks;
+        $emails_clicks_unique_subscriber = $response->clicks->unique_subscriber_clicks;
+        $emails_clicks_rate = $response->clicks->click_rate;
+        $emails_clicks_last_click = $response->clicks->last_click;
+        $emails_unsubscribed = $response->unsubscribed;
+        // Set table variables.
+        $opened_per = 0;
+        $unopened_per = 0;
+        $clicked_per = 0;
+        $forwarded_per = 0;
+        $bounced_per = 0;
+        $spam_per = 0;
+        $unsubscribe_per = 0;
+        // Set summary variables.
+        $unsubscribe_was = t('0 unsubscribed');
+        $opened_was = t('0 opened');
+        $unopened_was = t('0 unopened');
+        $bounced_was = t('0 bounced');
+        $clicked_was = t('0 clicked');
+        if ($emails_sent > 0) {
+          // Unsubscribed
+          if ($response->unsubscribed > 0) {
+            $unsubscribe_calc = ($response->unsubscribed / $emails_sent) * 100;
+            $unsubscribe_per = $unsubscribe_calc < 1 ? '&lt;1' : round($unsubscribe_calc);
+            $unsubscribe_was = l(t('!count unsubscribed', array('!count' => $response->unsubscribed)),
+                                 'node/' . $node->nid . '/unsubscribed', array('attributes' => array('class' => array('trigger'))));
+          }
+          if ($response->opens->unique_opens > 0) {
+            // Opened
+            $opened_calc = ($response->opens->unique_opens / $emails_sent) * 100;
+            $opened_per = $opened_calc < 1 ? '&lt;1' : round($opened_calc);
+            $opened_was = l(t('!count opened', array('!count' => $response->opens->unique_opens)),
+                            'node/' . $node->nid . '/opened', array('attributes' => array('class' => array('trigger'))));
+            // Unopened
+            $unopened_total = ($emails_sent - $emails_opened_unique) - $emails_bounced_total;
+            $unopened_calc = ($unopened_total / $emails_sent) * 100;
+            $unopened_per = $unopened_calc < 1 && $unopened_calc > 0 ? '&lt;1' : round($unopened_calc);
+            $unopened_was = $unopened_total > 0 ? l(t('!count unopened', array('!count' => $unopened_total)),
+                                                   'node/' . $node->nid . '/unopened', array('attributes' => array('class' => array('trigger')))) : $unopened_total . ' unopened';
+          }
+          // Bounced
+          if ($emails_bounced_total > 0) {
+            $bounced_calc = ($emails_bounced_total / $emails_sent) * 100;
+            $bounced_per = $bounced_calc < 1 && $bounced_calc > 0 ? '&lt;1' : round($bounced_calc);
+            $bounced_was = $emails_bounced_total <= 100 ? l(t('!count bounced', array('!count' => $emails_bounced_total)),
+                                                  'node/' . $node->nid . '/bounced', array('attributes' => array(
+                                                   'class' => array('trigger')))) : $emails_bounced_total . ' bounced';
+          }
+          // Clicks
+          if ($emails_clicks_total > 0) {
+            $clicked_calc = ($emails_clicks_unique / $emails_sent) * 100;
+            $clicked_per = $clicked_calc < 1 ? '&lt;1' : round($clicked_calc);
+            $clicked_was = l(t('!count clicked', array('!count' => $emails_clicks_unique)),
+                                                  'node/' . $node->nid . '/click-details', array('attributes' => array('class' => array('trigger'))));
+          }
+          // Forwarded
+          $forwarded_calc = ($emails_forwards_count / $emails_sent) * 100;
+          $forwarded_per = $forwarded_calc < 1 && $forwarded_calc > 0 ? '&lt;1' : round($forwarded_calc);
+        }
+        $spam_per = $emails_sent > 0 ? round(($response->abuse_reports / $emails_sent) * 100) : 0;
+        $spam_was = $response->abuse_reports != 1 ? 'were' : 'was';
+        $clicked_report = '<span class="details">' . ($emails_clicks_unique > 0 ? l(t('View Details'), 'node/' . $node->nid . '/clicked') : '') . '</span>';
+        $spam_report = '<span class="details">' . ($response->abuse_reports > 0 ? l(t('View Details'), 'node/' . $node->nid . '/spam') : '') . '</span>';
+        $rows = array(
+          // Opened.
+          array(
+            array(
+              'data' => t('Opens') . '<br><span>' . $opened_per . '%</span>',
+              'class' => 'cell cell-1 opens',
+            ),
+            array(
+              'data' => $opened_was,
+              'class' => 'cell cell-2 opens',
+            ),
+          ),
+          // Clicked.
+          array(
+            array(
+              'data' => t('Clicks') . ' <br><span>' . $clicked_per . '%</span>',
+              'class' => 'cell cell-1 clicks',
+            ),
+            array(
+              'data' => $clicked_was,
+              'class' => 'cell cell-2 clicks',
+            ),
+          ),
+          // Forwards.
+          array(
+            array(
+              'data' => t('Forwards') . '<br><span>' . $forwarded_per . '%</span>',
+              'class' => 'cell cell-1 forwarded',
+            ),
+            array(
+              'data' => $emails_forwards_count . ' ' . t(' forwarded'),
+              'class' => 'cell cell-2 forwarded',
+            ),
+          ),
+          // Bounces.
+          array(
+            array(
+              'data' => t('Bounces') . '<br><span>' . $bounced_per . '%</span>',
+              'class' => 'cell cell-1 bounces',
+            ),
+            array(
+              'data' => $bounced_was,
+              'class' => 'cell cell-2 bounces',
+            ),
+          ),
+          // Spam.
+          array(
+            array(
+              'data' => t('Spam') . '<br><span>' . $spam_per . '%</span>',
+              'class' => 'cell cell-1 spam',
+            ),
+            array(
+              'data' => $response->abuse_reports . ' ' . t(' flagged as spam'),
+              'class' => 'cell cell-2 spam',
+            ),
+          ),
+          // Unsubscribed.
+          array(
+            array(
+              'data' => t('Unsubscribed') . ' <br><span>' . $unsubscribe_per . '%</span>',
+              'class' => 'cell cell-1 unsubscribed',
+            ),
+            array(
+              'data' => $unsubscribe_was,
+              'class' => 'cell cell-2 unsubscribed',
+            ),
+          ),
+          // Unopened.
+          array(
+            array(
+              'data' => t('Unopen') . ' <br><span>' . $unopened_per . '%</span>',
+              'class' => 'cell cell-1 unopened',
+            ),
+            array(
+              'data' => $unopened_was,
+              'class' => 'cell cell-2 unopened',
+            ),
+          ),
+        );
+        // Add table header.
+        $email_count = $emails_sent == 1 ? '<span><em>1 </em></span> email was sent' : '<span><em>' . number_format($emails_sent) . ' </em></span>emails were sent';
+        $node->content['bei_mailchimp_stats_table'] = array(
+          '#theme_wrappers' => array('container'),
+          '#attributes' => array('class' => array('bei_mailchimp_stats_wrapper columns large-4 small-12')),
+          'header' => array(
+            '#prefix' => '<div class="table-header">',
+            '#markup' => t($email_count),
+            '#suffix' => '</div>',
+            '#weight' => 29,
+          ),
+          'table' => array(
+            '#markup' => theme('table', array(
+              'header' => array(),
+              'rows' => $rows,
+              'attributes' => array(
+                'id' => 'bei-mailchimp-stats',
+              ),
+            )),
+            '#weight' => 30,
+          ),
+          '#weight' => 30,
+        );
+        // This only works if the charts_google module is enabled and
+        // emails were sent for this campaign.
+        if (module_exists('charts_google') && $emails_sent > 0) {
+          $unopened = ($emails_sent - $emails_opened_unique) - $emails_bounced_total;
+          $chart = array(
+            '#type' => 'chart',
+            //'#title' => t('Distribution of E-mails'),
+            '#chart_type' => 'pie',
+            '#chart_library' => 'google',
+            '#legend_position' => 'right',
+            '#data_labels' => FALSE,
+            '#tooltips' => TRUE,
+            '#width' => '900',
+            '#height' => '500',
+            '#raw_options' => array(
+              'title' => 'Distribution of E-mails',
+              'titleTextStyle' => array(
+                'bold' => TRUE,
+                'fontSize' => 20,
+              ),
+              'is3D' => TRUE,
+              'slices' => array(
+                0 => array('color' => '#24CBE5'),
+                1 => array('color' => '#5D5D5D'),
+                2 => array('color' => '#FFC001'),
+                3 => array('color' => '#ED561B'),
+              ),
+            ),
+          );
+          $chart['pie_data'] = array(
+            '#type' => 'chart_data',
+            '#title' => t('Status'),
+            '#labels' => array('Opened', 'Unopened', 'Bounces', 'Unsubscribed'),
+            '#data' => array($emails_opened_unique, $unopened, $emails_bounced_total, $emails_unsubscribed),
+          );
+          $node->content['bie_mailchimp_chart'] = array(
+            '#markup' => '<div id="bei_mailchimp_chart" class="columns large-8 small-12">' . drupal_render($chart) . '</div>',
+            '#weight' => 25,
+          );
+        }
+      }
+    }
+    else {
+      $node->content['bei_campaign_not_sent'] = array(
+        '#markup' => '<div class="panel">Stats are not available for campaigns until they are sent.</div>',
+        '#weight' => 26,
+      );
+    }
+  }
 }
 
 /**
@@ -850,39 +814,38 @@ function bei_campaign_node_view($node, $view_mode, $langcode) {
 function bei_campaign_get_campaign_report($campaign_id, $type = NULL, $count = 100, $offset = 0) {
   $report = NULL;
   try {
-      $mc_reports = mailchimp_get_api_object('MailchimpReports');
-      if (!$mc_reports) {
-        throw new MailchimpException('Cannot pull a report without Mailchimp API. Check API key has been entered.');
+    $mc_reports = mailchimp_get_api_object('MailchimpReports');
+    if (!$mc_reports) {
+      throw new MailchimpException('Cannot pull a report without Mailchimp API. Check API key has been entered.');
+    }
+    // Pull a specific campaign report
+    if ($type) {
+      $options = array(
+        'count' => $count,
+        'offset' => $offset,
+      );
+      $response = $mc_reports->getCampaignReport($campaign_id, $type, $options);
+      if (!empty($response->campaign_id)) {
+        cache_set('campaign-' . $type . '-' . $campaign_id, $response, 'cache_mailchimp', REQUEST_TIME + (60*60));
+        $report = $response;
       }
-      // Pull a specific campaign report
-      if ($type) {
-         $options = array(
-            'count' => $count,
-            'offset' => $offset,
-         );
-         $response = $mc_reports->getCampaignReport($campaign_id, $type, $options);
-         if (!empty($response->campaign_id)) {
-            cache_set('campaign-' . $type . '-' . $campaign_id, $response, 'cache_mailchimp', REQUEST_TIME + (60*60));
-            $report = $response;
-         }
+    }
+    // Pull a campaign summary report
+    else {
+      $response = $mc_reports->getCampaignSummary($campaign_id);
+      if (!empty($response->id)) {
+        $report = $response;
+        cache_set('campaign-summary-' . $campaign_id, $response, 'cache_mailchimp', REQUEST_TIME + (15*60));
       }
-      // Pull a campaign summary report
       else {
-         $response = $mc_reports->getCampaignSummary($campaign_id);
-         if (!empty($response->id)) {
-            $report = $response;
-            cache_set('campaign-summary-' . $campaign_id, $response, 'cache_mailchimp', REQUEST_TIME + (15*60));
-         }
-         else {
-            $report = FALSE;
-         }
+        $report = FALSE;
       }
-   }
+    }
+  }
   catch (Exception $e) {
     drupal_set_message($e->getMessage(), 'error');
     watchdog('bei_campaign', 'An error occurred while trying to pull a report for this campaign: %message', array(
-      '%message' => $e->getMessage(),
-      ), WATCHDOG_ERROR);
+      '%message' => $e->getMessage()), WATCHDOG_ERROR);
     return NULL;
   }
   return $report;
@@ -894,20 +857,15 @@ function bei_campaign_get_campaign_report($campaign_id, $type = NULL, $count = 1
 function bei_campaign_delete_campaign($cid) {
   /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
   $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-
   $result = NULL;
   // Delete campaign from MailChimp.
   try {
     if (!$mc_campaigns) {
       throw new MailchimpException('Cannot delete campaign without Mailchimp API. Check API key has been entered.');
     }
-
     $mc_campaigns->delete($cid);
-
     watchdog('bei_campaign', 'MailChimp campaign %cid was deleted.', array(
-      '%cid' => $cid,
-      ), WATCHDOG_INFO);
-
+      '%cid' => $cid), WATCHDOG_INFO);
     return TRUE;
   }
   catch (Exception $e) {
@@ -917,40 +875,35 @@ function bei_campaign_delete_campaign($cid) {
       ), WATCHDOG_ERROR);
     return FALSE;
   }
-
   return FALSE;
 }
-
 /**
  * Helper function to create or save a campaign on mailchimp.
  */
 function bei_campaign_save_campaign($recipients, $settings, $node, $cid = NULL) {
-   /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-   $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-   $is_new = empty($cid);
-   if ($is_new) {
-      try {
-         if (!$mc_campaigns) {
-            throw new MailchimpException('Cannot create a campaign without Mailchimp API. Check API key has been entered.');
-         }
-         $result = $mc_campaigns->addCampaign(\Mailchimp\MailchimpCampaigns::CAMPAIGN_TYPE_REGULAR, $recipients, $settings);
-
-         if (!empty($result->id)) {
-           $cid = $result->id;
-           $mc_campaigns->setCampaignContent($cid, $content);
-         }
-         return TRUE;
+  /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+  $is_new = empty($cid);
+  if ($is_new) {
+    try {
+      if (!$mc_campaigns) {
+        throw new MailchimpException('Cannot create a campaign without Mailchimp API. Check API key has been entered.');
       }
-      catch (Exception $e) {
-         drupal_set_message($e->getMessage(), 'error');
-         watchdog('bei_campaign', 'An error occurred while trying to create a campaign: %message', array(
-           '%message' => $e->getMessage(),
-           ), WATCHDOG_ERROR);
-         return FALSE;
+      $result = $mc_campaigns->addCampaign(\Mailchimp\MailchimpCampaigns::CAMPAIGN_TYPE_REGULAR, $recipients, $settings);
+      if (!empty($result->id)) {
+        $cid = $result->id;
+        $mc_campaigns->setCampaignContent($cid, $content);
       }
-   }
+      return TRUE;
+    }
+    catch (Exception $e) {
+      drupal_set_message($e->getMessage(), 'error');
+      watchdog('bei_campaign', 'An error occurred while trying to create a campaign: %message', array(
+        '%message' => $e->getMessage()), WATCHDOG_ERROR);
+      return FALSE;
+    }
+  }
 }
-
 /**
  * Implements hook_action_info().
  */
@@ -988,7 +941,6 @@ function bei_campaign_action_info() {
  */
 function bei_campaign_schedule_campaign_form($options) {
   $form = array();
-
   $form['bei_campaign_schedule'] = array(
     '#type' => 'date_popup',
     '#date_format' => 'Y-m-d h:i:sa',
@@ -1002,21 +954,18 @@ function bei_campaign_schedule_campaign_form($options) {
     '#datepicker_options' => array('minDate' => 0),
     '#date_increment' => 15,
   );
-
   return $form;
 }
 /**
  * Helper function to ensure schedule date is not in the past.
  */
-
 function bei_campaign_schedule_date_validate($element, &$form_state, $form) {
   $now = strtotime('now');
   $schedule_date = strtotime($element['#value']['date'] . ' ' . $element['#value']['time']);
   if ($schedule_date <= $now) {
-      form_error($element, t($element['#title'] . '  must be in the future.'));
+    form_error($element, t($element['#title'] . '  must be in the future.'));
   }
 }
-
 /**
  * Helper function to submit schedule form for the schedule action.
  */
@@ -1024,153 +973,147 @@ function bei_campaign_schedule_campaign_submit($form, $form_state) {
   // This has to be returned as an array or it blows up. (Unsupported Operand)
   return array('time' => $form_state['values']['bei_campaign_schedule']);
 }
-
 /**
  * Action submit function to run an action's action!
  */
 function bei_campaign_schedule_campaign($node, $context) {
-   // Convert the time into GMT time.
-   $date = new DateTime($context['time'], new DateTimeZone('America/Denver'));
-   $date->setTimezone(new DateTimeZone('GMT'));
-   $send_date = $date->format('Y-m-d H:i:s');
-   $list_id = !empty($node->list_id) ? $node->list_id : NULL;
-   $campaign_id = !empty($node->campaign_id) ? $node->campaign_id : NULL;
-   if ($list_id && $campaign_id) {
+  // Convert the time into GMT time.
+  $date = new DateTime($context['time'], new DateTimeZone('America/Denver'));
+  $date->setTimezone(new DateTimeZone('GMT'));
+  $send_date = $date->format('Y-m-d H:i:s');
+  $list_id = !empty($node->list_id) ? $node->list_id : NULL;
+  $campaign_id = !empty($node->campaign_id) ? $node->campaign_id : NULL;
+  if ($list_id && $campaign_id) {
+    try {
+      /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+      if (!$mc_campaigns) {
+        throw new MailchimpException('Cannot schedule campaigns without MailChimp API. Check API key has been entered.');
+      }
       try {
-         /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-         $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-         if (!$mc_campaigns) {
-           throw new MailchimpException('Cannot schedule campaigns without MailChimp API. Check API key has been entered.');
-         }
-         try {
-            $checklist = $mc_campaigns->getSendChecklist($campaign_id);
-            if (!$checklist->is_ready) {
-               drupal_set_message(t('Campaign node @nid titled %title authored by @author cannot be scheduled.', array(
-                  '@nid' => $node->nid,
-                  '%title' => $node->title,
-                  '@author' => $node->name,
-                  )), 'warning');
-               $errors = array();
-               foreach ($checklist->items as $item) {
-                 if ($item->type == 'error') {
-                  $message = '<strong>' . $item->heading . '</strong>: ' . $item->details;
-                  drupal_set_message(t($message), 'error');
-                 }
-               }
-               watchdog('bei_campaign', 'Campaign node @nid is not ready to send.', array(
-                  '@nid' => $node->nid,
-                ), WATCHDOG_ERROR);
+        $checklist = $mc_campaigns->getSendChecklist($campaign_id);
+        if (!$checklist->is_ready) {
+          drupal_set_message(t('Campaign node @nid titled %title authored by @author cannot be scheduled.', array(
+            '@nid' => $node->nid,
+            '%title' => $node->title,
+            '@author' => $node->name,
+            )), 'warning');
+          $errors = array();
+          foreach ($checklist->items as $item) {
+            if ($item->type == 'error') {
+              $message = '<strong>' . $item->heading . '</strong>: ' . $item->details;
+              drupal_set_message(t($message), 'error');
             }
-            else {
-               $mc_campaigns->schedule($campaign_id, $send_date, FALSE, FALSE);
-               $campaign = $mc_campaigns->getCampaign($campaign_id);
-               $node->campaign_status = $campaign->status;
-               $node->schedule_date = strtotime($campaign->send_time);
-               node_save($node);
-            }
-         }
-         catch (Exception $e) {
-            // Throw exception only for errors other than campaign not found.
-            if ($e->getCode() != 404) {
-              throw new Exception($e->getMessage(), $e->getCode(), $e);
-            }
-         }
+          }
+          watchdog('bei_campaign', 'Campaign node @nid is not ready to send.', array(
+            '@nid' => $node->nid), WATCHDOG_ERROR);
+        }
+        else {
+          $mc_campaigns->schedule($campaign_id, $send_date, FALSE, FALSE);
+          $campaign = $mc_campaigns->getCampaign($campaign_id);
+          $node->campaign_status = $campaign->status;
+          $node->schedule_date = strtotime($campaign->send_time);
+          node_save($node);
+        }
       }
       catch (Exception $e) {
-        watchdog('bei_campaign', 'An error occurred trying to schedule campaign node @nid. "%message"', array(
-          '%message' => $e->getMessage(),
-          '@nid' => $node->nid,
-        ), WATCHDOG_ERROR);
+        // Throw exception only for errors other than campaign not found.
+        if ($e->getCode() != 404) {
+          throw new Exception($e->getMessage(), $e->getCode(), $e);
+        }
       }
-   }
+    }
+    catch (Exception $e) {
+      watchdog('bei_campaign', 'An error occurred trying to schedule campaign node @nid. "%message"', array(
+        '%message' => $e->getMessage(),
+        '@nid' => $node->nid,
+      ), WATCHDOG_ERROR);
+    }
+  }
 }
-
 /**
  * Action submit function to run an action's action!
  */
 function bei_campaign_unschedule_campaign($node, $context) {
   // Send Mailchimp a request to unschedule a campaign.
   try {
-      /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-      if (!$mc_campaigns) {
-        throw new MailchimpException('Cannot unschedule campaigns without MailChimp API. Check API key has been entered.');
-      }
-      if ($node->campaign_status !== 'schedule') {
-         drupal_set_message(t('Cannot unschedule a campaign that is not scheduled.'), 'error');
-      }
-      else {
-         $mc_campaigns->unschedule($node->campaign_id);
-         $campaign = $mc_campaigns->getCampaign($node->campaign_id);
-         $node->campaign_status = $campaign->status;
-         unset($node->schedule_date);
-         node_save($node);
-         drupal_set_message(t('Unscheduled campaign @nid', array('@nid' => $node->nid)), 'status', FALSE);
-      }
-   }
-   catch (Exception $e) {
-     watchdog('bei_campaign', 'An error occurred trying to unschedule campaign node @nid. "%message"', array(
-       '%message' => $e->getMessage(),
-       '@nid' => $node->nid,
-     ), WATCHDOG_ERROR);
-   }
+    /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+    $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+    if (!$mc_campaigns) {
+      throw new MailchimpException('Cannot unschedule campaigns without MailChimp API. Check API key has been entered.');
+    }
+    if ($node->campaign_status !== 'schedule') {
+      drupal_set_message(t('Cannot unschedule a campaign that is not scheduled.'), 'error');
+    }
+    else {
+      $mc_campaigns->unschedule($node->campaign_id);
+      $campaign = $mc_campaigns->getCampaign($node->campaign_id);
+      $node->campaign_status = $campaign->status;
+      unset($node->schedule_date);
+      node_save($node);
+      drupal_set_message(t('Unscheduled campaign @nid', array('@nid' => $node->nid)), 'status', FALSE);
+    }
+  }
+  catch (Exception $e) {
+    watchdog('bei_campaign', 'An error occurred trying to unschedule campaign node @nid. "%message"', array(
+      '%message' => $e->getMessage(),
+      '@nid' => $node->nid,
+    ), WATCHDOG_ERROR);
+  }
 }
-
 /**
  * Helper function that will run when send action is used.
  */
 function bei_campaign_send_campaign($node, &$form_state) {
-   $list_id = !empty($node->list_id) ? $node->list_id : NULL;
-   $campaign_id = !empty($node->campaign_id) ? $node->campaign_id : NULL;
-   if ($list_id && $campaign_id && $node->campaign_status == 'save') {
+  $list_id = !empty($node->list_id) ? $node->list_id : NULL;
+  $campaign_id = !empty($node->campaign_id) ? $node->campaign_id : NULL;
+  if ($list_id && $campaign_id && $node->campaign_status == 'save') {
+    try {
+      /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+      if (!$mc_campaigns) {
+        throw new MailchimpException('Cannot send campaigns without MailChimp API. Check API key has been entered.');
+      }
       try {
-         /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-         $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-         if (!$mc_campaigns) {
-           throw new MailchimpException('Cannot send campaigns without MailChimp API. Check API key has been entered.');
-         }
-         try {
-            $checklist = $mc_campaigns->getSendChecklist($campaign_id);
-            if (!$checklist->is_ready) {
-               drupal_set_message(t('Campaign node @nid titled %title authored by @author cannot be sent.', array(
-                  '@nid' => $node->nid,
-                  '%title' => $node->title,
-                  '@author' => $node->name,
-                  )), 'warning');
-               $errors = array();
-               foreach ($checklist->items as $item) {
-                 if ($item->type == 'error') {
-                  $message = '<strong>' . $item->heading . '</strong>: ' . $item->details;
-                  drupal_set_message(t($message), 'error');
-                 }
-               }
-               watchdog('bei_campaign', 'Campaign node @nid is not ready to send.', array(
-                  '@nid' => $node->nid,
-                ), WATCHDOG_ERROR);
+        $checklist = $mc_campaigns->getSendChecklist($campaign_id);
+        if (!$checklist->is_ready) {
+          drupal_set_message(t('Campaign node @nid titled %title authored by @author cannot be sent.', array(
+              '@nid' => $node->nid,
+              '%title' => $node->title,
+              '@author' => $node->name,
+            )), 'warning');
+          $errors = array();
+          foreach ($checklist->items as $item) {
+            if ($item->type == 'error') {
+              $message = '<strong>' . $item->heading . '</strong>: ' . $item->details;
+              drupal_set_message(t($message), 'error');
             }
-            else {
-               $mc_campaigns->send($campaign_id);
-               $campaign = $mc_campaigns->getCampaign($campaign_id);
-               $node->campaign_status = $campaign->status;
-               node_save($node);
-            }
-         }
-         catch (Exception $e) {
-            // Throw exception only for errors other than campaign not found.
-            if ($e->getCode() != 404) {
-              throw new Exception($e->getMessage(), $e->getCode(), $e);
-            }
-         }
+          }
+          watchdog('bei_campaign', 'Campaign node @nid is not ready to send.', array(
+            '@nid' => $node->nid), WATCHDOG_ERROR);
+        }
+        else {
+          $mc_campaigns->send($campaign_id);
+          $campaign = $mc_campaigns->getCampaign($campaign_id);
+          $node->campaign_status = $campaign->status;
+          node_save($node);
+        }
       }
       catch (Exception $e) {
-        watchdog('bei_campaign', 'An error occurred trying to send campaign node @nid. "%message"', array(
-          '%message' => $e->getMessage(),
-          '@nid' => $node->nid,
-        ), WATCHDOG_ERROR);
+        // Throw exception only for errors other than campaign not found.
+        if ($e->getCode() != 404) {
+          throw new Exception($e->getMessage(), $e->getCode(), $e);
+        }
       }
-   }
+    }
+    catch (Exception $e) {
+      watchdog('bei_campaign', 'An error occurred trying to send campaign node @nid. "%message"', array(
+        '%message' => $e->getMessage(),
+        '@nid' => $node->nid,
+      ), WATCHDOG_ERROR);
+    }
+  }
 }
-
 /**
  * Wrapper around bei_campaign_get_campaigns() to return a single campaign.
  *
@@ -1184,7 +1127,6 @@ function bei_campaign_get_campaign($campaign_id) {
   $campaigns = bei_campaign_get_campaigns(array($campaign_id));
   return reset($campaigns);
 }
-
 /**
  * Return all MailChimp campaigns for a given key. Campaigns are stored in the cache.
  *
@@ -1212,14 +1154,13 @@ function bei_campaign_get_campaigns($campaign_ids = array(), $reset = FALSE, $li
         throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
       }
       $options = array(
-         'offset' => $offset,
-         'count' => $count,
+        'offset' => $offset,
+        'count' => $count,
       );
       if ($list_id) {
-         $options['list_id'] = $list_id;
+        $options['list_id'] = $list_id;
       }
       $result = $mc_campaigns->getCampaigns($options);
-
       if ($result->total_items > 0) {
         foreach ($result->campaigns as $campaign) {
           $campaigns[$campaign->id] = $campaign;
@@ -1229,8 +1170,7 @@ function bei_campaign_get_campaigns($campaign_ids = array(), $reset = FALSE, $li
     }
     catch (Exception $e) {
       watchdog('mailchimp', 'An error occurred requesting list information from MailChimp. "%message"', array(
-        '%message' => $e->getMessage(),
-      ), WATCHDOG_ERROR);
+        '%message' => $e->getMessage()), WATCHDOG_ERROR);
     }
   }
   // Filter by given ids:
@@ -1259,41 +1199,39 @@ function bei_campaign_get_campaigns($campaign_ids = array(), $reset = FALSE, $li
  *   An array of list arrays.
  */
 function bei_campaign_get_list_campaigns($reset = FALSE, $list_id, $offset = 0, $count = 100) {
-   $cache = $reset ? NULL : cache_get('list_campaigns_' . $list_id, 'cache_mailchimp');
-   $campaigns = array();
-   // Return cached campaigns:
-   if ($cache) {
-     $campaigns = $cache->data;
-   }
-   // Query lists from the MailChimp API and store in cache:
-   else {
-      /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-      try {
-        if (!$mc_campaigns) {
-          throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
-        }
-        $options = array(
-           'offset' => $offset,
-           'count' => $count,
-           'list_id' => $list_id,
-        );
-        $result = $mc_campaigns->getCampaigns($options);
-
-        if ($result && $result->total_items > 0) {
-          foreach ($result->campaigns as $campaign) {
-            $campaigns[$campaign->id] = $campaign;
-          }
-          cache_set('list_campaigns_' . $list_id, $campaigns, 'cache_mailchimp', CACHE_TEMPORARY);
-        }
+  $cache = $reset ? NULL : cache_get('list_campaigns_' . $list_id, 'cache_mailchimp');
+  $campaigns = array();
+  // Return cached campaigns:
+  if ($cache) {
+    $campaigns = $cache->data;
+  }
+  // Query lists from the MailChimp API and store in cache:
+  else {
+    /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
+    $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+    try {
+      if (!$mc_campaigns) {
+        throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
       }
-      catch (Exception $e) {
-        watchdog('mailchimp', 'An error occurred requesting list information from MailChimp. "%message"', array(
-          '%message' => $e->getMessage(),
-        ), WATCHDOG_ERROR);
+      $options = array(
+        'offset' => $offset,
+        'count' => $count,
+        'list_id' => $list_id,
+      );
+      $result = $mc_campaigns->getCampaigns($options);
+      if ($result && $result->total_items > 0) {
+        foreach ($result->campaigns as $campaign) {
+          $campaigns[$campaign->id] = $campaign;
+        }
+        cache_set('list_campaigns_' . $list_id, $campaigns, 'cache_mailchimp', CACHE_TEMPORARY);
       }
-   }
-   return $campaigns;
+    }
+    catch (Exception $e) {
+      watchdog('mailchimp', 'An error occurred requesting list information from MailChimp. "%message"', array(
+        '%message' => $e->getMessage()), WATCHDOG_ERROR);
+    }
+  }
+  return $campaigns;
 }
 
 /**
@@ -1303,37 +1241,35 @@ function bei_campaign_get_list_campaigns($reset = FALSE, $list_id, $offset = 0, 
  */
 function bei_campaign_batch_processing($campaigns) {
   foreach ($campaigns as $campaign) {
-   $query = 'SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :cid';
-   $nid = db_query($query, array(':cid' => $campaign->id))->fetchField();
-   if (!empty($nid)) {
+    $query = 'SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :cid';
+    $nid = db_query($query, array(':cid' => $campaign->id))->fetchField();
+    if (!empty($nid)) {
       $node = node_load($nid);
       if ($node) {
-         $node->campaign_status = $campaign->status;
-         $node->archive_url = $campaign->archive_url;
-         if ($campaign->status == 'schedule') {
-            $node->schedule_date = strtotime($campaign->send_time);
-         }
-         if ($campaign->status == 'sent') {
-            $node->sent_date = strtotime($campaign->send_time);
-         }
-         else {
-            if(isset($node->schedule_date)) {
-               unset($node->schedule_date);
-            }
-         }
-         node_save($node);
+        $node->campaign_status = $campaign->status;
+        $node->archive_url = $campaign->archive_url;
+        if ($campaign->status == 'schedule') {
+          $node->schedule_date = strtotime($campaign->send_time);
+        }
+        if ($campaign->status == 'sent') {
+          $node->sent_date = strtotime($campaign->send_time);
+        }
+        else {
+          if(isset($node->schedule_date)) {
+            unset($node->schedule_date);
+          }
+        }
+        node_save($node);
       }
-   }
+    }
   }
 }
-
 /**
  * Batch complete function.
  */
 function bei_campaign_batch_finished() {
   drupal_set_message(t('Campaigns Synced Successfully'));
 }
-
 /**
  * Implements hook_views_api().
  */
@@ -1343,62 +1279,6 @@ function bei_campaign_views_api() {
     'path' => drupal_get_path('module', 'bei_campaign') . '/views',
   );
 }
-
-/**
- * Batch process for building campaign stats.
- */
-function bei_campaign_stats_batch($report, $counter) {
-   $total = $report->total_items;
-   $emails = $report->emails;
-   $counter = $counter += $counter;
-   $batch = 1;
-   /*
-   foreach ($report->emails as $email) {
-      $emails[] = $email;
-      unset($email);
-      $counter++;
-
-      if ($counter >= 5) {
-        $counter = 0;
-        $operations[] = array(
-          'bei_campaign_stats_batch_processing',
-          array($cid, $sub, $emails),
-        );
-        $emails = array();
-      }
-    }
-    // Add any remaining emails.
-    if (!empty($emails)) {
-      $operations[] = array(
-        'bei_campaign_stats_batch_processing_emails',
-         array($cid, $sub, $emails),
-      );
-    }
-    $operations[] = array(
-      'bei_campaign_stats_batch_processing_emails',
-      array($cid, $subs, $report->emails, $total),
-    );
-    // Once everything is gathered and ready to be processed... process it!
-    $batch = array(
-      'title' => t('Building campaign stats...'),
-      'operations' => $operations,
-      'finished' => 'bei_campaign_batch_finished',
-      'error_message' => t('The campaign stats batch processor has encountered an error.'),
-      'progress_message' => t('Checked @current of @total stats.'),
-    );
-    batch_set($batch);
-    batch_process('node/' . $campaign->nid . '/opened');
-    */
-
-   /*
-   $stats = array();
-   foreach ($emails as $email) {
-      $stats[] = $email;
-   }
-   cache_set('campaign-' . $sub . '-' . $cid, $emails, 'cache_mailchimp', REQUEST_TIME + (60*60));
-   */
-}
-
 /**
  * Implements hook_ctools_plugin_directory().
  */
