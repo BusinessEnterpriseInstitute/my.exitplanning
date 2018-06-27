@@ -317,14 +317,21 @@ function bei_mailchimp_cancel_key_submit($form, &$form_state) {
 function bei_mailchimp_api_key_validate($element, &$form_state, $form) {
   if (!empty($element['#value'])) {
     $account = mailchimp_get_api_object('Mailchimp', $element['#value']);
-    dpm($account);
+    try {
+      if ($account) {
+        $user = $account->getAccount();
+        if (isset($user->account_name)) {
+          $message = t('The api key was found on Mailchimp for account %account', array('%account' => $user->account_name));
+          drupal_set_message($message, 'status');
+        }
+      }
+    }
+    catch (Exception $e) {
+      form_error($element, t('The api key ' . $element['#value'] . ' was not found on Mailchimp.'));
+    }
   }
 }
-function bei_order_email_validate($element, &$form_state, $form) {
-  if (!empty($element['#value']) && !valid_email_address($element['#value'])) {
-    form_error($element, t($element['#value'] . '  is not a valid E-mail address.'));
-  }
-}
+
 /**
  * Submit callback for bei_mailchimp_user_key_form().
  */
