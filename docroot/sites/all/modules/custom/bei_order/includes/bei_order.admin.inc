@@ -637,10 +637,7 @@ function bei_order_email_validate($element, &$form_state, $form) {
 }
 function bei_order_color_validate($element, &$form_state, $form) {
   $value = $element['#value']['colorfield_picker'];
-  if (empty($value)) {
-    form_error($element, t($element['#title'] . ' is required.'));
-  }
-  elseif (!preg_match('@^#[0-9a-f]{6}$@i', $value)) {
+  if (!empty($value) && !preg_match('@^#[0-9a-f]{6}$@i', $value)) {
     form_error($element, t($element['#title'] . ' must be a hexadecimal value (eg: #84CCAF).'));
   }
 }
