@@ -203,10 +203,8 @@ function bei_mailchimp_get_lists($show_nid = FALSE) {
     }
     $lists[$result->nid] = $result->title . $nid;
   }
-
   // Sort the list so the output is a little cleaner.
   asort($lists);
-
   return $lists;
 }
 /**
@@ -239,6 +237,7 @@ function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
       '#title' => t('Mailchimp API key'),
       '#default_value' => $mc_key,
       '#required' => TRUE,
+      '#element_validate' => array('bei_mailchimp_api_key_validate'),
     );
     $form['keys_wrapper']['actions'] = array(
       '#type' => 'actions',
@@ -314,6 +313,17 @@ function bei_mailchimp_delete_key_submit($form, &$form_state) {
 function bei_mailchimp_cancel_key_submit($form, &$form_state) {
   unset($form_state['add_key']);
   $form_state['rebuild'] = TRUE;
+}
+function bei_mailchimp_api_key_validate($element, &$form_state, $form) {
+  if (!empty($element['#value'])) {
+    $account = mailchimp_get_api_object('Mailchimp', $element['#value']);
+    dpm($account);
+  }
+}
+function bei_order_email_validate($element, &$form_state, $form) {
+  if (!empty($element['#value']) && !valid_email_address($element['#value'])) {
+    form_error($element, t($element['#value'] . '  is not a valid E-mail address.'));
+  }
 }
 /**
  * Submit callback for bei_mailchimp_user_key_form().
