@@ -1,0 +1,205 @@
+<?php
+/**
+ * Menu callback form.
+ *
+ * @see bei_mailchimp_menu()
+ */
+function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
+  $form_state['user'] = $user;
+  $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
+  $mc_key = NULL;
+  $form['keys_wrapper'] = array(
+    '#prefix' => '<div id="keys-wrapper">',
+    '#suffix' => '</div>',
+  );
+  if ($existing_key) {
+    $mc_key = module_exists('encrypt') ? decrypt($existing_key->data) : $existing_key;
+    $markup = t('An api key is currently associated with this account.');
+  }
+  else {
+    $markup = t('No api key exists for this account.');
+  }
+  $form['keys_wrapper']['markup'] = array(
+    '#type' => 'markup',
+    '#markup' => $markup,
+  );
+  if (isset($form_state['add_key'])) {
+    $form['keys_wrapper']['mc_key'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Mailchimp API key'),
+      '#default_value' => $mc_key,
+      '#required' => TRUE,
+      '#element_validate' => array('bei_mailchimp_api_key_validate'),
+    );
+    $form['keys_wrapper']['actions'] = array(
+      '#type' => 'actions',
+    );
+    $form['keys_wrapper']['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    );
+    $form['keys_wrapper']['actions']['cancel'] = array(
+      '#type' => 'submit',
+      '#value' => t('Cancel'),
+      '#submit' => array('bei_mailchimp_cancel_key_submit'),
+      '#name' => 'cancel_button',
+      '#limit_validation_errors' => array(),
+      '#ajax' => array(
+        'callback' => 'bei_mailchimp_user_key_form_ajax',
+        'wrapper' => 'keys-wrapper',
+        'method' => 'replace',
+      ),
+      '#attributes' => array(
+        'class' => array('secondary'),
+      ),
+    );
+  }
+  else {
+    $form['keys_wrapper']['actions'] = array(
+      '#type' => 'actions',
+    );
+    $form['keys_wrapper']['actions']['add_key'] = array(
+      '#type' => 'submit',
+      '#value' => $existing_key ? t('Update key') : t('Add key'),
+      '#submit' => array('bei_mailchimp_add_key_submit'),
+      '#name' => 'add_key',
+      '#ajax' => array(
+        'callback' => 'bei_mailchimp_user_key_form_ajax',
+        'wrapper' => 'keys-wrapper',
+        'method' => 'replace',
+      ),
+    );
+    if ($existing_key) {
+      $form['keys_wrapper']['actions']['delete_key'] = array(
+        '#type' => 'submit',
+        '#value' => t('Delete'),
+        '#submit' => array('bei_mailchimp_delete_key_submit'),
+        '#name' => 'delete_key',
+        '#ajax' => array(
+          'callback' => 'bei_mailchimp_user_key_form_ajax',
+          'wrapper' => 'keys-wrapper',
+          'method' => 'replace',
+        ),
+        '#attributes' => array(
+          'class' => array('secondary'),
+        ),
+      );
+    }
+  }
+  return $form;
+}
+function bei_mailchimp_user_key_form_ajax($form, $form_state) {
+  return $form['keys_wrapper'];
+}
+function bei_mailchimp_add_key_submit($form, &$form_state) {
+  $form_state['add_key'] = 1;
+  $form_state['rebuild'] = TRUE;
+}
+function bei_mailchimp_delete_key_submit($form, &$form_state) {
+  $user = $form_state['user'];
+  db_delete('bei_mc_keys')
+  ->condition('uid', $user->uid)
+  ->execute();
+  $form_state['rebuild'] = TRUE;
+}
+function bei_mailchimp_cancel_key_submit($form, &$form_state) {
+  unset($form_state['add_key']);
+  $form_state['rebuild'] = TRUE;
+}
+function bei_mailchimp_api_key_validate($element, &$form_state, $form) {
+  if (!empty($element['#value'])) {
+    $account = mailchimp_get_api_object('Mailchimp', $element['#value']);
+    try {
+      if ($account) {
+        $user = $account->getAccount();
+        if (isset($user->account_name)) {
+          $message = t('The api key was found on Mailchimp for account %account', array('%account' => $user->account_name));
+          drupal_set_message($message, 'status');
+        }
+      }
+    }
+    catch (Exception $e) {
+      form_error($element, t('The api key ' . $element['#value'] . ' was not found on Mailchimp.'));
+    }
+  }
+}
+
+/**
+ * Submit callback for bei_mailchimp_user_key_form().
+ */
+function bei_mailchimp_user_key_form_submit($form, &$form_state) {
+  $user = $form_state['user'];
+  $key_exists = bei_mailchimp_load_key_by_user($user->uid);
+  $encrypt = module_exists('encrypt') ? TRUE : FALSE;
+  $mc_key = $encrypt ? encrypt(trim($form_state['values']['mc_key'])) : trim($form_state['values']['mc_key']);
+  if (!empty($form_state['values']['mc_key'])) {
+    if ($key_exists) {
+      db_update('bei_mc_keys')
+      ->fields(array(
+        'data' => $mc_key,
+      ))
+      ->condition('uid', $user->uid)
+      ->execute();
+    }
+    else {
+      db_insert('bei_mc_keys')
+      ->fields(array(
+        'uid' => $user->uid,
+        'data' => $mc_key,
+      ))
+      ->execute();
+    }
+  }
+  else {
+    if ($key_exists) {
+      db_delete('bei_mc_keys')
+      ->condition('uid', $user->uid)
+      ->execute();
+    }
+  }
+}
+
+function bei_mailchimp_user_lists_form($form, &$form_state, $user = NULL) {
+  $form_state['user'] = $user;
+  $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
+  $mc_key = NULL;
+  if (!$existing_key) {
+    $markup = t('Cannot sync lists without an api key.');
+    $form['no_key_markup'] = array(
+      '#type' => 'markup',
+      '#markup' => $markup,
+    );
+  }
+  elseif ($existing_key && module_exists('encrypt')) {
+    $form_state['existing_key'] = $existing_key;
+    $form['sync_lists'] = array(
+      '#type' => 'submit',
+      '#value' => t('Import Lists'),
+      '#submit' => array('bei_mailchimp_user_lists_import_submit'),
+    );
+  }
+  return $form;
+}
+function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
+  $key = $form_state['existing_key'];
+  $mc_key = decrypt($key->data);
+  try {
+    $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
+    if (!$mc_lists) {
+      throw new MailchimpException('Cannot get lists without MailChimp API. Check API key has been entered.');
+    }
+    else {
+      $result = $mc_lists->getLists(array('count' => 50));
+      if ($result->total_items > 0) {
+        dpm($result);
+      }
+    }
+  }
+  catch (Exception $e){
+    $error = t('An error occurred requesting list information from Mailchimp. "%message"', array(
+      '%message' => $e->getMessage()
+    ));
+    drupal_set_message($error, 'error');
+    $form_state['rebuild'] = TRUE;
+  }
+}

@@ -7,7 +7,6 @@
  */
 function bei_campaign_batch_form() {
   $form = array();
-
   $form['important'] = array(
     '#type' => 'markup',
     '#prefix' => '<div>',
@@ -25,7 +24,6 @@ function bei_campaign_batch_form() {
     '#type' => 'submit',
     '#value' => t('Import'),
   );
-
   return $form;
 }
 
@@ -53,7 +51,6 @@ function bei_campaign_batch_form_submit($form, $form_state) {
           $campaigns[] = $campaign;
           unset($campaign);
           $counter++;
-
           if ($counter >= 5) {
             $counter = 0;
             $operations[] = array(

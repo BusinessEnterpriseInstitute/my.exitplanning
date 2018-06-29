@@ -285,7 +285,6 @@ function bei_campaign_node_delete($node) {
   }
 }
 
-
 /**
  * Implements hook_permission().
  * Define user permissions.
@@ -309,7 +308,6 @@ function bei_campaign_permission() {
     ),
   );
 }
-
 
 /**
  * Implements hook_menu().
@@ -539,7 +537,6 @@ function bei_campaign_get_properties($node, array $options, $name, $entity_type)
       break;
   }
 }
-
 
 /**
  * Access callback to add a campaign.
