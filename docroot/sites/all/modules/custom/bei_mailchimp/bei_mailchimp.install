@@ -51,6 +51,12 @@ function bei_mailchimp_schema() {
         'serialize' => TRUE,
         'description' => 'Serialized data containing the value.',
       ),
+      'account' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The account name on mailchimp.',
+        'default' => '',
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -94,4 +100,16 @@ function bei_mailchimp_update_7000() {
     ),
   );
   db_create_table('bei_mc_keys', $table);
+}
+/**
+ * Add column for account name to bei_mc_keys table.
+ */
+function bei_mailchimp_update_7001() {
+  $field = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'description' => 'The account name on mailchimp.',
+    'default' => '',
+  );
+  db_add_field('bei_mc_keys', 'account', $field);
 }

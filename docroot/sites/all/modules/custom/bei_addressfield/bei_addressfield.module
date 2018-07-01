@@ -9,34 +9,224 @@ function bei_addressfield_element_info() {
       '#input' => TRUE,
       '#tree' => TRUE,
       '#process' => array('bei_addressfield_process'),
-      '#element_validate' => array('bei_addressfield_element_validate'),
-      '#theme' => array('bei_addressfield_element'),
-      '#theme_wrappers' => array('form_element'),
+      //'#element_validate' => array('bei_addressfield_element_validate'),
+      '#theme_wrappers' => array('fieldset'),
     ),
   );
 }
 function bei_addressfield_process($element, &$form_state) {
-  $fields = array(
-    'ability' => t('Ability'),
-    'score' => t('Score'),
-    'mod' => t('Modifier'),
-    'tempscore' => t('Temp score'),
-    'tempmod' => t('Temp modifier'),
-  );
- 
-  foreach ($fields as $key => $label) {
-    $element[$key] = array(
-      '#attributes' => array('class' => array('edit-dnd-fields-ability'), 'title' => t('')),
-      '#type' => 'textfield',
-      '#size' => 3,
-      '#maxlength' => 3,
-      '#title' => $label,
-      '#default_value' => NULL,
-      '#prefix' => '<div class="bei-addressfield-field bei-addressfield-' . $key . '-field">',
-      '#suffix' => '</div>',
-    );
+  $default_country = 'US';
+  if (isset($form_state['country_selected'])) {
+    $default_country = $form_state['country_selected'];
+    unset($form_state['country_selected']);
   }
+  $element['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#options' => array(
+      'CA' => t('Canada'),
+      'US' => t('United States'),
+    ),
+    '#required' => TRUE,
+    '#default_value' => $default_country,
+    '#ajax' => array(
+      'wrapper' => 'bei-address-province-wrapper',
+      'callback' => 'bei_addressfield_refresh',
+    ),
+    '#limit_validation_errors' => array(),
+    '#element_validate' => array('bei_addressfield_country_validate'),
+  );
+  $element['address1'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Street'),
+    '#required' => TRUE,
+    '#default_value' => NULL,
+  );
+  $element['address2'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Additional'),
+    '#default_value' => NULL,
+  );
+  $element['city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('City'),
+    '#required' => TRUE,
+    '#default_value' => NULL,
+  );
+  $element['province'] = array(
+    '#type' => 'select',
+    '#title' => $default_country == 'US' ? t('State') : t('Province'),
+    '#options' => bei_addressfield_get_administrative_areas($default_country),
+    '#empty_value' => '',
+    '#prefix' => '<div id="bei-address-province-wrapper">',
+    '#suffix' => '</div>',
+    '#required' => TRUE,
+  );
+  $element['zip'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Postal Code'),
+    '#default_value' => NULL,
+  );
   return $element;
 }
+function bei_addressfield_country_validate($element, &$form_state) {
+  if ($form_state['triggering_element']['#name'] == $element['#name']) {
+    $form_state['country_selected'] = $form_state['triggering_element']['#value'];
+    $form_state['rebuild'] = TRUE;
+  }
+}
+function bei_addressfield_refresh($form, $form_state) {
+  return $form['address']['province'];
+}
 
+/**
+ * Returns the country list in a format suitable for use as an options list.
+ */
+function bei_addressfield_country_options_list($field = NULL, $instance = NULL) {
+  if (module_exists('countries')) {
+    $countries = countries_get_countries('name', array('enabled' => COUNTRIES_ENABLED));
+  }
+  else {
+    require_once DRUPAL_ROOT . '/includes/locale.inc';
+    $countries = country_get_list();
+  }
 
+  if (isset($field)) {
+    // If the instance is not specified, loop against all the instances of the field.
+    if (!isset($instance)) {
+      $instances = array();
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle_name) {
+          $instances[] = field_info_instance($entity_type, $field['field_name'], $bundle_name);
+        }
+      }
+    }
+    else {
+      $instances = array($instance);
+    }
+
+    foreach ($instances as $instance) {
+      if (!empty($instance['widget']['settings']['available_countries'])) {
+        $countries = array_intersect_key($countries, $instance['widget']['settings']['available_countries']);
+        break;
+      }
+    }
+  }
+
+  return $countries;
+}
+
+/**
+ * Returns the predefined administrative areas.
+ *
+ * @param $country_code
+ *   The country code for which administrative areas should be returned.
+ *
+ * @return
+ *   An array of predefined administrative areas for the given country code, or
+ *   NULL if not found.
+ */
+function bei_addressfield_get_administrative_areas($country_code) {
+  // Maintain a static cache to avoid passing the administrative areas through
+  // t() more than once per request.
+  $administrative_areas = &drupal_static(__FUNCTION__, array());
+  if (empty($administrative_areas)) {
+    // Get the default administrative areas.
+    $administrative_areas = _bei_addressfield_get_administrative_areas_defaults();
+  }
+
+  return isset($administrative_areas[$country_code]) ? $administrative_areas[$country_code] : NULL;
+}
+
+/**
+ * Provides the default administrative areas.
+ */
+function _bei_addressfield_get_administrative_areas_defaults() {
+  // To avoid needless pollution of the strings list we only pass to t()
+  // those administrative areas that are in English (or a latin transcription),
+  // and belong to a country that either has multiple official languages (CA)
+  // or uses a non-latin script (AE, CN, JP, KR, UA, RU, etc).
+  // No translation is expected in other cases.
+  $administrative_areas = array();
+  $administrative_areas['CA'] = array(
+    'AB' => t('Alberta'),
+    'BC' => t('British Columbia'),
+    'MB' => t('Manitoba'),
+    'NB' => t('New Brunswick'),
+    'NL' => t('Newfoundland and Labrador'),
+    'NT' => t('Northwest Territories'),
+    'NS' => t('Nova Scotia'),
+    'NU' => t('Nunavut'),
+    'ON' => t('Ontario'),
+    'PE' => t('Prince Edward Island'),
+    'QC' => t('Quebec'),
+    'SK' => t('Saskatchewan'),
+    'YT' => t('Yukon Territory'),
+  );
+  $administrative_areas['US'] = array(
+    'AL' => t('Alabama'),
+    'AK' => t('Alaska'),
+    'AZ' => t('Arizona'),
+    'AR' => t('Arkansas'),
+    'CA' => t('California'),
+    'CO' => t('Colorado'),
+    'CT' => t('Connecticut'),
+    'DE' => t('Delaware'),
+    'DC' => t('District of Columbia'),
+    'FL' => t('Florida'),
+    'GA' => t('Georgia'),
+    'HI' => t('Hawaii'),
+    'ID' => t('Idaho'),
+    'IL' => t('Illinois'),
+    'IN' => t('Indiana'),
+    'IA' => t('Iowa'),
+    'KS' => t('Kansas'),
+    'KY' => t('Kentucky'),
+    'LA' => t('Louisiana'),
+    'ME' => t('Maine'),
+    'MD' => t('Maryland'),
+    'MA' => t('Massachusetts'),
+    'MI' => t('Michigan'),
+    'MN' => t('Minnesota'),
+    'MS' => t('Mississippi'),
+    'MO' => t('Missouri'),
+    'MT' => t('Montana'),
+    'NE' => t('Nebraska'),
+    'NV' => t('Nevada'),
+    'NH' => t('New Hampshire'),
+    'NJ' => t('New Jersey'),
+    'NM' => t('New Mexico'),
+    'NY' => t('New York'),
+    'NC' => t('North Carolina'),
+    'ND' => t('North Dakota'),
+    'OH' => t('Ohio'),
+    'OK' => t('Oklahoma'),
+    'OR' => t('Oregon'),
+    'PA' => t('Pennsylvania'),
+    'RI' => t('Rhode Island'),
+    'SC' => t('South Carolina'),
+    'SD' => t('South Dakota'),
+    'TN' => t('Tennessee'),
+    'TX' => t('Texas'),
+    'UT' => t('Utah'),
+    'VT' => t('Vermont'),
+    'VA' => t('Virginia'),
+    'WA' => t('Washington'),
+    'WV' => t('West Virginia'),
+    'WI' => t('Wisconsin'),
+    'WY' => t('Wyoming'),
+    ' ' => t('--'),
+    'AA' => t('Armed Forces (Americas)'),
+    'AE' => t('Armed Forces (Europe, Canada, Middle East, Africa)'),
+    'AP' => t('Armed Forces (Pacific)'),
+    'AS' => t('American Samoa'),
+    'FM' => t('Federated States of Micronesia'),
+    'GU' => t('Guam'),
+    'MH' => t('Marshall Islands'),
+    'MP' => t('Northern Mariana Islands'),
+    'PW' => t('Palau'),
+    'PR' => t('Puerto Rico'),
+    'VI' => t('Virgin Islands'),
+  );
+  return $administrative_areas;
+}

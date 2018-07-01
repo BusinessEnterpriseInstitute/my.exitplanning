@@ -11,11 +11,9 @@
 function bei_mailchimp_cron() {
   // Gather all list IDs.
   $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-
   // Lets check for scheduled campaigns that have been sent.
   $query = 'SELECT n.nid FROM {bei_campaign} n WHERE n.campaign_status = :campaign_status';
   $results = db_query_range($query, 0, 25, array(':campaign_status' => 'schedule'))->fetchAll();
-
   // Load all of the campaigns that have not been sent and get their status.
   if (!empty($results)) {
     try {
@@ -202,8 +200,6 @@ function bei_mailchimp_get_lists($show_nid = FALSE) {
     }
     $lists[$result->nid] = $result->title . $nid;
   }
-  // Sort the list so the output is a little cleaner.
-  //asort($lists);
   return $lists;
 }
 
@@ -213,4 +209,16 @@ function bei_mailchimp_get_lists($show_nid = FALSE) {
 function bei_mailchimp_load_key_by_user($uid) {
   $key = db_query('SELECT * FROM {bei_mc_keys} k WHERE k.uid = :uid', array(':uid' => $uid))->fetchObject();
   return $key;
+}
+
+/**
+ * Generate a key to include in the webhook url based on a hash.
+ *
+ * @string $list_id
+ *
+ * @return string
+ *   The key.
+ */
+function bei_mailchimp_webhook_key() {
+  return drupal_hash_base64($GLOBALS['base_url'] . drupal_get_private_key() . drupal_get_hash_salt());
 }

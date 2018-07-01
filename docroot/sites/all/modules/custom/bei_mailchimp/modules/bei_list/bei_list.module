@@ -64,6 +64,7 @@ function bei_list_node_load($nodes, $types) {
          $nodes[$record->nid]->from_email = $record->from_email;
          $nodes[$record->nid]->from_name = $record->from_name;
          $nodes[$record->nid]->list_id = $record->list_id;
+         $nodes[$record->nid]->mc_data = unserialize($record->mc_data);
       }
    }
 }
@@ -81,6 +82,7 @@ function bei_list_node_insert($node) {
         'from_email' => $node->from_email,
         'from_name' => $node->from_name,
         'list_id' => isset($node->list_id) ? $node->list_id : NULL,
+        'mc_data' => serialize($node->mc_data),
      ))
      ->execute();
      //bei_list_add_list($node);
@@ -100,6 +102,7 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => $node->list_id,
+          'mc_data' => serialize($node->mc_data)
        ))
        ->condition('nid', $node->nid)
        ->execute();
@@ -112,6 +115,7 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => isset($node->list_id) ? $node->list_id : NULL,
+          'mc_data' => serialize($node->mc_data)
        ))
        ->execute();
     }
@@ -233,7 +237,6 @@ function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $fo
       '#required' => TRUE,
       '#maxlength' => 200,
    );
-
    // Add our own custom callback to the submit handler.
    //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
 }
@@ -274,7 +277,6 @@ function bei_list_field_extra_fields() {
     'display' => array(
     )
   );
-
   return $extra;
 }
 
@@ -413,7 +415,7 @@ function bei_list_webhook_batch_processing($lists) {
  * Batch complete function.
  */
 function bei_list_webhook_batch_finished() {
-  drupal_set_message(t('Webhook updates finised.'));
+  drupal_set_message(t('Webhook updates finished.'));
 }
 
 /**
@@ -537,7 +539,7 @@ function bei_list_webhook_update_email($email, $member) {
  * @string $key
  */
 function bei_list_webhook_access($key) {
-  return $key == mailchimp_webhook_key();
+  return $key == bei_mailchimp_webhook_key();
 }
 
 /**
@@ -549,7 +551,7 @@ function bei_list_webhook_access($key) {
  *   The endpoint URL.
  */
 function bei_list_webhook_url() {
-  $key = mailchimp_webhook_key();
+  $key = bei_mailchimp_webhook_key();
   return $GLOBALS['base_url'] . '/bei-list/webhook/' . $key;
 }
 

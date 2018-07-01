@@ -65,6 +65,13 @@ function bei_list_schema() {
         'not null' => FALSE,
         'default' => '',
       ),
+      'mc_data' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'not null' => FALSE,
+        'description' => 'The stored mailchimp list settings and webhooks.',
+        'serialize' => TRUE,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -72,4 +79,17 @@ function bei_list_schema() {
     ),
   );
   return $schema;
+}
+/**
+ * Create blob field to store mailchimp settings.
+ */
+function bei_list_update_7001() {
+  $field = array(
+    'type' => 'blob',
+    'size' => 'big',
+    'not null' => FALSE,
+    'description' => 'The stored mailchimp list settings and webhooks.',
+    'serialize' => TRUE,
+  );
+  db_add_field('bei_list', 'mc_data', $field);
 }

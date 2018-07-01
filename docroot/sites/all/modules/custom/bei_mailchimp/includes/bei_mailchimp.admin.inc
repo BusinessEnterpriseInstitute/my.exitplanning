@@ -113,6 +113,7 @@ function bei_mailchimp_api_key_validate($element, &$form_state, $form) {
       if ($account) {
         $user = $account->getAccount();
         if (isset($user->account_name)) {
+          $form_state['mc_account'] = check_plain($user->account_name);
           $message = t('The api key was found on Mailchimp for account %account', array('%account' => $user->account_name));
           drupal_set_message($message, 'status');
         }
@@ -132,11 +133,13 @@ function bei_mailchimp_user_key_form_submit($form, &$form_state) {
   $key_exists = bei_mailchimp_load_key_by_user($user->uid);
   $encrypt = module_exists('encrypt') ? TRUE : FALSE;
   $mc_key = $encrypt ? encrypt(trim($form_state['values']['mc_key'])) : trim($form_state['values']['mc_key']);
+  $account_name = $form_state['mc_account'];
   if (!empty($form_state['values']['mc_key'])) {
     if ($key_exists) {
       db_update('bei_mc_keys')
       ->fields(array(
         'data' => $mc_key,
+        'account' => $account_name,
       ))
       ->condition('uid', $user->uid)
       ->execute();
@@ -145,6 +148,7 @@ function bei_mailchimp_user_key_form_submit($form, &$form_state) {
       db_insert('bei_mc_keys')
       ->fields(array(
         'uid' => $user->uid,
+        'account' => $account_name,
         'data' => $mc_key,
       ))
       ->execute();
@@ -162,9 +166,20 @@ function bei_mailchimp_user_key_form_submit($form, &$form_state) {
 function bei_mailchimp_user_lists_form($form, &$form_state, $user = NULL) {
   $form_state['user'] = $user;
   $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
-  $mc_key = NULL;
+  /*
+  $form['address'] = array(
+    '#type' => 'bei_addressfield',
+    '#title' => t('Address'),
+  );*/
+  /*
+  $lists_query = db_query('SELECT n.nid FROM {node} n WHERE n.type = :type AND n.uid = :uid', array(
+  ':type' => 'subscriber_list', ':uid' => $user->uid))->fetchAllAssoc('nid');
+  if (!empty($lists_query)) {
+    $lists_query = array_keys($lists_query);
+    $list_nodes = node_load_multiple($lists_query);
+  }*/
   if (!$existing_key) {
-    $markup = t('Cannot sync lists without an api key.');
+    $markup = t('Unable to sync lists without an api key.');
     $form['no_key_markup'] = array(
       '#type' => 'markup',
       '#markup' => $markup,
@@ -182,6 +197,7 @@ function bei_mailchimp_user_lists_form($form, &$form_state, $user = NULL) {
 }
 function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
   $key = $form_state['existing_key'];
+  $user = $form_state['user'];
   $mc_key = decrypt($key->data);
   try {
     $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
@@ -190,8 +206,69 @@ function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
     }
     else {
       $result = $mc_lists->getLists(array('count' => 50));
-      if ($result->total_items > 0) {
-        dpm($result);
+      foreach ($result->lists as $list) {
+        $query = "SELECT l.nid FROM {bei_list} l WHERE l.list_id = :lid";
+        $nid = db_query($query, array(':lid' => $list->id))->fetchField();
+        // An array of events the webhook will respond to.
+        $events = array(
+          'subscribe' => TRUE,
+          'unsubscribe' => TRUE,
+          'profile' => TRUE,
+          'cleaned' => TRUE,
+          'upemail' => TRUE,
+          'campaign' => TRUE,
+        );
+        // An array of sources the webhook will respond to.
+        $sources = array(
+          'user' => TRUE,
+          'admin' => TRUE,
+          'api' => FALSE,
+        );
+        $parameters = array(
+          'events' => (object) $events,
+          'sources' => (object) $sources,
+        );
+        $url = bei_list_webhook_url();
+        global $base_url;
+        $webhooks = array();
+        $webhooks_result = $mc_lists->getWebhooks($list->id);
+        if (empty($nid)) {
+          // The node doesn't exist. We should create it.
+          $node = new stdClass();
+          $node->type = 'subscriber_list';
+          node_object_prepare($node);
+          $node->uid = $user->uid;
+          $node->title = $list->name;
+          $node->language = LANGUAGE_NONE;
+          $node->list_id = $list->id;
+          $node->from_name = check_plain($list->campaign_defaults->from_name);
+          $node->from_email = check_plain($list->campaign_defaults->from_email);
+          $node->subject = check_plain($list->campaign_defaults->subject);
+        }
+        else {
+          $node = node_load($nid);
+        }
+        $add_webhook = TRUE;
+        if ($webhooks_result->total_items > 0) {
+          $webhooks = $webhooks_result->webhooks;
+          foreach ($webhooks as $webhook) {
+            if ($url == $webhook->url) {
+              $add_webhook = FALSE;
+            }
+          }
+        }
+        if ($add_webhook) {
+          $new_webhook = $mc_lists->addWebhook($list->id, $url, $parameters);
+          if (isset($new_webhook->id)) {
+            $webhooks[] = $new_webhook;
+          }
+        }
+        $node->mc_data = array(
+          'list' => $list,
+          'webhooks' => $webhooks,
+        );
+        // Save the node!
+        node_save($node);
       }
     }
   }
