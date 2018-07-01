@@ -1,0 +1,42 @@
+<?php
+
+/*
+ * Implements hook_element_info().
+ */
+function bei_addressfield_element_info() {
+  return array(
+    'bei_addressfield' => array(
+      '#input' => TRUE,
+      '#tree' => TRUE,
+      '#process' => array('bei_addressfield_process'),
+      '#element_validate' => array('bei_addressfield_element_validate'),
+      '#theme' => array('bei_addressfield_element'),
+      '#theme_wrappers' => array('form_element'),
+    ),
+  );
+}
+function bei_addressfield_process($element, &$form_state) {
+  $fields = array(
+    'ability' => t('Ability'),
+    'score' => t('Score'),
+    'mod' => t('Modifier'),
+    'tempscore' => t('Temp score'),
+    'tempmod' => t('Temp modifier'),
+  );
+ 
+  foreach ($fields as $key => $label) {
+    $element[$key] = array(
+      '#attributes' => array('class' => array('edit-dnd-fields-ability'), 'title' => t('')),
+      '#type' => 'textfield',
+      '#size' => 3,
+      '#maxlength' => 3,
+      '#title' => $label,
+      '#default_value' => NULL,
+      '#prefix' => '<div class="bei-addressfield-field bei-addressfield-' . $key . '-field">',
+      '#suffix' => '</div>',
+    );
+  }
+  return $element;
+}
+
+
