@@ -7,3 +7,4 @@ dependencies[] = mailchimp
 dependencies[] = date_api
 dependencies[] = date_popup
 dependencies[] = feeds
+dependencies[] = encrypt

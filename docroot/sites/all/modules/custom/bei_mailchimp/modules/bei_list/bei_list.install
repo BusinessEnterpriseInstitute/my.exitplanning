@@ -61,7 +61,7 @@ function bei_list_schema() {
       'list_id' => array(
         'description' => 'The List ID on Mailchimp',
         'type' => 'varchar',
-        'length' => 256,
+        'length' => 30,
         'not null' => FALSE,
         'default' => '',
       ),
@@ -76,6 +76,7 @@ function bei_list_schema() {
     'primary key' => array('id'),
     'indexes' => array(
       'nid' => array('nid'),
+      'list_id' => array('list_id'),
     ),
   );
   return $schema;
@@ -92,4 +93,20 @@ function bei_list_update_7001() {
     'serialize' => TRUE,
   );
   db_add_field('bei_list', 'mc_data', $field);
+}
+/**
+ * Add an index for list_id to bei_list table.
+ */
+function bei_list_update_7002() {
+  db_change_field('bei_list', 'list_id', 'list_id', array(
+    'description' => 'The List ID on Mailchimp',
+    'type' => 'varchar',
+    'length' => 30,
+    'not null' => FALSE,
+    'default' => '',
+  ), array(
+    'indexes' => array(
+      'list_id' => array('list_id'),
+    ),
+  ));
 }

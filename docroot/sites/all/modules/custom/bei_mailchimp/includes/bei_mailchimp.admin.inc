@@ -6,15 +6,15 @@
  */
 function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
   $form_state['user'] = $user;
-  $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : NULL;
+  $existing_key = isset($user->uid) ? bei_mailchimp_load_key_by_user($user->uid) : FALSE;
   $mc_key = NULL;
   $form['keys_wrapper'] = array(
     '#prefix' => '<div id="keys-wrapper">',
     '#suffix' => '</div>',
   );
-  if ($existing_key) {
-    $mc_key = module_exists('encrypt') ? decrypt($existing_key->data) : $existing_key;
-    $markup = t('An api key is currently associated for account %account.', array('%account' => $existing_key->account));
+  if ($existing_key != FALSE) {
+    $mc_key = $existing_key['key'];
+    $markup = t('An api key is currently associated for account %account.', array('%account' => $existing_key['account']));
   }
   else {
     $markup = t('No api key exists for this account.');
@@ -60,7 +60,7 @@ function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
     );
     $form['keys_wrapper']['actions']['add_key'] = array(
       '#type' => 'submit',
-      '#value' => $existing_key ? t('Update key') : t('Add key'),
+      '#value' => $mc_key ? t('Update key') : t('Add key'),
       '#submit' => array('bei_mailchimp_add_key_submit'),
       '#name' => 'add_key',
       '#ajax' => array(
@@ -69,7 +69,7 @@ function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
         'method' => 'replace',
       ),
     );
-    if ($existing_key) {
+    if ($mc_key) {
       $form['keys_wrapper']['actions']['delete_key'] = array(
         '#type' => 'submit',
         '#value' => t('Delete'),
@@ -131,11 +131,10 @@ function bei_mailchimp_api_key_validate($element, &$form_state, $form) {
 function bei_mailchimp_user_key_form_submit($form, &$form_state) {
   $user = $form_state['user'];
   $key_exists = bei_mailchimp_load_key_by_user($user->uid);
-  $encrypt = module_exists('encrypt') ? TRUE : FALSE;
-  $mc_key = $encrypt ? encrypt(trim($form_state['values']['mc_key'])) : trim($form_state['values']['mc_key']);
   $account_name = $form_state['mc_account'];
   if (!empty($form_state['values']['mc_key'])) {
-    if ($key_exists) {
+    $mc_key = encrypt(trim($form_state['values']['mc_key']));
+    if ($key_exists != FALSE) {
       db_update('bei_mc_keys')
       ->fields(array(
         'data' => $mc_key,
@@ -155,7 +154,7 @@ function bei_mailchimp_user_key_form_submit($form, &$form_state) {
     }
   }
   else {
-    if ($key_exists) {
+    if ($key_exists != FALSE) {
       db_delete('bei_mc_keys')
       ->condition('uid', $user->uid)
       ->execute();
@@ -185,7 +184,7 @@ function bei_mailchimp_user_lists_form($form, &$form_state, $user = NULL) {
       '#markup' => $markup,
     );
   }
-  elseif ($existing_key && module_exists('encrypt')) {
+  else {
     $form_state['existing_key'] = $existing_key;
     $form['sync_lists'] = array(
       '#type' => 'submit',
@@ -198,7 +197,7 @@ function bei_mailchimp_user_lists_form($form, &$form_state, $user = NULL) {
 function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
   $key = $form_state['existing_key'];
   $user = $form_state['user'];
-  $mc_key = decrypt($key->data);
+  $mc_key = $key['key'];
   try {
     $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
     if (!$mc_lists) {
@@ -237,7 +236,7 @@ function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
           $node = new stdClass();
           $node->type = 'subscriber_list';
           node_object_prepare($node);
-          $node->uid = $user->uid;
+          //$node->uid = $user->uid;
           $node->title = $list->name;
           $node->language = LANGUAGE_NONE;
           $node->list_id = $list->id;

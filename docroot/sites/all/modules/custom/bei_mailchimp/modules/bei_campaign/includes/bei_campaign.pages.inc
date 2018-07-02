@@ -11,6 +11,8 @@
  * @see bei_mailchimp_menu().
  */
 function bei_campaign_pages_open($campaign, $op) {
+  $existing_key = bei_mailchimp_load_key_by_user($campaign->uid);
+  $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
   $list = field_get_items('node', $campaign, 'field_subscriber_list');
   $lid = $list ? $list[0]['target_id'] : NULL;
   $pager = '';
@@ -47,7 +49,7 @@ function bei_campaign_pages_open($campaign, $op) {
     if ($op == 'opened') {
       $start = 0;
       $limit = 25;
-      $mcapi = mailchimp_old_get_api_object();
+      $mcapi = mailchimp_old_get_api_object($mc_key);
       if (!empty($_GET['page']) && is_numeric($_GET['page'])) {
         $stats = $mcapi->reports->{$op}($cid, array(
           'start' => $_GET['page'],
@@ -71,7 +73,7 @@ function bei_campaign_pages_open($campaign, $op) {
     elseif ($op == 'unopen') {
       $start = 0;
       $limit = 25;
-      $mcapi = mailchimp_old_get_api_object();
+      $mcapi = mailchimp_old_get_api_object($mc_key);
       if (!empty($_GET['page']) && is_numeric($_GET['page'])) {
         $stats = $mcapi->reports->{'notOpened'}($cid, array(
           'start' => $_GET['page'],
@@ -95,7 +97,7 @@ function bei_campaign_pages_open($campaign, $op) {
     elseif ($op == 'bounce') {
       $start = 0;
       $limit = 100;
-      $mcapi = mailchimp_old_get_api_object();
+      $mcapi = mailchimp_old_get_api_object($mc_key);
       $hard_bounces = $mcapi->reports->{'sentTo'}($cid, array(
         'status' => 'hard',
         'start' => $start,
@@ -175,7 +177,7 @@ function bei_campaign_pages_open($campaign, $op) {
         }
         else {
           cache_clear_all('campaign-' . $sub . '-' . $cid, 'cache_mailchimp');
-          $report = bei_campaign_get_campaign_report($cid, $sub, $limit, $offset);
+          $report = bei_campaign_get_campaign_report($cid, $sub, $limit, $offset, $mc_key);
           if ($report) {
             $total = $sub == 'opened' ? $report['total'] : $report->total_items;
             // If the total items are <= our limit, cache the results

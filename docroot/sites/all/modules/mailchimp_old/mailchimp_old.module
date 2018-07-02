@@ -45,7 +45,7 @@ function mailchimp_old_apikey_ready_access($permission) {
  *   The default return value is an instance of DrupalMailchimp, although that
  *   can be overridden.
  */
-function mailchimp_old_get_api_object() {
+function mailchimp_old_get_api_object($api_key = NULL) {
   $mailchimp = &drupal_static(__FUNCTION__);
   if (isset($mailchimp)) {
     return $mailchimp;
@@ -63,8 +63,9 @@ function mailchimp_old_get_api_object() {
     drupal_set_message($msg, 'error');
     return NULL;
   }
-
-  $api_key = variable_get('mailchimp_api_key', '');
+  if (!$api_key) {
+    $api_key = variable_get('mailchimp_api_key', '');
+  }
   if (!strlen($api_key)) {
     watchdog('mailchimp_old', t('MailChimp Old Error: API Key cannot be blank.'), array(), WATCHDOG_ERROR);
     return NULL;

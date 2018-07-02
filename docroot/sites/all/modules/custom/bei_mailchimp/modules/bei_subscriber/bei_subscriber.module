@@ -130,11 +130,11 @@ function bei_subscriber_load_multiple($ids = array(), $conditions = array(), $re
  * Save a Subscriber.
  */
 function bei_subscriber_save($subscriber, $skip_cron = FALSE, $is_new = FALSE) {
-   $changed = FALSE;
-   if ($is_new) {
+  $changed = FALSE;
+  if ($is_new) {
     $subscriber->created = REQUEST_TIME;
-   }
-   else {
+  }
+  else {
     $original = entity_load_unchanged('bei_subscriber', $subscriber->id);
     if ($original->first_name !== $subscriber->first_name) {
       $changed = TRUE;
@@ -142,10 +142,10 @@ function bei_subscriber_save($subscriber, $skip_cron = FALSE, $is_new = FALSE) {
     elseif ($original->last_name !== $subscriber->last_name) {
       $changed = TRUE;
     }
-   }
-   $subscriber->changed = REQUEST_TIME;
-   entity_save('bei_subscriber', $subscriber);
-   bei_subscriber_subscribe($subscriber, $changed, $skip_cron);
+  }
+  $subscriber->changed = REQUEST_TIME;
+  entity_save('bei_subscriber', $subscriber);
+  bei_subscriber_subscribe($subscriber, $changed, $skip_cron);
 }
 /**
  * Delete single Subscriber.
@@ -171,7 +171,9 @@ function bei_subscriber_entity_delete($entity, $type) {
       $list_id = $entity->list_id;
       // Delete the subscriber on mailchimp
       if (!empty($entity->unique_email_id)) {
-         mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE);
+        $existing_key = bei_mailchimp_load_key_by_user($entity->uid);
+        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+        bei_mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE, $mc_key);
       }
    }
 }
@@ -181,134 +183,40 @@ function bei_subscriber_entity_delete($entity, $type) {
  * Helper function to subscribe and/or update a subscriber on mailchimp.
  */
 function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FALSE) {
-   if (!empty($subscriber->list_id)) {
-      $list_id = $subscriber->list_id;
-      $email = $subscriber->email;
-      // Lets make sure the user hasn't already been added.
-      if (!mailchimp_is_subscribed($list_id, $email)) {
-         // Lets sync this new subscriber with mailchimp!
-         $merge_vars = array(
-          'EMAIL' => $email,
-          'FNAME' => $subscriber->first_name,
-          'LNAME' => $subscriber->last_name,
-         );
-         $interests = array();
-         if ($skip_cron) {
-            // Subscribe the user immediately and bypass cron.
-            bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, FALSE, 'html');
-         }
-         else {
-            // Subscribe the user via cron run if enabled.
-            mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
-         }
-      }
-      elseif ($changed) {
-         $merge_vars = array(
-          'EMAIL' => $email,
-          'FNAME' => $subscriber->first_name,
-          'LNAME' => $subscriber->last_name,
-         );
-         $interests = array();
-         mailchimp_update_member($list_id, $email, $merge_vars, $interests, FALSE, 'html');
-      }
-   }
-}
-
-/**
- * Wrapper around MailchimpLists::addOrUpdateMember().
- *
- * @see MailchimpLists::addOrUpdateMember()
- *
- * @return object
- *   On success a result object will be returned from Mailchimp. On failure an
- *   object will be returned with the property success set to FALSE, the
- *   response code as a property, and the message as a property. To check for
- *   a failure, look for the property 'success' of the object returned to
- *   be set to FALSE.
- */
-function bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars = NULL, $interests = array(), $double_optin = FALSE, $format = 'html') {
-  $result = FALSE;
-  try {
-    /* @var \Mailchimp\MailchimpLists $mc_lists */
-    $mc_lists = mailchimp_get_api_object('MailchimpLists');
-    if (!$mc_lists) {
-      throw new MailchimpException('Cannot subscribe to list without MailChimp API. Check API key has been entered.');
-    }
-
-    $parameters = array(
-      // If double opt-in is required, set member status to 'pending', but only
-      // if the user isn't already subscribed.
-      'status' => ($double_optin && !mailchimp_is_subscribed($list_id, $email)) ? \Mailchimp\MailchimpLists::MEMBER_STATUS_PENDING : \Mailchimp\MailchimpLists::MEMBER_STATUS_SUBSCRIBED,
-      'email_type' => $format,
-    );
-
-    // Set interests.
-    if (!empty($interests)) {
-      $parameters['interests'] = (object) $interests;
-    }
-
-    // Set merge fields.
-    if (!empty($merge_vars)) {
-      $parameters['merge_fields'] = (object) $merge_vars;
-    }
-
-    // Add member to list.
-    $result = $mc_lists->addOrUpdateMember($list_id, $email, $parameters);
-
-    if (isset($result->id)) {
-      $subscriber->status = $result->status;
-      $subscriber->unique_email_id = $result->unique_email_id;
-      $subscriber->changed = REQUEST_TIME;
-      entity_save('bei_subscriber', $subscriber);
-      mailchimp_cache_clear_member($list_id, $email);
-      watchdog('bei_mailchimp', '@email was subscribed to list @list.',
-        array('@email' => $email, '@list' => $list_id), WATCHDOG_NOTICE
+  if (!empty($subscriber->list_id)) {
+    $list_id = $subscriber->list_id;
+    $email = $subscriber->email;
+    $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
+    $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+    // Lets make sure the user hasn't already been added.
+    if (!bei_mailchimp_is_subscribed($list_id, $email, FALSE, $mc_key)) {
+      // Lets sync this new subscriber with mailchimp!
+      $merge_vars = array(
+        'EMAIL' => $email,
+        'FNAME' => $subscriber->first_name,
+        'LNAME' => $subscriber->last_name,
       );
-    }
-    else {
-      if (!variable_get('mailchimp_test_mode')) {
-        watchdog('bei_mailchimp', 'A problem occurred subscribing @email to list @list.', array(
-          '@email' => $email,
-          '@list' => $list_id,
-        ), WATCHDOG_WARNING);
+      $interests = array();
+      if ($skip_cron) {
+        // Subscribe the user immediately and bypass cron.
+        bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, FALSE, 'html', $mc_key);
+      }
+      else {
+        // Subscribe the user via cron run if enabled.
+        mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
       }
     }
-  }
-  catch (Exception $e) {
-    if ($e->getCode() == '400' && strpos($e->getMessage(), 'Member In Compliance State') !== false && !$double_optin) {
-      watchdog('bei_mailchimp', 'Detected "Member In Compliance State" subscribing @email to list @list.  Trying again using double-opt in.', array(
-        '@email' => $email,
-        '@list' => $list_id,
-      ), WATCHDOG_INFO);
-      return bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, TRUE, $format);
+    elseif ($changed) {
+      $merge_vars = array(
+        'EMAIL' => $email,
+        'FNAME' => $subscriber->first_name,
+        'LNAME' => $subscriber->last_name,
+      );
+      $interests = array();
+      bei_mailchimp_update_member($subscriber, $list_id, $email, $merge_vars, $interests, 'html', FALSE, $mc_key, $skip_cron);
     }
-
-    watchdog('bei_mailchimp', 'An error occurred subscribing @email to list @list. Status code @code. "%message"', array(
-      '@email' => $email,
-      '@list' => $list_id,
-      '%message' => $e->getMessage(),
-      '@code' => $e->getCode(),
-    ), WATCHDOG_ERROR);
-    $result = new stdClass();
-    $result->success = FALSE;
-    $result->status = $e->getCode();
-    $result->message = $e->getMessage();
   }
-  return $result;
 }
-
-/**
- * Helper function to perform additional actions after mailchimp_subscribe()
- */
-/*
-function bei_subscriber_mailchimp_subscribe_user($list_id, $email) {
-   $query = 'SELECT * FROM {bei_subscriber} s WHERE s.list_id = :list_id AND s.email = :email';
-   $subscriber = db_query($query, array(':list_id' => $list_id, ':email' => $email))->fetchObject();
-   if ($subscriber) {
-      $subscriber->status = 'subscribed';
-      entity_save('bei_subscriber', $subscriber);
-   }
-}*/
 
 /*
  * Helper function to perform additional actions after mailchimp_unsubscribe().
@@ -561,15 +469,6 @@ function bei_subscriber_feeds_presave($source, $entity, $item) {
             }
          }
       }
-      /*
-      elseif (!_bei_subscriber_unique_email($mail, $list_id)) {
-        $message = t('Import: The e-mail address !mail was already taken.', array('!mail' => $mail));
-        $skip = TRUE;
-      }
-      elseif (_bei_subscriber_unsubscribed($mail, $feed_nid)) {
-        $message = t('Import: The e-mail address !mail was previously unsubscribed from this list and can not be added again.', array('!mail' => $mail));
-        $skip = TRUE;
-      }*/
       if ($skip) {
         _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_ERROR);
         $entity->feeds_item->skip = TRUE;
@@ -671,9 +570,9 @@ function _bei_add_subscriber_access($node) {
 /**
  * Helper function to get member activity for a specific list and email address.
  */
-function bei_subscriber_get_member_activity($list_id, $email) {
+function bei_subscriber_get_member_activity($list_id, $email, $mc_key = NULL) {
   /* @var \Mailchimp\MailchimpLists $mc_lists */
-    $mc_lists = mailchimp_get_api_object('MailchimpLists');
+    $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
 
     try {
       if (!$mc_lists) {
@@ -709,75 +608,77 @@ function bei_subscriber_get_campaign_entity_id($campaign_id) {
  * View a subscriber.
  */
 function bei_subscriber_view($entity, $view_mode='full', $langcode = NULL) {
-   if (!isset($langcode)) {
-     $langcode = $GLOBALS['language_content']->language;
-   }
-   $member_info = mailchimp_get_memberinfo($entity->list_id, $entity->email);
-   if ($member_info) {
-   }
-   drupal_set_title($entity->email);
-   $entity_type = $entity->entityType();
-   $entity_id = entity_id($entity_type, $entity);
-   $entity->content = array();
-   field_attach_prepare_view($entity_type, array($entity_id => $entity), $view_mode);
-   entity_prepare_view($entity_type, array($entity_id => $entity));
-   $entity->content += field_attach_view($entity_type, $entity, $view_mode);
-   $entity->content += array(
-       //'#theme' => $entity_type,
-       '#element' => $entity,
-       '#view_mode' => $view_mode,
-       '#language' => LANGUAGE_NONE,
-   );
-   $list_node = node_load($entity->lid);
-   if ($list_node) {
-      // Set the Breadcrumb
-      $breadcrumb = array();
-      $breadcrumb[] = l(t($list_node->title), 'node/' . $list_node->nid);
-      $breadcrumb[] = l(t('Subscribers'), 'node/' . $list_node->nid . '/subscribers');
-      drupal_set_breadcrumb($breadcrumb);
-      $list_id = !empty($list_node->list_id) ? $list_node->list_id : NULL;
-      if ($list_id) {
-         $header = array(
-            array('data' => t('Campaign')),
-            array('data' => t('Action')),
-            array('data' => t('Timestamp')),
-         );
-         $rows = array();
-         $member_activity = bei_subscriber_get_member_activity($list_id, $entity->email);
-         if ($member_activity) {
-            foreach ($member_activity->activity as $activity) {
-              $timestamp = format_date(strtotime($activity->timestamp), 'short');
-              $campaign_id = bei_subscriber_get_campaign_entity_id($activity->campaign_id);
-              $campaign_entity = NULL;
-              if ($campaign_id) {
-                $campaign_entity = node_load($campaign_id);
-              }
-              $campaign = $campaign_entity ? l($campaign_entity->title, 'node/' . $campaign_entity->nid) : t($activity->campaign_id);
-              $rows[] = array(
-                array('data' => $campaign),
-                array('data' => t($activity->action)),
-                array('data' => $timestamp),
-              );
-            }
-         }
-         $entity->content['subscriber_activity'] = array(
-            '#theme' => 'table',
-            '#header' => $header,
-            '#rows' => $rows,
-            '#empty' => t('No activity history exists for this subscriber.'),
-            '#attributes' => array(
-              'id' => 'bei-mailchimp-campaigns',
-              'class' => array('bei-mailchimp-table'),
-            ),
-         );
-      }
-   }
-   /*
-   $entity->content['narrative'] = array(
-     '#theme' => 'container',
-     '#markup' => check_markup($entity->description, $entity->format),
-   );*/
-   return $entity->content;
+  if (!isset($langcode)) {
+    $langcode = $GLOBALS['language_content']->language;
+  }
+  $existing_key = bei_mailchimp_load_key_by_user($entity->uid);
+  $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+  $member_info = bei_mailchimp_get_memberinfo($entity->list_id, $entity->email, FALSE, $mc_key);
+  if ($member_info) {
+  }
+  drupal_set_title($entity->email);
+  $entity_type = $entity->entityType();
+  $entity_id = entity_id($entity_type, $entity);
+  $entity->content = array();
+  field_attach_prepare_view($entity_type, array($entity_id => $entity), $view_mode);
+  entity_prepare_view($entity_type, array($entity_id => $entity));
+  $entity->content += field_attach_view($entity_type, $entity, $view_mode);
+  $entity->content += array(
+      //'#theme' => $entity_type,
+      '#element' => $entity,
+      '#view_mode' => $view_mode,
+      '#language' => LANGUAGE_NONE,
+  );
+  $list_node = node_load($entity->lid);
+  if ($list_node) {
+     // Set the Breadcrumb
+     $breadcrumb = array();
+     $breadcrumb[] = l(t($list_node->title), 'node/' . $list_node->nid);
+     $breadcrumb[] = l(t('Subscribers'), 'node/' . $list_node->nid . '/subscribers');
+     drupal_set_breadcrumb($breadcrumb);
+     $list_id = !empty($list_node->list_id) ? $list_node->list_id : NULL;
+     if ($list_id) {
+        $header = array(
+           array('data' => t('Campaign')),
+           array('data' => t('Action')),
+           array('data' => t('Timestamp')),
+        );
+        $rows = array();
+        $member_activity = bei_subscriber_get_member_activity($list_id, $entity->email, $mc_key);
+        if ($member_activity) {
+           foreach ($member_activity->activity as $activity) {
+             $timestamp = format_date(strtotime($activity->timestamp), 'short');
+             $campaign_id = bei_subscriber_get_campaign_entity_id($activity->campaign_id);
+             $campaign_entity = NULL;
+             if ($campaign_id) {
+               $campaign_entity = node_load($campaign_id);
+             }
+             $campaign = $campaign_entity ? l($campaign_entity->title, 'node/' . $campaign_entity->nid) : t($activity->campaign_id);
+             $rows[] = array(
+               array('data' => $campaign),
+               array('data' => t($activity->action)),
+               array('data' => $timestamp),
+             );
+           }
+        }
+        $entity->content['subscriber_activity'] = array(
+           '#theme' => 'table',
+           '#header' => $header,
+           '#rows' => $rows,
+           '#empty' => t('No activity history exists for this subscriber.'),
+           '#attributes' => array(
+             'id' => 'bei-mailchimp-campaigns',
+             'class' => array('bei-mailchimp-table'),
+           ),
+        );
+     }
+  }
+  /*
+  $entity->content['narrative'] = array(
+    '#theme' => 'container',
+    '#markup' => check_markup($entity->description, $entity->format),
+  );*/
+  return $entity->content;
 }
 
 function bei_subscriber_queue_import($item) {

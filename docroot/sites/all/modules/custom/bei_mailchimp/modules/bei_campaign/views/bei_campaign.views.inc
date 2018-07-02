@@ -14,15 +14,6 @@ function bei_campaign_views_data() {
 
   // Group
   $data['bei_campaign']['table']['group'] = t('BEI Campaign');
-  /*
-  $data ['bei_campaign']['table']['base'] = array(
-    'field' => 'nid',
-    'help' => t('List of course progress stats'),
-    'title' => t('LMS Courses in Progress'),
-    'weight' => -10,
-  );*/
-
-
   // Joins
   $data['bei_campaign']['table']['join'] = array(
     'node' => array(
@@ -30,7 +21,6 @@ function bei_campaign_views_data() {
         'field' => 'nid',
     ),
   );
-
   // Fields
   $data['bei_campaign']['campaign_status'] = array(
     'title' => t('Campaign: Status'),

@@ -77,7 +77,7 @@ function bei_campaign_schema() {
       'list_id' => array(
         'description' => 'The List ID on Mailchimp',
         'type' => 'varchar',
-        'length' => 256,
+        'length' => 30,
         'not null' => FALSE,
         'default' => '',
       ),
@@ -122,4 +122,20 @@ function bei_campaign_schema() {
     ),
   );
   return $schema;
+}
+/**
+ * Add an index for list_id to bei_campaign table.
+ */
+function bei_campaign_update_7001() {
+  db_change_field('bei_campaign', 'list_id', 'list_id', array(
+    'description' => 'The List ID on Mailchimp',
+    'type' => 'varchar',
+    'length' => 30,
+    'not null' => FALSE,
+    'default' => '',
+  ), array(
+    'indexes' => array(
+      'list_id' => array('list_id'),
+    ),
+  ));
 }

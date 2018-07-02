@@ -5,6 +5,85 @@
  * Module for BEI Campaign.
  */
 
+ /**
+ * Implements hook_menu().
+ * Define menu items and page callbacks.
+ */
+function bei_campaign_menu() {
+  $items = array();
+  $items['admin/config/bei_mailchimp/campaigns-update'] = array(
+    'title' => 'Import/Update Campaigns',
+    'description' => 'Updates the mailchimp cache with new/updated campaigns',
+    'access arguments' => array('administer bei mailchimp'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_campaign_batch_form'),
+    'file' => 'includes/bei_campaign.admin.inc',
+  );
+  $items['node/%node/opened'] = array(
+    'title' => 'Opened',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'opened'), // Using mailchimp 2.0 library to load this report
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 47,
+  );
+  $items['node/%node/unopened'] = array(
+    'title' => 'Unopened',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'unopen'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 48,
+  );
+  $items['node/%node/bounced'] = array(
+    'title' => 'Bounced',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'bounce'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 49,
+  );
+  $items['node/%node/unsubscribed'] = array(
+    'title' => 'Unsubscribes',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'unsubscribed'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 50,
+  );
+  $items['node/%node/clicked'] = array(
+    'title' => 'Clicked',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'clicks'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 50,
+  );
+  $items['node/%node/click-details'] = array(
+    'title' => 'Click Details',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'click-details'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 51,
+  );
+  $items['node/%node/spam'] = array(
+    'title' => 'Spam',
+    'access callback' => '_bei_campaign_stat_access',
+    'access arguments' => array(1),
+    'page callback' => 'bei_campaign_pages_open',
+    'page arguments' => array(1, 'abuse'),
+    'file' => 'includes/bei_campaign.pages.inc',
+    'weight' => 52,
+  );
+  return $items;
+}
 /**
  * Implements hook_form_alter().
  * Perform alterations before a form is rendered.
@@ -149,8 +228,10 @@ function bei_campaign_node_insert($node) {
   }
 }
 function bei_campaign_add_campaign($node) {
+  $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+  $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
   /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
   try {
     if (!$mc_campaigns) {
       throw new MailchimpException('Cannot create campaign without Mailchimp API. Check API key has been entered.');
@@ -240,9 +321,11 @@ function bei_campaign_node_update($node) {
       ->execute();
     }
     if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
+      $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+      $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
       // Update on mailchimp only if the status is 'save' and content has changed.
       try {
-        $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+        $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
         if (!$mc_campaigns) {
           throw new MailchimpException('Cannot update a campaign without Mailchimp API. Check API key has been entered.');
         }
@@ -280,7 +363,9 @@ function bei_campaign_node_delete($node) {
     db_query("DELETE FROM {bei_campaign} WHERE nid = :nid", array(':nid' => $node->nid));
     // Delete it from Mailchimp only if status is 'save';
     if (!empty($node->campaign_id) && $node->campaign_status == 'save') {
-      bei_campaign_delete_campaign($node->campaign_id);
+      $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+      $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+      bei_campaign_delete_campaign($node->campaign_id, $mc_key);
     }
   }
 }
@@ -307,86 +392,6 @@ function bei_campaign_permission() {
       'restrict access' => TRUE,
     ),
   );
-}
-
-/**
- * Implements hook_menu().
- * Define menu items and page callbacks.
- */
-function bei_campaign_menu() {
-  $items = array();
-  $items['admin/config/bei_mailchimp/campaigns-update'] = array(
-    'title' => 'Import/Update Campaigns',
-    'description' => 'Updates the mailchimp cache with new/updated campaigns',
-    'access arguments' => array('administer bei mailchimp'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bei_campaign_batch_form'),
-    'file' => 'includes/bei_campaign.admin.inc',
-  );
-  $items['node/%node/opened'] = array(
-    'title' => 'Opened',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'opened'), // Using mailchimp 2.0 library to load this report
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 47,
-  );
-  $items['node/%node/unopened'] = array(
-    'title' => 'Unopened',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'unopen'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 48,
-  );
-  $items['node/%node/bounced'] = array(
-    'title' => 'Bounced',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'bounce'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 49,
-  );
-  $items['node/%node/unsubscribed'] = array(
-    'title' => 'Unsubscribes',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'unsubscribed'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 50,
-  );
-  $items['node/%node/clicked'] = array(
-    'title' => 'Clicked',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'clicks'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 50,
-  );
-  $items['node/%node/click-details'] = array(
-    'title' => 'Click Details',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'click-details'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 51,
-  );
-  $items['node/%node/spam'] = array(
-    'title' => 'Spam',
-    'access callback' => '_bei_campaign_stat_access',
-    'access arguments' => array(1),
-    'page callback' => 'bei_campaign_pages_open',
-    'page arguments' => array(1, 'abuse'),
-    'file' => 'includes/bei_campaign.pages.inc',
-    'weight' => 52,
-  );
-  return $items;
 }
 
 /**
@@ -562,17 +567,26 @@ function bei_campaign_node_view($node, $view_mode, $langcode) {
     if ($cid && $node->campaign_status == 'sent') {
       // Try to load stats from cache first.
       $cache = cache_get('campaign-summary-' . $cid, 'cache_mailchimp');
+      $fresh_pull = FALSE;
       if ($cache && $cache->expire >= REQUEST_TIME) {
         if ($cache->expire > REQUEST_TIME) {
           $response = $cache->data;
         }
         else {
           cache_clear_all('campaign-summary-' . $cid, 'cache_mailchimp');
-          $response = bei_campaign_get_campaign_report($cid);
+          $fresh_pull = TRUE;
         }
       }
       else {
-        $response = bei_campaign_get_campaign_report($cid);
+        $fresh_pull = TRUE;
+      }
+      if ($fresh_pull) {
+        $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+        $type = NULL;
+        $count = 100;
+        $offset = 0;
+        $response = bei_campaign_get_campaign_report($cid, $type, $count, $offset, $mc_key);
       }
       if ($response) {
         // Load our CSS.
@@ -808,10 +822,10 @@ function bei_campaign_node_view($node, $view_mode, $langcode) {
 /**
  * Helper function to pull a mailchimp report
  */
-function bei_campaign_get_campaign_report($campaign_id, $type = NULL, $count = 100, $offset = 0) {
+function bei_campaign_get_campaign_report($campaign_id, $type = NULL, $count = 100, $offset = 0, $mc_key = NULL) {
   $report = NULL;
   try {
-    $mc_reports = mailchimp_get_api_object('MailchimpReports');
+    $mc_reports = mailchimp_get_api_object('MailchimpReports', $mc_key);
     if (!$mc_reports) {
       throw new MailchimpException('Cannot pull a report without Mailchimp API. Check API key has been entered.');
     }
@@ -851,9 +865,9 @@ function bei_campaign_get_campaign_report($campaign_id, $type = NULL, $count = 1
 /**
  * Delete a MailChimp campaign.
  */
-function bei_campaign_delete_campaign($cid) {
+function bei_campaign_delete_campaign($cid, $mc_key = NULL) {
   /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
   $result = NULL;
   // Delete campaign from MailChimp.
   try {
@@ -873,33 +887,6 @@ function bei_campaign_delete_campaign($cid) {
     return FALSE;
   }
   return FALSE;
-}
-/**
- * Helper function to create or save a campaign on mailchimp.
- */
-function bei_campaign_save_campaign($recipients, $settings, $node, $cid = NULL) {
-  /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
-  $is_new = empty($cid);
-  if ($is_new) {
-    try {
-      if (!$mc_campaigns) {
-        throw new MailchimpException('Cannot create a campaign without Mailchimp API. Check API key has been entered.');
-      }
-      $result = $mc_campaigns->addCampaign(\Mailchimp\MailchimpCampaigns::CAMPAIGN_TYPE_REGULAR, $recipients, $settings);
-      if (!empty($result->id)) {
-        $cid = $result->id;
-        $mc_campaigns->setCampaignContent($cid, $content);
-      }
-      return TRUE;
-    }
-    catch (Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-      watchdog('bei_campaign', 'An error occurred while trying to create a campaign: %message', array(
-        '%message' => $e->getMessage()), WATCHDOG_ERROR);
-      return FALSE;
-    }
-  }
 }
 /**
  * Implements hook_action_info().
@@ -980,10 +967,12 @@ function bei_campaign_schedule_campaign($node, $context) {
   $send_date = $date->format('Y-m-d H:i:s');
   $list_id = !empty($node->list_id) ? $node->list_id : NULL;
   $campaign_id = !empty($node->campaign_id) ? $node->campaign_id : NULL;
+  $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+  $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
   if ($list_id && $campaign_id) {
     try {
       /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+      $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
       if (!$mc_campaigns) {
         throw new MailchimpException('Cannot schedule campaigns without MailChimp API. Check API key has been entered.');
       }
@@ -1032,10 +1021,12 @@ function bei_campaign_schedule_campaign($node, $context) {
  * Action submit function to run an action's action!
  */
 function bei_campaign_unschedule_campaign($node, $context) {
+  $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+  $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
   // Send Mailchimp a request to unschedule a campaign.
   try {
     /* @var \Mailchimp\MailchimpCampaigns $mc_campaigns */
-    $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+    $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
     if (!$mc_campaigns) {
       throw new MailchimpException('Cannot unschedule campaigns without MailChimp API. Check API key has been entered.');
     }

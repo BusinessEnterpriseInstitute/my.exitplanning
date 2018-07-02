@@ -10,7 +10,7 @@
  */
 function bei_list_menu() {
   $items = array();
-
+  /*
   $items['admin/config/bei_mailchimp/lists-update'] = array(
     'title' => 'Import/Update Lists',
     'description' => 'Updates the mailchimp cache with new/updated lists',
@@ -18,7 +18,7 @@ function bei_list_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('bei_list_batch_form'),
     'file' => 'includes/bei_list.admin.inc',
-  );
+  );*/
   $items['admin/config/bei_mailchimp/webhooks-update'] = array(
     'title' => 'Update Webhooks',
     'description' => 'Updates webhooks on Mailchimp',
@@ -337,31 +337,6 @@ function bei_list_batch_processing($lists) {
         ), WATCHDOG_INFO);
       }
     }
-    /*
-    // Check to see if a webhook already exists. If not, create one.
-    $webhooks = mailchimp_webhook_get($list->id);
-    // If webhooks exist, check to see if they use the same base URL.
-    if (!empty($webhooks)) {
-      // Loop through the hooks and see if there is a matching base URL.
-      $webhook_exists = TRUE;
-      foreach ($webhooks as $webhook) {
-        if ($webhook->url !== $url) {
-          $webhook_exists = FALSE;
-          mailchimp_webhook_delete($list->id, $webhook->url);
-          watchdog('bei_list', 'Removed old webhook @url for list node @nid.', array(
-            '@url' => $webhook->url,
-            '@nid' => $nid,
-          ), WATCHDOG_INFO);
-        }
-      }
-      if (!$webhook_exists) {
-        $response = mailchimp_webhook_add($list->id, $url, $events, $sources);
-      }
-    }
-    else {
-      // There were no webhooks at all so lets add ours.
-      $response = mailchimp_webhook_add($list->id, $url, $events, $sources);
-    }*/
   }
 }
 
@@ -434,23 +409,43 @@ function bei_list_webhook() {
   }
   $data = $_POST['data'];
   $type = $_POST['type'];
+  $mc_key = NULL;
   switch ($type) {
     case 'subscribe':
-      $member = mailchimp_get_memberinfo($data['list_id'], $data['email']);
-      bei_list_webhook_member_add($member);
-      break;
     case 'unsubscribe':
     case 'profile':
     case 'cleaned':
-      $member = mailchimp_get_memberinfo($data['list_id'], $data['email'], TRUE);
-      bei_list_webhook_member_update($member);
+      $query = "SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.list_id = :list_id";
+      $subscriber = db_query($query, array(':email' => $data['email'], ':list_id' => $data['list_id']))->fetchObject();
+      if ($subscriber) {
+        $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
+        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+        $member = bei_mailchimp_get_memberinfo($data['list_id'], $data['email'], TRUE, $mc_key);
+        bei_list_webhook_member_update($member, $subscriber);
+      }
+      elseif ($type == 'subscribe') {
+        $nid = db_query('SELECT l.nid FROM {bei_list} l WHERE l.list_id = :list_id', array(':list_id' => $data['list_id']))->fetchField();
+        if ($nid) {
+          $node = node_load($nid);
+          $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+          $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+          $member = bei_mailchimp_get_memberinfo($data['list_id'], $data['email'], FALSE, $mc_key);
+          bei_list_webhook_member_add($member, $node);
+        }
+      }
       break;
 
     case 'upemail':
       $old_email = $data['old_email'];
-      mailchimp_cache_clear_member($data['list_id'], $data['old_email']);
-      $member = mailchimp_get_memberinfo($data['list_id'], $data['new_email'], TRUE);
-      bei_list_webhook_update_email($old_email, $member);
+      $query = "SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.list_id = :list_id";
+      $subscriber = db_query($query, array(':email' => $old_email, ':list_id' => $data['list_id']))->fetchObject();
+      if ($subscriber) {
+        $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
+        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+        mailchimp_cache_clear_member($data['list_id'], $data['old_email']);
+        $member = bei_mailchimp_get_memberinfo($data['list_id'], $data['new_email'], TRUE, $mc_key);
+        bei_list_webhook_update_email($old_email, $member, $subscriber);
+      }
       break;
   }
 
@@ -464,17 +459,14 @@ function bei_list_webhook() {
 /**
  * Webhook create subscriber helper function
  */
-function bei_list_webhook_member_add($member) {
+function bei_list_webhook_member_add($member, $node = NULL) {
   // Create a subscriber
   $email = $member->email_address;
   $list_id = $member->list_id;
-  $query = 'SELECT l.nid FROM {bei_list} l WHERE l.list_id = :list_id';
-  $nid = db_query($query, array(':list_id' => $list_id))->fetchField();
-  if (!empty($nid)) {
-    $list = node_load($nid);
+  if (isset($node->nid)) {
     $subscriber = new stdClass('bei_subscriber');
-    $subscriber->uid = $list->uid;
-    $subscriber->lid = $list->nid;
+    $subscriber->uid = $node->uid;
+    $subscriber->lid = $node->nid;
     $subscriber->created = REQUEST_TIME;
     $subscriber->changed = REQUEST_TIME;
     $subscriber->email = $member->email_address;
@@ -494,12 +486,9 @@ function bei_list_webhook_member_add($member) {
 /**
  * Webhook update subscriber helper function
  */
-function bei_list_webhook_member_update($member) {
+function bei_list_webhook_member_update($member, $subscriber = NULL) {
   $email = $member->email_address;
   $list_id = $member->list_id;
-  $query = 'SELECT * FROM {bei_subscriber} s ' .
-  'WHERE s.email = :email AND s.list_id = :list_id';
-  $subscriber = db_query($query, array(':email' => $email, ':list_id' => $list_id))->fetchObject();
   if ($subscriber) {
     $subscriber->first_name = $member->merge_fields->FNAME;
     $subscriber->last_name = $member->merge_fields->LNAME;
@@ -516,19 +505,16 @@ function bei_list_webhook_member_update($member) {
 /**
  * Webhook update email helper function
  */
-function bei_list_webhook_update_email($email, $member) {
+function bei_list_webhook_update_email($old_email, $member, $subscriber = NULL) {
   $new_email = $member->email_address;
   $list_id = $member->list_id;
-  $query = 'SELECT * FROM {bei_subscriber} s ' .
-  'WHERE s.email = :email AND s.list_id = :list_id';
-  $subscriber = db_query($query, array(':email' => $email, ':list_id' => $list_id))->fetchObject();
   if ($subscriber) {
     $subscriber->email = $new_email;
     $subscriber->changed = REQUEST_TIME;
     entity_save('bei_subscriber', $subscriber);
     // Log event:
     watchdog('bei_list', 'The e-mail address @old_email was changed to @new_email for list @list.',
-      array('@old_email' => $email, '@new_email' => $new_email, '@list' => $list_id), WATCHDOG_INFO
+      array('@old_email' => $old_email, '@new_email' => $new_email, '@list' => $list_id), WATCHDOG_INFO
     );
   }
 }

@@ -58,8 +58,8 @@ function bei_subscriber_form($form, &$form_state, $subscriber) {
  */
 function bei_subscriber_email_validate($element, &$form_state, $form) {
   $subscriber = $form_state['bei_subscriber'];
-  $list = $form_state['bei_list'];
   if (isset($subscriber->is_new)) {
+    $list = $form_state['bei_list'];
     if (!valid_email_address($element['#value'])) {
       form_error($element, t($element['#title'] . ' is not a valid email address.'));
     }
@@ -77,15 +77,12 @@ function bei_subscriber_email_validate($element, &$form_state, $form) {
         form_error($element, $message);
       }
     }
-    /*
-    elseif (!_bei_subscriber_unique_email($element['#value'], $list->list_id)) {
-      form_error($element, t($element['#title'] . ' already exists on another list.'));
-    }*/
   }
 }
 function bei_subscriber_form_submit($form, &$form_state) {
   $subscriber = entity_ui_form_submit_build_entity($form, $form_state);
-  $skip_cron = FALSE;
+  // Add to mailchimp immediately instead of waiting for cron run.
+  $skip_cron = TRUE;
   $is_new = isset($subscriber->is_new) || !isset($subscriber->id);
   if ($is_new) {
     $list = $form_state['bei_list'];
@@ -93,8 +90,6 @@ function bei_subscriber_form_submit($form, &$form_state) {
     $subscriber->uid = $list->uid;
     $subscriber->list_id = $list->list_id;
     $subscriber->status = 'subscribed';
-    // Add to mailchimp immediately instead of waiting for cron run.
-    $skip_cron = TRUE;
   }
   // Save and go back.
   bei_subscriber_save($subscriber, $skip_cron, $is_new);
@@ -193,6 +188,9 @@ function bei_subscriber_batch_form_submit($form, &$form_state) {
   if (!empty($list_id)) {
     $node = node_load($form_state['values']['list']);
     $uid = $node->uid;
+    // Assign an api key if one exists.
+    $existing_key = bei_mailchimp_load_key_by_user($uid);
+    $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
     $break = FALSE;
     $total = 0;
     $subscribers = array();
@@ -219,7 +217,7 @@ function bei_subscriber_batch_form_submit($form, &$form_state) {
       $options['status'] = $form_state['values']['status'];
     }
     do {
-      $members = bei_subscriber_get_members($list_id, $options);
+      $members = bei_subscriber_get_members($list_id, $options, $mc_key);
       if ($members) {
         $total = $members->total_items;
         //$counter += count($members->members);
@@ -242,9 +240,9 @@ function bei_subscriber_batch_form_submit($form, &$form_state) {
  * Grab a subscriber batch.
  */
 
-function bei_subscriber_get_members($list_id, $options = array()) {
+function bei_subscriber_get_members($list_id, $options = array(), $mc_key = NULL) {
   $members = NULL;
-  $mc_lists = mailchimp_get_api_object('MailchimpLists');
+  $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
   try {
     if (!$mc_lists) {
       throw new MailchimpException('Cannot get members without MailChimp API. Check API key has been entered.');
