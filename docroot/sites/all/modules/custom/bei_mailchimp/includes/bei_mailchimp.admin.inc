@@ -14,7 +14,7 @@ function bei_mailchimp_user_key_form($form, &$form_state, $user = NULL) {
   );
   if ($existing_key) {
     $mc_key = module_exists('encrypt') ? decrypt($existing_key->data) : $existing_key;
-    $markup = t('An api key is currently associated with this account.');
+    $markup = t('An api key is currently associated for account %account.', array('%account' => $existing_key->account));
   }
   else {
     $markup = t('No api key exists for this account.');
