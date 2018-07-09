@@ -409,6 +409,7 @@ function bei_list_webhook() {
   }
   $data = $_POST['data'];
   $type = $_POST['type'];
+  $fired_at = $_POST['fired_at'];
   $mc_key = NULL;
   switch ($type) {
     case 'subscribe':
@@ -445,6 +446,18 @@ function bei_list_webhook() {
         mailchimp_cache_clear_member($data['list_id'], $data['old_email']);
         $member = bei_mailchimp_get_memberinfo($data['list_id'], $data['new_email'], TRUE, $mc_key);
         bei_list_webhook_update_email($old_email, $member, $subscriber);
+      }
+      break;
+    case 'campaign':
+      $query = "SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id AND c.list_id = :list_id";
+      $nid = db_query($query, array(':campaign_id' => $data['id'], ':list_id' => $data['list_id']))->fetchField();
+      if ($nid) {
+        $node = node_load($nid);
+        if ($node) {
+          $node->campaign_status = $data['status'];
+          $node->sent_date = strtotime($fired_at);
+          node_save($node);
+        }
       }
       break;
   }
