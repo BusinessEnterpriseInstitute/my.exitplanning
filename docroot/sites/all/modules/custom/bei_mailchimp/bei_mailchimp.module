@@ -10,20 +10,23 @@
  */
 function bei_mailchimp_cron() {
   // Gather all list IDs.
-  $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns');
+  $current_time = REQUEST_TIME;
   // Lets check for scheduled campaigns that have been sent.
-  $query = 'SELECT n.nid FROM {bei_campaign} n WHERE n.campaign_status = :campaign_status';
-  $results = db_query_range($query, 0, 25, array(':campaign_status' => 'schedule'))->fetchAll();
+  $query = 'SELECT n.nid FROM {bei_campaign} n WHERE n.campaign_status = :campaign_status AND n.schedule_date < :current_time';
+  $results = db_query_range($query, 0, 25, array(':campaign_status' => 'schedule', ':current_time' => $current_time))->fetchAll();
   // Load all of the campaigns that have not been sent and get their status.
   if (!empty($results)) {
-    try {
-      if (!$mc_campaigns) {
-        throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
-      }
-      foreach ($results as $result) {
-        $node = node_load($result->nid);
+    foreach ($results as $result) {
+      $node = node_load($result->nid);
+      if ($node) {
+        $existing_key = bei_mailchimp_load_key_by_user($node->uid);
+        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL; 
         $cid = $node->campaign_id;
-        if ($cid) {
+        $mc_campaigns = mailchimp_get_api_object('MailchimpCampaigns', $mc_key);
+        try {
+          if (!$mc_campaigns) {
+            throw new MailchimpException('Cannot get campaigns without MailChimp API. Check API key has been entered.');
+          }
           $campaign = $mc_campaigns->getCampaign($cid);
           if ($campaign && $campaign->status == 'sent') {
             $node->campaign_status = $campaign->status;
@@ -31,12 +34,12 @@ function bei_mailchimp_cron() {
             node_save($node);
           }
         }
+        catch (Exception $e) {
+          watchdog('bei_mailchimp', 'An error occurred requesting campaign information from MailChimp. "%message"', array(
+            '%message' => $e->getMessage(),
+          ), WATCHDOG_ERROR);
+        }
       }
-    }
-    catch (Exception $e) {
-      watchdog('bei_mailchimp', 'An error occurred requesting campaign information from MailChimp. "%message"', array(
-        '%message' => $e->getMessage(),
-      ), WATCHDOG_ERROR);
     }
   }
 }
