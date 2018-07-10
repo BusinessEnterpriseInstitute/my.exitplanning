@@ -82,7 +82,7 @@ function bei_list_node_insert($node) {
         'from_email' => $node->from_email,
         'from_name' => $node->from_name,
         'list_id' => isset($node->list_id) ? $node->list_id : NULL,
-        'mc_data' => serialize($node->mc_data),
+        'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
      ))
      ->execute();
      //bei_list_add_list($node);
@@ -102,7 +102,7 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => $node->list_id,
-          'mc_data' => serialize($node->mc_data)
+          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL
        ))
        ->condition('nid', $node->nid)
        ->execute();
@@ -115,7 +115,7 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => isset($node->list_id) ? $node->list_id : NULL,
-          'mc_data' => serialize($node->mc_data)
+          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL
        ))
        ->execute();
     }
