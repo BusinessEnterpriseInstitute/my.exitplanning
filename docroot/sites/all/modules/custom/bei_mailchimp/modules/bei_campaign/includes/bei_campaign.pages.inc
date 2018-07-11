@@ -200,7 +200,7 @@ function bei_campaign_pages_open($campaign, $op) {
         }
       }
       else {
-        $report = bei_campaign_get_campaign_report($cid, $sub, $limit, $offset);
+        $report = bei_campaign_get_campaign_report($cid, $sub, $limit, $offset, $mc_key);
         if ($report) {
           $total = $report->total_items;
           // If the total items are <= our limit, cache the results

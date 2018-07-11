@@ -448,6 +448,7 @@ function bei_list_webhook() {
         bei_list_webhook_update_email($old_email, $member, $subscriber);
       }
       break;
+    /*
     case 'campaign':
       $query = "SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id AND c.list_id = :list_id";
       $nid = db_query($query, array(':campaign_id' => $data['id'], ':list_id' => $data['list_id']))->fetchField();
@@ -460,6 +461,7 @@ function bei_list_webhook() {
         }
       }
       break;
+      */
   }
 
   // Log event:
