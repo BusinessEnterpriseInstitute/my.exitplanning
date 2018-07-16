@@ -166,16 +166,13 @@ function bei_subscriber_delete_multiple($sids) {
  * Act on entities when deleted.
  */
 function bei_subscriber_entity_delete($entity, $type) {
-   if ($type == 'bei_subscriber') {
-      $email = $entity->email;
-      $list_id = $entity->list_id;
-      // Delete the subscriber on mailchimp
-      if (!empty($entity->unique_email_id)) {
-        $existing_key = bei_mailchimp_load_key_by_user($entity->uid);
-        $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
-        bei_mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE, $mc_key);
-      }
-   }
+  if ($type == 'bei_subscriber') {
+    $email = $entity->email;
+    $list_id = $entity->list_id;
+    $existing_key = bei_mailchimp_load_key_by_user($entity->uid);
+    $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+    bei_mailchimp_unsubscribe_member($list_id, $email, TRUE, FALSE, FALSE, $mc_key);
+  }
 }
 
 
@@ -474,23 +471,23 @@ function bei_subscriber_feeds_presave($source, $entity, $item) {
         $entity->feeds_item->skip = TRUE;
       }
       else {
-         $entity->uid = $uid;
-         $entity->lid = $feed_nid;
-         $entity->list_id = $list_id;
-         $entity->status = 'subscribed';
-         if (!empty($item['last_name']) && !bei_mailchimp_is_utf8($item['last_name'])) {
-           $last_name = mb_convert_encoding($item['last_name'], 'UTF-8', 'UTF-8');
-           $message = t('Import: The last name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
-           _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
-           $entity->last_name = $last_name;
-         }
-         if (!empty($item['first_name']) && !bei_mailchimp_is_utf8($item['first_name'])) {
-           $first_name = mb_convert_encoding($item['first_name'], 'UTF-8', 'UTF-8');
-           $message = t('Import: The first name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
-           _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
-           $entity->first_name = $first_name;
-         }
-         bei_subscriber_subscribe($entity);
+        $entity->uid = $uid;
+        $entity->lid = $feed_nid;
+        $entity->list_id = $list_id;
+        $entity->status = 'subscribed';
+        if (!empty($item['last_name']) && !bei_mailchimp_is_utf8($item['last_name'])) {
+          $last_name = mb_convert_encoding($item['last_name'], 'UTF-8', 'UTF-8');
+          $message = t('Import: The last name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
+          _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
+          $entity->last_name = $last_name;
+        }
+        if (!empty($item['first_name']) && !bei_mailchimp_is_utf8($item['first_name'])) {
+          $first_name = mb_convert_encoding($item['first_name'], 'UTF-8', 'UTF-8');
+          $message = t('Import: The first name for email !mail has invalid characters so we replaced the characters with "?".', array('!mail' => $mail));
+          _bei_subscriber_log_error($feed_nid, $message, $mail, WATCHDOG_WARNING);
+          $entity->first_name = $first_name;
+        }
+        bei_subscriber_subscribe($entity);
       }
    }
 }
