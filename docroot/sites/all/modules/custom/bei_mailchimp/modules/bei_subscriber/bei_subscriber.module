@@ -5,6 +5,67 @@
  * Module for BEI Susbscriber.
  */
 
+ /**
+ * Implements hook_menu().
+ * Define menu items and page callbacks.
+ */
+function bei_subscriber_menu() {
+  $items = array();
+  $items['bei-subscriber/%bei_subscriber'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'View Subscriber',
+    'page callback' => 'bei_subscriber_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'bei_subscriber', 1),
+  );
+  $items['bei-subscriber/%bei_subscriber/view'] = array(
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'title' => 'View',
+    'weight' => -10,
+  );
+  $items['bei-subscriber/%bei_subscriber/edit'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_subscriber', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'bei_subscriber', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_subscriber.admin.inc',
+    'weight' => -9,
+  );
+  $items['node/%node/subscribers/add'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Add a subscriber',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('bei_subscriber', NULL, 'add'),
+    'access callback' => '_bei_add_subscriber_access',
+    'access arguments' => array(1),
+    'file' => 'includes/bei_subscriber.admin.inc',
+  );
+  $items['bei-subscriber/%bei_subscriber/delete'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_subscriber_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'bei_subscriber', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/bei_subscriber.admin.inc',
+    'weight' => -8,
+  );
+  $items['admin/config/bei_mailchimp/subscribers-sync'] = array(
+    'title' => 'Subscriber Batch Update',
+    'description' => 'Syncs subscribers from mailchimp to drupal.',
+    'access arguments' => array('administer bei mailchimp'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bei_subscriber_batch_form'),
+    'file' => 'includes/bei_subscriber.admin.inc',
+  );
+  return $items;
+}
+
 /**
  * Implements hook_permission().
  * Define user permissions.
@@ -202,16 +263,10 @@ function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FA
         // Subscribe the user via cron run if enabled.
         //mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
         $args = array(
-          'subscriber' => $subscriber,
           'list_id' => $list_id,
           'email' => $email,
-          'merge_vars' => $merge_vars,
-          'interests' => $interests,
-          'double_optin' => $double_optin,
-          'format' => $format,
-          'mc_key' => NULL,
         );
-        bei_subscriber_addto_queue('bei_subscriber_queue_mailchimp', $args);
+        bei_subscriber_addto_mailchimp_queue('bei_subscriber_queue_mailchimp', $args);
       }
     }
     elseif ($changed) {
@@ -231,67 +286,6 @@ function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FA
  */
 function bei_subscriber_mailchimp_unsubscribe_user($list_id, $email) {
    watchdog('bei_subscriber', 'Unsubscribed @email from @list_id', array('@email' => $email, '@list_id' => $list_id), WATCHDOG_INFO);
-}
-
-/**
- * Implements hook_menu().
- * Define menu items and page callbacks.
- */
-function bei_subscriber_menu() {
-  $items = array();
-  $items['bei-subscriber/%bei_subscriber'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => 'View Subscriber',
-    'page callback' => 'bei_subscriber_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
-    'page arguments' => array(1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('view', 'bei_subscriber', 1),
-  );
-  $items['bei-subscriber/%bei_subscriber/view'] = array(
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'title' => 'View',
-    'weight' => -10,
-  );
-  $items['bei-subscriber/%bei_subscriber/edit'] = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'Edit',
-    'page callback' => 'entity_ui_get_form',
-    'page arguments' => array('bei_subscriber', 1, 'edit'),
-    'access callback' => 'entity_access',
-    'access arguments' => array('update', 'bei_subscriber', 1),
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'includes/bei_subscriber.admin.inc',
-    'weight' => -9,
-  );
-  $items['node/%node/subscribers/add'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => 'Add a subscriber',
-    'page callback' => 'entity_ui_get_form',
-    'page arguments' => array('bei_subscriber', NULL, 'add'),
-    'access callback' => '_bei_add_subscriber_access',
-    'access arguments' => array(1),
-    'file' => 'includes/bei_subscriber.admin.inc',
-  );
-  $items['bei-subscriber/%bei_subscriber/delete'] = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bei_subscriber_delete_form', 1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('delete', 'bei_subscriber', 1),
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'file' => 'includes/bei_subscriber.admin.inc',
-    'weight' => -8,
-  );
-  $items['admin/config/bei_mailchimp/subscribers-sync'] = array(
-    'title' => 'Subscriber Batch Update',
-    'description' => 'Syncs subscribers from mailchimp to drupal.',
-    'access arguments' => array('administer bei mailchimp'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bei_subscriber_batch_form'),
-    'file' => 'includes/bei_subscriber.admin.inc',
-  );
-  return $items;
 }
 
 /**
@@ -738,13 +732,22 @@ function bei_subscriber_queue_import($item) {
   }
 }
 function bei_subscriber_queue_mailchimp($item) {
-  $parameters = $item['args'];
-  $subscriber = $parameters['subscriber'];
-  $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
-  if ($existing_key) {
-    $parameters['mc_key'] = $existing_key['key'];
+  $list_id = $item['args']['list_id'];
+  $email = $item['args']['email'];
+  $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.lid = :lid';
+  $subscriber = db_query($query, array(':email' => $email, ':lid' => $list_id))->fetchObject();
+  //$subscriber = $item['args']['subscriber'];
+  if ($subscriber) {
+    $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
+    $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+    $merge_vars = array(
+      'EMAIL' => $email,
+      'FNAME' => $subscriber->first_name,
+      'LNAME' => $subscriber->last_name,
+    );
+    $interests = array();
+    bei_mailchimp_subscribe_process($subscriber, $list_id, $email, $merge_vars, $interests, FALSE, 'html', $mc_key);
   }
-  bei_mailchimp_subscribe_process($parameters);
 }
 
 /**
