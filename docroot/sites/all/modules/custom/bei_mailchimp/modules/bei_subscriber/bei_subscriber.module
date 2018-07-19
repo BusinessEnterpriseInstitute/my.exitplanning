@@ -734,8 +734,8 @@ function bei_subscriber_queue_import($item) {
 function bei_subscriber_queue_mailchimp($item) {
   $list_id = $item['args']['list_id'];
   $email = $item['args']['email'];
-  $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.lid = :lid';
-  $subscriber = db_query($query, array(':email' => $email, ':lid' => $list_id))->fetchObject();
+  $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.list_id = :list_id';
+  $subscriber = db_query($query, array(':email' => $email, ':list_id' => $list_id))->fetchObject();
   //$subscriber = $item['args']['subscriber'];
   if ($subscriber) {
     $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
