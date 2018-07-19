@@ -200,7 +200,18 @@ function bei_subscriber_subscribe($subscriber, $changed = FALSE, $skip_cron = FA
       }
       else {
         // Subscribe the user via cron run if enabled.
-        mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+        //mailchimp_subscribe($list_id, $email, $merge_vars, $interests, FALSE, 'html');
+        $args = array(
+          'subscriber' => $subscriber,
+          'list_id' => $list_id,
+          'email' => $email,
+          'merge_vars' => $merge_vars,
+          'interests' => $interests,
+          'double_optin' => $double_optin,
+          'format' => $format,
+          'mc_key' => NULL,
+        );
+        bei_subscriber_addto_queue('bei_subscriber_queue_mailchimp', $args);
       }
     }
     elseif ($changed) {
@@ -569,36 +580,36 @@ function _bei_add_subscriber_access($node) {
  */
 function bei_subscriber_get_member_activity($list_id, $email, $mc_key = NULL) {
   /* @var \Mailchimp\MailchimpLists $mc_lists */
-    $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
+  $mc_lists = mailchimp_get_api_object('MailchimpLists', $mc_key);
 
-    try {
-      if (!$mc_lists) {
-        throw new MailchimpException('Cannot get member activity without Mailchimp API. Check API key has been entered.');
-      }
+  try {
+    if (!$mc_lists) {
+      throw new MailchimpException('Cannot get member activity without Mailchimp API. Check API key has been entered.');
+    }
 
-      $result = $mc_lists->getMemberActivity($list_id, $email);
-      if ($result->total_items > 0) {
-        return $result;
-      }
+    $result = $mc_lists->getMemberActivity($list_id, $email);
+    if ($result->total_items > 0) {
+      return $result;
     }
-    catch (Exception $e) {
-      drupal_set_message($e->getMessage(), 'error');
-      watchdog('bei_subscriber_activity', 'An error occurred while getting activity for email "%email": %message', array(
-        '%email' => $email,
-        '%message' => $e->getMessage(),
-        ), WATCHDOG_ERROR);
-      return NULL;
-    }
+  }
+  catch (Exception $e) {
+    drupal_set_message($e->getMessage(), 'error');
+    watchdog('bei_subscriber_activity', 'An error occurred while getting activity for email "%email": %message', array(
+      '%email' => $email,
+      '%message' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
+    return NULL;
+  }
 }
 /**
  * Helper function to get the campaign entity id for a corresponding campaign id.
  */
 function bei_subscriber_get_campaign_entity_id($campaign_id) {
-   $id = db_query('SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id', array(':campaign_id' => $campaign_id))->fetchField();
-   if (!empty($id)) {
-      return $id;
-   }
-   return;
+  $id = db_query('SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id', array(':campaign_id' => $campaign_id))->fetchField();
+  if (!empty($id)) {
+    return $id;
+  }
+  return;
 }
 
 /**
@@ -610,9 +621,10 @@ function bei_subscriber_view($entity, $view_mode='full', $langcode = NULL) {
   }
   $existing_key = bei_mailchimp_load_key_by_user($entity->uid);
   $mc_key = $existing_key != FALSE ? $existing_key['key'] : NULL;
+  /*
   $member_info = bei_mailchimp_get_memberinfo($entity->list_id, $entity->email, FALSE, $mc_key);
   if ($member_info) {
-  }
+  }*/
   drupal_set_title($entity->email);
   $entity_type = $entity->entityType();
   $entity_id = entity_id($entity_type, $entity);
@@ -677,38 +689,6 @@ function bei_subscriber_view($entity, $view_mode='full', $langcode = NULL) {
   );*/
   return $entity->content;
 }
-
-function bei_subscriber_queue_import($item) {
-   $lid = $item['args']['lid'];
-   $uid = $item['args']['uid'];
-   $member = $item['args']['member_info'];
-   $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.lid = :lid';
-   $subscriber = db_query($query, array(':email' => $member->email_address, ':lid' => $lid))->fetchObject();
-   if ($subscriber) {
-      $subscriber->status = $member->status;
-      $subscriber->changed = strtotime($member->last_changed);
-      $subscriber->first_name = $member->merge_fields->FNAME;
-      $subscriber->last_name = $member->merge_fields->LNAME;
-      $subscriber->unique_email_id = $member->unique_email_id;
-      entity_save('bei_subscriber', $subscriber);
-   }
-   else {
-      // Create a subscriber
-      $subscriber = new stdClass('bei_subscriber');
-      $subscriber->uid = $uid;
-      $subscriber->lid = $lid;
-      $subscriber->created = strtotime($member->timestamp_opt);
-      $subscriber->changed = strtotime($member->last_changed);
-      $subscriber->email = $member->email_address;
-      $subscriber->status = $member->status;
-      $subscriber->first_name = $member->merge_fields->FNAME;
-      $subscriber->last_name = $member->merge_fields->LNAME;
-      $subscriber->unique_email_id = $member->unique_email_id;
-      $subscriber->list_id = $member->list_id;
-      entity_save('bei_subscriber', $subscriber);
-   }
-}
-
 function bei_subscriber_addto_queue($function, $args) {
   $queue = DrupalQueue::get('subscriber_sync');
   $queue->createQueue();
@@ -718,15 +698,67 @@ function bei_subscriber_addto_queue($function, $args) {
     'args' => $args,
   ));
 }
+function bei_subscriber_addto_mailchimp_queue($function, $args) {
+  $queue = DrupalQueue::get('subscriber_mailchimp_process');
+  $queue->createQueue();
+  return $queue->createItem(array(
+    'function' => $function,
+    'args' => $args,
+  ));
+}
+
+function bei_subscriber_queue_import($item) {
+  $lid = $item['args']['lid'];
+  $uid = $item['args']['uid'];
+  $member = $item['args']['member_info'];
+  $query = 'SELECT * FROM {bei_subscriber} s WHERE s.email = :email AND s.lid = :lid';
+  $subscriber = db_query($query, array(':email' => $member->email_address, ':lid' => $lid))->fetchObject();
+  if ($subscriber) {
+    $subscriber->status = $member->status;
+    $subscriber->changed = strtotime($member->last_changed);
+    $subscriber->first_name = $member->merge_fields->FNAME;
+    $subscriber->last_name = $member->merge_fields->LNAME;
+    $subscriber->unique_email_id = $member->unique_email_id;
+    entity_save('bei_subscriber', $subscriber);
+  }
+  else {
+    // Create a subscriber
+    $subscriber = new stdClass('bei_subscriber');
+    $subscriber->uid = $uid;
+    $subscriber->lid = $lid;
+    $subscriber->created = strtotime($member->timestamp_opt);
+    $subscriber->changed = strtotime($member->last_changed);
+    $subscriber->email = $member->email_address;
+    $subscriber->status = $member->status;
+    $subscriber->first_name = $member->merge_fields->FNAME;
+    $subscriber->last_name = $member->merge_fields->LNAME;
+    $subscriber->unique_email_id = $member->unique_email_id;
+    $subscriber->list_id = $member->list_id;
+    entity_save('bei_subscriber', $subscriber);
+  }
+}
+function bei_subscriber_queue_mailchimp($item) {
+  $parameters = $item['args'];
+  $subscriber = $parameters['subscriber'];
+  $existing_key = bei_mailchimp_load_key_by_user($subscriber->uid);
+  if ($existing_key) {
+    $parameters['mc_key'] = $existing_key['key'];
+  }
+  bei_mailchimp_subscribe_process($parameters);
+}
 
 /**
  * Implements hook_cron_queue_info().
  * Declare queues holding items that need to be run periodically.
  */
 function bei_subscriber_cron_queue_info() {
-   $queues['subscriber_sync'] = array(
-      'worker callback' => 'bei_subscriber_queue_import',
-      'time' => 15,
-   );
-   return $queues;
+  $queues['subscriber_sync'] = array(
+    'worker callback' => 'bei_subscriber_queue_import',
+    'time' => 15,
+  );
+  $queues['subscriber_mailchimp_process'] = array(
+    'worker callback' => 'bei_subscriber_queue_mailchimp',
+    'time' => 15,
+  );
+  return $queues;
 }

@@ -255,7 +255,6 @@ function bei_mailchimp_is_subscribed($list_id, $email, $reset = FALSE, $api_key 
   if (isset($memberinfo->status) && $memberinfo->status == 'subscribed') {
     $subscribed = TRUE;
   }
-
   return $subscribed;
 }
 
@@ -279,22 +278,18 @@ function bei_mailchimp_is_subscribed($list_id, $email, $reset = FALSE, $api_key 
  */
 function bei_mailchimp_get_memberinfo($list_id, $email, $reset = FALSE, $api_key = NULL) {
   $cache = $reset ? NULL : cache_get($list_id . '-' . $email, 'cache_mailchimp');
-
   // Return cached lists:
   if ($cache) {
     return $cache->data;
   }
-
   // Query lists from the MCAPI and store in cache:
   $memberinfo = new stdClass();
-
   /* @var \Mailchimp\MailchimpLists $mc_lists */
   $mc_lists = mailchimp_get_api_object('MailchimpLists', $api_key);
   try {
     if (!$mc_lists) {
       throw new MailchimpException('Cannot get member info without MailChimp API. Check API key has been entered.');
     }
-
     try {
       $memberinfo = $mc_lists->getMemberInfo($list_id, $email);
       cache_set($list_id . '-' . $email, $memberinfo, 'cache_mailchimp', CACHE_TEMPORARY);

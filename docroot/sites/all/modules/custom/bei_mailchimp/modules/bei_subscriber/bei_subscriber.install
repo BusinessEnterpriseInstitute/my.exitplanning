@@ -14,8 +14,10 @@ function bei_subscriber_uninstall() {
   // remove variables
   db_query('DELETE FROM {variable} WHERE name like :type', array(':type' => 'bei_subscriber_%'));
   // delete queues
-  $queue = DrupalQueue::get('subscriber_sync');
-  $queue->deleteQueue();
+  $queue_sync = DrupalQueue::get('subscriber_sync');
+  $queue_sync->deleteQueue();
+  $queue_mailchimp = DrupalQueue::get('subscriber_mailchimp_process');
+  $queue_mailchimp->deleteQueue();
 }
 
 /**
