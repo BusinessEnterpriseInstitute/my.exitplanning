@@ -212,37 +212,44 @@ function bei_list_node_validate($node, &$form, $form_state) {
  * Perform alterations before a form is rendered.
  */
 function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $form_id) {
-   $node = $form_state['node'];
-   $is_new = isset($node->is_new) || !isset($node->nid);
-   $form['from_email'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From e-mail'),
-      '#default_value' => isset($node->from_email) ? $node->from_email : '',
-      '#required' => TRUE,
-      '#element_validate' => array('bei_list_email_validate'),
-      '#disabled' => $is_new ? FALSE : TRUE,
-   );
-   $form['subject'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Subject (optional)'),
-      '#description' => t('Keep it relevant and non-spammy. If you leave this
-                          blank, a default subject will be applied for each
-                          newsletter campaign sent.'),
-      '#default_value' => isset($node->subject) ? $node->subject : '',
-      '#size' => 60,
-      '#maxlength' => 128,
-   );
-   $form['from_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From name'),
-      '#description' => t('This is who your emails will come from. Use something
-                          they\'ll instantly recognize, like your company name.'),
-      '#default_value' => isset($node->from_name) ? $node->from_name : '',
-      '#required' => TRUE,
-      '#maxlength' => 200,
-   );
-   // Add our own custom callback to the submit handler.
-   //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
+  $node = $form_state['node'];
+  $is_new = isset($node->is_new) || !isset($node->nid);
+  $is_administrator = user_access('administer bei mailchimp');
+  $form['import'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow import subscribers'),
+    '#default_value' => $node->import,
+    '#access' => $is_administrator,
+  );
+  $form['from_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From e-mail'),
+    '#default_value' => isset($node->from_email) ? $node->from_email : '',
+    '#required' => TRUE,
+    '#element_validate' => array('bei_list_email_validate'),
+    '#disabled' => $is_new ? FALSE : TRUE,
+  );
+  $form['subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject (optional)'),
+    '#description' => t('Keep it relevant and non-spammy. If you leave this
+                        blank, a default subject will be applied for each
+                        newsletter campaign sent.'),
+    '#default_value' => isset($node->subject) ? $node->subject : '',
+    '#size' => 60,
+    '#maxlength' => 128,
+  );
+  $form['from_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From name'),
+    '#description' => t('This is who your emails will come from. Use something
+                        they\'ll instantly recognize, like your company name.'),
+    '#default_value' => isset($node->from_name) ? $node->from_name : '',
+    '#required' => TRUE,
+    '#maxlength' => 200,
+  );
+  // Add our own custom callback to the submit handler.
+  //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
 }
 
 /**
@@ -262,6 +269,10 @@ function bei_list_email_validate($element, &$form_state, $form) {
 function bei_list_field_extra_fields() {
   $extra['node']['subscriber_list'] = array(
     'form' => array(
+      'import' => array(
+        'label' => t('List: Import settings'),
+        'weight' => -5,
+      ),
       'from_email' => array(
         'label' => t('List: From Email'),
         'description' => t('Default from email'),
