@@ -72,6 +72,12 @@ function bei_list_schema() {
         'description' => 'The stored mailchimp list settings and webhooks.',
         'serialize' => TRUE,
       ),
+      'import' => array(
+        'description' => 'Boolean indicating whether the importing subscribers is allowed for this list.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -109,4 +115,16 @@ function bei_list_update_7002() {
       'list_id' => array('list_id'),
     ),
   ));
+}
+/**
+ * Create import field to specify whether subscribers are allowed to be imported to list.
+ */
+function bei_list_update_7003() {
+  $field = array(
+    'description' => 'Boolean indicating whether the importing subscribers is allowed for this list.',
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('bei_list', 'import', $field);
 }

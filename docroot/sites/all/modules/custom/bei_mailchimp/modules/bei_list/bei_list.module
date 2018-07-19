@@ -65,6 +65,7 @@ function bei_list_node_load($nodes, $types) {
          $nodes[$record->nid]->from_name = $record->from_name;
          $nodes[$record->nid]->list_id = $record->list_id;
          $nodes[$record->nid]->mc_data = unserialize($record->mc_data);
+         $nodes[$record->nid]->import = $record->import;
       }
    }
 }
@@ -83,6 +84,7 @@ function bei_list_node_insert($node) {
         'from_name' => $node->from_name,
         'list_id' => isset($node->list_id) ? $node->list_id : NULL,
         'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
+        'import' => $node->import,
      ))
      ->execute();
      //bei_list_add_list($node);
@@ -102,7 +104,8 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => $node->list_id,
-          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL
+          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
+          'import' => $node->import,
        ))
        ->condition('nid', $node->nid)
        ->execute();
@@ -115,7 +118,8 @@ function bei_list_node_update($node) {
           'from_email' => $node->from_email,
           'from_name' => $node->from_name,
           'list_id' => isset($node->list_id) ? $node->list_id : NULL,
-          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL
+          'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
+          'import' => $node->import,
        ))
        ->execute();
     }
