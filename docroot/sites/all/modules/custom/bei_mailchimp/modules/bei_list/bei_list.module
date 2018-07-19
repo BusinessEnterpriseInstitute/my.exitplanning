@@ -214,6 +214,14 @@ function bei_list_node_validate($node, &$form, $form_state) {
 function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $form_id) {
    $node = $form_state['node'];
    $is_new = isset($node->is_new) || !isset($node->nid);
+   $is_administrator = user_access('administer bei mailchimp');
+   if ($is_administrator) {
+    $form['import'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow import subscribers'),
+      '#default_value' => $node->import, 
+    );
+   }
    $form['from_email'] = array(
       '#type' => 'textfield',
       '#title' => t('From e-mail'),
