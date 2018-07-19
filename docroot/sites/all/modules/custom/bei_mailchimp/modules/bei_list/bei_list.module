@@ -84,7 +84,7 @@ function bei_list_node_insert($node) {
         'from_name' => $node->from_name,
         'list_id' => isset($node->list_id) ? $node->list_id : NULL,
         'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
-        'import' => $node->import,
+        'import' => isset($node->import) ? $node->import : 0,
      ))
      ->execute();
      //bei_list_add_list($node);
