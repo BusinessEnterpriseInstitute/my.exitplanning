@@ -691,3 +691,11 @@ function bei_list_views_api() {
     'path' => drupal_get_path('module', 'bei_list') . '/views',
   );
 }
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function bei_list_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && !empty($plugin)) {
+    return "plugins/$plugin";
+  }
+}
