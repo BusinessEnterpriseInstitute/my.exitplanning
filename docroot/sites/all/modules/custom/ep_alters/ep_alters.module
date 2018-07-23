@@ -1028,7 +1028,7 @@ function ep_alters_block_view($delta = '') {
                   $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscribers') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'subscriber-actions', 'class' => array('button success split'))));
                   $subscriber_actions = array();
                   $subscriber_actions[] = l(t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('attributes' => array('title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
-                  if (user_access('import bei_subscribers feeds') && $node->import) {
+                  if (user_access('import bei_subscribers feeds') && (isset($node->import) && $node->import != FALSE)) {
                     $subscriber_actions[] = l(t('Import a List'), 'node/' . $nid . '/edit/import', array('query' => array('destination' => 'node/' . $nid . '/import')));
                     $subscriber_actions[] = l(t('Import Status'), 'node/' . $nid . '/import', array('attributes' => array('title' => 'View the status of recent imports')));
                   }
