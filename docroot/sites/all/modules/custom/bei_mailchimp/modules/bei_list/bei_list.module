@@ -575,39 +575,47 @@ function bei_list_webhook_url() {
  * Implements hook_entity_property_info_alter()
  */
 function bei_list_entity_property_info_alter(&$info) {
-   $properties = &$info['node']['bundles']['subscriber_list']['properties'];
-   $properties['from_email'] = array(
-    'label' => t('List: From e-mail'),
-    'type' => 'text',
-    'description' => t('The default reply to e-mail.'),
-    'getter callback' => 'bei_list_get_properties',
-    'setter callback' => 'entity_property_verbatim_set',
-    'entity views field' => TRUE,
-   );
-   $properties['from_name'] = array(
-    'label' => t('List: From name'),
-    'type' => 'text',
-    'description' => t('The default name of the person/company sending the campaign.'),
-    'getter callback' => 'bei_list_get_properties',
-    'setter callback' => 'entity_property_verbatim_set',
-    'entity views field' => TRUE,
-   );
-   $properties['subject'] = array(
-    'label' => t('List: Subject'),
-    'type' => 'text',
-    'description' => t('The default subject field for the campaign.'),
-    'getter callback' => 'bei_list_get_properties',
-    'setter callback' => 'entity_property_verbatim_set',
-    'entity views field' => TRUE,
-   );
-   $properties['list_id'] = array(
-    'label' => t('List: List id'),
-    'type' => 'text',
-    'description' => t('The list id on Mailchimp.'),
-    'getter callback' => 'bei_list_get_properties',
-    'setter callback' => 'entity_property_verbatim_set',
-    'entity views field' => TRUE,
-   );
+  $properties = &$info['node']['bundles']['subscriber_list']['properties'];
+  $properties['from_email'] = array(
+   'label' => t('List: From e-mail'),
+   'type' => 'text',
+   'description' => t('The default reply to e-mail.'),
+   'getter callback' => 'bei_list_get_properties',
+   'setter callback' => 'entity_property_verbatim_set',
+   'entity views field' => TRUE,
+  );
+  $properties['from_name'] = array(
+   'label' => t('List: From name'),
+   'type' => 'text',
+   'description' => t('The default name of the person/company sending the campaign.'),
+   'getter callback' => 'bei_list_get_properties',
+   'setter callback' => 'entity_property_verbatim_set',
+   'entity views field' => TRUE,
+  );
+  $properties['subject'] = array(
+   'label' => t('List: Subject'),
+   'type' => 'text',
+   'description' => t('The default subject field for the campaign.'),
+   'getter callback' => 'bei_list_get_properties',
+   'setter callback' => 'entity_property_verbatim_set',
+   'entity views field' => TRUE,
+  );
+  $properties['list_id'] = array(
+   'label' => t('List: List id'),
+   'type' => 'text',
+   'description' => t('The list id on Mailchimp.'),
+   'getter callback' => 'bei_list_get_properties',
+   'setter callback' => 'entity_property_verbatim_set',
+   'entity views field' => TRUE,
+  );
+  $properties['import'] = array(
+   'label' => t('List: Import settings'),
+   'type' => 'boolean',
+   'description' => t('The status of whether or not importing is allowed for this list.'),
+   'getter callback' => 'bei_list_get_properties',
+   'setter callback' => 'entity_property_verbatim_set',
+   'entity views field' => TRUE,
+  );
 }
 
 /**
@@ -617,17 +625,25 @@ function bei_list_entity_property_info_alter(&$info) {
 function bei_list_get_properties($node, array $options, $name, $entity_type) {
    switch ($name) {
       case 'from_email':
-         $value = isset($node->from_email) ? $node->from_email : NULL;
-         return $value;
+        $value = isset($node->from_email) ? $node->from_email : NULL;
+        return $value;
+        break;
       case 'from_name':
-         $value = isset($node->from_name) ? $node->from_name : NULL;
-         return $value;
+        $value = isset($node->from_name) ? $node->from_name : NULL;
+        return $value;
+        break;
       case 'subject':
-         $value = isset($node->subject) ? $node->subject : NULL;
-         return $value;
+        $value = isset($node->subject) ? $node->subject : NULL;
+        return $value;
+        break;
       case 'list_id':
-         $value = isset($node->list_id) ? $node->list_id : NULL;
-         return $value;
+        $value = isset($node->list_id) ? $node->list_id : NULL;
+        return $value;
+        break;
+      case 'import':
+        $value = $node->import;
+        return $value;
+        break;
    }
 }
 
