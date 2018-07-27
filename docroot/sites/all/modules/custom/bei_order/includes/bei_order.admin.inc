@@ -26,6 +26,7 @@ function bei_order_form($form, &$form_state, $order) {
     'name' => '',
     'company' => '',
     'address' => array(
+      'country' => 'US',
       'street' => '',
       'additional' => '',
       'city' => '',
@@ -48,12 +49,24 @@ function bei_order_form($form, &$form_state, $order) {
       'value' => '',
       'format' => NULL,
     ),
+    'shipping_address' => array(
+      'country' => 'US',
+      'street' => '',
+      'additional' => '',
+      'city' => '',
+      'state' => NULL,
+      'postal_code' => '',
+    ),
+  );
+  $country_options = array(
+    'CA' => t('Canada'),
+    'US' => t('United States')
   );
   if ($user_entity && !$existing_order) {
     // Set default values for new orders.
     $display_name = field_get_items('user', $user_entity, 'field_display_name');
     $company = field_get_items('user', $user_entity, 'field_company_name');
-    $address = field_get_items('user', $user_entity, 'field_address');
+    $address_field = field_get_items('user', $user_entity, 'field_address');
     $phone = field_get_items('user', $user_entity, 'field_phone');
     $website = field_get_items('user', $user_entity, 'field_website');
     $background_color = field_get_items('user', $user_entity, 'field_mc_color_email_bg');
@@ -67,12 +80,16 @@ function bei_order_form($form, &$form_state, $order) {
     if ($company) {
       $defaults['company'] = $company[0]['safe_value'];
     }
-    if ($address) {
-      $defaults['address']['street'] = check_plain($address[0]['street']);
-      $defaults['address']['additional'] = check_plain($address[0]['additional']);
-      $defaults['address']['city'] = check_plain($address[0]['city']);
-      $defaults['address']['state'] = $address[0]['province'];
-      $defaults['address']['postal_code'] = $address[0]['postal_code'];
+    if ($address_field) {
+      $default_country = strtoupper($address_field[0]['country']);
+      if (array_key_exists($default_country, $country_options)) {
+        $defaults['address']['country'] = check_plain($default_country);
+        $defaults['address']['state'] = $address_field[0]['province'];
+      }
+      $defaults['address']['street'] = check_plain($address_field[0]['street']);
+      $defaults['address']['additional'] = check_plain($address_field[0]['additional']);
+      $defaults['address']['city'] = check_plain($address_field[0]['city']);
+      $defaults['address']['postal_code'] = $address_field[0]['postal_code'];
     }
     if ($phone) {
       $defaults['phone'] = $phone[0]['safe_value'];
@@ -101,6 +118,24 @@ function bei_order_form($form, &$form_state, $order) {
   $form_state['bei_order'] = $order;
   $form_state['bei_order_data'] = $existing_order ? $order->data : array();
   $data = $form_state['bei_order_data'];
+  $values = !empty($form_state['values']) ? $form_state['values'] : NULL;
+  // If the form has been submitted through ajax request, account for those values.
+  if ($values) {
+    if (isset($values['address'])) {
+      $defaults['address'] = $values['address'];
+    }
+    if (isset($values['shipping_address'])) {
+      $defaults['shipping_address'] = $values['shipping_address'];
+    }
+  }
+  else {
+    if (isset($data['address'])) {
+      $defaults['address'] = array_replace($defaults['address'], $data['address']);
+    }
+    if (isset($data['shipping_address'])) {
+      $defaults['shipping_address'] = array_replace($defaults['shipping_address'], $data['shipping_address']);
+    }
+  }
   $default_adjustments = isset($data['materials']['adjustments']) ? $data['materials']['adjustments'] : array();
   $adjustments = !empty($form_state['values']['materials']['adjustments']) ? $form_state['values']['materials']['adjustments'] : $default_adjustments;
   
@@ -166,36 +201,49 @@ function bei_order_form($form, &$form_state, $order) {
   $form['wrapper']['contact_info']['address'] = array(
     '#type' => 'container',
     '#tree' => TRUE,
+    '#prefix' => '<div id="contact-address-wrapper">',
+    '#suffix' => '</div>',
+  );
+  $form['wrapper']['contact_info']['address']['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#options' => $country_options,
+    '#required' => TRUE,
+    '#default_value' => $defaults['address']['country'],
+    '#ajax' => array(
+      'wrapper' => 'contact-address-wrapper',
+      'callback' => 'bei_order_address1_refresh',
+    ),
   );
   $form['wrapper']['contact_info']['address']['street'] = array(
     '#type' => 'textfield',
     '#title' => t('Address 1'),
-    '#default_value' => isset($data['address']['street']) ? $data['address']['street'] : $defaults['address']['street'],
+    '#default_value' => $defaults['address']['street'],
     '#required' => TRUE,
   );
   $form['wrapper']['contact_info']['address']['additional'] = array(
     '#type' => 'textfield',
     '#title' => t('Address 2'),
-    '#default_value' => isset($data['address']['additional']) ? $data['address']['additional'] : $defaults['address']['additional'],
+    '#default_value' => $defaults['address']['additional'],
   );
   $form['wrapper']['contact_info']['address']['city'] = array(
     '#type' => 'textfield',
     '#title' => t('City'),
-    '#default_value' => isset($data['address']['city']) ? $data['address']['city'] : $defaults['address']['city'],
+    '#default_value' => $defaults['address']['city'],
     '#required' => TRUE,
   );
   $form['wrapper']['contact_info']['address']['state'] = array(
     '#type' => 'select',
-    '#options' => bei_order_province_list_us(),
-    '#empty_option' => t(' - Select state - '),
-    '#title' => t('State'),
-    '#default_value' => isset($data['address']['state']) ? $data['address']['state'] : $defaults['address']['state'],
+    '#options' => bei_order_get_administrative_areas($defaults['address']['country']),
+    '#empty_option' => t(' - Select - '),
+    '#title' => $defaults['address']['country'] == 'US' ? t('State') : t('Province'),
+    '#default_value' => $defaults['address']['state'],
     '#required' => TRUE,
   );
   $form['wrapper']['contact_info']['address']['postal_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Postal code'),
-    '#default_value' => isset($data['address']['postal_code']) ? $data['address']['postal_code'] : $defaults['address']['postal_code'],
+    '#default_value' => $defaults['address']['postal_code'],
     '#required' => TRUE,
   );
   $form['wrapper']['contact_info']['phone'] = array(
@@ -435,7 +483,6 @@ function bei_order_form($form, &$form_state, $order) {
       $form['wrapper']['materials']['total_cost']['#value'] = number_format(array_sum($pricing), 2);
     }
   }
-  // Shipping Address
   $form['wrapper']['shipping_address'] = array(
     '#type' => 'fieldset',
     '#title' => t('Shipping Address'),
@@ -447,58 +494,53 @@ function bei_order_form($form, &$form_state, $order) {
     '#type' => 'checkbox',
     '#title' => t('Copy from contact information'),
     '#ajax' => array(
-      'callback' => 'bei_order_ajax_copy_address',
+      'callback' => 'bei_order_address2_refresh',
       'wrapper' => 'shipping-address-wrapper',
       'progress' => array('type' => 'none'),
+    ),
+  );
+  $form['wrapper']['shipping_address']['country'] = array(
+    '#type' => 'select',
+    '#title' => t('Country'),
+    '#options' => $country_options,
+    '#required' => TRUE,
+    '#default_value' => $defaults['shipping_address']['country'],
+    '#ajax' => array(
+      'wrapper' => 'shipping-address-wrapper',
+      'callback' => 'bei_order_address2_refresh',
     ),
   );
   $form['wrapper']['shipping_address']['street'] = array(
     '#type' => 'textfield',
     '#title' => t('Address 1'),
-    '#default_value' => isset($data['shipping_address']['street']) ? $data['shipping_address']['street'] : '',
+    '#default_value' => $defaults['shipping_address']['street'],
     '#required' => TRUE,
   );
   $form['wrapper']['shipping_address']['additional'] = array(
     '#type' => 'textfield',
     '#title' => t('Address 2'),
-    '#default_value' => isset($data['shipping_address']['additional']) ? $data['shipping_address']['additional'] : '',
+    '#default_value' => $defaults['shipping_address']['additional'],
   );
   $form['wrapper']['shipping_address']['city'] = array(
     '#type' => 'textfield',
     '#title' => t('City'),
-    '#default_value' => isset($data['shipping_address']['city']) ? $data['shipping_address']['city'] : '',
+    '#default_value' => $defaults['shipping_address']['city'],
     '#required' => TRUE,
   );
   $form['wrapper']['shipping_address']['state'] = array(
     '#type' => 'select',
-    '#options' => bei_order_province_list_us(),
-    '#empty_option' => t(' - Select state - '),
-    '#title' => t('State'),
-    '#default_value' => isset($data['shipping_address']['state']) ? $data['shipping_address']['state'] : '',
+    '#options' => bei_order_get_administrative_areas($defaults['shipping_address']['country']),
+    '#empty_option' => t(' - Select - '),
+    '#title' => $defaults['shipping_address']['country'] == 'US' ? t('State') : t('Province'),
+    '#default_value' => $defaults['shipping_address']['state'],
     '#required' => TRUE,
   );
   $form['wrapper']['shipping_address']['postal_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Postal code'),
-    '#default_value' => isset($data['shipping_address']['postal_code']) ? $data['shipping_address']['postal_code'] : '',
+    '#default_value' => $defaults['shipping_address']['postal_code'],
     '#required' => TRUE,
   );
-  if (!empty($form_state['values']['address'])) {
-    $triggered = $form_state['values']['shipping_address']['copy'] == 1 ? TRUE : FALSE;
-    if ($triggered) {
-      unset($form_state['input']['shipping_address']['street']);
-      unset($form_state['input']['shipping_address']['additional']);
-      unset($form_state['input']['shipping_address']['city']);
-      unset($form_state['input']['shipping_address']['state']);
-      unset($form_state['input']['shipping_address']['postal_code']);
-      $form['wrapper']['shipping_address']['street']['#default_value'] = $form_state['values']['address']['street'];
-      $form['wrapper']['shipping_address']['additional']['#default_value'] = $form_state['values']['address']['additional'];
-      $form['wrapper']['shipping_address']['city']['#default_value'] = $form_state['values']['address']['city'];
-      $form['wrapper']['shipping_address']['state']['#default_value'] = $form_state['values']['address']['state'];
-      $form['wrapper']['shipping_address']['postal_code']['#default_value'] = $form_state['values']['address']['postal_code'];
-      unset($form_state['input']['shipping_address']['copy']);
-    }
-  }
   field_attach_form('bei_order', $order, $form, $form_state);
   // Set a default value on field api fields for new orders.
   if (!$existing_order) {
@@ -546,6 +588,120 @@ function bei_order_form($form, &$form_state, $order) {
     );
   }
   return $form;
+}
+/**
+ * Returns the predefined administrative areas.
+ *
+ * @param $country_code
+ *   The country code for which administrative areas should be returned.
+ *
+ * @return
+ *   An array of predefined administrative areas for the given country code, or
+ *   NULL if not found.
+ */
+function bei_order_get_administrative_areas($country_code) {
+  // Maintain a static cache to avoid passing the administrative areas through
+  // t() more than once per request.
+  $administrative_areas = &drupal_static(__FUNCTION__, array());
+  if (empty($administrative_areas)) {
+    // Get the default administrative areas.
+    $administrative_areas = _bei_order_get_administrative_areas_defaults();
+  }
+
+  return isset($administrative_areas[$country_code]) ? $administrative_areas[$country_code] : NULL;
+}
+
+/**
+ * Provides the default administrative areas.
+ */
+function _bei_order_get_administrative_areas_defaults() {
+  // To avoid needless pollution of the strings list we only pass to t()
+  // those administrative areas that are in English (or a latin transcription),
+  // and belong to a country that either has multiple official languages (CA)
+  // or uses a non-latin script (AE, CN, JP, KR, UA, RU, etc).
+  // No translation is expected in other cases.
+  $administrative_areas = array();
+  $administrative_areas['CA'] = array(
+    'AB' => t('Alberta'),
+    'BC' => t('British Columbia'),
+    'MB' => t('Manitoba'),
+    'NB' => t('New Brunswick'),
+    'NL' => t('Newfoundland and Labrador'),
+    'NT' => t('Northwest Territories'),
+    'NS' => t('Nova Scotia'),
+    'NU' => t('Nunavut'),
+    'ON' => t('Ontario'),
+    'PE' => t('Prince Edward Island'),
+    'QC' => t('Quebec'),
+    'SK' => t('Saskatchewan'),
+    'YT' => t('Yukon Territory'),
+  );
+  $administrative_areas['US'] = array(
+    'AL' => t('Alabama'),
+    'AK' => t('Alaska'),
+    'AZ' => t('Arizona'),
+    'AR' => t('Arkansas'),
+    'CA' => t('California'),
+    'CO' => t('Colorado'),
+    'CT' => t('Connecticut'),
+    'DE' => t('Delaware'),
+    'DC' => t('District of Columbia'),
+    'FL' => t('Florida'),
+    'GA' => t('Georgia'),
+    'HI' => t('Hawaii'),
+    'ID' => t('Idaho'),
+    'IL' => t('Illinois'),
+    'IN' => t('Indiana'),
+    'IA' => t('Iowa'),
+    'KS' => t('Kansas'),
+    'KY' => t('Kentucky'),
+    'LA' => t('Louisiana'),
+    'ME' => t('Maine'),
+    'MD' => t('Maryland'),
+    'MA' => t('Massachusetts'),
+    'MI' => t('Michigan'),
+    'MN' => t('Minnesota'),
+    'MS' => t('Mississippi'),
+    'MO' => t('Missouri'),
+    'MT' => t('Montana'),
+    'NE' => t('Nebraska'),
+    'NV' => t('Nevada'),
+    'NH' => t('New Hampshire'),
+    'NJ' => t('New Jersey'),
+    'NM' => t('New Mexico'),
+    'NY' => t('New York'),
+    'NC' => t('North Carolina'),
+    'ND' => t('North Dakota'),
+    'OH' => t('Ohio'),
+    'OK' => t('Oklahoma'),
+    'OR' => t('Oregon'),
+    'PA' => t('Pennsylvania'),
+    'RI' => t('Rhode Island'),
+    'SC' => t('South Carolina'),
+    'SD' => t('South Dakota'),
+    'TN' => t('Tennessee'),
+    'TX' => t('Texas'),
+    'UT' => t('Utah'),
+    'VT' => t('Vermont'),
+    'VA' => t('Virginia'),
+    'WA' => t('Washington'),
+    'WV' => t('West Virginia'),
+    'WI' => t('Wisconsin'),
+    'WY' => t('Wyoming'),
+    ' ' => t('--'),
+    'AA' => t('Armed Forces (Americas)'),
+    'AE' => t('Armed Forces (Europe, Canada, Middle East, Africa)'),
+    'AP' => t('Armed Forces (Pacific)'),
+    'AS' => t('American Samoa'),
+    'FM' => t('Federated States of Micronesia'),
+    'GU' => t('Guam'),
+    'MH' => t('Marshall Islands'),
+    'MP' => t('Northern Mariana Islands'),
+    'PW' => t('Palau'),
+    'PR' => t('Puerto Rico'),
+    'VI' => t('Virgin Islands'),
+  );
+  return $administrative_areas;
 }
 
 function bei_order_form_submit($form, &$form_state) {
@@ -623,6 +779,36 @@ function bei_order_remove_adjustment_submit($form, &$form_state) {
  *
  * Errors should be signaled with form_error().
  */
+function bei_order_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $trigger = $form_state['triggering_element'];
+  if (empty($values['materials']['total_cost'])) {
+    form_set_error('materials', 'You must select a quantity for at least 1 material.');
+  }
+  if ($trigger['#name'] == 'address[country]') {
+    $form_state['values']['address']['country'] = $trigger['#value'];
+    $form_state['values']['address']['state'] = '';
+    unset($form_state['input']['address']['state']);
+    $form_state['rebuild'] = TRUE;
+  }
+  elseif ($trigger['#name'] == 'shipping_address[country]') {
+    $form_state['values']['shipping_address']['country'] = $trigger['#value'];
+    $form_state['values']['shipping_address']['state'] = '';
+    $form_state['rebuild'] = TRUE;
+  }
+  elseif ($trigger['#name'] == 'shipping_address[copy]') {
+    unset($form_state['input']['shipping_address']);
+    $form_state['values']['shipping_address'] = array(
+      'country' => $values['address']['country'],
+      'street' => $values['address']['street'],
+      'additional' => $values['address']['additional'],
+      'city' => $values['address']['city'],
+      'state' => $values['address']['state'],
+      'postal_code' => $values['address']['postal_code'],
+    );
+    $form_state['rebuild'] = TRUE;
+  }
+}
 function bei_order_numeric_validate($element, &$form_state, $form) {
   if (!empty($element['#value'])) {
     if (!is_numeric($element['#value']) || $element['#value'] < 0) {
@@ -641,16 +827,16 @@ function bei_order_color_validate($element, &$form_state, $form) {
     form_error($element, t($element['#title'] . ' must be a hexadecimal value (eg: #84CCAF).'));
   }
 }
-function bei_order_form_validate($form, &$form_state) {
-  $values = $form_state['values'];
-  if (empty($values['materials']['total_cost'])) {
-    form_set_error('materials', 'You must select a quantity for at least 1 material.');
-  }
+/*
+ * Ajax callback to return provinces for address1.
+ */
+function bei_order_address1_refresh($form, $form_state) {
+  return $form['wrapper']['contact_info']['address'];
 }
 /*
- * Ajax callback to copy address.
+ * Ajax callback to return provinces for address2.
  */
-function bei_order_ajax_copy_address($form, $form_state) {
+function bei_order_address2_refresh($form, $form_state) {
   return $form['wrapper']['shipping_address'];
 }
 
