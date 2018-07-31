@@ -243,9 +243,11 @@ function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
           $node->from_name = check_plain($list->campaign_defaults->from_name);
           $node->from_email = check_plain($list->campaign_defaults->from_email);
           $node->subject = check_plain($list->campaign_defaults->subject);
+          $message_prefix = 'Created';
         }
         else {
           $node = node_load($nid);
+          $message_prefix = 'Updated';
         }
         $add_webhook = TRUE;
         if ($webhooks_result->total_items > 0) {
@@ -268,6 +270,8 @@ function bei_mailchimp_user_lists_import_submit($form, &$form_state) {
         );
         // Save the node!
         node_save($node);
+        $success_message = t('%prefix list %title', array('%prefix' => $message_prefix, '%title' => $node->title));
+        drupal_set_message($success_message);
       }
     }
   }
