@@ -295,6 +295,22 @@ function shopify_update_7105() {
 }
 
 /**
+ * change the shopify collection ID from INT to BIGINT.
+ */
+function shopify_update_7106() {
+  db_change_field('field_data_shopify_collection_id', 'shopify_collection_id_value', 'shopify_collection_id_value', array(
+    'type' => 'int',
+    'description' => 'Collection ID',
+    'size' => 'big',
+  ));
+  db_change_field('field_revision_shopify_collection_id', 'shopify_collection_id_value', 'shopify_collection_id_value', array(
+    'type' => 'int',
+    'description' => 'Collection ID',
+    'size' => 'big',
+  ));
+}
+
+/**
  * Implements hook_install().
  */
 function shopify_install() {

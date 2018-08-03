@@ -1,0 +1,27 @@
+diff --git a/shopify/shopify.install b/shopify/shopify.install
+index 81adf6dd4a..2576ae1ab5 100644
+--- a/shopify/shopify.install
++++ b/shopify/shopify.install
+@@ -294,6 +294,22 @@ function shopify_update_7105() {
+   db_change_field('shopify_products', 'barcode', 'barcode', $barcode_column);
+ }
+
++/**
++ * change the shopify collection ID from INT to BIGINT.
++ */
++function shopify_update_7106() {
++  db_change_field('field_data_shopify_collection_id', 'shopify_collection_id_value', 'shopify_collection_id_value', array(
++    'type' => 'int',
++    'description' => 'Collection ID',
++    'size' => 'big',
++  ));
++  db_change_field('field_revision_shopify_collection_id', 'shopify_collection_id_value', 'shopify_collection_id_value', array(
++    'type' => 'int',
++    'description' => 'Collection ID',
++    'size' => 'big',
++  ));
++}
++
+ /**
+  * Implements hook_install().
+  */
