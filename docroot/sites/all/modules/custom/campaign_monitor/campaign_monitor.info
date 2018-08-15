@@ -1,0 +1,8 @@
+name = Campaign Monitor
+description = Campaign Monitor email service integration.
+package = Campaign Monitor
+core = 7.x
+
+files[] = includes/campaign_monitor.entity.inc
+files[] = includes/campaign_monitor.admin.inc
+stylesheets[all][] = css/campaign_monitor.admin.css
