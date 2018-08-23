@@ -1,0 +1,205 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function campaign_monitor_lists_menu() {
+  $items = array();
+  $items['cm-client/%cm_client/lists'] = array(
+    'title' => 'Lists',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_client_lists_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_client', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'weight' => -8,
+  );
+  $items['cm-client/%cm_client/lists/add'] = array(
+    'title' => 'Create list',
+    'description' => 'Add list to Campaign Monitor.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_list_form', NULL, 1),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+  // Lists
+  $items['cm-list/%cm_list'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'List',
+    'title callback' => 'entity_label',
+    'title arguments' => array('cm_list', 1),
+    'page callback' => 'campaign_monitor_lists_cm_list_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_list', 1),
+    'file' => 'includes/campaign_monitor_lists.pages.inc',
+  );
+  $items['cm-list/%cm_list/view'] = array(
+    'title' => 'Summary',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['cm-list/%cm_list/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('cm_list', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'weight' => -9,
+  );
+  $items['cm-list/%cm_list/webhooks'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Webhooks',
+    'page callback' => 'campaign_monitor_lists_webhooks', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor_lists.pages.inc',
+  );
+  $items['cm-list/%cm_list/raw'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'List',
+    'title callback' => 'entity_label',
+    'title arguments' => array('cm_list', 1),
+    'page callback' => 'campaign_monitor_lists_cm_list_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1, 'raw'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_list', 1),
+    'file' => 'includes/campaign_monitor_lists.pages.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function campaign_monitor_lists_permission() {
+  return array(
+    'create list' => array(
+      'title' => t('Create list'),
+      'description' => t('Access to create Campaign Monitor lists'),
+    ),
+    'view own lists' => array(
+      'title' => t('View own lists'),
+      'description' => t('Access to view own Campaign Monitor lists'),
+    ),
+    'edit own lists' => array(
+      'title' => t('Edit own lists'),
+      'description' => t('Access to edit own Campaign Monitor lists'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ * Inform the base system and the Field API about one or more entity types.
+ */
+function campaign_monitor_lists_entity_info() {
+  $info = array();
+  $info['cm_list'] = array(
+    'label' => t('List'),
+    'plural label' => t('Lists'),
+    'base table' => 'campaign_monitor_lists',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'title',
+    ),
+    'static cache' => TRUE,
+    'entity class' => 'ListEntity',
+    'controller class' => 'EntityAPIController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor_lists',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => TRUE,
+      ),
+      'raw' => array(
+        'label' => t('Raw content'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'cm_list' => array(
+        'label' => t('Campaign Monitor List'),
+        'admin' => array(
+          'path' => 'admin/config/campaign-monitor/lists',
+        ),
+      ),
+    ),
+    'access callback' => 'campaign_monitor_lists_access',
+    'admin ui' => array(
+      'path' => 'admin/config/campaign-monitor/lists',
+      'controller class' => 'EntityDefaultUIController',
+      'access arguments' => array('administer campaign monitor'),
+      'file' => 'includes/campaign_monitor_lists.admin.inc',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'load hook' => 'cm_list_load',
+  );
+  return $info;
+}
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function campaign_monitor_lists_entity_property_info_alter(&$info) {
+  $properties = &$info['cm_list']['properties'];
+  $properties['uid'] = array(
+    'label' => t('User'),
+    'type' => 'user',
+    'description' => t('The user associated with the list'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'uid',
+  );
+  $properties['cid'] = array(
+    'label' => t('Client'),
+    'type' => 'cm_client',
+    'description' => t('The client entity associated with the list'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'cid',
+  );
+}
+
+/*******************************************************************************
+ ********************************* List API's ****************************
+ ******************************************************************************/
+/**
+ * Access callback for List entities.
+ */
+function campaign_monitor_lists_access($op, $list = NULL, $account = NULL, $entity_type = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer campaign monitor', $account) ||
+      user_access('create list', $account);
+    case 'view':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('view own lists', $account) && ($list->uid === $account->uid));
+    case 'update':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('edit own lists', $account) && ($list->uid === $account->uid));
+    case 'delete':
+      return user_access('administer campaign monitor', $account);
+  }
+}
+/**
+ *  Load a list.
+ */
+function cm_list_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $list = cm_list_load_multiple($ids, $reset);
+  return $list ? reset ($list) : FALSE;
+}
+function cm_list_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_list', $ids, $conditions, $reset);
+}

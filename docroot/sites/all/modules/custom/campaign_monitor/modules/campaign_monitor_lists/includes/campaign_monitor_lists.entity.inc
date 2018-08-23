@@ -1,10 +1,11 @@
 <?php
+
 /**
- * Client entity class extending the Entity class
+ * List entity class extending the Entity class
  */
-class ClientEntity extends Entity {
+class ListEntity extends Entity {
   protected function defaultUri() {
-    return array('path' => 'cm-client/' . $this->identifier());
+    return array('path' => 'cm-list/' . $this->identifier());
   }
   /*
   protected function defaultLabel() {
@@ -15,11 +16,10 @@ class ClientEntity extends Entity {
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
 
     // Our additions to the $build render array
-    $build = parent::buildContent($entity, $view_mode, $langcode, $content);
-    return $build;
+    return parent::buildContent($entity, $view_mode, $langcode, $content);
   }*/
 }
-class ClientEntityController extends EntityAPIController {
+class ListEntityController extends EntityAPIController {
 
 }
 

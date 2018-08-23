@@ -1,0 +1,175 @@
+<?php
+
+/**
+ * @file
+ * Installation instructions for the campaign_monitor_lists module.
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+/*
+function campaign_monitor_lists_install() {
+  // Create all the fields we are adding to our entity type.
+  // http://api.drupal.org/api/function/field_create_field/7
+  foreach (_campaign_monitor_lists_field_data() as $field) {
+    field_create_field($field);
+  }
+  // Create all the instances for our fields.
+  // http://api.drupal.org/api/function/field_create_instance/7
+  foreach (_campaign_monitor_lists_instance_data() as $instance) {
+    field_create_instance($instance);
+  }
+}
+// Create the array of information about the fields we want to create.
+function _campaign_monitor_lists_field_data() {
+  $fields = array();
+  // Paste $fields data from devel ouput here.
+  return $fields;
+}
+
+// Create the array of information about the instances we want to create.
+function _campaign_monitor_lists_instance_data() {
+  $instances = array();
+  // Paste $instances data from devel output here.
+  $instances['field_mc_banner'] = array(
+    'label' => 'Banner Image (optional)',
+    'widget' => array(
+      'weight' => '32',
+      'type' => 'media_generic',
+      'module' => 'media',
+      'active' => 1,
+      'settings' => array(
+        'browser_plugins' => array(
+          'upload' => 'upload',
+          'media_default--media_browser_1' => 'media_default--media_browser_1',
+          'media_default--media_browser_my_files' => 0,
+          'media_internet' => 0,
+        ),
+        'allowed_types' => array(
+          'image' => 'image',
+          'document' => 0,
+          'video' => 0,
+          'audio' => 0,
+        ),
+        'allowed_schemes' => array(
+          'public' => 'public',
+          'private' => 0,
+        ),
+      ),
+    ),
+    'settings' => array(
+      'file_directory' => '',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => 0,
+      'title_field' => 0,
+      'default_image' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'above',
+        'type' => 'image',
+        'settings' => array(
+          'image_style' => '',
+          'image_link' => '',
+        ),
+        'module' => 'image',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'type' => 'hidden',
+        'label' => 'above',
+        'settings' => array(),
+        'weight' => 0,
+      ),
+    ),
+    'required' => 0,
+    'description' => '',
+    'fences_wrapper' => 'div',
+    'field_name' => 'field_mc_banner',
+    'entity_type' => 'cm_list',
+    'bundle' => 'cm_list',
+    'deleted' => '0',
+  );
+  return $instances;
+}
+*/
+
+/**
+ * Implements hook_uninstall().
+ */
+/*
+function campaign_monitor_lists_uninstall() {
+  module_load_include('module', 'campaign_monitor');
+  $params = array(
+    'entity_type' => 'cm_list',
+    'bundle' => 'cm_list',
+  );
+  //$instances = field_read_instances($params, array('include_inactive' => TRUE), array('include_deleted' => TRUE));
+  
+  field_attach_delete_bundle('cm_list', 'cm_list');
+  // Delete all existing deleted field data and their instances.
+  //campaign_monitor_field_purge_batch(100);
+  //campaign_monitor_delete_instances('cm_list');
+}*/
+
+/**
+ * Implements hook_schema().
+ */
+function campaign_monitor_lists_schema() {
+  $schema['campaign_monitor_lists'] = array(
+    'description' => 'Table for Campaign Monitor Lists',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'cid' => array(
+        'type' => 'int',
+        'description' => 'The Client Entity ID the list references.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'list_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The ListID on Campaign Monitor.',
+        'default' => '',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The list title on Campaign Monitor.',
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The user id associated with the list.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'list_data' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the value.',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'cid' => array('cid'),
+      'list_id' => array('list_id'),
+    ),
+  );
+  return $schema;
+}

@@ -1,0 +1,5 @@
+<?php
+
+/**
+ * Module purpose is to uninstall field api fields before entity is removed.
+ */
