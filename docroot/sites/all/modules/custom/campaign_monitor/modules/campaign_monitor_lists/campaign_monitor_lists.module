@@ -51,6 +51,16 @@ function campaign_monitor_lists_menu() {
     'file' => 'includes/campaign_monitor_lists.admin.inc',
     'weight' => -9,
   );
+  $items['cm-list/%cm_list/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_list_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'weight' => -8,
+  );
   $items['cm-list/%cm_list/webhooks'] = array(
     'type' => MENU_LOCAL_TASK,
     'title' => 'Webhooks',
@@ -202,4 +212,17 @@ function cm_list_load($id = NULL, $reset = FALSE){
 }
 function cm_list_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
   return entity_load('cm_list', $ids, $conditions, $reset);
+}
+/**
+ * Delete single list.
+ */
+function cm_list_delete($list) {
+   // Delete the list entity
+   entity_delete('cm_list', entity_id('cm_list', $list));
+}
+/**
+ * Delete multiple lists.
+ */
+function cm_list_delete_multiple($ids) {
+  entity_delete_multiple('cm_list', $ids);
 }

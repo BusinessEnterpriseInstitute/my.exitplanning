@@ -83,7 +83,7 @@ function cm_client_lists_form_submit(&$form, &$form_state) {
           else {
             $cm_list = cm_list_load($list_exists);
             if ($cm_list) {
-              dpm($cm_list);
+              //dpm($cm_list);
             }
           }
           // Update webhooks.
@@ -307,4 +307,47 @@ function cm_list_form_submit(&$form, &$form_state) {
       }
     }
   }
+}
+
+/**
+ * Delete confirmation form.
+ */
+function cm_list_delete_form($form, &$form_state, $cm_list) {
+  $form_state['cm_list'] = $cm_list;
+  // Always provide entity id in the same form key as in the entity edit form.
+  //$form['list_id'] = array('#type' => 'value', '#value' => entity_id('cm_list', $cm_list));
+  $list_uri = entity_uri('cm_list', $cm_list);
+  return confirm_form($form,
+    t('Are you sure you want to delete list %title?', array('%title' => entity_label('cm_list', $cm_list))),
+    $list_uri['path'],
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+/**
+ * Delete form submit handler.
+ */
+function cm_list_delete_form_submit($form, &$form_state) {
+  $list = $form_state['cm_list'];
+  $cid = $list->cid;
+  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
+  $redirect = 'cm-client/' . $cid . '/lists';
+  if ($wrap) {
+    $result = $wrap->delete();
+    // Delete our entity if list could be deleted on CM or the list id couldn't be found.
+    if ($result->was_successful() || $result->response->Code == 101) {
+      cm_list_delete($list);
+      drupal_set_message(t('List %title deleted.', array('%title' => entity_label('cm_list', $list))));
+    }
+    else {
+      $error = $result->response->Message;
+      if ($result->response->Code == 252) {
+      }
+      $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
+      drupal_set_message($message, 'error');
+    }
+  }
+
+  $form_state['redirect'] = $redirect;
 }
