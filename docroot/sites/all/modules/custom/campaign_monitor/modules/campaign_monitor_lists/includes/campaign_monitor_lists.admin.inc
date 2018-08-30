@@ -180,6 +180,32 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
     $form['#attached']['js'] = array(
       drupal_get_path('module', 'field_group') . '/horizontal-tabs/horizontal-tabs.js',
     );
+    $form['tabs']['defaults'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Campaign Defaults'),
+      '#weight' => -11,
+      '#tree' => TRUE,
+    );
+    $form['tabs']['defaults']['from_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('From name'),
+      '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
+      '#default_value' => isset($data['defaults']['from_name']) ? $data['defaults']['from_name'] : '',
+    );
+    $form['tabs']['defaults']['from_email'] = array(
+      '#type' => 'textfield',
+      '#title' => t('From e-mail'),
+      '#description' => t('This is the e-mail address your campaigns will come from.'),
+      '#element_validate' => array('campaign_monitor_email_validate'),
+      '#default_value' => isset($data['defaults']['from_email']) ? $data['defaults']['from_email'] : '',
+    );
+    $form['tabs']['defaults']['reply_to'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Replies should be sent to'),
+      '#description' => t('Enter a valid email address that replies will be sent to.'),
+      '#element_validate' => array('campaign_monitor_email_validate'),
+      '#default_value' => isset($data['defaults']['reply_to']) ? $data['defaults']['reply_to'] : '',
+    );
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
       '#title' => t('Design'),
@@ -195,17 +221,22 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
         'colorfield_picker' => isset($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4',
       ),
       '#element_validate' => array('campaign_monitor_color_validate'),
+      '#required' => TRUE,
+      '#weight' => 1,
     );
     if (isset($form['field_mc_banner'])) {
       $form['tabs']['design']['field_mc_banner'] = $form['field_mc_banner'];
+      $form['tabs']['design']['field_mc_banner']['#weight'] = 2;
       unset($form['field_mc_banner']);
     }
     if (isset($form['field_mc_logo'])) {
       $form['tabs']['design']['field_mc_logo'] = $form['field_mc_logo'];
+      $form['tabs']['design']['field_mc_logo']['#weight'] = 3;
       unset($form['field_mc_logo']);
     }
     if (isset($form['field_mc_profile_pic'])) {
       $form['tabs']['design']['field_mc_profile_pic'] = $form['field_mc_profile_pic'];
+      $form['tabs']['design']['field_mc_profile_pic']['#weight'] = 4;
       unset($form['field_mc_profile_pic']);
     }
   }
@@ -289,6 +320,7 @@ function cm_list_form_submit(&$form, &$form_state) {
           $list->list_data['design'] = array(
             'background_color' => $values['background_color'],
           );
+          $list->list_data['defaults'] = $values['defaults'];
           field_attach_submit('cm_list', $list, $form, $form_state);
           $list->save();
           $message = t('Updated list %title on Campaign Monitor', array('%title' => $values['title']));

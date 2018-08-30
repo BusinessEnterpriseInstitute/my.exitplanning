@@ -444,6 +444,14 @@ function campaign_monitor_color_validate($element, &$form_state, $form) {
   }
 }
 /**
+ * E-mail validation.
+ */
+function campaign_monitor_email_validate($element, &$form_state, $form) {
+  if (!empty($element['#value']) && !valid_email_address($element['#value'])) {
+    form_error($element, t($element['#title'] . ' is not a valid email address.'));
+  }
+}
+/**
  * Autocomplete to pull newsletter node titles.
  */
 function campaign_monitor_newsletter_autocomplete($string) {

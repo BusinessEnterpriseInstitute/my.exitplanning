@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Installation instructions for the campaign_monitor_subscribers module.
+ */
+
+
+/**
+ * Implements hook_install().
+ */
+/*
+function campaign_monitor_subscribers_install() {
+}
+*/
+
+/**
+ * Implements hook_uninstall().
+ */
+/*
+function campaign_monitor_subscribers_uninstall() {
+}*/
+
+/**
+ * Implements hook_schema().
+ */
+function campaign_monitor_subscribers_schema() {
+  $schema['campaign_monitor_subscribers'] = array(
+    'description' => 'Table for Campaign Monitor subscribers',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'lid' => array(
+        'type' => 'int',
+        'description' => 'The List Entity ID the subscriber references.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'list_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The ListID on Campaign Monitor.',
+        'default' => '',
+      ),
+      'email' => array(
+        'description' => 'Email Address',
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The subscriber name on Campaign Monitor.',
+        'default' => '',
+      ),
+      'status' => array(
+        'description' => 'Subscriber\'s current status.',
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => FALSE,
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The user id associated with the subscriber.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'subscriber_data' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing subscriber profile.',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the subscriber was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'lid' => array('lid'),
+      'email' => array('email'),
+      'list_id' => array('list_id'),
+    ),
+  );
+  return $schema;
+}

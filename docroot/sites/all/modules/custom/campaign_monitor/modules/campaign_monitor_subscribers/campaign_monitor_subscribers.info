@@ -1,0 +1,9 @@
+name = Campaign Monitor Subscribers
+description = Creates cm_subscriber entity type for Campaign Monitor.
+package = Campaign Monitor
+core = 7.x
+
+dependencies[] = campaign_monitor
+dependencies[] = campaign_monitor_lists
+files[] = includes/campaign_monitor_subscribers.entity.inc
+files[] = includes/campaign_monitor_subscribers.admin.inc
