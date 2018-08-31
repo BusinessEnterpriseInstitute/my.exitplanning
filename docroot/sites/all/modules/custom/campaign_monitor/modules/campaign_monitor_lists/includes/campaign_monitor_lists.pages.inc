@@ -94,7 +94,7 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     }
   }
   if ($view_mode == 'raw') {
-    
+    /*
     $mc_banner = field_get_items($entity_type, $entity, 'field_mc_banner');
     $rows = array();
     // Top spacer row.
@@ -224,11 +224,12 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
         'border' => '0',
         'id' => 'background-table',
       ),
-    ));
+    ));*/
+    $output = campaign_monitor_build_template($entity, $entity_type);
     
     $entity->content['footer'] = array(
       '#type' => 'markup',
-      '#markup' => $table_wrapper,
+      '#markup' => $output,
     );
   }
   return $entity->content;

@@ -345,11 +345,22 @@ function campaign_monitor_get_countries() {
  * Implements hook_preprocess_html().
  */
 function campaign_monitor_preprocess_html(&$variables) {
-  $list = menu_get_object('cm_list');
-  if (isset($list)) {
+  //$list = menu_get_object('cm_list');
+  if ($entity = menu_get_object('cm_list')) {
     if (arg(2) == 'raw') {
-      $data = $list->list_data;
+      $data = $entity->list_data;
       $bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
+      $extra_styles = '
+      html, body, #background-table { background-color: ' . $bg_color . ';}
+      ';
+      $variables['extra_styles'] = $extra_styles;
+      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
+    }
+  }
+  elseif ($entity = menu_get_object('cm_campaign')) {
+    if (arg(2) == 'raw') {
+      //$bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
+      $bg_color = '#E4E4E4';
       $extra_styles = '
       html, body, #background-table { background-color: ' . $bg_color . ';}
       ';
@@ -363,14 +374,23 @@ function campaign_monitor_preprocess_html(&$variables) {
  * Implements hook_preprocess_page().
  */
 function campaign_monitor_preprocess_page(&$variables) {
-  $list = menu_get_object('cm_list');
-  if (isset($list)) {
+  //$list = menu_get_object('cm_list');
+  if ($entity = menu_get_object('cm_list')) {
     if (arg(2) == 'raw') {
       $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
     }
     if (arg(2) == 'edit') {
       $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
-      $variables['form_preview'] = '<iframe src="/cm-list/' . $list->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+      $variables['form_preview'] = '<iframe src="/cm-list/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+    }
+  }
+  elseif ($entity = menu_get_object('cm_campaign')) {
+    if (arg(2) == 'raw') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
+    }
+    if (arg(2) == 'edit') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
+      $variables['form_preview'] = '<iframe src="/cm-campaign/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
     }
   }
 }
@@ -467,4 +487,140 @@ function campaign_monitor_newsletter_autocomplete($string) {
   }
   // Return the result to the form in JSON.
   drupal_json_output($matches);
+}
+/**
+ * Custom callback to build raw template output.
+ */
+function campaign_monitor_build_template($entity, $entity_type) {
+  $mc_banner = field_get_items($entity_type, $entity, 'field_mc_banner');
+  $rows = array();
+  // Top spacer row.
+  $rows[] = array(
+    'data' => array(
+      array('data' => '', 'class' => 'w600', 'height' => '20'),
+    ),
+    'no_striping' => TRUE,
+  );
+  // Top bar row.
+  $top_bar_table = '
+  <table id="top-bar" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+    <tr>
+      <td class="w15" width="15"></td>
+      <td class="w340" width="340" valign="middle" align="left">
+          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
+            <tr><td class="w340" width="340" height="8"></td></tr>
+          </tbody></table>
+          <div class="header-content"><webversion>Web version</webversion><span class="hide">&nbsp;&nbsp;|&nbsp; <preferences>Update preferences</preferences>&nbsp;&nbsp;|&nbsp; <unsubscribe>Unsubscribe</unsubscribe></span></div>
+          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
+            <tr><td class="w340" width="340" height="8"></td></tr>
+          </tbody></table>
+      </td>
+      <td class="w230" width="230" valign="middle" align="right">
+        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr><td class="w230" width="230" height="8"></td></tr>
+        </tbody></table>
+        <table cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr>
+            <td valign="middle"><fblike><img src="https://img.createsend1.com/img/templatebuilder/like-glyph.png" alt="Facebook icon" =""="" width="8" height="14" border="0"></fblike></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><fblike>Like</fblike></div></td>
+            <td class="w10" width="10"></td>
+            <td valign="middle"><tweet><img src="https://img.createsend1.com/img/templatebuilder/tweet-glyph.png" alt="Twitter icon" =""="" width="17" height="13" border="0"></tweet></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><tweet>Tweet</tweet></div></td>
+            <td class="w10" width="10"></td>
+            <td valign="middle"><forwardtoafriend><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon" =""="" width="19" height="14" border="0"></forwardtoafriend></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><forwardtoafriend>Forward</forwardtoafriend></div></td>
+          </tr>
+        </tbody></table>
+        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr><td class="w230" width="230" height="8"></td></tr>
+        </tbody></table>
+      </td>
+      <td class="w15" width="15"></td>
+    </tr>
+  </tbody></table>
+  ';
+  $rows[] = array(
+    'data' => array(
+      array('data' => $top_bar_table, 'class' => 'w600', 'width' => '600'),
+    ),
+    'no_striping' => TRUE,
+  );
+  // Banner.
+  if ($mc_banner) {
+    $mc_banner_file = file_load($mc_banner[0]['fid']);
+    $mc_banner_output = array(
+      '#theme' => 'image_style',
+      '#style_name' => 'mc_banner',
+      '#path' => $mc_banner_file->uri,
+      '#width' => $mc_banner_file->width,
+      '#height' => $mc_banner_file->height,
+    );
+    $banner_table = '
+    <table id="banner" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr>
+            <td align="center" valign="top">
+            ' . render($mc_banner_output) . '
+            </td>
+        </tr>
+    </tbody></table>';
+    $rows[] = array(
+      'data' => array(
+        array('data' => $banner_table, 'class' => 'w600', 'width' => '600'),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
+  // Article
+  $article = variable_get('campaign_monitor_article_preview', FALSE);
+  if ($article) {
+    $article_output = check_markup($article['value'], $article['format']);
+    $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
+    if ($disclaimer) {
+      $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+    }
+    $article_table = '
+    <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr>
+            <td valign="top">
+            <div class="article-content">' . $article_output . '</div>
+            </td>
+        </tr>
+    </tbody></table>';
+    $rows[] = array(
+      'data' => array(
+        array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
+  $table = theme('table', array(
+    'header' => array(),
+    'rows' => $rows,
+    'attributes' => array(
+      'class' => 'w600',
+      'width' => '600',
+      'cellpadding' => '0',
+      'cellspacing' => '0',
+      'border' => '0',
+    ),
+  ));
+  $output = theme('table', array(
+    'header' => array(),
+    'rows' => array(
+      array(
+        array('data' => $table, 'align' => 'center'),
+      ),
+    ),
+    'attributes' => array(
+      'width' => '100%',
+      'cellpadding' => '0',
+      'cellspacing' => '0',
+      'border' => '0',
+      'id' => 'background-table',
+    ),
+  ));
+  return $output;
 }

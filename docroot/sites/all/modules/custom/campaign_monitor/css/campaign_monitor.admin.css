@@ -1,8 +1,10 @@
-body.page-cm-list-edit {
+body.page-cm-list-edit,
+body.page-cm-campaign-edit {
     overflow: hidden;
     padding-top: 60px;
 }
-body.page-cm-list-edit > div.page {
+body.page-cm-list-edit > div.page,
+body.page-cm-campaign-edit > div.page {
     position: relative;
     height: 100%;
 }

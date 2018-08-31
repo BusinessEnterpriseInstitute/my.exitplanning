@@ -1,0 +1,8 @@
+name = Campaign Monitor Campaigns
+description = Creates cm_campaign entity type for Campaign Monitor.
+package = Campaign Monitor
+core = 7.x
+
+dependencies[] = campaign_monitor
+dependencies[] = campaign_monitor_lists
+files[] = includes/campaign_monitor_campaigns.entity.inc
