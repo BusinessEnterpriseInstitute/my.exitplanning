@@ -72,8 +72,8 @@ function campaign_monitor_campaigns_menu() {
     'title arguments' => array('cm_campaign', 1),
     'page callback' => 'campaign_monitor_campaigns_cm_campaign_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
     'page arguments' => array(1, 'raw'),
-    'access callback' => 'entity_access',
-    'access arguments' => array('view', 'cm_campaign', 1),
+    'access callback' => TRUE,
+    //'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
   );
 
@@ -116,7 +116,7 @@ function campaign_monitor_campaigns_entity_info() {
     ),
     'static cache' => TRUE,
     'entity class' => 'CampaignEntity',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'CampaignEntityController',
     'views controller class' => 'EntityDefaultViewsController',
     'module' => 'campaign_monitor_campaigns',
     'view modes' => array(

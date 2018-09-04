@@ -23,6 +23,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   if (!$is_new) {
     $title = entity_label('cm_campaign', $campaign);
     $tabs_type = 'horizontal_tabs';
+    $list = cm_list_load($campaign->lid);
   }
   else {
     $title = 'Create campaign';
@@ -121,29 +122,58 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $form['actions'] = array(
     '#type' => 'actions',
   );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => $is_new ? t('Next') : t('Save'),
-    '#attributes' => array(
-      'class' => array('button small'),
-    ),
-  );
+  if ($is_new || !$is_new && $campaign->status == 'Design') {
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $is_new ? t('Next') : t('Save'),
+      '#attributes' => array(
+        'class' => array('button small'),
+      ),
+    );
+  }
   return $form;
 }
 function cm_campaign_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   $list = $form_state['cm_list'];
   $campaign = $form_state['cm_campaign'];
+  $client = cm_client_load($list->cid);
   if (isset($campaign->is_new)) {
+    $campaign->lid = $list->id;
+    $campaign->list_id = $list->list_id;
     $campaign->name = $values['name'];
     $campaign->subject = $values['subject'];
     $campaign->from_name = $values['from_name'];
     $campaign->from_email = $values['from_email'];
     $campaign->reply_to = $values['reply_to'];
     $campaign->status = 'Design';
-    $campaign->created = REQUEST_TIME;
     $campaign->save();
     $form_state['redirect'] = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
+  }
+  elseif ($campaign->status == 'Design') {
+    $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
+    $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
+    if ($wrap) {
+      $result = $wrap->create($client->client_id, array(
+        'Subject' => $values['subject'],
+        'Name' => $values['name'],
+        'FromName' => $values['from_name'],
+        'FromEmail' => $values['from_email'],
+        'ReplyTo' => $values['reply_to'],
+        'HtmlUrl' => $html_url,
+        'ListIDs' => array($campaign->list_id),
+      ));
+      if ($result->was_successful()) {
+        $campaign->campaign_id = $result->response;
+        $campaign->status = 'Draft';
+        $campaign->save();
+      }
+      else {
+        $error = $result->response->Message;
+        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+        drupal_set_message($message, 'error');
+      }
+    }
   }
   /*
   if (isset($list->is_new)) {

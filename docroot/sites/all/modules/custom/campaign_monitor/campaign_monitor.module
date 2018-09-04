@@ -448,7 +448,7 @@ function campaign_monitor_webhook_url() {
  * Implements hook_form_alter().
  */
 function campaign_monitor_form_alter(&$form, &$form_state, $form_id) {
-  if ($form_id == 'cm_list_form') {
+  if ($form_id == 'cm_list_form' || $form_id == 'cm_campaign_form') {
     if (isset($form['redirect'])) {
       unset($form['redirect']);
     }
