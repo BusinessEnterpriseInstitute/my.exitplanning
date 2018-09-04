@@ -84,12 +84,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     $form['#attached']['js'] = array(
       drupal_get_path('module', 'field_group') . '/horizontal-tabs/horizontal-tabs.js',
     );
-    $form['tabs']['defaults'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Campaign Defaults'),
-      '#weight' => -11,
-      '#tree' => TRUE,
-    );
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
       '#title' => t('Design'),
