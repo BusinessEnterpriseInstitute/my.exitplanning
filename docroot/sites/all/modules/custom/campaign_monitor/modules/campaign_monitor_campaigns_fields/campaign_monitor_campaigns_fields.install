@@ -8,27 +8,27 @@
  /**
  * Implements hook_install().
  */
-function campaign_monitor_fields_install() {
+function campaign_monitor_campaigns_fields_install() {
   // Create all the fields we are adding to our entity type.
   // http://api.drupal.org/api/function/field_create_field/7
-  foreach (_campaign_monitor_fields_field_data() as $field) {
+  foreach (_campaign_monitor_campaigns_fields_field_data() as $field) {
     field_create_field($field);
   }
   // Create all the instances for our fields.
   // http://api.drupal.org/api/function/field_create_instance/7
-  foreach (_campaign_monitor_fields_instance_data() as $instance) {
+  foreach (_campaign_monitor_campaigns_fields_instance_data() as $instance) {
     field_create_instance($instance);
   }
 }
 // Create the array of information about the fields we want to create.
-function _campaign_monitor_fields_field_data() {
+function _campaign_monitor_campaigns_fields_field_data() {
   $fields = array();
   // Paste $fields data from devel ouput here.
   return $fields;
 }
 
 // Create the array of information about the instances we want to create.
-function _campaign_monitor_fields_instance_data() {
+function _campaign_monitor_campaigns_fields_instance_data() {
   $instances = array();
   // Paste $instances data from devel output here.
   $instances['field_mc_banner'] = array(
@@ -87,8 +87,8 @@ function _campaign_monitor_fields_instance_data() {
     'description' => '',
     'fences_wrapper' => 'div',
     'field_name' => 'field_mc_banner',
-    'entity_type' => 'cm_list',
-    'bundle' => 'cm_list',
+    'entity_type' => 'cm_campaign',
+    'bundle' => 'cm_campaign',
     'deleted' => '0',
   );
   $instances['field_mc_logo'] = array(
@@ -146,8 +146,8 @@ function _campaign_monitor_fields_instance_data() {
     'description' => '',
     'fences_wrapper' => 'div',
     'field_name' => 'field_mc_logo',
-    'entity_type' => 'cm_list',
-    'bundle' => 'cm_list',
+    'entity_type' => 'cm_campaign',
+    'bundle' => 'cm_campaign',
     'deleted' => '0',
   );
   $instances['field_mc_profile_pic'] = array(
@@ -205,8 +205,8 @@ function _campaign_monitor_fields_instance_data() {
     'description' => '',
     'fences_wrapper' => 'div',
     'field_name' => 'field_mc_profile_pic',
-    'entity_type' => 'cm_list',
-    'bundle' => 'cm_list',
+    'entity_type' => 'cm_campaign',
+    'bundle' => 'cm_campaign',
     'deleted' => '0',
   );
   return $instances;
@@ -214,12 +214,12 @@ function _campaign_monitor_fields_instance_data() {
 /**
  * Implements hook_uninstall().
  */
-function campaign_monitor_fields_uninstall() {
-  campaign_monitor_fields_cleanup();
+function campaign_monitor_campaigns_fields_uninstall() {
+  campaign_monitor_campaigns_fields_cleanup();
   // Call a second field_purge_batch to remove instances.
   field_purge_batch(1000);
 }
-function campaign_monitor_fields_cleanup() {
-  field_attach_delete_bundle('cm_list', 'cm_list');
+function campaign_monitor_campaigns_fields_cleanup() {
+  field_attach_delete_bundle('cm_campaign', 'cm_campaign');
   field_purge_batch(1000);
 }

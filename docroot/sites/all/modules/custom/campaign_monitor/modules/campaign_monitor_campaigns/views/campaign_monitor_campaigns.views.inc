@@ -11,5 +11,70 @@
 function campaign_monitor_campaigns_views_default_views() {
   $views = array();
   
+  $view = new view();
+  $view->name = 'campaign_monitor_campaigns';
+  $view->description = '';
+  $view->tag = 'default';
+  $view->base_table = 'campaign_monitor_campaigns';
+  $view->human_name = 'Campaign Monitor Campaigns';
+  $view->core = 7;
+  $view->api_version = '3.0';
+  $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
+  
+  /* Display: Master */
+  $handler = $view->new_display('default', 'Master', 'default');
+  $handler->display->display_options['use_more_always'] = FALSE;
+  $handler->display->display_options['access']['type'] = 'none';
+  $handler->display->display_options['cache']['type'] = 'none';
+  $handler->display->display_options['query']['type'] = 'views_query';
+  $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['pager']['type'] = 'full';
+  $handler->display->display_options['style_plugin'] = 'table';
+  $handler->display->display_options['style_options']['columns'] = array(
+    'id' => 'id',
+  );
+  $handler->display->display_options['style_options']['default'] = '-1';
+  $handler->display->display_options['style_options']['info'] = array(
+    'id' => array(
+      'sortable' => 0,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+  );
+  /* No results behavior: Global: Text area */
+  $handler->display->display_options['empty']['area']['id'] = 'area';
+  $handler->display->display_options['empty']['area']['table'] = 'views';
+  $handler->display->display_options['empty']['area']['field'] = 'area';
+  $handler->display->display_options['empty']['area']['empty'] = TRUE;
+  $handler->display->display_options['empty']['area']['content'] = 'No results found.';
+  $handler->display->display_options['empty']['area']['format'] = 'raw_html';
+  /* Field: Campaign: Campaign ID */
+  $handler->display->display_options['fields']['id']['id'] = 'id';
+  $handler->display->display_options['fields']['id']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['id']['field'] = 'id';
+  /* Field: Campaign: Label */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  /* Field: Campaign: Subject */
+  $handler->display->display_options['fields']['subject']['id'] = 'subject';
+  $handler->display->display_options['fields']['subject']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['subject']['field'] = 'subject';
+  /* Field: Campaign: Status */
+  $handler->display->display_options['fields']['status']['id'] = 'status';
+  $handler->display->display_options['fields']['status']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['status']['field'] = 'status';
+  /* Contextual filter: Campaign: List */
+  $handler->display->display_options['arguments']['lid']['id'] = 'lid';
+  $handler->display->display_options['arguments']['lid']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['arguments']['lid']['field'] = 'lid';
+  $handler->display->display_options['arguments']['lid']['default_action'] = 'empty';
+  $handler->display->display_options['arguments']['lid']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['lid']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['lid']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['lid']['summary_options']['items_per_page'] = '25';
+
   return $views;
 }

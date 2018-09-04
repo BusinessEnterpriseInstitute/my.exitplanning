@@ -270,7 +270,7 @@ function cm_campaign_delete_form($form, &$form_state, $campaign) {
   //$form['list_id'] = array('#type' => 'value', '#value' => entity_id('cm_list', $cm_list));
   $campaign_uri = entity_uri('cm_campaign', $campaign);
   return confirm_form($form,
-    t('Are you sure you want to delete list %title?', array('%title' => entity_label('cm_campaign', $campaign))),
+    t('Are you sure you want to delete campaign %title?', array('%title' => entity_label('cm_campaign', $campaign))),
     $campaign_uri['path'],
     t('This action cannot be undone.'),
     t('Delete'),
@@ -283,15 +283,14 @@ function cm_campaign_delete_form($form, &$form_state, $campaign) {
 function cm_campaign_delete_form_submit($form, &$form_state) {
   $campaign = $form_state['cm_campaign'];
   $lid = $campaign->lid;
-  //$redirect = 'cm-list/' . $lid . '/campaigns';
-  /*
-  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
+  $redirect = 'cm-list/' . $lid . '/campaigns';
+  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign->campaign_id);
   if ($wrap) {
     $result = $wrap->delete();
-    // Delete our entity if list could be deleted on CM or the list id couldn't be found.
+    // Delete our entity if list could be deleted on CM or the campaign id couldn't be found.
     if ($result->was_successful() || $result->response->Code == 101) {
-      cm_list_delete($list);
-      drupal_set_message(t('List %title deleted.', array('%title' => entity_label('cm_list', $list))));
+      cm_campaign_delete($campaign);
+      drupal_set_message(t('Campaign %title deleted.', array('%title' => entity_label('cm_campaign', $campaign))));
     }
     else {
       $error = $result->response->Message;
@@ -300,7 +299,7 @@ function cm_campaign_delete_form_submit($form, &$form_state) {
       $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
       drupal_set_message($message, 'error');
     }
-  }*/
+  }
 
-  //$form_state['redirect'] = $redirect;
+  $form_state['redirect'] = $redirect;
 }

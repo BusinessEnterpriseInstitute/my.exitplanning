@@ -9,6 +9,19 @@
  * @see hook_entity_view()
  * @see hook_entity_view_alter()
  */
+/*
+ * Page callback to return view of campaigns referenced to list.
+ */
+function campaign_monitor_campaigns_list($list) {
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  $list_uri = entity_uri('cm_list', $list);
+  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+  drupal_set_breadcrumb($breadcrumb);
+  
+  $output = views_embed_view('campaign_monitor_campaigns', 'default', $list->id);
+  return $output;
+}
 
 function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full') {
   // Our entity type, for convenience.

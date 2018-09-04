@@ -5,18 +5,16 @@
  */
 function campaign_monitor_campaigns_menu() {
   $items = array();
-  /*
-  $items['cm-client/%cm_client/lists'] = array(
-    'title' => 'Lists',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cm_client_lists_form', 1),
+  $items['cm-list/%cm_list/campaigns'] = array(
+    'title' => 'Campaigns',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1),
     'access callback' => 'entity_access',
-    'access arguments' => array('update', 'cm_client', 1),
+    'access arguments' => array('update', 'cm_list', 1),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
     'weight' => -8,
   );
-  */
   $items['cm-list/%cm_list/campaigns/add'] = array(
     'title' => 'Create campaign',
     'description' => 'Add campaign to Campaign Monitor.',
@@ -53,18 +51,16 @@ function campaign_monitor_campaigns_menu() {
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     'weight' => -9,
   );
-  /*
-  $items['cm-list/%cm_list/delete'] = array(
+  $items['cm-campaign/%cm_campaign/delete'] = array(
     'title' => 'Delete',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('cm_list_delete_form', 1),
+    'page arguments' => array('cm_campaign_delete_form', 1),
     'access callback' => 'entity_access',
-    'access arguments' => array('delete', 'cm_list', 1),
+    'access arguments' => array('delete', 'cm_campaign', 1),
     'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     'weight' => -8,
   );
-  */
   $items['cm-campaign/%cm_campaign/raw'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'Campaign',
@@ -171,6 +167,38 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'lid',
   );
+    $properties['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the campaign\'s edit page.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['delete_url'] = array(
+    'label' => t('Delete Link'),
+    'description' => t('The URL to delete a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+}
+/**
+ * Callback for getting campaign properties.
+ *
+ */
+function campaign_monitor_campaigns_get_properties($campaign, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . $campaign->id . '/edit', $options);
+      break;
+    case 'delete_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . $campaign->id . '/delete', $options);
+      break;
+  }
 }
 
 /*******************************************************************************
