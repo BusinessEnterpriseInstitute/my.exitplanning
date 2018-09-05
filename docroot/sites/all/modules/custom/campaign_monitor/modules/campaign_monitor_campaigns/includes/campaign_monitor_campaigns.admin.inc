@@ -38,13 +38,14 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#type' => 'fieldset',
     '#title' => t('Settings'),
   );
+  /*
   $form['tabs']['settings']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name this campaign'),
     '#description' => t('The campaign name is shown in your reports and your email archive.'),
     '#required' => TRUE,
     '#default_value' => isset($campaign->name) ? $campaign->name : '',
-  );
+  );*/
   $form['tabs']['settings']['subject'] = array(
     '#type' => 'textfield',
     '#title' => t('Write a subject line'),
@@ -74,6 +75,12 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#element_validate' => array('campaign_monitor_email_validate'),
     '#default_value' => isset($campaign->reply_to) ? $campaign->reply_to : '',
     '#required' => TRUE,
+  );
+  $form['tabs']['settings']['article_reference'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Newsletter Reference'),
+    '#description' => t('Choose an article from our database'),
+    '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete'
   );
   // Attach field api fields.
   if (!$is_new) {
@@ -141,22 +148,27 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   if (isset($campaign->is_new)) {
     $campaign->lid = $list->id;
     $campaign->list_id = $list->list_id;
-    $campaign->name = $values['name'];
-    $campaign->subject = $values['subject'];
-    $campaign->from_name = $values['from_name'];
-    $campaign->from_email = $values['from_email'];
-    $campaign->reply_to = $values['reply_to'];
     $campaign->status = 'Design';
     $campaign->save();
+    // Set a unique campaign name now.
+    $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
     $form_state['redirect'] = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
   }
+  $campaign->subject = $values['subject'];
+  $campaign->from_name = $values['from_name'];
+  $campaign->from_email = $values['from_email'];
+  $campaign->reply_to = $values['reply_to'];
+  field_attach_submit('cm_campaign', $campaign, $form, $form_state);
+  $campaign->save();
+  
+  /*
   elseif ($campaign->status == 'Design') {
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
     $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
     if ($wrap) {
       $result = $wrap->create($client->client_id, array(
         'Subject' => $values['subject'],
-        'Name' => $values['name'],
+        'Name' => entity_label('cm_campaign', $campaign),
         'FromName' => $values['from_name'],
         'FromEmail' => $values['from_email'],
         'ReplyTo' => $values['reply_to'],
@@ -167,90 +179,6 @@ function cm_campaign_form_submit(&$form, &$form_state) {
         $campaign->campaign_id = $result->response;
         $campaign->status = 'Draft';
         $campaign->save();
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
-    }
-  }
-  /*
-  if (isset($list->is_new)) {
-    $cm = campaign_monitor_get_api_object('CS_REST_Lists', NULL);
-    if ($cm) {
-      $result = $cm->create($client->client_id, array(
-        'Title' => $values['title'],
-        'UnsubscribeSetting' => $values['unsubscribe_setting'],
-        'UnsubscribePage' => $values['unsubscribe_page'],
-        'ConfirmationSuccessPage' => $values['confirmation_success_page'],
-        'ConfirmedOptIn' => $values['confirmed_opt_in'],
-      ));
-      if ($result->was_successful()) {
-        $id = $result->response;
-        $list_api = campaign_monitor_get_api_object('CS_REST_Lists', $id);
-        if ($list_api) {
-          $list_result = $list_api->get();
-          if ($list_result->was_successful()) {
-            $list->list_id = $id;
-            $list->title = $values['title'];
-            $list->list_data = array(
-              'details' => $list_result->response,
-              'webhooks' => array(),
-            );
-            $webhook = $list_api->create_webhook(array(
-              'Events' => array(CS_REST_LIST_WEBHOOK_SUBSCRIBE, CS_REST_LIST_WEBHOOK_DEACTIVATE, CS_REST_LIST_WEBHOOK_UPDATE),
-              'Url' => campaign_monitor_webhook_url(),
-              'PayLoadFormat' => CS_REST_WEBHOOK_FORMAT_JSON,
-            ));
-            $webhooks = $list_api->get_webhooks();
-            if ($webhooks->was_successful()) {
-              $list->list_data['webhooks'] = $webhooks->response;
-            }
-            //field_attach_submit('cm_list', $list, $form, $form_state);
-            $list->save();
-            $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/edit';
-            $message = t('Added new list %title to Campaign Monitor', array('%title' => $values['title']));
-            drupal_set_message($message);
-          }
-        }
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
-    }
-  }
-  else {
-    $cm = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
-    if ($cm) {
-      $result = $cm->update(array(
-        'Title' => $values['title'],
-        'UnsubscribeSetting' => $values['unsubscribe_setting'],
-        'UnsubscribePage' => $values['unsubscribe_page'],
-        'ConfirmationSuccessPage' => $values['confirmation_success_page'],
-        'ConfirmedOptIn' => $values['confirmed_opt_in'],
-      ));
-      if ($result->was_successful()) {
-        $list_result = $cm->get();
-        if ($list_result->was_successful()) {
-          $list->title = $values['title'];
-          $list->list_data['details'] = $list_result->response;
-          $list->list_data['design'] = array(
-            'background_color' => $values['background_color'],
-          );
-          $list->list_data['defaults'] = $values['defaults'];
-          field_attach_submit('cm_list', $list, $form, $form_state);
-          $list->save();
-          $message = t('Updated list %title on Campaign Monitor', array('%title' => $values['title']));
-          drupal_set_message($message);
-        }
-        else {
-          $error = $result->response->Message;
-          $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-          drupal_set_message($message, 'error');
-        }
       }
       else {
         $error = $result->response->Message;
@@ -308,6 +236,12 @@ function cm_campaign_delete_form_submit($form, &$form_state) {
  * Campaign Send form.
  */
 function cm_campaign_send_form($form, &$form_state, $campaign) {
+  $form['#prefix'] = '<div id="send-form-wrapper">';
+  $form['#suffix'] = '</div>';
+  $values = !empty($form_state['values']) ? $form_state['values'] : NULL;
+  $list = cm_list_load($campaign->lid);
+  $form_state['cm_campaign'] = $campaign;
+  $form_state['cm_list'] = $list;
   $form['send_options'] = array(
     '#type' => 'radios',
     '#title' => t('Sending options'),
@@ -315,16 +249,114 @@ function cm_campaign_send_form($form, &$form_state, $campaign) {
       1 => t('Send immediately'),
       2 => t('Schedule for specific date and time'),
     ),
-  );
-  $form['actions'] = array(
-    '#type' => 'actions',
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-    '#attributes' => array(
-      'class' => array('button small'),
+    '#default_value' => $values ? $values['send_options'] : NULL,
+    '#required' => TRUE,
+    '#ajax' => array(
+      'event' => 'change',
+      'wrapper' => 'send-form-wrapper',
+      'callback' => 'cm_campaign_send_form_refresh',
     ),
   );
+  if ($values) {
+    if ($values['send_options'] == 2) {
+      $form['send_date'] = array(
+        '#type' => 'date_popup',
+        '#date_format' => 'Y-m-d h:i:sa',
+        '#date_year_range' => '0:+1',
+        '#date_timezone' => date_default_timezone(),
+        '#title' => t('Schedule Date'),
+        '#description' => t('Choose a time in which this campaign should be sent.'),
+        '#default_value' => '',
+        '#element_validate' => array('campaign_monitor_campaigns_schedule_date_validate'),
+        '#datepicker_options' => array('minDate' => 0),
+        '#date_increment' => 15,
+        '#required' => TRUE,
+      );
+    }
+    $form['actions'] = array(
+      '#type' => 'actions',
+    );
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => $values['send_options'] == 1 ? t('Send') : t('Schedule'),
+    );
+  }
   return $form;
+}
+/**
+ * Ajax callback.
+ */
+function cm_campaign_send_form_refresh($form, $form_state) {
+  return $form;
+}
+function cm_campaign_send_form_submit($form, &$form_state) {
+  $campaign = $form_state['cm_campaign'];
+  $list = $form_state['cm_list'];
+  $client = cm_client_load($list->cid);
+  $values = $form_state['values'];
+  $send_option = $values['send_options'];
+  $campaign_id = !empty($campaign->campaign_id) ? $campaign->campaign_id : NULL;
+  if ($send_option == 2) {
+    $date = new DateTime($values['send_date'], new DateTimeZone('America/Denver'));
+    $schedule_date = $date->format('Y-m-d H:i');
+  }
+  else {
+    $schedule_date = 'Immediately';
+  }
+  // First create a draft campaign.
+  if (!$campaign_id) {
+    $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
+    $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
+    if ($wrap) {
+      $result = $wrap->create($client->client_id, array(
+        'Subject' => $campaign->subject,
+        'Name' => entity_label('cm_campaign', $campaign),
+        'FromName' => $campaign->from_name,
+        'FromEmail' => $campaign->from_email,
+        'ReplyTo' => $campaign->reply_to,
+        'HtmlUrl' => $html_url,
+        'ListIDs' => array($campaign->list_id),
+      ));
+      if ($result->was_successful()) {
+        $campaign_id = $result->response;
+        $campaign->campaign_id = $result->response;
+        $campaign->status = 'Draft';
+        $campaign->save();
+      }
+      else {
+        $error = $result->response->Message;
+        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+        drupal_set_message($message, 'error');
+      }
+    }
+  }
+  if ($campaign_id) {
+    $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
+    $result = $wrap->send(array(
+      'ConfirmationEmail' => 'amarquis@exitplanning.com',
+      'SendDate' => $schedule_date,
+    ));
+    if ($result->was_successful()) {
+      $new_status = $send_option == 1 ? 'Sent' : 'Scheduled';
+      $campaign->status = $new_status;
+      $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
+      $campaign->save();
+    }
+    else {
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      drupal_set_message($message, 'error');
+    }
+  }
+  $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
+}
+/**
+ * Helper function to ensure schedule date is not in the past.
+ */
+function campaign_monitor_campaigns_schedule_date_validate($element, &$form_state, $form) {
+  $now = strtotime('now');
+  $schedule_date = strtotime($element['#value']['date'] . ' ' . $element['#value']['time']);
+  if ($schedule_date <= $now) {
+    form_error($element, t($element['#title'] . '  must be in the future.'));
+  }
 }

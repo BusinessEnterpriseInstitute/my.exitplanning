@@ -74,16 +74,27 @@ function campaign_monitor_campaigns_menu() {
   );
   $items['cm-campaign/%cm_campaign/send'] = array(
     'title' => 'Send',
-    'page callback' => 'cm_campaign_send_form',
-    'page arguments' => array(1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('update', 'cm_campaign', 1),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_send_form', 1),
+    'access callback' => 'campaign_monitor_send_access',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     'weight' => -7,
   );
 
   return $items;
+}
+/**
+ * Access callback for sending a campaign.
+ */
+function campaign_monitor_send_access($campaign) {
+  $can_update = entity_access('update', 'cm_campaign', $campaign);
+  $statuses = array('Scheduled', 'Sent');
+  if ($can_update && !in_array($campaign->status, $statuses)) {
+    return TRUE;
+  }
+  return;
 }
 
 /**
@@ -193,6 +204,28 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $properties['created'] = array(
+    'label' => t('Date created'),
+    'description' => t('The date the campaign was created.'),
+    'type' => 'date',
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['send_date'] = array(
+    'label' => t('Send date'),
+    'description' => t('The date the campaign is scheduled to be sent.'),
+    'type' => 'date',
+    'schema field' => 'send_date',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['send_link'] = array(
+    'label' => t('Send link'),
+    'description' => t('The URL to send a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
 }
 /**
  * Callback for getting campaign properties.
@@ -207,6 +240,13 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
     case 'delete_url':
       $options = array('query' => drupal_get_destination());
       return url('cm-campaign/' . $campaign->id . '/delete', $options);
+      break;
+    case 'send_link':
+      if (campaign_monitor_send_access($campaign)) {
+        $options = array('query' => drupal_get_destination());
+        return url('cm-campaign/' . $campaign->id . '/send', $options);
+      }
+      return;
       break;
   }
 }
