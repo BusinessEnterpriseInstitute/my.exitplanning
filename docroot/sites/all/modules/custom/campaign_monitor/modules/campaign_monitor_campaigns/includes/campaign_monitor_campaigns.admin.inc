@@ -303,3 +303,28 @@ function cm_campaign_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = $redirect;
 }
+
+/**
+ * Campaign Send form.
+ */
+function cm_campaign_send_form($form, &$form_state, $campaign) {
+  $form['send_options'] = array(
+    '#type' => 'radios',
+    '#title' => t('Sending options'),
+    '#options' => array(
+      1 => t('Send immediately'),
+      2 => t('Schedule for specific date and time'),
+    ),
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+    '#attributes' => array(
+      'class' => array('button small'),
+    ),
+  );
+  return $form;
+}

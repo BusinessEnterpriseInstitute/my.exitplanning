@@ -72,6 +72,16 @@ function campaign_monitor_campaigns_menu() {
     //'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
   );
+  $items['cm-campaign/%cm_campaign/send'] = array(
+    'title' => 'Send',
+    'page callback' => 'cm_campaign_send_form',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_campaign', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    'weight' => -7,
+  );
 
   return $items;
 }
