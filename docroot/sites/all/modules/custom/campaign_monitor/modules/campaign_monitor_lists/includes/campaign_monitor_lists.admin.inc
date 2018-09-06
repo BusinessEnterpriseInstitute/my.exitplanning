@@ -43,6 +43,7 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
           if (!$list_exists) {
             $cm_list = entity_create('cm_list', array(
               'cid' => $client->id,
+              'client_id' => $client->client_id,
               'uid' => $client->uid,
               'list_id' => $list->ListID,
               'title' => $list->Title,
@@ -80,27 +81,31 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
 /*
  * List entity form.
  */
-function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
+function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   global $user;
-  if (!isset($cm_list->id)) {
-    $cm_list = entity_create('cm_list', array(
+  if (!isset($list->id)) {
+    $list = entity_create('cm_list', array(
       'cid' => $client->id,
-      'uid' => $user->uid
+      'client_id' => $client->client_id,
+      'uid' => $user->uid,
     ));
+    $data = array();
   }
-  $data = isset($cm_list->id) ? $cm_list->list_data : array();
-  $is_new = isset($cm_list->is_new) ? TRUE : FALSE;
+  else {
+    $data = $list->list_data;
+  }
+  $is_new = isset($list->is_new) ? TRUE : FALSE;
   $tabs_type = 'container';
   if (!$is_new) {
-    $title = entity_label('cm_list', $cm_list);
+    $title = entity_label('cm_list', $list);
     $tabs_type = 'horizontal_tabs';
   }
   else {
     $title = 'Create list';
   }
   drupal_set_title($title);
-  $form_state['client'] = $client;
-  $form_state['list'] = $cm_list;
+  $form_state['cm_client'] = $client;
+  $form_state['cm_list'] = $list;
   $form['tabs'] = array(
     '#type' => $tabs_type,
   );
@@ -112,7 +117,7 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
     '#type' => 'textfield',
     '#title' => t('List Name'),
     '#required' => TRUE,
-    '#default_value' => isset($cm_list->title) ? $cm_list->title : '',
+    '#default_value' => isset($list->title) ? $list->title : '',
   );
   $form['tabs']['settings']['unsubscribe_page'] = array(
     '#type' => 'textfield',
@@ -142,7 +147,7 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
   );
   // Attach field api fields.
   if (!$is_new) {
-    field_attach_form('cm_list', $cm_list, $form, $form_state);
+    field_attach_form('cm_list', $list, $form, $form_state);
     // Attaches css and js from the field group module.
     $form['#attached']['css'] = array(
       drupal_get_path('module', 'field_group') . '/horizontal-tabs/horizontal-tabs.css',
@@ -154,27 +159,26 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
       '#type' => 'fieldset',
       '#title' => t('Campaign Defaults'),
       '#weight' => -11,
-      '#tree' => TRUE,
     );
     $form['tabs']['defaults']['from_name'] = array(
       '#type' => 'textfield',
       '#title' => t('From name'),
       '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
-      '#default_value' => isset($data['defaults']['from_name']) ? $data['defaults']['from_name'] : '',
+      '#default_value' => $list->from_name,
     );
     $form['tabs']['defaults']['from_email'] = array(
       '#type' => 'textfield',
       '#title' => t('From e-mail'),
       '#description' => t('This is the e-mail address your campaigns will come from.'),
       '#element_validate' => array('campaign_monitor_email_validate'),
-      '#default_value' => isset($data['defaults']['from_email']) ? $data['defaults']['from_email'] : '',
+      '#default_value' => $list->from_email,
     );
     $form['tabs']['defaults']['reply_to'] = array(
       '#type' => 'textfield',
       '#title' => t('Replies should be sent to'),
       '#description' => t('Enter a valid email address that replies will be sent to.'),
       '#element_validate' => array('campaign_monitor_email_validate'),
-      '#default_value' => isset($data['defaults']['reply_to']) ? $data['defaults']['reply_to'] : '',
+      '#default_value' => $list->reply_to,
     );
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
@@ -215,17 +219,28 @@ function cm_list_form($form, &$form_state, $cm_list = NULL, $client = NULL) {
   );
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => $is_new ? t('Next') : t('Save'),
+    '#value' => $is_new ? t('Next') : t('Finish'),
     '#attributes' => array(
       'class' => array('button small'),
     ),
   );
+  if (!$is_new) {
+    $form['actions']['save_edit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save & Continue'),
+      '#weight' => -1,
+      '#name' => 'save_edit',
+      '#attributes' => array(
+        'class' => array('button small'),
+      ),
+    );
+  }
   return $form;
 }
 function cm_list_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
-  $client = $form_state['client'];
-  $list = $form_state['list'];
+  $client = $form_state['cm_client'];
+  $list = $form_state['cm_list'];
   if (isset($list->is_new)) {
     $cm = campaign_monitor_get_api_object('CS_REST_Lists', NULL);
     if ($cm) {
@@ -273,6 +288,13 @@ function cm_list_form_submit(&$form, &$form_state) {
     }
   }
   else {
+    $query_string = array();
+    $query_parameters = drupal_get_query_parameters();
+    if (!empty($query_parameters)) {
+      foreach ($query_parameters as $key => $value) {
+        $query_string[$key] = $value;
+      }
+    }
     $cm = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
     if ($cm) {
       $result = $cm->update(array(
@@ -286,11 +308,13 @@ function cm_list_form_submit(&$form, &$form_state) {
         $list_result = $cm->get();
         if ($list_result->was_successful()) {
           $list->title = $values['title'];
+          $list->from_name = $values['from_name'];
+          $list->from_email = $values['from_email'];
+          $list->reply_to = $values['reply_to'];
           $list->list_data['details'] = $list_result->response;
           $list->list_data['design'] = array(
             'background_color' => $values['background_color'],
           );
-          $list->list_data['defaults'] = $values['defaults'];
           field_attach_submit('cm_list', $list, $form, $form_state);
           $list->save();
           $message = t('Updated list %title on Campaign Monitor', array('%title' => $values['title']));
@@ -308,6 +332,14 @@ function cm_list_form_submit(&$form, &$form_state) {
         drupal_set_message($message, 'error');
       }
     }
+    if ($form_state['clicked_button']['#name'] == 'save_edit') {
+      $redirect = url('cm-list/' . entity_id('cm_list', $list) . '/edit', array('query' => $query_string, 'absolute' => TRUE));
+      unset($_GET['destination']);
+    }
+    else {
+      $redirect = 'cm-client/' . $list->cid . '/lists';
+    }
+    $form_state['redirect'] = $redirect;
   }
 }
 

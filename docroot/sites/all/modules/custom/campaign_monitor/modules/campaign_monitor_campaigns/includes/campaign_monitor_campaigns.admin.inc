@@ -9,12 +9,13 @@
  * Campaign entity form.
  */
 function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
-  global $user;
   if (!isset($campaign->id)) {
     $campaign = entity_create('cm_campaign', array(
       'lid' => $list->id,
-      'uid' => $user->uid,
+      'uid' => $list->uid,
       'list_id' => $list->list_id,
+      'client_id' => $list->client_id,
+      'status' => 'Design',
     ));
   }
   //$data = isset($cm_list->id) ? $cm_list->list_data : array();
@@ -57,7 +58,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#type' => 'textfield',
     '#title' => t('From name'),
     '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
-    '#default_value' => isset($campaign->from_name) ? $campaign->from_name : '',
+    '#default_value' => $is_new ? $list->from_name : $campaign->from_name,
     '#required' => TRUE,
   );
   $form['tabs']['settings']['from_email'] = array(
@@ -65,7 +66,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#title' => t('From e-mail'),
     '#description' => t('This is the e-mail address your campaigns will come from.'),
     '#element_validate' => array('campaign_monitor_email_validate'),
-    '#default_value' => isset($campaign->from_email) ? $campaign->from_email : '',
+    '#default_value' => $is_new ? $list->from_email : $campaign->from_email,
     '#required' => TRUE,
   );
   $form['tabs']['settings']['reply_to'] = array(
@@ -73,7 +74,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#title' => t('Replies should be sent to'),
     '#description' => t('Enter a valid email address that replies will be sent to.'),
     '#element_validate' => array('campaign_monitor_email_validate'),
-    '#default_value' => isset($campaign->reply_to) ? $campaign->reply_to : '',
+    '#default_value' => $is_new ? $list->reply_to : $campaign->reply_to,
     '#required' => TRUE,
   );
   $form['tabs']['settings']['article_reference'] = array(
@@ -132,7 +133,18 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   if ($is_new || !$is_new && $campaign->status == 'Design') {
     $form['actions']['submit'] = array(
       '#type' => 'submit',
-      '#value' => $is_new ? t('Next') : t('Save'),
+      '#value' => $is_new ? t('Next') : t('Finish'),
+      '#attributes' => array(
+        'class' => array('button small'),
+      ),
+    );
+  }
+  if (!$is_new && $campaign->status == 'Design') {
+    $form['actions']['save_edit'] = array(
+      '#type' => 'submit',
+      '#value' => t('Save & Continue'),
+      '#weight' => -1,
+      '#name' => 'save_edit',
       '#attributes' => array(
         'class' => array('button small'),
       ),
@@ -144,15 +156,30 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   $list = $form_state['cm_list'];
   $campaign = $form_state['cm_campaign'];
-  $client = cm_client_load($list->cid);
   if (isset($campaign->is_new)) {
-    $campaign->lid = $list->id;
-    $campaign->list_id = $list->list_id;
-    $campaign->status = 'Design';
+    //$campaign->lid = $list->id;
+    //$campaign->list_id = $list->list_id;
+    //$campaign->status = 'Design';
     $campaign->save();
     // Set a unique campaign name now.
     $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
-    $form_state['redirect'] = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
+    $redirect = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
+  }
+  else {
+    $query_string = array();
+    $query_parameters = drupal_get_query_parameters();
+    if (!empty($query_parameters)) {
+      foreach ($query_parameters as $key => $value) {
+        $query_string[$key] = $value;
+      }
+    }
+    if ($form_state['clicked_button']['#name'] == 'save_edit') {
+      $redirect = url('cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit', array('query' => $query_string, 'absolute' => TRUE));
+      unset($_GET['destination']);
+    }
+    else {
+      $redirect = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
+    }
   }
   $campaign->subject = $values['subject'];
   $campaign->from_name = $values['from_name'];
@@ -160,7 +187,7 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   $campaign->reply_to = $values['reply_to'];
   field_attach_submit('cm_campaign', $campaign, $form, $form_state);
   $campaign->save();
-  
+  $form_state['redirect'] = $redirect;
   /*
   elseif ($campaign->status == 'Design') {
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
@@ -215,15 +242,13 @@ function cm_campaign_delete_form_submit($form, &$form_state) {
   $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign->campaign_id);
   if ($wrap) {
     $result = $wrap->delete();
-    // Delete our entity if list could be deleted on CM or the campaign id couldn't be found.
-    if ($result->was_successful() || $result->response->Code == 101) {
+    // Delete our entity if campaign could be deleted on CM or the campaign id couldn't be found.
+    if ($result->was_successful() || $result->response->Code == 404) {
       cm_campaign_delete($campaign);
       drupal_set_message(t('Campaign %title deleted.', array('%title' => entity_label('cm_campaign', $campaign))));
     }
     else {
       $error = $result->response->Message;
-      if ($result->response->Code == 252) {
-      }
       $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
       drupal_set_message($message, 'error');
     }
@@ -292,7 +317,6 @@ function cm_campaign_send_form_refresh($form, $form_state) {
 function cm_campaign_send_form_submit($form, &$form_state) {
   $campaign = $form_state['cm_campaign'];
   $list = $form_state['cm_list'];
-  $client = cm_client_load($list->cid);
   $values = $form_state['values'];
   $send_option = $values['send_options'];
   $campaign_id = !empty($campaign->campaign_id) ? $campaign->campaign_id : NULL;
@@ -308,7 +332,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
     $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
     if ($wrap) {
-      $result = $wrap->create($client->client_id, array(
+      $result = $wrap->create($campaign->client_id, array(
         'Subject' => $campaign->subject,
         'Name' => entity_label('cm_campaign', $campaign),
         'FromName' => $campaign->from_name,
