@@ -138,6 +138,12 @@ function campaign_monitor_lists_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'client_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The ClientID on Campaign Monitor.',
+        'default' => '',
+      ),
       'list_id' => array(
         'type' => 'varchar',
         'length' => 32,
@@ -148,6 +154,24 @@ function campaign_monitor_lists_schema() {
         'type' => 'varchar',
         'length' => 255,
         'description' => 'The list title on Campaign Monitor.',
+        'default' => '',
+      ),
+      'from_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The default FromName for campaigns on Campaign Monitor.',
+        'default' => '',
+      ),
+      'from_email' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The default FromEmail for campaigns on Campaign Monitor.',
+        'default' => '',
+      ),
+      'reply_to' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The default ReplyTo for campaigns on Campaign Monitor.',
         'default' => '',
       ),
       'uid' => array(

@@ -47,6 +47,12 @@ function campaign_monitor_campaigns_schema() {
         'description' => 'The ListID on Campaign Monitor.',
         'default' => '',
       ),
+      'client_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The ClientID on Campaign Monitor.',
+        'default' => '',
+      ),
       'campaign_id' => array(
         'type' => 'varchar',
         'length' => 32,

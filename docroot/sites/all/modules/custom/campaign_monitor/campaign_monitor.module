@@ -117,7 +117,6 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
-  /*
   $items['cm-client/%cm_client/delete'] = array(
     'type' => MENU_LOCAL_TASK,
     'title' => 'Delete',
@@ -128,7 +127,7 @@ function campaign_monitor_menu() {
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'file' => 'includes/campaign_monitor.admin.inc',
     'weight' => -8,
-  );*/
+  );
 
   return $items;
 }
@@ -255,6 +254,20 @@ function cm_client_load($id = NULL, $reset = FALSE){
 }
 function cm_client_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
   return entity_load('cm_client', $ids, $conditions, $reset);
+}
+
+/**
+ * Delete single client.
+ */
+function cm_client_delete($client) {
+   // Delete the client entity
+   entity_delete('cm_client', entity_id('cm_client', $client));
+}
+/**
+ * Delete multiple clients.
+ */
+function cm_client_delete_multiple($ids) {
+  entity_delete_multiple('cm_client', $ids);
 }
 
 /**

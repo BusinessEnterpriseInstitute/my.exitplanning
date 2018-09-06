@@ -217,3 +217,40 @@ function cm_client_form_submit(&$form, &$form_state) {
     }
   }
 }
+
+/**
+ * Delete confirmation form.
+ */
+function cm_client_delete_form($form, &$form_state, $client) {
+  $form_state['cm_client'] = $client;
+  $client_uri = entity_uri('cm_client', $client);
+  return confirm_form($form,
+    t('Are you sure you want to delete client %name?', array('%name' => entity_label('cm_client', $client))),
+    $client_uri['path'],
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel')
+  );
+}
+/**
+ * Delete form submit handler.
+ */
+function cm_client_delete_form_submit($form, &$form_state) {
+  $client = $form_state['cm_client'];
+  $wrap = campaign_monitor_get_api_object('CS_REST_Clients', $client->client_id);
+  if ($wrap) {
+    $result = $wrap->delete();
+    // Delete our entity if client could be deleted on CM or the client id couldn't be found.
+    if ($result->was_successful() || $result->response->Code == 101) {
+      cm_client_delete($client);
+      drupal_set_message(t('Client %name deleted.', array('%name' => entity_label('cm_client', $client))));
+    }
+    else {
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
+      drupal_set_message($message, 'error');
+    }
+  }
+
+  $form_state['redirect'] = 'admin/config/campaign-monitor/clients';
+}
