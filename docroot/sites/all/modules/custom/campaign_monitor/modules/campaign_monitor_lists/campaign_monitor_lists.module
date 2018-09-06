@@ -138,13 +138,13 @@ function campaign_monitor_lists_entity_info() {
       'cm_list' => array(
         'label' => t('Campaign Monitor List'),
         'admin' => array(
-          'path' => 'admin/config/campaign-monitor/lists',
+          'path' => 'admin/campaign-monitor/lists',
         ),
       ),
     ),
     'access callback' => 'campaign_monitor_lists_access',
     'admin ui' => array(
-      'path' => 'admin/config/campaign-monitor/lists',
+      'path' => 'admin/campaign-monitor/lists',
       'controller class' => 'EntityDefaultUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_lists.admin.inc',

@@ -151,13 +151,13 @@ function campaign_monitor_campaigns_entity_info() {
       'cm_campaign' => array(
         'label' => t('Campaign Monitor Campaign'),
         'admin' => array(
-          'path' => 'admin/config/campaign-monitor/campaigns',
+          'path' => 'admin/campaign-monitor/campaigns',
         ),
       ),
     ),
     'access callback' => 'campaign_monitor_campaigns_access',
     'admin ui' => array(
-      'path' => 'admin/config/campaign-monitor/campaigns',
+      'path' => 'admin/campaign-monitor/campaigns',
       'controller class' => 'EntityDefaultUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_campaigns.admin.inc',

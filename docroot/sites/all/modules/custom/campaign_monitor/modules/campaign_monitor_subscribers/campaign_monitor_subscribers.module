@@ -132,13 +132,13 @@ function campaign_monitor_subscribers_entity_info() {
       'cm_subscriber' => array(
         'label' => t('Campaign Monitor Subscriber'),
         'admin' => array(
-          'path' => 'admin/config/campaign-monitor/subscribers',
+          'path' => 'admin/campaign-monitor/subscribers',
         ),
       ),
     ),
     'access callback' => 'campaign_monitor_subscribers_access',
     'admin ui' => array(
-      'path' => 'admin/config/campaign-monitor/subscribers',
+      'path' => 'admin/campaign-monitor/subscribers',
       'controller class' => 'EntityDefaultUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_subscribers.admin.inc',

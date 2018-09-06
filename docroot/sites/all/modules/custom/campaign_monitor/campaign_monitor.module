@@ -32,7 +32,7 @@ function campaign_monitor_libraries_info() {
  */
 function campaign_monitor_menu() {
   $items = array();
-  $items['admin/config/campaign-monitor'] = array(
+  $items['admin/campaign-monitor'] = array(
     'type' => MENU_NORMAL_ITEM,
     'title' => 'Campaign Monitor',
     'description' => 'Settings for Campaign Monitor',
@@ -41,27 +41,29 @@ function campaign_monitor_menu() {
     'access arguments' => array('administer campaign monitor'),
     'file' => 'system.admin.inc',
     'file path' => drupal_get_path('module', 'system'),
+    'weight' => 100,
   );
-  $items['admin/config/campaign-monitor/api-key'] = array(
-    'title' => 'API Key',
+  $items['admin/campaign-monitor/settings'] = array(
+    'title' => 'Settings',
     'description' => 'Configure api key to connnect to Campaign Monitor.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('campaign_monitor_admin_settings'),
     'access arguments' => array('administer campaign monitor'),
     'file' => 'includes/campaign_monitor.admin.inc',
     'type' => MENU_NORMAL_ITEM,
+    'weight' => -20,
   );
   $items['campaign-monitor/newsletter-autocomplete'] = array(
     'type' => MENU_CALLBACK,
     'access callback' => TRUE,
     'page callback' => 'campaign_monitor_newsletter_autocomplete',
   );
-  $items['admin/config/campaign-monitor/clients/list'] = array(
+  $items['admin/campaign-monitor/clients/list'] = array(
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
+    'weight' => -19,
   );
-  $items['admin/config/campaign-monitor/clients/import'] = array(
+  $items['admin/campaign-monitor/clients/import'] = array(
     'title' => 'Import clients',
     'description' => 'Test various campaign monitor classes.',
     'page callback' => 'drupal_get_form',
@@ -69,7 +71,6 @@ function campaign_monitor_menu() {
     'access arguments' => array('administer campaign monitor'),
     'file' => 'includes/campaign_monitor.admin.inc',
     'type' => MENU_LOCAL_TASK,
-    'weight' => -9,
   );
   /*
   $items['admin/config/campaign-monitor/clients/add'] = array(
@@ -185,7 +186,7 @@ function campaign_monitor_entity_info() {
     ),
     'access callback' => 'campaign_monitor_client_access',
     'admin ui' => array(
-      'path' => 'admin/config/campaign-monitor/clients',
+      'path' => 'admin/campaign-monitor/clients',
       'controller class' => 'EntityDefaultUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor.admin.inc',

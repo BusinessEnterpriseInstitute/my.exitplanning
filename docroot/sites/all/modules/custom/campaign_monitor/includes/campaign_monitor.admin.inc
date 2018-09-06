@@ -252,5 +252,5 @@ function cm_client_delete_form_submit($form, &$form_state) {
     }
   }
 
-  $form_state['redirect'] = 'admin/config/campaign-monitor/clients';
+  $form_state['redirect'] = 'admin/campaign-monitor/clients';
 }
