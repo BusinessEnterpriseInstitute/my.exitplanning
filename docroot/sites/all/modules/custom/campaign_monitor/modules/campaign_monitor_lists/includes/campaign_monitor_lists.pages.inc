@@ -9,13 +9,18 @@
  * @see hook_entity_view()
  * @see hook_entity_view_alter()
  */
-function campaign_monitor_client_view_lists($entity, $view_mode = 'full') {
-  $lists = db_query('SELECT * FROM {campaign_monitor_lists} l WHERE l.cid = :cid', array(':cid' => $entity->id))->fetchAll();
-  $header = array(t('Id'), t('Title'));
-  $rows = array();
-  foreach ($lists as $list) {
-    
-  }
+/*
+ * Page callback to return view of lists referenced to client.
+ */
+function campaign_monitor_lists_list($client) {
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  $client_uri = entity_uri('cm_client', $client);
+  $breadcrumb[] = l(t('@client', array('@client' => entity_label('cm_client', $client))), $client_uri['path']);
+  drupal_set_breadcrumb($breadcrumb);
+  
+  $output = views_embed_view('campaign_monitor_lists', 'default', $client->id);
+  return $output;
 }
 
 function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {

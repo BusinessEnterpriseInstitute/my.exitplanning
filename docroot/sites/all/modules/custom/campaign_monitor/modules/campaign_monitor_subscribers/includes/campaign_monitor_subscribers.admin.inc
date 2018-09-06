@@ -8,7 +8,7 @@
 /*
  * Subscribers form.
  */
-function cm_list_subscribers_form($form, &$form_state, $list) {
+function campaign_monitor_subscribers_import_form($form, &$form_state, $list) {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   $list_uri = entity_uri('cm_list', $list);
@@ -38,7 +38,7 @@ function cm_list_subscribers_form($form, &$form_state, $list) {
   );
   return $form;
 }
-function cm_list_subscribers_form_submit(&$form, &$form_state) {
+function campaign_monitor_subscribers_import_form_submit(&$form, &$form_state) {
   $list = $form_state['cm_list'];
   $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
   $values = $form_state['values'];
@@ -65,19 +65,26 @@ function cm_list_subscribers_form_submit(&$form, &$form_state) {
     $count = $result->response->TotalNumberOfRecords;
     if ($count >= 1) {
       $subscribers = $result->response->Results;
-      /*
+      $counter = 0;
       foreach ($subscribers as $item) {
-        $subscriber = entity_create('cm_subscriber', array(
-          'email' => $item->EmailAddress,
-          'name' => $item->Name,
-          'created' => strtotime($item->Date),
-          'status' => $item->State,
-          'lid' => $list->id,
-          'list_id' => $list->list_id,
-          'uid' => $list->uid,
-        ));
-        $subscriber->save();
-      }*/
+        $query = 'SELECT s.id FROM {campaign_monitor_subscribers} s WHERE s.lid = :lid AND s.email = :email';
+        $subscriber_exists = db_query($query, array(':lid' => $list->id, ':email' => $item->EmailAddress))->fetchField();
+        if (!$subscriber_exists) {
+          $subscriber = entity_create('cm_subscriber', array(
+            'email' => $item->EmailAddress,
+            'name' => $item->Name,
+            'created' => strtotime($item->Date),
+            'status' => $item->State,
+            'lid' => $list->id,
+            'list_id' => $list->list_id,
+            'uid' => $list->uid,
+          ));
+          $subscriber->save();
+          $counter++;
+        }
+      }
+      $message = t('Imported @count new subscribers for %list', array('@count' => number_format($counter), '%list' => entity_label('cm_list', $list)));
+      drupal_set_message($message);
     }
     else {
       $message = t('No %type subscribers found for %list', array('%type' => $report_type, '%list' => entity_label('cm_list', $list)));

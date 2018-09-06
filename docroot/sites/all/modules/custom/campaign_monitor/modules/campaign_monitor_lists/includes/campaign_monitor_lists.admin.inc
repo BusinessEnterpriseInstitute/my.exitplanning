@@ -8,44 +8,14 @@
 /*
  * Campaign Lists form.
  */
-function cm_client_lists_form($form, &$form_state, $client) {
+function campaign_monitor_lists_import_form($form, &$form_state, $client) {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($client) {
     $client_uri = entity_uri('cm_client', $client);
     $breadcrumb[] = l(t('@client', array('@client' => $client->name)), $client_uri['path']);
   }
-    drupal_set_breadcrumb($breadcrumb);
-  $lists_query = new EntityFieldQuery();
-  $lists_query->entityCondition('entity_type', 'cm_list');
-  $lists_query->propertyCondition('cid', $client->id, '=');
-  $lists_result = $lists_query->execute();
-  $header = array(t('Title'), t('Operations'), t('Preview'));
-  $rows = array();
-  if (isset($lists_result['cm_list'])) {
-    $list_ids = array_keys($lists_result['cm_list']);
-    $lists = entity_load('cm_list', $list_ids);
-    foreach ($lists as $list) {
-      $list_uri = entity_uri('cm_list', $list);
-      $destination = drupal_get_destination();
-      $row = array(
-        'data' => array(
-          array('data' => l($list->title, $list_uri['path'])),
-          array('data' => l(t('edit'), 'cm-list/' . $list->id . '/edit', array('query' => array($destination)))),
-          array('data' => l(t('preview'), 'cm-list/' . $list->id . '/raw', array('attributes' => array('target' => '_blank')))),
-        ),
-        'no_striping' => TRUE,
-      );
-      $rows[] = $row;
-    }
-  }
-  $form['lists_table'] = array(
-    '#type' => 'container',
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => 'No lists exist.',
-  );
+  drupal_set_breadcrumb($breadcrumb);
   $form_state['client'] = $client;
   $form['actions'] = array(
     '#type' => 'actions',
@@ -56,7 +26,7 @@ function cm_client_lists_form($form, &$form_state, $client) {
   );
   return $form;
 }
-function cm_client_lists_form_submit(&$form, &$form_state) {
+function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
   $client = $form_state['client'];
   $cm = campaign_monitor_get_api_object('CS_REST_Clients', $client->client_id);
   $cm_list = NULL;

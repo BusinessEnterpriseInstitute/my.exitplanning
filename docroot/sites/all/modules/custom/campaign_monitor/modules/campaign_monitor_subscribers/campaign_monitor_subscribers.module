@@ -20,10 +20,10 @@ function campaign_monitor_subscribers_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
-  $items['cm-list/%cm_list/subscribers/sync'] = array(
-    'title' => 'Sync',
+  $items['cm-list/%cm_list/subscribers/import'] = array(
+    'title' => 'Import',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('cm_list_subscribers_form', 1),
+    'page arguments' => array('campaign_monitor_subscribers_import_form', 1),
     'access arguments' => array('administer campaign monitor'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
