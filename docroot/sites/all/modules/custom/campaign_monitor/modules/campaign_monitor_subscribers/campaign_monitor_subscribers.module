@@ -139,7 +139,7 @@ function campaign_monitor_subscribers_entity_info() {
     'access callback' => 'campaign_monitor_subscribers_access',
     'admin ui' => array(
       'path' => 'admin/campaign-monitor/subscribers',
-      'controller class' => 'EntityDefaultUIController',
+      'controller class' => 'CmSubscriberEntityUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     ),
