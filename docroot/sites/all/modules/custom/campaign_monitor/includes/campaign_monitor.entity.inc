@@ -20,7 +20,7 @@ class ClientEntity extends Entity {
   }*/
 }
 class ClientEntityController extends EntityAPIController {
-
+  
 }
 
 

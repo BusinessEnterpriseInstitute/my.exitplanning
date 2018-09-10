@@ -157,11 +157,9 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   $list = $form_state['cm_list'];
   $campaign = $form_state['cm_campaign'];
   if (isset($campaign->is_new)) {
-    //$campaign->lid = $list->id;
-    //$campaign->list_id = $list->list_id;
-    //$campaign->status = 'Design';
+    // Save it now to get the entity id for unique campaign name.
     $campaign->save();
-    // Set a unique campaign name now.
+    // Set a unique campaign name to use on Campaign Monitor.
     $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
     $redirect = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
   }
@@ -188,32 +186,6 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   field_attach_submit('cm_campaign', $campaign, $form, $form_state);
   $campaign->save();
   $form_state['redirect'] = $redirect;
-  /*
-  elseif ($campaign->status == 'Design') {
-    $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
-    $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
-    if ($wrap) {
-      $result = $wrap->create($client->client_id, array(
-        'Subject' => $values['subject'],
-        'Name' => entity_label('cm_campaign', $campaign),
-        'FromName' => $values['from_name'],
-        'FromEmail' => $values['from_email'],
-        'ReplyTo' => $values['reply_to'],
-        'HtmlUrl' => $html_url,
-        'ListIDs' => array($campaign->list_id),
-      ));
-      if ($result->was_successful()) {
-        $campaign->campaign_id = $result->response;
-        $campaign->status = 'Draft';
-        $campaign->save();
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
-    }
-  }*/
 }
 
 /**
@@ -221,8 +193,6 @@ function cm_campaign_form_submit(&$form, &$form_state) {
  */
 function cm_campaign_delete_form($form, &$form_state, $campaign) {
   $form_state['cm_campaign'] = $campaign;
-  // Always provide entity id in the same form key as in the entity edit form.
-  //$form['list_id'] = array('#type' => 'value', '#value' => entity_id('cm_list', $cm_list));
   $campaign_uri = entity_uri('cm_campaign', $campaign);
   return confirm_form($form,
     t('Are you sure you want to delete campaign %title?', array('%title' => entity_label('cm_campaign', $campaign))),
@@ -253,7 +223,6 @@ function cm_campaign_delete_form_submit($form, &$form_state) {
       drupal_set_message($message, 'error');
     }
   }
-
   $form_state['redirect'] = $redirect;
 }
 

@@ -209,6 +209,38 @@ function campaign_monitor_entity_property_info_alter(&$info) {
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'uid',
   );
+$properties['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the list\'s edit page.'),
+    'getter callback' => 'campaign_monitor_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['delete_url'] = array(
+    'label' => t('Delete Link'),
+    'description' => t('The URL to delete a client.'),
+    'getter callback' => 'campaign_monitor_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+}
+/**
+ * Callback for getting subscriber properties.
+ *
+ */
+function campaign_monitor_get_properties($client, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-client/' . entity_id($entity_type, $client) . '/edit', $options);
+      break;
+    case 'delete_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-client/' . entity_id($entity_type, $client) . '/delete', $options);
+      break;
+  }
 }
 /*******************************************************************************
  ********************************* Client API's ****************************
@@ -639,4 +671,14 @@ function campaign_monitor_build_template($entity, $entity_type) {
     ),
   ));
   return $output;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function campaign_monitor_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'campaign_monitor') . '/views',
+  );
 }
