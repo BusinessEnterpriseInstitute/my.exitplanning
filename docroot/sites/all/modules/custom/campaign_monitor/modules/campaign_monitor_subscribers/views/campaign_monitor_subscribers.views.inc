@@ -256,6 +256,36 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler->display->display_options['fields']['name_1']['field'] = 'name';
   $handler->display->display_options['fields']['name_1']['relationship'] = 'uid';
   $handler->display->display_options['fields']['name_1']['label'] = 'Author';
+  /* Field: Subscriber: Edit Link */
+  $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
+  $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_subscriber';
+  $handler->display->display_options['fields']['edit_url']['field'] = 'edit_url';
+  $handler->display->display_options['fields']['edit_url']['label'] = '';
+  $handler->display->display_options['fields']['edit_url']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['edit_url']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['edit_url']['alter']['text'] = 'Edit';
+  $handler->display->display_options['fields']['edit_url']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['edit_url']['link_to_entity'] = 0;
+  /* Field: Subscriber: Delete Link */
+  $handler->display->display_options['fields']['delete_url']['id'] = 'delete_url';
+  $handler->display->display_options['fields']['delete_url']['table'] = 'views_entity_cm_subscriber';
+  $handler->display->display_options['fields']['delete_url']['field'] = 'delete_url';
+  $handler->display->display_options['fields']['delete_url']['label'] = '';
+  $handler->display->display_options['fields']['delete_url']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['delete_url']['alter']['alter_text'] = TRUE;
+  $handler->display->display_options['fields']['delete_url']['alter']['text'] = 'Delete';
+  $handler->display->display_options['fields']['delete_url']['element_label_colon'] = FALSE;
+  $handler->display->display_options['fields']['delete_url']['link_to_entity'] = 0;
+  /* Field: Global: Dropdown links */
+  $handler->display->display_options['fields']['ctools_dropdown']['id'] = 'ctools_dropdown';
+  $handler->display->display_options['fields']['ctools_dropdown']['table'] = 'views';
+  $handler->display->display_options['fields']['ctools_dropdown']['field'] = 'ctools_dropdown';
+  $handler->display->display_options['fields']['ctools_dropdown']['label'] = 'Operations';
+  $handler->display->display_options['fields']['ctools_dropdown']['fields'] = array(
+    'edit_url' => 'edit_url',
+    'delete_url' => 'delete_url',
+  );
+  $handler->display->display_options['fields']['ctools_dropdown']['check_access'] = 0;
   /* Filter criterion: Subscriber: Label */
   $handler->display->display_options['filters']['email']['id'] = 'email';
   $handler->display->display_options['filters']['email']['table'] = 'campaign_monitor_subscribers';
@@ -343,5 +373,6 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler = $view->new_display('system', 'System', 'system_1');
   $handler->display->display_options['defaults']['access'] = FALSE;
   $handler->display->display_options['path'] = 'admin/campaign-monitor/subscribers';
+
   return $view;
 }

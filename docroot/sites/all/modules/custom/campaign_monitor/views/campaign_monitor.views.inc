@@ -12,7 +12,7 @@ function campaign_monitor_views_default_views() {
   $views = array();
   $view = new view();
   $view->name = 'administer_campaign_monitor_clients';
-  $view->description = '';
+  $view->description = 'Administrative view to manage clients.';
   $view->tag = 'campaign monitor';
   $view->base_table = 'campaign_monitor_clients';
   $view->human_name = 'Administer Campaign Monitor Clients';
@@ -95,10 +95,14 @@ function campaign_monitor_views_default_views() {
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'campaign_monitor_clients';
   $handler->display->display_options['fields']['id']['field'] = 'id';
-  /* Field: Client: Label */
-  $handler->display->display_options['fields']['name']['id'] = 'name';
-  $handler->display->display_options['fields']['name']['table'] = 'campaign_monitor_clients';
-  $handler->display->display_options['fields']['name']['field'] = 'name';
+  /* Field: Client: Rendered Client */
+  $handler->display->display_options['fields']['rendered_entity']['id'] = 'rendered_entity';
+  $handler->display->display_options['fields']['rendered_entity']['table'] = 'views_entity_cm_client';
+  $handler->display->display_options['fields']['rendered_entity']['field'] = 'rendered_entity';
+  $handler->display->display_options['fields']['rendered_entity']['label'] = 'Client Name';
+  $handler->display->display_options['fields']['rendered_entity']['link_to_entity'] = 1;
+  $handler->display->display_options['fields']['rendered_entity']['view_mode'] = 'full';
+  $handler->display->display_options['fields']['rendered_entity']['bypass_access'] = 0;
   /* Field: Client: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_client';

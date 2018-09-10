@@ -100,7 +100,7 @@ function campaign_monitor_lists_views_default_views() {
 function _campaign_monitor_lists_views_admin() {
   $view = new view();
   $view->name = 'administer_campaign_monitor_lists';
-  $view->description = '';
+  $view->description = 'Administrative view to manage lists.';
   $view->tag = 'campaign monitor';
   $view->base_table = 'campaign_monitor_lists';
   $view->human_name = 'Administer Campaign Monitor Lists';
