@@ -29,6 +29,18 @@ class CampaignEntityController extends EntityAPIController {
   }
 }
 
+class CampaignEntityUIController extends EntityDefaultUIController {
+
+  /**
+   * Overrides hook_menu() defaults.
+   */
+  public function hook_menu() {
+    $items = parent::hook_menu();
+    unset($items[$this->path . '/add']);
+    return $items;
+  }
+}
+
 
 
 

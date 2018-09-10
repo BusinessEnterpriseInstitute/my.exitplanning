@@ -158,7 +158,7 @@ function campaign_monitor_campaigns_entity_info() {
     'access callback' => 'campaign_monitor_campaigns_access',
     'admin ui' => array(
       'path' => 'admin/campaign-monitor/campaigns',
-      'controller class' => 'EntityDefaultUIController',
+      'controller class' => 'CampaignEntityUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     ),
@@ -188,7 +188,7 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'lid',
   );
-    $properties['edit_url'] = array(
+  $properties['edit_url'] = array(
     'label' => t('Edit Link'),
     'description' => t('The URL of the campaign\'s edit page.'),
     'getter callback' => 'campaign_monitor_campaigns_get_properties',
@@ -199,6 +199,14 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
   $properties['delete_url'] = array(
     'label' => t('Delete Link'),
     'description' => t('The URL to delete a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['preview_url'] = array(
+    'label' => t('Preview Link'),
+    'description' => t('The URL to preview a campaign template.'),
     'getter callback' => 'campaign_monitor_campaigns_get_properties',
     'type' => 'uri',
     'computed' => TRUE,
@@ -235,16 +243,20 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
   switch ($name) {
     case 'edit_url':
       $options = array('query' => drupal_get_destination());
-      return url('cm-campaign/' . $campaign->id . '/edit', $options);
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/edit', $options);
       break;
     case 'delete_url':
       $options = array('query' => drupal_get_destination());
-      return url('cm-campaign/' . $campaign->id . '/delete', $options);
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/delete', $options);
+      break;
+    case 'preview_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/raw', $options);
       break;
     case 'send_link':
       if (campaign_monitor_send_access($campaign)) {
         $options = array('query' => drupal_get_destination());
-        return url('cm-campaign/' . $campaign->id . '/send', $options);
+        return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/send', $options);
       }
       return;
       break;
