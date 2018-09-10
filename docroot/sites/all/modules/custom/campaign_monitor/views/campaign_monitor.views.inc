@@ -13,7 +13,7 @@ function campaign_monitor_views_default_views() {
   $view = new view();
   $view->name = 'administer_campaign_monitor_clients';
   $view->description = '';
-  $view->tag = 'default';
+  $view->tag = 'campaign monitor';
   $view->base_table = 'campaign_monitor_clients';
   $view->human_name = 'Administer Campaign Monitor Clients';
   $view->core = 7;

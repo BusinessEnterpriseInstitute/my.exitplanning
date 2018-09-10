@@ -163,3 +163,9 @@ function campaign_monitor_campaigns_views_default_views() {
   $views['campaign_monitor_campaigns'] = $view; 
   return $views;
 }
+/**
+ * Callback to create an admin view for campaigns.
+ * @return $view
+ */
+function _campaign_monitor_campaigns_views_admin() {
+}
