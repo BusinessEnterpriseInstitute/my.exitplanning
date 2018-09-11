@@ -20,7 +20,13 @@ class ClientEntity extends Entity {
   }*/
 }
 class ClientEntityController extends EntityAPIController {
-  
+  public function create(array $values = array()) {
+    global $user;
+    $values += array(
+      'uid' => $user->uid,
+    );
+    return parent::create($values);
+  }
 }
 
 

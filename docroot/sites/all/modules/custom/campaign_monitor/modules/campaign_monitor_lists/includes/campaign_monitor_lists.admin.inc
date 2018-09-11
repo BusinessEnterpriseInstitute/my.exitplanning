@@ -83,16 +83,22 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
  */
 function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   global $user;
+  $is_administrator = user_access('administer campaign monitor');
   if (!isset($list->id)) {
+    $author = user_load($client->uid);
     $list = entity_create('cm_list', array(
       'cid' => $client->id,
       'client_id' => $client->client_id,
-      'uid' => $user->uid,
+      'uid' => $client->uid,
+      'from_name' => '',
+      'from_email' => $author->mail,
+      'reply_to' => $author->mail,
     ));
     $data = array();
   }
   else {
     $data = $list->list_data;
+    $author = user_load($list->uid);
   }
   $is_new = isset($list->is_new) ? TRUE : FALSE;
   $tabs_type = 'container';
@@ -109,9 +115,11 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   $form['tabs'] = array(
     '#type' => $tabs_type,
   );
+  // Settings tab.
   $form['tabs']['settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Settings'),
+    '#weight' => 1,
   );
   $form['tabs']['settings']['title'] = array(
     '#type' => 'textfield',
@@ -145,6 +153,43 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     '#title' => t('Confirmation success page'),
     '#default_value' => isset($data['details']->ConfirmationSuccessPage) ? $data['details']->ConfirmationSuccessPage : '',
   );
+  // Defaults tab.
+  $form['tabs']['defaults'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Campaign Defaults'),
+    '#weight' => $is_new ? 2 : -11,
+  );
+  // Only allow administrators to set author.
+  if ($is_administrator) {
+    $form['tabs']['defaults']['author'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Authored by'),
+      '#maxlength' => 60,
+      '#autocomplete_path' => 'user/autocomplete',
+      '#default_value' => $author->name,
+      '#required' => TRUE,
+    );
+  }
+  $form['tabs']['defaults']['from_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From name'),
+    '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
+    '#default_value' => $list->from_name,
+  );
+  $form['tabs']['defaults']['from_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('From e-mail'),
+    '#description' => t('This is the e-mail address your campaigns will come from.'),
+    '#element_validate' => array('campaign_monitor_email_validate'),
+    '#default_value' => $list->from_email,
+  );
+  $form['tabs']['defaults']['reply_to'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Replies should be sent to'),
+    '#description' => t('Enter a valid email address that replies will be sent to.'),
+    '#element_validate' => array('campaign_monitor_email_validate'),
+    '#default_value' => $list->reply_to,
+  );
   // Attach field api fields.
   if (!$is_new) {
     field_attach_form('cm_list', $list, $form, $form_state);
@@ -155,34 +200,10 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     $form['#attached']['js'] = array(
       drupal_get_path('module', 'field_group') . '/horizontal-tabs/horizontal-tabs.js',
     );
-    $form['tabs']['defaults'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Campaign Defaults'),
-      '#weight' => -11,
-    );
-    $form['tabs']['defaults']['from_name'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From name'),
-      '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
-      '#default_value' => $list->from_name,
-    );
-    $form['tabs']['defaults']['from_email'] = array(
-      '#type' => 'textfield',
-      '#title' => t('From e-mail'),
-      '#description' => t('This is the e-mail address your campaigns will come from.'),
-      '#element_validate' => array('campaign_monitor_email_validate'),
-      '#default_value' => $list->from_email,
-    );
-    $form['tabs']['defaults']['reply_to'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Replies should be sent to'),
-      '#description' => t('Enter a valid email address that replies will be sent to.'),
-      '#element_validate' => array('campaign_monitor_email_validate'),
-      '#default_value' => $list->reply_to,
-    );
+    // Design tab.
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Design'),
+      '#title' => t('Design Template'),
       '#weight' => -10,
     );
     $form['tabs']['design']['background_color'] = array(
@@ -237,10 +258,30 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   }
   return $form;
 }
+/**
+ * Implements hook_validate().
+ *
+ * Performs validation checks on the given list.
+ */
+function cm_list_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  // Validate the "authored by" field.
+  if (!empty($values['author']) && !($account = user_load_by_name($values['author']))) {
+    // The use of empty() is mandatory in the context of usernames
+    // as the empty string denotes the anonymous user. In case we
+    // are dealing with an anonymous user we set the user ID to 0.
+    form_set_error('author', t('The username %name does not exist.', array('%name' => $values['author'])));
+  }
+}
 function cm_list_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   $client = $form_state['cm_client'];
   $list = $form_state['cm_list'];
+  if (!empty($values['author'])) {
+    if ($account = user_load_by_name($values['author'])) {
+      $list->uid = $account->uid;
+    }
+  }
   if (isset($list->is_new)) {
     $cm = campaign_monitor_get_api_object('CS_REST_Lists', NULL);
     if ($cm) {

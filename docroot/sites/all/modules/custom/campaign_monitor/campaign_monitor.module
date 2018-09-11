@@ -175,7 +175,7 @@ function campaign_monitor_entity_info() {
     ),
     'static cache' => TRUE,
     'entity class' => 'ClientEntity',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'ClientEntityController',
     'views controller class' => 'EntityDefaultViewsController',
     'module' => 'campaign_monitor',
     'view modes' => array(

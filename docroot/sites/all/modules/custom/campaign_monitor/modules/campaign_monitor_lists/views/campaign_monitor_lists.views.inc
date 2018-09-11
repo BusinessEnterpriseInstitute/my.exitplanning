@@ -13,7 +13,7 @@ function campaign_monitor_lists_views_default_views() {
   $view = new view();
   $view->name = 'campaign_monitor_lists';
   $view->description = '';
-  $view->tag = 'default';
+  $view->tag = 'campaign monitor';
   $view->base_table = 'campaign_monitor_lists';
   $view->human_name = 'Campaign Monitor Lists';
   $view->core = 7;
@@ -49,11 +49,29 @@ function campaign_monitor_lists_views_default_views() {
   $handler->display->display_options['empty']['area']['empty'] = TRUE;
   $handler->display->display_options['empty']['area']['content'] = 'No lists exist for this client.';
   $handler->display->display_options['empty']['area']['format'] = 'raw_html';
+  /* Relationship: List: User */
+  $handler->display->display_options['relationships']['uid']['id'] = 'uid';
+  $handler->display->display_options['relationships']['uid']['table'] = 'campaign_monitor_lists';
+  $handler->display->display_options['relationships']['uid']['field'] = 'uid';
+  /* Field: List: URL */
+  $handler->display->display_options['fields']['url']['id'] = 'url';
+  $handler->display->display_options['fields']['url']['table'] = 'views_entity_cm_list';
+  $handler->display->display_options['fields']['url']['field'] = 'url';
+  $handler->display->display_options['fields']['url']['exclude'] = TRUE;
+  $handler->display->display_options['fields']['url']['link_to_entity'] = 0;
   /* Field: List: Label */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'campaign_monitor_lists';
   $handler->display->display_options['fields']['title']['field'] = 'title';
   $handler->display->display_options['fields']['title']['label'] = 'Name';
+  $handler->display->display_options['fields']['title']['alter']['make_link'] = TRUE;
+  $handler->display->display_options['fields']['title']['alter']['path'] = '[url]';
+  /* Field: User: Name */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'users';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  $handler->display->display_options['fields']['name']['relationship'] = 'uid';
+  $handler->display->display_options['fields']['name']['label'] = 'Author';
   /* Field: List: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_list';

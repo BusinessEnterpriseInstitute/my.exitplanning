@@ -106,6 +106,7 @@ function cm_client_form($form, &$form_state, $cm_client, $op = 'edit') {
     $title = entity_label('cm_client', $cm_client);
     drupal_set_title($title);
   }
+  $author = user_load($cm_client->uid);
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Company Name'),
@@ -127,6 +128,14 @@ function cm_client_form($form, &$form_state, $cm_client, $op = 'edit') {
     '#options' => drupal_map_assoc($zones),
     '#required' => TRUE,
   );
+  $form['author'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Authored by'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => $author->name,
+    '#required' => TRUE,
+  );
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -136,10 +145,31 @@ function cm_client_form($form, &$form_state, $cm_client, $op = 'edit') {
   );
   return $form;
 }
+/**
+ * Implements hook_validate().
+ *
+ * Performs validation checks on the given client.
+ */
+function cm_client_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  // Validate the "authored by" field.
+  if (!empty($values['author']) && !($account = user_load_by_name($values['author']))) {
+    // The use of empty() is mandatory in the context of usernames
+    // as the empty string denotes the anonymous user. In case we
+    // are dealing with an anonymous user we set the user ID to 0.
+    form_set_error('author', t('The username %name does not exist.', array('%name' => $values['author'])));
+  }
+}
 function cm_client_form_submit(&$form, &$form_state) {
   $form_state['redirect'] = 'admin/config/campaign-monitor/clients';
   $client = entity_ui_form_submit_build_entity($form, $form_state);
   $is_new = isset($client->is_new) ? TRUE : FALSE;
+  $values = $form_state['values'];
+  if (!empty($values['author'])) {
+    if ($account = user_load_by_name($values['author'])) {
+      $client->uid = $account->uid;
+    }
+  }
   if ($is_new) {
     $cm = campaign_monitor_get_api_object('CS_REST_Clients', NULL);
     $id = NULL;
@@ -201,7 +231,6 @@ function cm_client_form_submit(&$form, &$form_state) {
         $data['BasicDetails']->Country = $client->country;
         $data['BasicDetails']->TimeZone = $client->timezone;
         $client->client_data = $data;
-        $client->save();
         $message = t('Updated client id %id on Campaign Monitor', array('%id' => $client->client_id));
         drupal_set_message($message);
       }
@@ -216,6 +245,7 @@ function cm_client_form_submit(&$form, &$form_state) {
       drupal_set_message($message);
     }
   }
+  $client->save();
 }
 
 /**
