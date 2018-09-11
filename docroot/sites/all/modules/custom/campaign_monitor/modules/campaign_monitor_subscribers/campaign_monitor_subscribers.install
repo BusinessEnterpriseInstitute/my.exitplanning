@@ -60,7 +60,7 @@ function campaign_monitor_subscribers_schema() {
         'description' => 'The subscriber name on Campaign Monitor.',
         'default' => '',
       ),
-      'status' => array(
+      'state' => array(
         'description' => 'Subscriber\'s current status.',
         'type' => 'varchar',
         'length' => 20,
@@ -82,6 +82,12 @@ function campaign_monitor_subscribers_schema() {
       ),
       'created' => array(
         'description' => 'The Unix timestamp when the subscriber was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the subscriber was updated.',
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,

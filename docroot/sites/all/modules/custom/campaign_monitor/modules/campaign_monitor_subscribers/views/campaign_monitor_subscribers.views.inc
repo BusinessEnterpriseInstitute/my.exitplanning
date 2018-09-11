@@ -13,7 +13,7 @@ function campaign_monitor_subscribers_views_default_views() {
   $view = new view();
   $view->name = 'campaign_monitor_subscribers';
   $view->description = '';
-  $view->tag = 'default';
+  $view->tag = 'campaign monitor';
   $view->base_table = 'campaign_monitor_subscribers';
   $view->human_name = 'Campaign Monitor Subscribers';
   $view->core = 7;
@@ -100,9 +100,9 @@ function campaign_monitor_subscribers_views_default_views() {
   $handler->display->display_options['fields']['name']['table'] = 'campaign_monitor_subscribers';
   $handler->display->display_options['fields']['name']['field'] = 'name';
   /* Field: Subscriber: Status */
-  $handler->display->display_options['fields']['status']['id'] = 'status';
-  $handler->display->display_options['fields']['status']['table'] = 'campaign_monitor_subscribers';
-  $handler->display->display_options['fields']['status']['field'] = 'status';
+  $handler->display->display_options['fields']['state']['id'] = 'state';
+  $handler->display->display_options['fields']['state']['table'] = 'campaign_monitor_subscribers';
+  $handler->display->display_options['fields']['state']['field'] = 'state';
   /* Field: Subscriber: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_subscriber';
@@ -136,6 +136,32 @@ function campaign_monitor_subscribers_views_default_views() {
   $handler->display->display_options['arguments']['lid']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['lid']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['lid']['summary_options']['items_per_page'] = '25';
+  /* Filter criterion: Subscriber: Status */
+  $handler->display->display_options['filters']['state']['id'] = 'state';
+  $handler->display->display_options['filters']['state']['table'] = 'campaign_monitor_subscribers';
+  $handler->display->display_options['filters']['state']['field'] = 'state';
+  $handler->display->display_options['filters']['state']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['state']['expose']['operator_id'] = 'state_op';
+  $handler->display->display_options['filters']['state']['expose']['label'] = 'Status';
+  $handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
+  $handler->display->display_options['filters']['state']['expose']['identifier'] = 'state';
+  $handler->display->display_options['filters']['state']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    18 => 0,
+    9 => 0,
+    7 => 0,
+    16 => 0,
+    8 => 0,
+    17 => 0,
+    6 => 0,
+    15 => 0,
+    5 => 0,
+    11 => 0,
+    14 => 0,
+    12 => 0,
+    3 => 0,
+  );
 
   $views['campaign_monitor_subscribers'] = $view;
   $views['administer_campaign_monitor_subscribers'] = _campaign_monitor_subscribers_views_admin();
@@ -174,10 +200,15 @@ function _campaign_monitor_subscribers_views_admin() {
     'id' => 'id',
     'email' => 'email',
     'name' => 'name',
+    'state' => 'state',
     'rendered_entity_1' => 'rendered_entity_1',
     'name_1' => 'name_1',
+    'changed' => 'changed',
+    'edit_url' => 'edit_url',
+    'delete_url' => 'delete_url',
+    'ctools_dropdown' => 'ctools_dropdown',
   );
-  $handler->display->display_options['style_options']['default'] = 'email';
+  $handler->display->display_options['style_options']['default'] = 'changed';
   $handler->display->display_options['style_options']['info'] = array(
     'id' => array(
       'sortable' => 0,
@@ -200,6 +231,13 @@ function _campaign_monitor_subscribers_views_admin() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'state' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
     'rendered_entity_1' => array(
       'align' => '',
       'separator' => '',
@@ -208,6 +246,28 @@ function _campaign_monitor_subscribers_views_admin() {
     'name_1' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'changed' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'edit_url' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'delete_url' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
+    'ctools_dropdown' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
@@ -232,6 +292,7 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'campaign_monitor_subscribers';
   $handler->display->display_options['fields']['id']['field'] = 'id';
+  $handler->display->display_options['fields']['id']['label'] = 'ID';
   /* Field: Subscriber: Label */
   $handler->display->display_options['fields']['email']['id'] = 'email';
   $handler->display->display_options['fields']['email']['table'] = 'campaign_monitor_subscribers';
@@ -241,6 +302,10 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'campaign_monitor_subscribers';
   $handler->display->display_options['fields']['name']['field'] = 'name';
+  /* Field: Subscriber: Status */
+  $handler->display->display_options['fields']['state']['id'] = 'state';
+  $handler->display->display_options['fields']['state']['table'] = 'campaign_monitor_subscribers';
+  $handler->display->display_options['fields']['state']['field'] = 'state';
   /* Field: List: Rendered List */
   $handler->display->display_options['fields']['rendered_entity_1']['id'] = 'rendered_entity_1';
   $handler->display->display_options['fields']['rendered_entity_1']['table'] = 'views_entity_cm_list';
@@ -256,6 +321,13 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler->display->display_options['fields']['name_1']['field'] = 'name';
   $handler->display->display_options['fields']['name_1']['relationship'] = 'uid';
   $handler->display->display_options['fields']['name_1']['label'] = 'Author';
+  /* Field: Subscriber: Date Updated */
+  $handler->display->display_options['fields']['changed']['id'] = 'changed';
+  $handler->display->display_options['fields']['changed']['table'] = 'campaign_monitor_subscribers';
+  $handler->display->display_options['fields']['changed']['field'] = 'changed';
+  $handler->display->display_options['fields']['changed']['label'] = 'Last Update';
+  $handler->display->display_options['fields']['changed']['date_format'] = 'short';
+  $handler->display->display_options['fields']['changed']['second_date_format'] = 'search_api_facetapi_YEAR';
   /* Field: Subscriber: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_subscriber';
@@ -352,6 +424,32 @@ function _campaign_monitor_subscribers_views_admin() {
   $handler->display->display_options['filters']['uid']['expose']['operator'] = 'uid_op';
   $handler->display->display_options['filters']['uid']['expose']['identifier'] = 'uid';
   $handler->display->display_options['filters']['uid']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    18 => 0,
+    9 => 0,
+    7 => 0,
+    16 => 0,
+    8 => 0,
+    17 => 0,
+    6 => 0,
+    15 => 0,
+    5 => 0,
+    11 => 0,
+    14 => 0,
+    12 => 0,
+    3 => 0,
+  );
+  /* Filter criterion: Subscriber: Status */
+  $handler->display->display_options['filters']['state']['id'] = 'state';
+  $handler->display->display_options['filters']['state']['table'] = 'campaign_monitor_subscribers';
+  $handler->display->display_options['filters']['state']['field'] = 'state';
+  $handler->display->display_options['filters']['state']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['state']['expose']['operator_id'] = 'state_op';
+  $handler->display->display_options['filters']['state']['expose']['label'] = 'Status';
+  $handler->display->display_options['filters']['state']['expose']['operator'] = 'state_op';
+  $handler->display->display_options['filters']['state']['expose']['identifier'] = 'state';
+  $handler->display->display_options['filters']['state']['expose']['remember_roles'] = array(
     2 => '2',
     1 => 0,
     18 => 0,

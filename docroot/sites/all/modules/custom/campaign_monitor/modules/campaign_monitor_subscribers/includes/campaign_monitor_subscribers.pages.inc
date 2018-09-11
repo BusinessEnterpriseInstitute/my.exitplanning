@@ -38,53 +38,6 @@ function campaign_monitor_subscribers_cm_subscriber_view($entity, $view_mode = '
       $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
-    /*
-    $summary = isset($data['details']) ? $data['details'] : NULL;
-    if ($summary) {
-      $rows = array();
-      $rows[] = array(
-        'data' => array(
-          array('data' => t('List ID:'), 'header' => TRUE),
-          array('data' => $summary->ListID),
-        ),
-        'no_striping' => TRUE,
-      );
-      $rows[] = array(
-        'data' => array(
-          array('data' => t('Unsubscribe Page:'), 'header' => TRUE),
-          array('data' => !empty($summary->UnsubscribePage) ? $summary->UnsubscribePage : t('n/a')),
-        ),
-        'no_striping' => TRUE,
-      );
-      $rows[] = array(
-        'data' => array(
-          array('data' => t('Confirmed Opt-in:'), 'header' => TRUE),
-          array('data' => $summary->ConfirmedOptIn ? t('Yes') : t('No')),
-        ),
-        'no_striping' => TRUE,
-      );
-      $rows[] = array(
-        'data' => array(
-          array('data' => t('Confirmation Success Page:'), 'header' => TRUE),
-          array('data' => !empty($summary->ConfirmationSuccessPage) ? $summary->ConfirmationSuccessPage : t('n/a')),
-        ),
-        'no_striping' => TRUE,
-      );
-      $rows[] = array(
-        'data' => array(
-          array('data' => t('Unsubscribe Setting:'), 'header' => TRUE),
-          array('data' => $summary->UnsubscribeSetting == 'AllClientLists' ? t('All client lists') : t('Only this list')),
-        ),
-        'no_striping' => TRUE,
-      );
-      $entity->content['summary'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Summary'),
-        '#theme' => 'table',
-        '#header' => array(),
-        '#rows' => $rows,
-      );
-    }*/
   }
   return $entity->content;
 }
@@ -97,7 +50,10 @@ function campaign_monitor_subscribers_list($list) {
   $list_uri = entity_uri('cm_list', $list);
   $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
-  
-  $output = views_embed_view('campaign_monitor_subscribers', 'default', $list->id);
+  $view = views_get_view('campaign_monitor_subscribers','default');
+  $view->set_arguments(array($list->id));
+  $view->override_url = drupal_get_path_alias($_GET['q']);
+
+  $output = $view->preview();
   return $output;
 }

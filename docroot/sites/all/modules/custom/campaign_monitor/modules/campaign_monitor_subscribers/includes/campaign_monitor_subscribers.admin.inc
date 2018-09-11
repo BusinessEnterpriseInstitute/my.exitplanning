@@ -74,7 +74,8 @@ function campaign_monitor_subscribers_import_form_submit(&$form, &$form_state) {
             'email' => $item->EmailAddress,
             'name' => $item->Name,
             'created' => strtotime($item->Date),
-            'status' => $item->State,
+            'changed' => strtotime($item->Date),
+            'state' => $item->State,
             'lid' => $list->id,
             'list_id' => $list->list_id,
             'uid' => $list->uid,
@@ -132,7 +133,7 @@ function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = 
     '#title' => t('Name'),
     '#default_value' => isset($cm_subscriber->name) ? $cm_subscriber->name : '',
   );
-  if (!$is_new && $cm_subscriber->status == 'Deleted') {
+  if (!$is_new && $cm_subscriber->state == 'Deleted') {
     $form['resubscribe'] = array(
       '#type' => 'checkbox',
       '#title' => t('Resubscribe'),
@@ -197,8 +198,7 @@ function cm_subscriber_form_submit(&$form, &$form_state) {
         $subscriber->list_id = $list->list_id;
         $subscriber->email = $values['email'];
         $subscriber->name = $values['name'];
-        $subscriber->created = REQUEST_TIME;
-        $subscriber->status = 'Active';
+        $subscriber->state = 'Active';
         $subscriber->uid = $list->uid;
         $subscriber->save();
         
@@ -240,7 +240,7 @@ function cm_subscriber_form_submit(&$form, &$form_state) {
         $subscriber->email = $values['email'];
         $subscriber->name = $values['name'];
         if (!empty($values['resubscribe'])) {
-          $subscriber->status = 'Active';
+          $subscriber->state = 'Active';
         }
         $subscriber->save();
         foreach ($messages as $message) {
@@ -282,7 +282,7 @@ function cm_subscriber_delete_form_submit($form, &$form_state) {
     $result = $wrap->delete($subscriber->email);
     // Delete our entity if subscriber could be deleted on CM or the list id couldn't be found.
     if ($result->was_successful()) {
-      $subscriber->status = 'Deleted';
+      $subscriber->state = 'Deleted';
       $subscriber->save();
       drupal_set_message(t('Subscriber %email was deleted from this list.', array('%email' => entity_label('cm_subscriber', $subscriber))));
     }

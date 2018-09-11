@@ -119,7 +119,7 @@ function campaign_monitor_subscribers_entity_info() {
     ),
     'static cache' => TRUE,
     'entity class' => 'CmSubscriberEntity',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'CmSubscriberEntityController',
     'views controller class' => 'EntityDefaultViewsController',
     'module' => 'campaign_monitor_subscribers',
     'view modes' => array(
@@ -185,6 +185,28 @@ function campaign_monitor_subscribers_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $properties['state'] = array(
+    'label' => t('Status'),
+    'type' => 'text',
+    'description' => t('The status of the subscriber.'),
+    'schema field' => 'state',
+    'options list' => 'campaign_monitor_subscribers_status_list',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['created'] = array(
+    'label' => t('Date Created'),
+    'type' => 'date',
+    'description' => t('The date the subsciber was created.'),
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['changed'] = array(
+    'label' => t('Date Updated'),
+    'type' => 'date',
+    'description' => t('The date the subsciber was most recently updated.'),
+    'schema field' => 'changed',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
 }
 /**
  * Callback for getting subscriber properties.
@@ -197,12 +219,25 @@ function campaign_monitor_subscribers_get_properties($subscriber, array $options
       return url('cm-subscriber/' . $subscriber->id . '/edit', $options);
       break;
     case 'delete_url':
-      if ($subscriber->status != 'Deleted') {
+      if ($subscriber->state != 'Deleted') {
         $options = array('query' => drupal_get_destination());
         return url('cm-subscriber/' . $subscriber->id . '/delete', $options);
       }
       break;
   }
+}
+/**
+ * Callback for returning a list of subsriber states.
+ */
+function campaign_monitor_subscribers_status_list($subscriber) {
+  $statuses = array(
+    'Active',
+    'Unconfirmed',
+    'Unsubscribed',
+    'Bounced',
+    'Deleted',
+  );
+  return drupal_map_assoc($statuses);
 }
 
 /*******************************************************************************
@@ -269,7 +304,7 @@ function campaign_monitor_subscribers_views_api() {
  * Helper function to check for duplicate e-mail addresses.
  */
 function campaign_monitor_subscribers_unique_email($email, $list_id) {
-  $query = "SELECT e.email, e.list_id, e.status " .
+  $query = "SELECT e.email, e.list_id, e.state " .
            "FROM {campaign_monitor_subscribers} e " .
            "WHERE email = :email";
   $email_items = db_query($query, array(':email' => $email))->fetchAll();
@@ -281,13 +316,13 @@ function campaign_monitor_subscribers_unique_email($email, $list_id) {
           $my_list = TRUE;
           break;
         }
-        if ($item->status == 'Active') {
+        if ($item->state == 'Active') {
           $other_list = TRUE;
           break;
         }
       }
       if ($my_list) {
-        return array('match' => 'self', 'status' => $item->status);
+        return array('match' => 'self', 'status' => $item->state);
       }
       elseif ($other_list) {
         return array('match' => 'other', 'status' => 'Active');
