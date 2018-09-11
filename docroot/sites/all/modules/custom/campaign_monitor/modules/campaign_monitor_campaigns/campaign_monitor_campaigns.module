@@ -15,6 +15,21 @@ function campaign_monitor_campaigns_menu() {
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
     'weight' => -8,
   );
+  $items['cm-list/%cm_list/campaigns/drafts'] = array(
+    'title' => 'Campaign Drafts',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['cm-list/%cm_list/campaigns/sent'] = array(
+    'title' => 'Campaigns Sent',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1, 3),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 2,
+  );
   $items['cm-list/%cm_list/campaigns/add'] = array(
     'title' => 'Create campaign',
     'description' => 'Add campaign to Campaign Monitor.',
