@@ -91,7 +91,7 @@ function campaign_monitor_campaigns_menu() {
 function campaign_monitor_send_access($campaign) {
   $can_update = entity_access('update', 'cm_campaign', $campaign);
   $statuses = array('Scheduled', 'Sent');
-  if ($can_update && !in_array($campaign->status, $statuses)) {
+  if ($can_update && !in_array($campaign->campaign_status, $statuses)) {
     return TRUE;
   }
   return;
@@ -212,6 +212,14 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $properties['campaign_status'] = array(
+    'label' => t('Status'),
+    'type' => 'text',
+    'description' => t('The status of the campaign.'),
+    'schema field' => 'campaign_status',
+    'options list' => 'campaign_monitor_campaigns_status_list',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
   $properties['created'] = array(
     'label' => t('Date created'),
     'description' => t('The date the campaign was created.'),
@@ -261,6 +269,18 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
       return;
       break;
   }
+}
+/**
+ * Callback for returning a list of subsriber states.
+ */
+function campaign_monitor_campaigns_status_list($campaign) {
+  $statuses = array(
+    'Design',
+    'Draft',
+    'Scheduled',
+    'Sent',
+  );
+  return drupal_map_assoc($statuses);
 }
 
 /*******************************************************************************

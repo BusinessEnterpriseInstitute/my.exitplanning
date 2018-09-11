@@ -15,7 +15,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       'uid' => $list->uid,
       'list_id' => $list->list_id,
       'client_id' => $list->client_id,
-      'status' => 'Design',
+      'campaign_status' => 'Design',
     ));
   }
   //$data = isset($cm_list->id) ? $cm_list->list_data : array();
@@ -77,12 +77,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#default_value' => $is_new ? $list->reply_to : $campaign->reply_to,
     '#required' => TRUE,
   );
-  $form['tabs']['settings']['article_reference'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Newsletter Reference'),
-    '#description' => t('Choose an article from our database'),
-    '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete'
-  );
   // Attach field api fields.
   if (!$is_new) {
     field_attach_form('cm_campaign', $campaign, $form, $form_state);
@@ -93,6 +87,25 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     $form['#attached']['js'] = array(
       drupal_get_path('module', 'field_group') . '/horizontal-tabs/horizontal-tabs.js',
     );
+    // Content tab.
+    $form['tabs']['content'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Content'),
+      '#weight' => -20,
+    );
+    $form['tabs']['content']['article_reference'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Newsletter Reference'),
+      '#description' => t('Choose an article from our database'),
+      '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete',
+      '#weight' => 1,
+    );
+    if (isset($form['field_body'])) {
+      $form['tabs']['content']['field_body'] = $form['field_body'];
+      $form['tabs']['content']['field_body']['#weight'] = 2;
+      unset($form['field_body']);
+    }
+    // Design tab.
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
       '#title' => t('Design'),
@@ -130,7 +143,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $form['actions'] = array(
     '#type' => 'actions',
   );
-  if ($is_new || !$is_new && $campaign->status == 'Design') {
+  if ($is_new || !$is_new && $campaign->campaign_status == 'Design') {
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $is_new ? t('Next') : t('Finish'),
@@ -139,7 +152,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       ),
     );
   }
-  if (!$is_new && $campaign->status == 'Design') {
+  if (!$is_new && $campaign->campaign_status == 'Design') {
     $form['actions']['save_edit'] = array(
       '#type' => 'submit',
       '#value' => t('Save & Continue'),
@@ -313,7 +326,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
       if ($result->was_successful()) {
         $campaign_id = $result->response;
         $campaign->campaign_id = $result->response;
-        $campaign->status = 'Draft';
+        $campaign->campaign_status = 'Draft';
         $campaign->save();
       }
       else {
@@ -331,7 +344,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
     ));
     if ($result->was_successful()) {
       $new_status = $send_option == 1 ? 'Sent' : 'Scheduled';
-      $campaign->status = $new_status;
+      $campaign->campaign_status = $new_status;
       $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
       $campaign->save();
     }
