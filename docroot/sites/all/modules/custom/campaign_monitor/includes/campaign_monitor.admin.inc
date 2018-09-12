@@ -236,6 +236,7 @@ function cm_client_form_submit(&$form, &$form_state) {
         $data['BasicDetails']->Country = $client->country;
         $data['BasicDetails']->TimeZone = $client->timezone;
         $client->client_data = $data;
+        $client->save();
         $message = t('Updated client id %id on Campaign Monitor', array('%id' => $client->client_id));
         drupal_set_message($message);
       }
@@ -246,7 +247,6 @@ function cm_client_form_submit(&$form, &$form_state) {
       }
     }
   }
-  $client->save();
   $form_state['redirect'] = 'admin/campaign-monitor/clients';
 }
 
@@ -273,7 +273,7 @@ function cm_client_delete_form_submit($form, &$form_state) {
   if ($wrap) {
     $result = $wrap->delete();
     // Delete our entity if client could be deleted on CM or the client id couldn't be found.
-    if ($result->was_successful() || $result->response->Code == 101) {
+    if ($result->was_successful() || $result->response->Code == 101 || $result->response->Code == 404) {
       cm_client_delete($client);
       drupal_set_message(t('Client %name deleted.', array('%name' => entity_label('cm_client', $client))));
     }
