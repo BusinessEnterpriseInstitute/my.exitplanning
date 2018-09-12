@@ -39,6 +39,7 @@ function campaign_monitor_views_default_views() {
     'edit_url' => 'edit_url',
     'delete_url' => 'delete_url',
     'name_1' => 'name_1',
+    'created' => 'created',
     'ctools_dropdown' => 'ctools_dropdown',
   );
   $handler->display->display_options['style_options']['default'] = 'name';
@@ -74,12 +75,23 @@ function campaign_monitor_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'created' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 0,
+    ),
     'ctools_dropdown' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 0,
     ),
   );
+  /* Header: Global: Result summary */
+  $handler->display->display_options['header']['result']['id'] = 'result';
+  $handler->display->display_options['header']['result']['table'] = 'views';
+  $handler->display->display_options['header']['result']['field'] = 'result';
   /* No results behavior: Global: Text area */
   $handler->display->display_options['empty']['area']['id'] = 'area';
   $handler->display->display_options['empty']['area']['table'] = 'views';
@@ -91,18 +103,11 @@ function campaign_monitor_views_default_views() {
   $handler->display->display_options['relationships']['uid']['id'] = 'uid';
   $handler->display->display_options['relationships']['uid']['table'] = 'campaign_monitor_clients';
   $handler->display->display_options['relationships']['uid']['field'] = 'uid';
-  /* Field: Client: Client ID */
-  $handler->display->display_options['fields']['id']['id'] = 'id';
-  $handler->display->display_options['fields']['id']['table'] = 'campaign_monitor_clients';
-  $handler->display->display_options['fields']['id']['field'] = 'id';
-  /* Field: Client: Rendered Client */
-  $handler->display->display_options['fields']['rendered_entity']['id'] = 'rendered_entity';
-  $handler->display->display_options['fields']['rendered_entity']['table'] = 'views_entity_cm_client';
-  $handler->display->display_options['fields']['rendered_entity']['field'] = 'rendered_entity';
-  $handler->display->display_options['fields']['rendered_entity']['label'] = 'Client Name';
-  $handler->display->display_options['fields']['rendered_entity']['link_to_entity'] = 1;
-  $handler->display->display_options['fields']['rendered_entity']['view_mode'] = 'full';
-  $handler->display->display_options['fields']['rendered_entity']['bypass_access'] = 0;
+  /* Field: Client: Label */
+  $handler->display->display_options['fields']['name']['id'] = 'name';
+  $handler->display->display_options['fields']['name']['table'] = 'campaign_monitor_clients';
+  $handler->display->display_options['fields']['name']['field'] = 'name';
+  $handler->display->display_options['fields']['name']['label'] = 'Name';
   /* Field: Client: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_client';
@@ -129,6 +134,12 @@ function campaign_monitor_views_default_views() {
   $handler->display->display_options['fields']['name_1']['field'] = 'name';
   $handler->display->display_options['fields']['name_1']['relationship'] = 'uid';
   $handler->display->display_options['fields']['name_1']['label'] = 'Author';
+  /* Field: Client: Date created */
+  $handler->display->display_options['fields']['created']['id'] = 'created';
+  $handler->display->display_options['fields']['created']['table'] = 'campaign_monitor_clients';
+  $handler->display->display_options['fields']['created']['field'] = 'created';
+  $handler->display->display_options['fields']['created']['date_format'] = 'short';
+  $handler->display->display_options['fields']['created']['second_date_format'] = 'search_api_facetapi_YEAR';
   /* Field: Global: Dropdown links */
   $handler->display->display_options['fields']['ctools_dropdown']['id'] = 'ctools_dropdown';
   $handler->display->display_options['fields']['ctools_dropdown']['table'] = 'views';
