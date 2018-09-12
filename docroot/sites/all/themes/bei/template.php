@@ -302,4 +302,6 @@ function bei_zurb_foundation_ignored_forms_alter(&$form_ids) {
   $form_ids[] = 'field_collection_item_form';
   $form_ids[] = 'masquerade_block_1';
   $form_ids[] = 'webform_client_form_6164';
+  $form_ids[] = 'cm_list_form';
+  $form_ids[] = 'cm_campaign_form';
 }

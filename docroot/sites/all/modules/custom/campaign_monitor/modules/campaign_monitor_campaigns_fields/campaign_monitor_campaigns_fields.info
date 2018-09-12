@@ -1,0 +1,7 @@
+name = Campaign Monitor Fields - cm_campaign entity
+description = Creates field api fields for Campaign Monitor cm_campaign entities.
+package = Campaign Monitor
+core = 7.x
+
+dependencies[] = campaign_monitor
+dependencies[] = campaign_monitor_campaigns

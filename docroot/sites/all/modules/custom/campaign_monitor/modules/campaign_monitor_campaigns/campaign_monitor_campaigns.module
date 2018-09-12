@@ -1,0 +1,359 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function campaign_monitor_campaigns_menu() {
+  $items = array();
+  $items['cm-list/%cm_list/campaigns'] = array(
+    'title' => 'Campaigns',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => -8,
+  );
+  $items['cm-list/%cm_list/campaigns/drafts'] = array(
+    'title' => 'Campaign Drafts',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => 1,
+  );
+  $items['cm-list/%cm_list/campaigns/sent'] = array(
+    'title' => 'Campaigns Sent',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1, 3),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 2,
+  );
+  $items['cm-list/%cm_list/campaigns/add'] = array(
+    'title' => 'Create campaign',
+    'description' => 'Add campaign to Campaign Monitor.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_form', NULL, 1),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );
+  // Campaigns
+  $items['cm-campaign/%cm_campaign'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Campaign',
+    'title callback' => 'entity_label',
+    'title arguments' => array('cm_campaign', 1),
+    'page callback' => 'campaign_monitor_campaigns_cm_campaign_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+  );
+  $items['cm-campaign/%cm_campaign/view'] = array(
+    'title' => 'Summary',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['cm-campaign/%cm_campaign/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('cm_campaign', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_campaign', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    'weight' => -9,
+  );
+  $items['cm-campaign/%cm_campaign/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'cm_campaign', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    'weight' => -8,
+  );
+  $items['cm-campaign/%cm_campaign/raw'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Campaign',
+    'title callback' => 'entity_label',
+    'title arguments' => array('cm_campaign', 1),
+    'page callback' => 'campaign_monitor_campaigns_cm_campaign_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1, 'raw'),
+    'access callback' => TRUE,
+    //'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+  );
+  $items['cm-campaign/%cm_campaign/send'] = array(
+    'title' => 'Send',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_send_form', 1),
+    'access callback' => 'campaign_monitor_send_access',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    'weight' => -7,
+  );
+
+  return $items;
+}
+/**
+ * Access callback for sending a campaign.
+ */
+function campaign_monitor_send_access($campaign) {
+  $can_update = entity_access('update', 'cm_campaign', $campaign);
+  $statuses = array('Scheduled', 'Sent');
+  if ($can_update && !in_array($campaign->campaign_status, $statuses)) {
+    return TRUE;
+  }
+  return;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function campaign_monitor_campaigns_permission() {
+  return array(
+    'create campaign' => array(
+      'title' => t('Create campaign'),
+      'description' => t('Access to create Campaign Monitor campaigns'),
+    ),
+    'view own campaigns' => array(
+      'title' => t('View own campaigns'),
+      'description' => t('Access to view own Campaign Monitor campaigns'),
+    ),
+    'edit own campaigns' => array(
+      'title' => t('Edit own campaigns in design status'),
+      'description' => t('Access to edit own Campaign Monitor campaigns'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ * Inform the base system and the Field API about one or more entity types.
+ */
+function campaign_monitor_campaigns_entity_info() {
+  $info = array();
+  $info['cm_campaign'] = array(
+    'label' => t('Campaign'),
+    'plural label' => t('Campaigns'),
+    'base table' => 'campaign_monitor_campaigns',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'name',
+    ),
+    'static cache' => TRUE,
+    'entity class' => 'CampaignEntity',
+    'controller class' => 'CampaignEntityController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor_campaigns',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => TRUE,
+      ),
+      'raw' => array(
+        'label' => t('Raw content'),
+        'custom settings' => FALSE,
+      ),
+    ),
+    'fieldable' => TRUE,
+    'bundles' => array(
+      'cm_campaign' => array(
+        'label' => t('Campaign Monitor Campaign'),
+        'admin' => array(
+          'path' => 'admin/campaign-monitor/campaigns',
+        ),
+      ),
+    ),
+    'access callback' => 'campaign_monitor_campaigns_access',
+    'admin ui' => array(
+      'path' => 'admin/campaign-monitor/campaigns',
+      'controller class' => 'CampaignEntityUIController',
+      'access arguments' => array('administer campaign monitor'),
+      'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'load hook' => 'cm_campaign_load',
+  );
+  return $info;
+}
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
+  $properties = &$info['cm_campaign']['properties'];
+  $properties['uid'] = array(
+    'label' => t('User'),
+    'type' => 'user',
+    'description' => t('The user associated with the list'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'uid',
+  );
+  $properties['lid'] = array(
+    'label' => t('List'),
+    'type' => 'cm_list',
+    'description' => t('The list entity associated with the campaign'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'lid',
+  );
+  $properties['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the campaign\'s edit page.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['delete_url'] = array(
+    'label' => t('Delete Link'),
+    'description' => t('The URL to delete a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['preview_url'] = array(
+    'label' => t('Preview Link'),
+    'description' => t('The URL to preview a campaign template.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['campaign_status'] = array(
+    'label' => t('Status'),
+    'type' => 'text',
+    'description' => t('The status of the campaign.'),
+    'schema field' => 'campaign_status',
+    'options list' => 'campaign_monitor_campaigns_status_list',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['created'] = array(
+    'label' => t('Date created'),
+    'description' => t('The date the campaign was created.'),
+    'type' => 'date',
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['send_date'] = array(
+    'label' => t('Send date'),
+    'description' => t('The date the campaign is scheduled to be sent.'),
+    'type' => 'date',
+    'schema field' => 'send_date',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['send_link'] = array(
+    'label' => t('Send link'),
+    'description' => t('The URL to send a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+}
+/**
+ * Callback for getting campaign properties.
+ *
+ */
+function campaign_monitor_campaigns_get_properties($campaign, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/edit', $options);
+      break;
+    case 'delete_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/delete', $options);
+      break;
+    case 'preview_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/raw', $options);
+      break;
+    case 'send_link':
+      if (campaign_monitor_send_access($campaign)) {
+        $options = array('query' => drupal_get_destination());
+        return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/send', $options);
+      }
+      return;
+      break;
+  }
+}
+/**
+ * Callback for returning a list of subsriber states.
+ */
+function campaign_monitor_campaigns_status_list($campaign) {
+  $statuses = array(
+    'Design',
+    'Draft',
+    'Scheduled',
+    'Sent',
+  );
+  return drupal_map_assoc($statuses);
+}
+
+/*******************************************************************************
+ ********************************* Campaign API's ****************************
+ ******************************************************************************/
+/**
+ * Access callback for Campaign entities.
+ */
+function campaign_monitor_campaigns_access($op, $campaign = NULL, $account = NULL, $entity_type = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer campaign monitor', $account) ||
+      user_access('create campaign', $account);
+    case 'view':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('view own campaigns', $account) && ($campaign->uid === $account->uid));
+    case 'update':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('edit own campaigns', $account) && ($campaign->uid === $account->uid));
+    case 'delete':
+      return user_access('administer campaign monitor', $account);
+  }
+}
+/**
+ *  Load a campaign.
+ */
+function cm_campaign_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $campaign = cm_campaign_load_multiple($ids, $reset);
+  return $campaign ? reset ($campaign) : FALSE;
+}
+function cm_campaign_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_campaign', $ids, $conditions, $reset);
+}
+/**
+ * Delete single campaign.
+ */
+function cm_campaign_delete($campaign) {
+   // Delete the campaign entity
+   entity_delete('cm_campaign', entity_id('cm_campaign', $campaign));
+}
+/**
+ * Delete multiple campaigns.
+ */
+function cm_campaign_delete_multiple($ids) {
+  entity_delete_multiple('cm_campaign', $ids);
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function campaign_monitor_campaigns_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'campaign_monitor_campaigns') . '/views',
+  );
+}

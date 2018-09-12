@@ -1,0 +1,698 @@
+<?php
+
+define('CAMPAIGN_MONITOR_DEFAULT_TIMEZONE', '(GMT-07:00) Mountain Time (US & Canada)');
+define('CAMPAIGN_MONITOR_DEFAULT_COUNTRY', 'United States of America');
+
+/**
+ * Implements hook_libraries_info().
+ */
+function campaign_monitor_libraries_info() {
+  $libraries['campaignmonitor'] = array(
+    'name' => 'Campaign Monitor API',
+    'vendor url' => 'https://github.com/campaignmonitor/createsend-php',
+    'download url' => 'https://github.com/campaignmonitor/createsend-php.git',
+    'version' => '2018-07-09',
+    'files' => array(
+      'php' => array(
+        'csrest_general.php',
+        'csrest_clients.php',
+        'csrest_lists.php',
+        'csrest_campaigns.php',
+        'csrest_segments.php',
+        'csrest_templates.php',
+        'csrest_subscribers.php',
+      ),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function campaign_monitor_menu() {
+  $items = array();
+  $items['admin/campaign-monitor'] = array(
+    'type' => MENU_NORMAL_ITEM,
+    'title' => 'Campaign Monitor',
+    'description' => 'Settings for Campaign Monitor',
+    'position' => 'right',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+    'weight' => 100,
+  );
+  $items['admin/campaign-monitor/settings'] = array(
+    'title' => 'Settings',
+    'description' => 'Configure api key to connnect to Campaign Monitor.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('campaign_monitor_admin_settings'),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+    'weight' => -20,
+  );
+  $items['campaign-monitor/newsletter-autocomplete'] = array(
+    'type' => MENU_CALLBACK,
+    'access callback' => TRUE,
+    'page callback' => 'campaign_monitor_newsletter_autocomplete',
+  );
+  $items['admin/campaign-monitor/clients/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -19,
+  );
+  $items['admin/campaign-monitor/clients/import'] = array(
+    'title' => 'Import clients',
+    'description' => 'Test various campaign monitor classes.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('campaign_monitor_clients_import_form'),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  /*
+  $items['admin/config/campaign-monitor/clients/add'] = array(
+    'title' => 'Create client',
+    'description' => 'Add client to Campaign Monitor.',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('cm_client', NULL, 'add'),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'type' => MENU_LOCAL_ACTION,
+  );*/
+  $items['cm-client/%cm_client'] = array(
+    'type' => MENU_CALLBACK,
+    'title' => 'Client',
+    'title callback' => 'entity_label',
+    'title arguments' => array('cm_client', 1),
+    'page callback' => 'campaign_monitor_client_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_client', 1),
+    'file' => 'includes/campaign_monitor.pages.inc',
+  );
+  $items['cm-client/%cm_client/view'] = array(
+    'title' => 'View',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['cm-client/%cm_client/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('cm_client', 1, 'edit'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_client', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'weight' => -9,
+  );
+  $items['cm-client/%cm_client/session'] = array(
+    'title' => 'Session',
+    'description' => 'Embedded Campaign Monitor session.',
+    'page callback' => 'campaign_monitor_cm_client_session_view',
+    'page arguments' => array(1),
+    'access callback' => 'campaign_monitor_cm_client_session_access',
+    'access arguments' => array(1),
+    'file' => 'includes/campaign_monitor.pages.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['cm-client/%cm_client/delete'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Delete',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_client_delete_form', 1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('delete', 'cm_client', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'weight' => -8,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function campaign_monitor_permission() {
+  return array(
+    'administer campaign monitor' => array(
+      'title' => t('Administor Campaign Monitor'),
+      'description' => t('Access the Campaign Monitor configuration options.'),
+      'restrict access' => TRUE,
+    ),
+    // Client entity permissions.
+    'create client' => array(
+      'title' => t('Create client'),
+      'description' => t('Access to create Campaign Monitor clients'),
+    ),
+    'view own clients' => array(
+      'title' => t('View own clients'),
+      'description' => t('Access to view own Campaign Monitor clients'),
+    ),
+    'edit own clients' => array(
+      'title' => t('Edit own clients'),
+      'description' => t('Access to edit own Campaign Monitor clients'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_entity_info().
+ * Inform the base system and the Field API about one or more entity types.
+ */
+function campaign_monitor_entity_info() {
+  $info = array();
+  $info['cm_client'] = array(
+    'label' => t('Client'),
+    'plural label' => t('Clients'),
+    'base table' => 'campaign_monitor_clients',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'name',
+    ),
+    'static cache' => TRUE,
+    'entity class' => 'ClientEntity',
+    'controller class' => 'ClientEntityController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor',
+    'view modes' => array(
+      'full' => array(
+        'label' => t('Full content'),
+        'custom settings' => TRUE,
+      ),
+    ),
+    'access callback' => 'campaign_monitor_client_access',
+    'admin ui' => array(
+      'path' => 'admin/campaign-monitor/clients',
+      'controller class' => 'EntityDefaultUIController',
+      'access arguments' => array('administer campaign monitor'),
+      'file' => 'includes/campaign_monitor.admin.inc',
+    ),
+    'uri callback' => 'entity_class_uri',
+    'load hook' => 'cm_client_load',
+  );
+  return $info;
+}
+/**
+ * Implements hook_entity_property_info_alter().
+ */
+function campaign_monitor_entity_property_info_alter(&$info) {
+  $properties = &$info['cm_client']['properties'];
+  $properties['uid'] = array(
+    'label' => t('User'),
+    'type' => 'user',
+    'description' => t('The user associated with the client'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'uid',
+  );
+  $properties['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the list\'s edit page.'),
+    'getter callback' => 'campaign_monitor_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['delete_url'] = array(
+    'label' => t('Delete Link'),
+    'description' => t('The URL to delete a client.'),
+    'getter callback' => 'campaign_monitor_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  $properties['created'] = array(
+    'label' => t('Date created'),
+    'description' => t('The date the client was created.'),
+    'type' => 'date',
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['changed'] = array(
+    'label' => t('Date updated'),
+    'description' => t('The date the client was last updated.'),
+    'type' => 'date',
+    'schema field' => 'changed',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+}
+/**
+ * Callback for getting subscriber properties.
+ *
+ */
+function campaign_monitor_get_properties($client, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-client/' . entity_id($entity_type, $client) . '/edit', $options);
+      break;
+    case 'delete_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-client/' . entity_id($entity_type, $client) . '/delete', $options);
+      break;
+  }
+}
+/*******************************************************************************
+ ********************************* Client API's ****************************
+ ******************************************************************************/
+
+/**
+ * Access callback for Client entities.
+ */
+function campaign_monitor_client_access($op, $client = NULL, $account = NULL, $entity_type = NULL) {
+  global $user;
+  if (!isset($account)) {
+    $account = $user;
+  }
+  switch ($op) {
+    case 'create':
+      return user_access('administer campaign monitor', $account) ||
+      user_access('create client', $account);
+    case 'view':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('view own clients', $account) && ($client->uid === $account->uid));
+    case 'update':
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('edit own clients', $account) && ($client->uid === $account->uid));
+    case 'delete':
+      return user_access('administer campaign monitor', $account);
+  }
+}
+/**
+ * Access callback for client session.
+ */
+function campaign_monitor_cm_client_session_access($client) {
+  $integrator_id = variable_get('campaign_monitor_integrator_id', '');
+  $permission = user_access('administer campaign monitor');
+  $access = strlen($integrator_id) && $permission ? TRUE : FALSE;
+  return $access;
+}
+/**
+ *  Load a client.
+ */
+function cm_client_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $client = cm_client_load_multiple($ids, $reset);
+  return $client ? reset ($client) : FALSE;
+}
+function cm_client_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_client', $ids, $conditions, $reset);
+}
+
+/**
+ * Delete single client.
+ */
+function cm_client_delete($client) {
+   // Delete the client entity
+   entity_delete('cm_client', entity_id('cm_client', $client));
+}
+/**
+ * Delete multiple clients.
+ */
+function cm_client_delete_multiple($ids) {
+  entity_delete_multiple('cm_client', $ids);
+}
+
+/**
+ * Get an instance of the Campaign Monitor library.
+ *
+ * @param string $classname
+ *   The campaignmonitor library class to instantiate.
+ * @param string $api_key
+ *   The campaignmonitor api key to use if not the default.
+ *
+ * @return campaignmonitor
+ *   Instance of the csrest_general library class. Can be overridden by $classname.
+ */
+function campaign_monitor_get_api_object($classname = 'CS_REST_General', $client_key = NULL) {
+
+  $campaignmonitor = &drupal_static(__FUNCTION__);
+  if (!$client_key && isset($campaignmonitor) && $campaignmonitor instanceof $classname) {
+    return $campaignmonitor;
+  }
+  if (module_exists('libraries')) {
+    $library = libraries_load('campaignmonitor');
+  }
+  else {
+    $library = FALSE;
+  }
+  if (!$library['installed'] && !class_exists('CS_REST_General')) {
+    $msg = t('Failed to load the Campaign Monitor PHP library. Please refer to the installation requirements.');
+    watchdog('campaign_monitor', $msg, array(), WATCHDOG_ERROR);
+    drupal_set_message($msg, 'error', FALSE);
+    return NULL;
+  }
+  $api_key = variable_get('campaign_monitor_api_key', '');
+
+  if (!strlen($api_key)) {
+    watchdog('campaign_monitor', 'Campaign Monitor Error: API Key cannot be blank.', array(), WATCHDOG_ERROR);
+    return NULL;
+  }
+  $auth = array('api_key' => $api_key);
+  
+  if ($classname == 'CS_REST_General') {
+    $campaignmonitor = new $classname($auth);
+  }
+  else {
+    $campaignmonitor = new $classname($client_key, $auth);
+  }
+
+  return $campaignmonitor;
+}
+function campaign_monitor_get_client_object($client_id = NULL) {
+  $api_key = variable_get('campaign_monitor_api_key', '');
+  $auth = array('api_key' => $api_key);
+  return new CS_REST_Clients($client_id, $auth);
+}
+// Helper function to get valid timezones from Campaign monitor.
+function campaign_monitor_get_timezones() {
+  $cache = cache_get('timezones', 'cache_campaign_monitor');
+  if (!empty($cache)) {
+    return $cache->data;
+  }
+  else {
+    $cm = campaign_monitor_get_api_object();
+    $result = $cm->get_timezones();
+    if ($result->was_successful()) {
+      $zones = $result->response;
+      cache_set('timezones', $zones, 'cache_campaign_monitor', CACHE_PERMANENT);
+      return $zones;
+    }
+  }
+}
+// Helper function to get valid countries from Campaign monitor.
+function campaign_monitor_get_countries() {
+  $cache = cache_get('countries', 'cache_campaign_monitor');
+  if (!empty($cache)) {
+    return $cache->data;
+  }
+  else {
+    $cm = campaign_monitor_get_api_object();
+    $result = $cm->get_countries();
+    if ($result->was_successful()) {
+      $countries = $result->response;
+      cache_set('countries', $countries, 'cache_campaign_monitor', CACHE_PERMANENT);
+      return $countries;
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_html().
+ */
+function campaign_monitor_preprocess_html(&$variables) {
+  //$list = menu_get_object('cm_list');
+  if ($entity = menu_get_object('cm_list')) {
+    if (arg(2) == 'raw') {
+      $data = $entity->list_data;
+      $bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
+      $extra_styles = '
+      html, body, #background-table { background-color: ' . $bg_color . ';}
+      ';
+      $variables['extra_styles'] = $extra_styles;
+      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
+    }
+  }
+  elseif ($entity = menu_get_object('cm_campaign')) {
+    if (arg(2) == 'raw') {
+      //$bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
+      $bg_color = '#E4E4E4';
+      $extra_styles = '
+      html, body, #background-table { background-color: ' . $bg_color . ';}
+      ';
+      $variables['extra_styles'] = $extra_styles;
+      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function campaign_monitor_preprocess_page(&$variables) {
+  //$list = menu_get_object('cm_list');
+  if ($entity = menu_get_object('cm_list')) {
+    if (arg(2) == 'raw') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
+      $variables['cm_html'] = entity_view('cm_list', array($entity), 'raw', NULL, TRUE);
+    }
+    if (arg(2) == 'edit') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
+      $variables['form_preview'] = '<iframe src="/cm-list/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+    }
+  }
+  elseif ($entity = menu_get_object('cm_campaign')) {
+    if (arg(2) == 'raw') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
+      $variables['cm_html'] = entity_view('cm_campaign', array($entity), 'raw', NULL, TRUE);
+    }
+    if (arg(2) == 'edit') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
+      $variables['form_preview'] = '<iframe src="/cm-campaign/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+    }
+  }
+}
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function campaign_monitor_theme_registry_alter(&$theme_registry) {
+  // Defined path to the current module.
+  $module_path = drupal_get_path('module', 'campaign_monitor');
+  // Find all .tpl.php files in this module's folder recursively.
+  $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path . '/templates');
+  // Iterate through all found template file objects.
+  foreach ($template_file_objects as $key => $template_file_object) {
+    // If the template has not already been overridden by a theme.
+    if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+      // Alter the theme path and template elements.
+      $theme_registry[$key]['theme path'] = $module_path;
+      $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+      $theme_registry[$key]['type'] = 'module';
+    }
+  }
+}
+
+/**
+ * Generate a key to include in the webhook url based on a hash.
+ *
+ * @string $list_id
+ *
+ * @return string
+ *   The key.
+ */
+function campaign_monitor_webhook_key() {
+  return drupal_hash_base64($GLOBALS['base_url'] . drupal_get_private_key() . drupal_get_hash_salt());
+}
+/**
+ * Access callback for campaign_monitor_webhook().
+ *
+ * @string $key
+ */
+function campaign_monitor_webhook_access($key) {
+  return $key == campaign_monitor_webhook_key();
+}
+/**
+ * Generate the webhook endpoint URL.
+ *
+ * @return string
+ *   The endpoint URL.
+ */
+function campaign_monitor_webhook_url() {
+  $key = campaign_monitor_webhook_key();
+  return $GLOBALS['base_url'] . '/cm-list/webhook/' . $key;
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function campaign_monitor_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'cm_list_form' || $form_id == 'cm_campaign_form') {
+    if (isset($form['redirect'])) {
+      unset($form['redirect']);
+    }
+  }
+}
+/**
+ * Color validation.
+ */
+function campaign_monitor_color_validate($element, &$form_state, $form) {
+  $value = $element['#value']['colorfield_picker'];
+  if (!empty($value) && !preg_match('@^#[0-9a-f]{6}$@i', $value)) {
+    form_error($element, t($element['#title'] . ' must be a hexadecimal value (eg: #84CCAF).'));
+  }
+}
+/**
+ * E-mail validation.
+ */
+function campaign_monitor_email_validate($element, &$form_state, $form) {
+  if (!empty($element['#value']) && !valid_email_address($element['#value'])) {
+    form_error($element, t($element['#title'] . ' is not a valid email address.'));
+  }
+}
+/**
+ * Autocomplete to pull newsletter node titles.
+ */
+function campaign_monitor_newsletter_autocomplete($string) {
+  $matches = array();
+  $result = db_select('node', 'n')
+    ->fields('n', array('title', 'nid'))
+    ->condition('type', 'newsletter')
+    ->condition('title', '%' . db_like($string) . '%', 'LIKE')
+    ->execute();
+  // Save the query to matches.
+  foreach ($result as $row) {
+    $matches[$row->nid] = check_plain($row->title);
+  }
+  // Return the result to the form in JSON.
+  drupal_json_output($matches);
+}
+/**
+ * Custom callback to build raw template output.
+ */
+function campaign_monitor_build_template($entity, $entity_type) {
+  $mc_banner = field_get_items($entity_type, $entity, 'field_mc_banner');
+  $rows = array();
+  // Top spacer row.
+  $rows[] = array(
+    'data' => array(
+      array('data' => '', 'class' => 'w600', 'height' => '20'),
+    ),
+    'no_striping' => TRUE,
+  );
+  // Top bar row.
+  $top_bar_table = '
+  <table id="top-bar" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+    <tr>
+      <td class="w15" width="15"></td>
+      <td class="w340" width="340" valign="middle" align="left">
+          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
+            <tr><td class="w340" width="340" height="8"></td></tr>
+          </tbody></table>
+          <div class="header-content"><webversion>Web version</webversion><span class="hide">&nbsp;&nbsp;|&nbsp; <preferences>Update preferences</preferences>&nbsp;&nbsp;|&nbsp; <unsubscribe>Unsubscribe</unsubscribe></span></div>
+          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
+            <tr><td class="w340" width="340" height="8"></td></tr>
+          </tbody></table>
+      </td>
+      <td class="w230" width="230" valign="middle" align="right">
+        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr><td class="w230" width="230" height="8"></td></tr>
+        </tbody></table>
+        <table cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr>
+            <td valign="middle"><fblike><img src="https://img.createsend1.com/img/templatebuilder/like-glyph.png" alt="Facebook icon" =""="" width="8" height="14" border="0"></fblike></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><fblike>Like</fblike></div></td>
+            <td class="w10" width="10"></td>
+            <td valign="middle"><tweet><img src="https://img.createsend1.com/img/templatebuilder/tweet-glyph.png" alt="Twitter icon" =""="" width="17" height="13" border="0"></tweet></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><tweet>Tweet</tweet></div></td>
+            <td class="w10" width="10"></td>
+            <td valign="middle"><forwardtoafriend><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon" =""="" width="19" height="14" border="0"></forwardtoafriend></td>
+            <td width="3"></td>
+            <td valign="middle"><div class="header-content"><forwardtoafriend>Forward</forwardtoafriend></div></td>
+          </tr>
+        </tbody></table>
+        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr><td class="w230" width="230" height="8"></td></tr>
+        </tbody></table>
+      </td>
+      <td class="w15" width="15"></td>
+    </tr>
+  </tbody></table>
+  ';
+  $rows[] = array(
+    'data' => array(
+      array('data' => $top_bar_table, 'class' => 'w600', 'width' => '600'),
+    ),
+    'no_striping' => TRUE,
+  );
+  // Banner.
+  if ($mc_banner) {
+    $mc_banner_file = file_load($mc_banner[0]['fid']);
+    $mc_banner_output = array(
+      '#theme' => 'image_style',
+      '#style_name' => 'mc_banner',
+      '#path' => $mc_banner_file->uri,
+      '#width' => $mc_banner_file->width,
+      '#height' => $mc_banner_file->height,
+    );
+    $banner_table = '
+    <table id="banner" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr>
+            <td align="center" valign="top">
+            ' . render($mc_banner_output) . '
+            </td>
+        </tr>
+    </tbody></table>';
+    $rows[] = array(
+      'data' => array(
+        array('data' => $banner_table, 'class' => 'w600', 'width' => '600'),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
+  // Article
+  $article = variable_get('campaign_monitor_article_preview', FALSE);
+  if ($article) {
+    $article_output = check_markup($article['value'], $article['format']);
+    $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
+    if ($disclaimer) {
+      $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+    }
+    $article_table = '
+    <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr>
+            <td valign="top">
+            <div class="article-content">' . $article_output . '</div>
+            </td>
+        </tr>
+    </tbody></table>';
+    $rows[] = array(
+      'data' => array(
+        array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
+      ),
+      'no_striping' => TRUE,
+    );
+  }
+  $table = theme('table', array(
+    'header' => array(),
+    'rows' => $rows,
+    'attributes' => array(
+      'class' => 'w600',
+      'width' => '600',
+      'cellpadding' => '0',
+      'cellspacing' => '0',
+      'border' => '0',
+    ),
+  ));
+  $output = theme('table', array(
+    'header' => array(),
+    'rows' => array(
+      array(
+        array('data' => $table, 'align' => 'center'),
+      ),
+    ),
+    'attributes' => array(
+      'width' => '100%',
+      'cellpadding' => '0',
+      'cellspacing' => '0',
+      'border' => '0',
+      'id' => 'background-table',
+    ),
+  ));
+  return $output;
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function campaign_monitor_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'campaign_monitor') . '/views',
+  );
+}

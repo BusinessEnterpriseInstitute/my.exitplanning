@@ -1,0 +1,47 @@
+body.page-cm-list-edit,
+body.page-cm-campaign-edit {
+    overflow: hidden;
+    padding-top: 60px;
+}
+body.page-cm-list-edit > div.page,
+body.page-cm-campaign-edit > div.page {
+    position: relative;
+    height: 100%;
+}
+.cm-design-form .cm-form-preview,
+.cm-design-form .cm-form-content {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    background: #fff;
+}
+.cm-design-form .cm-form-preview {
+    left: 0;
+    right: 40%;
+    overflow: hidden;
+    z-index: 99;
+}
+.cm-design-form .cm-form-content {
+    left: 60%;
+    right: 0;
+    overflow-y: scroll;
+    padding-top: 20px;
+}
+.cm-design-form .form-actions {
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    margin: 0;
+    height: 60px;
+    line-height: 60px;
+    overflow: hidden;
+    padding: 0 20px;
+    text-align: right;
+}
+.cm-design-form .form-actions .button {
+    margin-bottom: 0;
+}
+body.admin-menu .cm-design-form .form-actions {
+    top: 20px;
+}

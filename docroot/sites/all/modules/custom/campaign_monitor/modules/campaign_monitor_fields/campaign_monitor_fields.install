@@ -1,0 +1,225 @@
+<?php
+
+/**
+ * @file
+ * Installation instructions for the campaign_monitor_fields module.
+ */
+
+ /**
+ * Implements hook_install().
+ */
+function campaign_monitor_fields_install() {
+  // Create all the fields we are adding to our entity type.
+  // http://api.drupal.org/api/function/field_create_field/7
+  foreach (_campaign_monitor_fields_field_data() as $field) {
+    field_create_field($field);
+  }
+  // Create all the instances for our fields.
+  // http://api.drupal.org/api/function/field_create_instance/7
+  foreach (_campaign_monitor_fields_instance_data() as $instance) {
+    field_create_instance($instance);
+  }
+}
+// Create the array of information about the fields we want to create.
+function _campaign_monitor_fields_field_data() {
+  $fields = array();
+  // Paste $fields data from devel ouput here.
+  return $fields;
+}
+
+// Create the array of information about the instances we want to create.
+function _campaign_monitor_fields_instance_data() {
+  $instances = array();
+  // Paste $instances data from devel output here.
+  $instances['field_mc_banner'] = array(
+    'label' => 'Banner Image (optional)',
+    'widget' => array(
+      'weight' => '32',
+      'type' => 'media_generic',
+      'module' => 'media',
+      'active' => 1,
+      'settings' => array(
+        'browser_plugins' => array(
+          'upload' => 'upload',
+          'media_default--media_browser_1' => 'media_default--media_browser_1',
+          'media_default--media_browser_my_files' => 0,
+          'media_internet' => 0,
+        ),
+        'allowed_types' => array(
+          'image' => 'image',
+          'document' => 0,
+          'video' => 0,
+          'audio' => 0,
+        ),
+        'allowed_schemes' => array(
+          'public' => 'public',
+          'private' => 0,
+        ),
+      ),
+    ),
+    'settings' => array(
+      'file_directory' => '',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => 0,
+      'title_field' => 0,
+      'default_image' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'hidden',
+        'settings' => array(),
+        'module' => 'image',
+        'weight' => 0,
+      ),
+      'full' => array(
+        'type' => 'hidden',
+        'label' => 'hidden',
+        'settings' => array(),
+        'weight' => 0,
+      ),
+    ),
+    'required' => 0,
+    'description' => '',
+    'fences_wrapper' => 'div',
+    'field_name' => 'field_mc_banner',
+    'entity_type' => 'cm_list',
+    'bundle' => 'cm_list',
+    'deleted' => '0',
+  );
+  $instances['field_mc_logo'] = array(
+    'label' => 'Logo',
+    'widget' => array(
+      'weight' => '20',
+      'type' => 'media_generic',
+      'module' => 'media',
+      'active' => 1,
+      'settings' => array(
+        'browser_plugins' => array(
+          'upload' => 'upload',
+          'media_default--media_browser_1' => 'media_default--media_browser_1',
+          'media_default--media_browser_my_files' => 'media_default--media_browser_my_files',
+          'media_internet' => 0,
+        ),
+        'allowed_types' => array(
+          'image' => 'image',
+          'document' => 0,
+          'video' => 0,
+          'audio' => 0,
+        ),
+        'allowed_schemes' => array(
+          'public' => 'public',
+          'private' => 'private',
+        ),
+      ),
+    ),
+    'settings' => array(
+      'file_directory' => '',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '2 MB',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => 0,
+      'title_field' => 0,
+      'default_image' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'hidden',
+        'weight' => 0,
+        'settings' => array(),
+      ),
+      'full' => array(
+        'label' => 'hidden',
+        'type' => 'hidden',
+        'weight' => 0,
+        'settings' => array(),
+      ),
+    ),
+    'required' => 0,
+    'description' => '',
+    'fences_wrapper' => 'div',
+    'field_name' => 'field_mc_logo',
+    'entity_type' => 'cm_list',
+    'bundle' => 'cm_list',
+    'deleted' => '0',
+  );
+  $instances['field_mc_profile_pic'] = array(
+    'label' => 'Profile Pic',
+    'widget' => array(
+      'weight' => '22',
+      'type' => 'media_generic',
+      'module' => 'media',
+      'active' => 1,
+      'settings' => array(
+        'browser_plugins' => array(
+          'upload' => 'upload',
+          'media_default--media_browser_1' => 'media_default--media_browser_1',
+          'media_default--media_browser_my_files' => 'media_default--media_browser_my_files',
+          'media_internet' => 0,
+        ),
+        'allowed_types' => array(
+          'image' => 'image',
+          'document' => 0,
+          'video' => 0,
+          'audio' => 0,
+        ),
+        'allowed_schemes' => array(
+          'public' => 'public',
+          'private' => 'private',
+        ),
+      ),
+    ),
+    'settings' => array(
+      'file_directory' => '',
+      'file_extensions' => 'png gif jpg jpeg',
+      'max_filesize' => '2 MB',
+      'max_resolution' => '',
+      'min_resolution' => '',
+      'alt_field' => 0,
+      'title_field' => 0,
+      'default_image' => 0,
+      'user_register_form' => FALSE,
+    ),
+    'display' => array(
+      'default' => array(
+        'label' => 'hidden',
+        'type' => 'hidden',
+        'weight' => '12',
+        'settings' => array(),
+      ),
+      'full' => array(
+        'label' => 'hidden',
+        'type' => 'hidden',
+        'weight' => '12',
+        'settings' => array(),
+      ),
+    ),
+    'required' => 0,
+    'description' => '',
+    'fences_wrapper' => 'div',
+    'field_name' => 'field_mc_profile_pic',
+    'entity_type' => 'cm_list',
+    'bundle' => 'cm_list',
+    'deleted' => '0',
+  );
+  return $instances;
+}
+/**
+ * Implements hook_uninstall().
+ */
+function campaign_monitor_fields_uninstall() {
+  campaign_monitor_fields_cleanup();
+  // Call a second field_purge_batch to remove instances.
+  field_purge_batch(1000);
+}
+function campaign_monitor_fields_cleanup() {
+  field_attach_delete_bundle('cm_list', 'cm_list');
+  field_purge_batch(1000);
+}

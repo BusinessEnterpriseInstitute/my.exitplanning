@@ -1,0 +1,112 @@
+<?php
+
+/**
+ * @file
+ * Installation instructions for the campaign_monitor module.
+ */
+
+// Set the module weight to 0 to make sure it is run before feeds.
+/*
+db_update('system')
+  ->fields(array('weight' => 0))
+  ->condition('name', 'campaign_monitor', '=')
+  ->execute();
+*/
+
+/**
+ * Implements hook_install().
+ */
+/*
+function campaign_monitor_install() {
+}*/
+
+/**
+ * Implements hook_uninstall().
+ */
+function campaign_monitor_uninstall() {
+  /*
+  $fid = db_query("SELECT fid FROM {file_managed} WHERE filename = 'subscribers_template.csv'")->fetchField();
+  if (!empty($fid)) {
+    $file = file_load($fid);
+    file_usage_delete($file, 'campaign_monitor', 'module', 0);
+    file_delete($file);
+  }*/
+  // Clean up settings.
+  variable_del('campaign_monitor_article_preview');
+  variable_del('campaign_monitor_disclaimer');
+}
+
+/**
+ * Implements hook_schema().
+ */
+function campaign_monitor_schema() {
+  $schema['cache_campaign_monitor'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_campaign_monitor']['description'] = 'Cache table for the Campaign Monitor module to store lists of valid settings for forms.';
+  
+  $schema['campaign_monitor_clients'] = array(
+    'description' => 'Table for Campaign Monitor Clients',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'client_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The ClientID on Campaign Monitor.',
+        'default' => '',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The client name on Campaign Monitor.',
+        'default' => '',
+      ),
+      'timezone' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The client timezone on Campaign Monitor.',
+        'default' => '',
+      ),
+      'uid' => array(
+        'description' => 'The user id associated with the client.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'client_key' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the value.',
+      ),
+      'client_data' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the value.',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the client was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the client was updated.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'uid' => array('uid'),
+      'client_id' => array('client_id'),
+    ),
+  );
+  return $schema;
+}
