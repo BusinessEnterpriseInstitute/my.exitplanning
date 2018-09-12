@@ -55,46 +55,55 @@ function campaign_monitor_clients_import_form() {
 }
 
 function campaign_monitor_clients_import_form_submit($form, &$form_state) {
-  $cm = campaign_monitor_get_api_object();
-  if ($cm) {
-    $result = $cm->get_clients();
-    if($result->was_successful()) {
-      $clients = $result->response;
-      foreach ($clients as $client) {
-        $query = "SELECT c.id FROM {campaign_monitor_clients} c WHERE c.client_id = :client_id";
-        $cid = db_query($query, array(':client_id' => $client->ClientID))->fetchField();
-        $client_api = campaign_monitor_get_api_object('CS_REST_Clients', $client->ClientID);
-        if ($client_api) {
-          $client_result = $client_api->get();
-          if ($client_result->was_successful()) {
-            $client_response = $client_result->response;
-            $data = array('BasicDetails' => $client_response->BasicDetails, 'BillingDetails' => $client_response->BillingDetails);
-            if ($cid) {
-              // Update existing client record.
-              db_update('campaign_monitor_clients')
-              ->fields(array(
-                'name' => $client->Name,
-                'client_data' => serialize($data),
-              ))
-              ->condition('id', $cid)
-              ->execute();
-            }
-            else {
-              $client_key = encrypt($client_response->ApiKey);
-              db_insert('campaign_monitor_clients')
-              ->fields(array(
-                'client_id' => $client->ClientID,
-                'name' => $client->Name,
-                'client_key' => serialize($client_key),
-                'client_data' => serialize($data),
-              ))
-              ->execute();
-            }
+  global $user;
+  $wrap = campaign_monitor_get_api_object();
+  $result = $wrap->get_clients();
+  $clients_new_counter = 0;
+  if($result->was_successful()) {
+    $clients = $result->response;
+    foreach ($clients as $client) {
+      $query = "SELECT c.id FROM {campaign_monitor_clients} c WHERE c.client_id = :client_id";
+      $cid = db_query($query, array(':client_id' => $client->ClientID))->fetchField();
+      $client_api = campaign_monitor_get_api_object('CS_REST_Clients', $client->ClientID);
+      if ($client_api) {
+        $client_result = $client_api->get();
+        if ($client_result->was_successful()) {
+          $client_response = $client_result->response;
+          $data = array('BasicDetails' => $client_response->BasicDetails, 'BillingDetails' => $client_response->BillingDetails);
+          if ($cid) {
+            // Update existing client record.
+            db_update('campaign_monitor_clients')
+            ->fields(array(
+              'name' => $client->Name,
+              'timezone' => $client_response->BasicDetails->TimeZone,
+              'client_data' => serialize($data),
+            ))
+            ->condition('id', $cid)
+            ->execute();
+          }
+          else {
+            $client_key = encrypt($client_response->ApiKey);
+            $new_client = entity_create('cm_client', array(
+              'uid' => $user->uid,
+              'client_id' => $client->ClientID,
+              'name' => $client->Name,
+              'timezone' => $client_response->BasicDetails->TimeZone,
+              'client_key' => serialize($client_key),
+              'client_data' => serialize($data),
+            ));
+            $new_client->save();
+            $clients_new_counter++;
           }
         }
       }
     }
   }
+  if ($clients_new_counter > 0) {
+    $message_label = $clients_new_counter > 1 ? 'Clients' : 'Client';
+    $message = t('Created @count new @clients', array('@count' => $clients_new_counter, '@clients' => $message_label));
+    drupal_set_message($message);
+  }
+  $form_state['redirect'] = 'admin/campaign-monitor/clients';
 }
 
 function cm_client_form($form, &$form_state, $cm_client, $op = 'edit') {
@@ -171,39 +180,35 @@ function cm_client_form_submit(&$form, &$form_state) {
     }
   }
   if ($is_new) {
-    $cm = campaign_monitor_get_api_object('CS_REST_Clients', NULL);
+    $wrap = campaign_monitor_get_api_object('CS_REST_Clients', NULL);
     $id = NULL;
-    if ($cm) {
-      $values = $form_state['values'];
-      $new_client = array(
-        'CompanyName' => trim($values['name']),
-        'Country' => $values['country'],
-        'Timezone' => $values['timezone'],
-      );
-      $result = $cm->create($new_client);
-      if ($result->was_successful()) {
-        $id = $result->response;
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
+    $values = $form_state['values'];
+    $new_client = array(
+      'CompanyName' => trim($values['name']),
+      'Country' => $values['country'],
+      'Timezone' => $values['timezone'],
+    );
+    $result = $wrap->create($new_client);
+    if ($result->was_successful()) {
+      $id = $result->response;
+    }
+    else {
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      drupal_set_message($message, 'error');
     }
     if ($id) {
-      $cm = campaign_monitor_get_api_object('CS_REST_Clients', $id);
-      if ($cm) {
-        $client_result = $cm->get();
-        if ($client_result->was_successful()) {
-          $client_key = encrypt($client_result->response->ApiKey);
-          $data = array('BasicDetails' => $client_result->response->BasicDetails, 'BillingDetails' => $client_result->response->BillingDetails);
-          $client->client_id = $id;
-          $client->client_key = $client_key;
-          $client->client_data = $data;
-          $client->save();
-          $message = t('Created new client %name', array('%name' => $client->name));
-          drupal_set_message($message);
-        }
+      $wrap = campaign_monitor_get_api_object('CS_REST_Clients', $id);
+      $result = $wrap->get();
+      if ($result->was_successful()) {
+        $client_key = encrypt($result->response->ApiKey);
+        $data = array('BasicDetails' => $result->response->BasicDetails, 'BillingDetails' => $result->response->BillingDetails);
+        $client->client_id = $id;
+        $client->client_key = $client_key;
+        $client->client_data = $data;
+        $client->save();
+        $message = t('Created new client %name', array('%name' => $client->name));
+        drupal_set_message($message);
       }
     }
   }
@@ -216,17 +221,17 @@ function cm_client_form_submit(&$form, &$form_state) {
     elseif ($original->client_data['BasicDetails']->Country != $client->country) {
       $changed = TRUE;
     }
-    elseif ($original->client_data['BasicDetails']->TimeZone != $client->timezone) {
+    elseif ($original->timezone != $client->timezone) {
       $changed = TRUE;
     }
     if ($changed) {
-      $cm = campaign_monitor_get_api_object('CS_REST_Clients', $client->client_id);
-      $client_update = $cm->set_basics(array(
+      $wrap = campaign_monitor_get_api_object('CS_REST_Clients', $client->client_id);
+      $result = $wrap->set_basics(array(
         'CompanyName' => $client->name,
         'Country' => $client->country,
         'Timezone' => $client->timezone
       ));
-      if ($client_update->was_successful()) {
+      if ($result->was_successful()) {
         $data = $client->client_data;
         $data['BasicDetails']->Country = $client->country;
         $data['BasicDetails']->TimeZone = $client->timezone;
@@ -235,17 +240,14 @@ function cm_client_form_submit(&$form, &$form_state) {
         drupal_set_message($message);
       }
       else {
-        $error = $client_update->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $client_update->http_status_code, '%error' => $error));
+        $error = $result->response->Message;
+        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
         drupal_set_message($message, 'error');
       }
     }
-    else {
-      $message = t('No changes to save.');
-      drupal_set_message($message);
-    }
   }
   $client->save();
+  $form_state['redirect'] = 'admin/campaign-monitor/clients';
 }
 
 /**

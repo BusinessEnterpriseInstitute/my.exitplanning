@@ -10,6 +10,10 @@
  * @see hook_entity_view_alter()
  */
 function campaign_monitor_client_view($entity, $view_mode = 'full') {
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('Clients'), 'admin/campaign-monitor/clients');
+  drupal_set_breadcrumb($breadcrumb);
   // Our entity type, for convenience.
   $entity_type = 'cm_client';
   // Start setting up the content.
@@ -27,8 +31,8 @@ function campaign_monitor_client_view($entity, $view_mode = 'full') {
   entity_prepare_view($entity_type, array($entity->id => $entity));
   // Now field_attach_view() generates the content for the fields.
   //$entity->content += field_attach_view($entity_type, $entity, $view_mode);
-  $data = $entity->client_data;
-  if (isset($data['BasicDetails'])) {
+  $data = unserialize($entity->client_data);
+  if (!empty($data['BasicDetails'])) {
     $basic = $data['BasicDetails'];
     $header = array();
     $rows = array();

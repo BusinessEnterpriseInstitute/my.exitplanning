@@ -94,7 +94,7 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.pages.inc',
   );
   $items['cm-client/%cm_client/view'] = array(
-    'title' => 'Summary',
+    'title' => 'View',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -209,7 +209,7 @@ function campaign_monitor_entity_property_info_alter(&$info) {
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'uid',
   );
-$properties['edit_url'] = array(
+  $properties['edit_url'] = array(
     'label' => t('Edit Link'),
     'description' => t('The URL of the list\'s edit page.'),
     'getter callback' => 'campaign_monitor_get_properties',
@@ -224,6 +224,20 @@ $properties['edit_url'] = array(
     'type' => 'uri',
     'computed' => TRUE,
     'entity views field' => TRUE,
+  );
+  $properties['created'] = array(
+    'label' => t('Date created'),
+    'description' => t('The date the client was created.'),
+    'type' => 'date',
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['changed'] = array(
+    'label' => t('Date updated'),
+    'description' => t('The date the client was last updated.'),
+    'type' => 'date',
+    'schema field' => 'changed',
+    'setter callback' => 'entity_property_verbatim_set',
   );
 }
 /**

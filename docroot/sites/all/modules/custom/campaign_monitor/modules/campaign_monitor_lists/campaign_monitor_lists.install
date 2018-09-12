@@ -187,6 +187,18 @@ function campaign_monitor_lists_schema() {
         'serialize' => TRUE,
         'description' => 'Serialized data containing the value.',
       ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the list was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the list was updated.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
