@@ -31,7 +31,7 @@ function campaign_monitor_client_view($entity, $view_mode = 'full') {
   entity_prepare_view($entity_type, array($entity->id => $entity));
   // Now field_attach_view() generates the content for the fields.
   //$entity->content += field_attach_view($entity_type, $entity, $view_mode);
-  $data = unserialize($entity->client_data);
+  $data = $entity->client_data;
   if (!empty($data['BasicDetails'])) {
     $basic = $data['BasicDetails'];
     $header = array();
