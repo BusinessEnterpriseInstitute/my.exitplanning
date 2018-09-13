@@ -136,7 +136,7 @@ function campaign_monitor_lists_entity_info() {
     ),
     'static cache' => TRUE,
     'entity class' => 'ListEntity',
-    'controller class' => 'EntityAPIController',
+    'controller class' => 'ListEntityController',
     'views controller class' => 'EntityDefaultViewsController',
     'module' => 'campaign_monitor_lists',
     'view modes' => array(
@@ -214,6 +214,20 @@ function campaign_monitor_lists_entity_property_info_alter(&$info) {
     'type' => 'uri',
     'computed' => TRUE,
     'entity views field' => TRUE,
+  );
+  $properties['created'] = array(
+    'label' => t('Date created'),
+    'description' => t('The date the list was created.'),
+    'type' => 'date',
+    'schema field' => 'created',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['changed'] = array(
+    'label' => t('Date updated'),
+    'description' => t('The date the list was last updated.'),
+    'type' => 'date',
+    'schema field' => 'changed',
+    'setter callback' => 'entity_property_verbatim_set',
   );
 }
 /**
