@@ -414,8 +414,7 @@ function campaign_monitor_preprocess_html(&$variables) {
   //$list = menu_get_object('cm_list');
   if ($entity = menu_get_object('cm_list')) {
     if (arg(2) == 'raw') {
-      $data = $entity->list_data;
-      $bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
+      $bg_color = !empty($entity->background_color) ? $entity->background_color : '#E4E4E4';
       $extra_styles = '
       html, body, #background-table { background-color: ' . $bg_color . ';}
       ';

@@ -242,59 +242,242 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
 /*
  * Webhooks page for lists.
  */
-function campaign_monitor_lists_webhooks($entity) {
-  $client = cm_client_load($entity->cid);
+function campaign_monitor_lists_webhooks($list) {
+  $client = cm_client_load($list->cid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($client) {
     $client_uri = entity_uri('cm_client', $client);
-    $breadcrumb[] = l(t('@client', array('@client' => $client->name)), $client_uri['path']);
+    $breadcrumb[] = l(t('@client', array('@client' => entity_label('cm_client', $client))), $client_uri['path']);
   }
+  $list_uri = entity_uri('cm_list', $list);
+  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
-  $data = $entity->list_data;
-  $webhooks = isset($data['webhooks']) ? $data['webhooks'] : array();
+  $webhooks = db_query('SELECT * FROM {campaign_monitor_list_webhooks} w WHERE w.lid = :lid', array(':lid' => entity_id('cm_list', $list)))->fetchAll();
   $rows = array();
   foreach ($webhooks as $webhook) {
+    $header = array(t('URL'), t('Events'), t('Status'), t('Operations'));
+    $activate_link = l(t('Activate'), 'cm-webhook/' . entity_id('cm_webhook', $webhook) . '/activate', array('query' => drupal_get_destination()));
+    $deactivate_link = l(t('Deactivate'), 'cm-webhook/' . entity_id('cm_webhook', $webhook) . '/deactivate', array('query' => drupal_get_destination()));
+    $delete_link = l(t('Delete'), 'cm-webhook/' . entity_id('cm_webhook', $webhook) . '/delete', array('query' => drupal_get_destination()));
+    $test_link = l(t('Test'), 'cm-webhook/' . entity_id('cm_webhook', $webhook) . '/test', array('query' => drupal_get_destination()));
+    $status_link = $webhook->status == 'Active' ? $deactivate_link : $activate_link;
+    $events = unserialize($webhook->events);
+    $row = array(
+      'data' => array(
+        array('data' => check_plain($webhook->url)),
+        array('data' => implode(' | ', $events)),
+        array('data' => check_plain($webhook->status)),
+        array('data' => $test_link . ' | ' . $delete_link . ' | ' . $status_link),
+      ),
+    );
+    $rows[] = $row;
+  }
+  $table = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No webhooks exist for this list.'),
+  ));
+  $output = array(
+    '#type' => 'markup',
+    '#markup' => $table,
+  );
+  return $output;
+}
+/**
+ * Page callback to display campaign monitor stats for list.
+ */
+function campaign_monitor_lists_stats($list) {
+  $client = cm_client_load($list->cid);
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  if ($client) {
+    $client_uri = entity_uri('cm_client', $client);
+    $breadcrumb[] = l(t('@client', array('@client' => entity_label('cm_client', $client))), $client_uri['path']);
+  }
+  $list_uri = entity_uri('cm_list', $list);
+  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+  drupal_set_breadcrumb($breadcrumb);
+  
+  $header = array();
+  $rows = array();
+  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
+  $result = $wrap->get_stats();
+  if ($result->was_successful()) {
+    $stats = $result->response;
     $rows[] = array(
       'data' => array(
-        array('data' => t('Webhook ID:'), 'header' => TRUE),
-        array('data' => check_plain($webhook->WebhookID)),
+        array('data' => t('Total Active Subscribers'), 'header' => TRUE),
+        array('data' => number_format($stats->TotalActiveSubscribers)),
       ),
       'no_striping' => TRUE,
     );
     $rows[] = array(
       'data' => array(
-        array('data' => t('Events:'), 'header' => TRUE),
-        array('data' => theme_item_list(array('items' => $webhook->Events, 'title' => NULL, 'type' => 'ul', 'attributes' => array()))),
+        array('data' => t('New Active Subscribers Today'), 'header' => TRUE),
+        array('data' => number_format($stats->NewActiveSubscribersToday)),
       ),
       'no_striping' => TRUE,
     );
     $rows[] = array(
       'data' => array(
-        array('data' => t('Url:'), 'header' => TRUE),
-        array('data' => check_plain($webhook->Url)),
+        array('data' => t('New Active Subscribers Yesterday'), 'header' => TRUE),
+        array('data' => number_format($stats->NewActiveSubscribersYesterday)),
       ),
       'no_striping' => TRUE,
     );
     $rows[] = array(
       'data' => array(
-        array('data' => t('Status:'), 'header' => TRUE),
-        array('data' => check_plain($webhook->Status)),
+        array('data' => t('New Active Subscribers This Week'), 'header' => TRUE),
+        array('data' => number_format($stats->NewActiveSubscribersThisWeek)),
       ),
       'no_striping' => TRUE,
     );
     $rows[] = array(
       'data' => array(
-        array('data' => t('Payload Format:'), 'header' => TRUE),
-        array('data' => check_plain($webhook->PayloadFormat)),
+        array('data' => t('New Active Subscribers This Month'), 'header' => TRUE),
+        array('data' => number_format($stats->NewActiveSubscribersThisMonth)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('New Active Subscribers This Year'), 'header' => TRUE),
+        array('data' => number_format($stats->NewActiveSubscribersThisYear)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Total Unsubscribes'), 'header' => TRUE),
+        array('data' => number_format($stats->TotalUnsubscribes)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribes Today'), 'header' => TRUE),
+        array('data' => number_format($stats->UnsubscribesToday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribes Yesterday'), 'header' => TRUE),
+        array('data' => number_format($stats->UnsubscribesYesterday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribes This Week'), 'header' => TRUE),
+        array('data' => number_format($stats->UnsubscribesThisWeek)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribes This Month'), 'header' => TRUE),
+        array('data' => number_format($stats->UnsubscribesThisMonth)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribes This Year'), 'header' => TRUE),
+        array('data' => number_format($stats->UnsubscribesThisYear)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Total Delete'), 'header' => TRUE),
+        array('data' => number_format($stats->TotalDeleted)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Deleted Today'), 'header' => TRUE),
+        array('data' => number_format($stats->DeletedToday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Deleted Yesterday'), 'header' => TRUE),
+        array('data' => number_format($stats->DeletedYesterday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Deleted This Week'), 'header' => TRUE),
+        array('data' => number_format($stats->DeletedThisWeek)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Deleted This Month'), 'header' => TRUE),
+        array('data' => number_format($stats->DeletedThisMonth)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Deleted This Year'), 'header' => TRUE),
+        array('data' => number_format($stats->DeletedThisYear)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Total Bounces'), 'header' => TRUE),
+        array('data' => number_format($stats->TotalBounces)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Bounces Today'), 'header' => TRUE),
+        array('data' => number_format($stats->BouncesToday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Bounces Yesterday'), 'header' => TRUE),
+        array('data' => number_format($stats->BouncesYesterday)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Bounces This Week'), 'header' => TRUE),
+        array('data' => number_format($stats->BouncesThisWeek)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Bounces This Month'), 'header' => TRUE),
+        array('data' => number_format($stats->BouncesThisMonth)),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Bounces This Year'), 'header' => TRUE),
+        array('data' => number_format($stats->BouncesThisYear)),
       ),
       'no_striping' => TRUE,
     );
   }
   $table = theme('table', array(
-    'header' => array(),
+    'header' => $header,
     'rows' => $rows,
-    'empty' => t('No webhooks exist for this list.'),
+    'empty' => t('Unable to produce stats for this list.'),
   ));
   $output = array(
     '#type' => 'markup',
