@@ -156,6 +156,11 @@ function campaign_monitor_permission() {
       'title' => t('Edit own clients'),
       'description' => t('Access to edit own Campaign Monitor clients'),
     ),
+    'edit any clients' => array(
+      'title' => t('Edit any clients'),
+      'description' => t('Access to edit any Campaign Monitor clients'),
+      'restrict access' => TRUE,
+    ),
   );
 }
 
@@ -277,6 +282,7 @@ function campaign_monitor_client_access($op, $client = NULL, $account = NULL, $e
       (user_access('view own clients', $account) && ($client->uid === $account->uid));
     case 'update':
       return user_access('administer campaign monitor', $account) ||
+      (user_access('edit any clients', $account)) ||
       (user_access('edit own clients', $account) && ($client->uid === $account->uid));
     case 'delete':
       return user_access('administer campaign monitor', $account);

@@ -127,6 +127,14 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     '#required' => TRUE,
     '#default_value' => isset($list->title) ? $list->title : '',
   );
+  $form['tabs']['settings']['manage_campaigns'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Manage Campaigns'),
+    '#description' => t('Check this box if you prefer to create and send your own campaigns. Otherwise, BEI
+                        will select a unique article from our Newsletter library and send campaigns for you bi-weekly
+                        based on a template comprised of the design elements from this list.'),
+    '#default_value' => $list->manage_campaigns,
+  );
   $form['tabs']['settings']['unsubscribe_page'] = array(
     '#type' => 'textfield',
     '#title' => t('Unsubscribe page'),
@@ -146,12 +154,14 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   $form['tabs']['settings']['confirmed_opt_in'] = array(
     '#type' => 'checkbox',
     '#title' => t('Confirmed opt in'),
-    '#default_value' => isset($data['details']->ConfirmedOptIn) ? $data['details']->ConfirmedOptIn : false,
+    '#default_value' => isset($data['details']->ConfirmedOptIn) ? $data['details']->ConfirmedOptIn : FALSE,
+    '#description' => t('Require new subscribers to opt in via e-mail before being added to the list.'),
   );
   $form['tabs']['settings']['confirmation_success_page'] = array(
     '#type' => 'textfield',
     '#title' => t('Confirmation success page'),
     '#default_value' => isset($data['details']->ConfirmationSuccessPage) ? $data['details']->ConfirmationSuccessPage : '',
+    '#description' => t(''),
   );
   // Defaults tab.
   $form['tabs']['defaults'] = array(
