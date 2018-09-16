@@ -128,6 +128,12 @@ function campaign_monitor_lists_schema() {
         'description' => 'The logo region background color.',
         'default' => '',
       ),
+      'logo_link' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'Stores a link for logo image.',
+        'default' => '',
+      ),
       'logo_region_status' => array(
         'type' => 'int',
         'description' => 'A boolean to indicate if logo region is enabled.',
@@ -142,12 +148,42 @@ function campaign_monitor_lists_schema() {
         'not null' => TRUE,
         'default' => 1,
       ),
+      'banner_link' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'Stores a link for banner image.',
+        'default' => '',
+      ),
       'profile_region_status' => array(
         'type' => 'int',
         'description' => 'A boolean to indicate if profile region is enabled.',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 1,
+      ),
+      'address' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the address value.',
+      ),
+      'footer_region' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the footer_region value.',
+      ),
+      'disclaimer_text' => array(
+        'type' => 'text', 
+        'size' => 'big',
+        'not null' => FALSE, 
+        'description' => 'Stores disclaimer text.',
+      ),
+      'promotional_text' => array(
+        'type' => 'text', 
+        'size' => 'big',
+        'not null' => FALSE, 
+        'description' => 'Stores promotional text.',
       ),
       'created' => array(
         'description' => 'The Unix timestamp when the list was created.',

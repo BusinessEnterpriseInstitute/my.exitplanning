@@ -122,6 +122,16 @@ function campaign_monitor_lists_menu() {
     'type' => MENU_LOCAL_ACTION,
     'file' => 'includes/campaign_monitor_lists.admin.inc',
   );
+  $items['cm-list/%cm_list/migrate'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Migrate',
+    'page callback' => 'drupal_get_form', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array('campaign_monitor_lists_migrate_form', 1),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'weight' => 5
+  );
+  // Webhook routes.
   $items['cm-webhook/%cm_webhook/deactivate'] = array(
     'title' => 'Deactivate webhook',
     'page callback' => 'campaign_monitor_lists_webhook_deactivate',
