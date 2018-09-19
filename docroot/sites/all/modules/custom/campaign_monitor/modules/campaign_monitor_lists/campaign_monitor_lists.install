@@ -53,10 +53,35 @@ function campaign_monitor_lists_schema() {
         'description' => 'The ListID on Campaign Monitor.',
         'default' => '',
       ),
+      'confirmed_opt_in' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate opt in requirement on Campaign Monitor.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
       'title' => array(
         'type' => 'varchar',
         'length' => 255,
         'description' => 'The list title on Campaign Monitor.',
+        'default' => '',
+      ),
+      'unsubscribe_page' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The unsubscribe page on Campaign Monitor.',
+        'default' => '',
+      ),
+      'unsubscribe_setting' => array(
+        'type' => 'varchar',
+        'length' => 60,
+        'description' => 'The unsubscribe setting on Campaign Monitor.',
+        'default' => '',
+      ),
+      'confirmation_success_page' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The confirmation success page on Campaign Monitor.',
         'default' => '',
       ),
       'from_name' => array(
@@ -91,11 +116,74 @@ function campaign_monitor_lists_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
-      'list_data' => array(
+      'background_color' => array(
+        'type' => 'varchar',
+        'length' => 30,
+        'description' => 'The template background color.',
+        'default' => '',
+      ),
+      'logo_background_color' => array(
+        'type' => 'varchar',
+        'length' => 30,
+        'description' => 'The logo region background color.',
+        'default' => '',
+      ),
+      'logo_link' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'Stores a link for logo image.',
+        'default' => '',
+      ),
+      'logo_region_status' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate if logo region is enabled.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'banner_region_status' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate if banner region is enabled.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'banner_link' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'Stores a link for banner image.',
+        'default' => '',
+      ),
+      'profile_region_status' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate if profile region is enabled.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'address' => array(
         'type' => 'blob',
         'size' => 'big',
         'serialize' => TRUE,
-        'description' => 'Serialized data containing the value.',
+        'description' => 'Serialized data containing the address value.',
+      ),
+      'footer_region' => array(
+        'type' => 'blob',
+        'size' => 'big',
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the footer_region value.',
+      ),
+      'disclaimer_text' => array(
+        'type' => 'text', 
+        'size' => 'big',
+        'not null' => FALSE, 
+        'description' => 'Stores disclaimer text.',
+      ),
+      'promotional_text' => array(
+        'type' => 'text', 
+        'size' => 'big',
+        'not null' => FALSE, 
+        'description' => 'Stores promotional text.',
       ),
       'created' => array(
         'description' => 'The Unix timestamp when the list was created.',
@@ -115,6 +203,59 @@ function campaign_monitor_lists_schema() {
       'uid' => array('uid'),
       'cid' => array('cid'),
       'list_id' => array('list_id'),
+    ),
+  );
+  $schema['campaign_monitor_list_webhooks'] = array(
+    'description' => 'Table for Campaign Monitor List webhooks',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'lid' => array(
+        'type' => 'int',
+        'description' => 'The List Entity ID the webhook references.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'webhook_id' => array(
+        'type' => 'varchar',
+        'length' => 32,
+        'description' => 'The WebhookID on Campaign Monitor.',
+        'default' => '',
+      ),
+      'url' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The URL of the webhook.',
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'varchar',
+        'length' => 30,
+        'description' => 'The status of the webhook.',
+        'default' => '',
+      ),
+      'payload_format' => array(
+        'type' => 'varchar',
+        'length' => 30,
+        'description' => 'The payload format of the webhook.',
+        'default' => '',
+      ),
+      'events' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'description' => 'Serialized data containing the value.',
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'lid' => array('lid'),
+      'webhook_id' => array('webhook_id'),
     ),
   );
   return $schema;

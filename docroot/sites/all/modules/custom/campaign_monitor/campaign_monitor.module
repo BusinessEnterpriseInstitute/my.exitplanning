@@ -411,25 +411,24 @@ function campaign_monitor_get_countries() {
  * Implements hook_preprocess_html().
  */
 function campaign_monitor_preprocess_html(&$variables) {
-  //$list = menu_get_object('cm_list');
-  if ($entity = menu_get_object('cm_list')) {
-    if (arg(2) == 'raw') {
-      $data = $entity->list_data;
-      $bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
-      $extra_styles = '
-      html, body, #background-table { background-color: ' . $bg_color . ';}
-      ';
-      $variables['extra_styles'] = $extra_styles;
-      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
-    }
+  $cm_entity = FALSE;
+  $entity_type = NULL;
+  if ($entity = menu_get_object('cm_campaign')) {
+    $cm_entity = TRUE;
+    $entity_type = 'cm_campaign';
   }
-  elseif ($entity = menu_get_object('cm_campaign')) {
+  elseif ($entity = menu_get_object('cm_list')) {
+    $cm_entity = TRUE;
+    $entity_type = 'cm_list';
+  }
+  if ($cm_entity) {
     if (arg(2) == 'raw') {
-      //$bg_color = !empty($data['design']['background_color']['colorfield_picker']) ? $data['design']['background_color']['colorfield_picker'] : '#E4E4E4';
-      $bg_color = '#E4E4E4';
-      $extra_styles = '
-      html, body, #background-table { background-color: ' . $bg_color . ';}
-      ';
+      $bg_color = !empty($entity->background_color) ? $entity->background_color : '#E4E4E4';
+      $logo_bg_color = !empty($entity->logo_background_color) ? $entity->logo_background_color : '#FFFFFF';
+      $extra_styles = "html, body, #background-table {background-color: $bg_color;}";
+      $extra_styles .= "#logo-table {background-color: $logo_bg_color;}";
+      $extra_styles .= "#banner-table, #footer-table {background-color: #FFFFFF;}";
+      $extra_styles .= "#profile-table {background-color: #F4F4F4;}";
       $variables['extra_styles'] = $extra_styles;
       $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
     }
@@ -523,6 +522,15 @@ function campaign_monitor_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 /**
+ * Implements hook_location_element_alter().
+ */
+/*
+function campaign_monitor_location_element_alter(&$element) {
+  $element['country']['#weight'] = 1;
+  //unset($element['re_geocode_location']);
+  //unset($element['delete_location']);
+}*/
+/**
  * Color validation.
  */
 function campaign_monitor_color_validate($element, &$form_state, $form) {
@@ -560,14 +568,11 @@ function campaign_monitor_newsletter_autocomplete($string) {
  * Custom callback to build raw template output.
  */
 function campaign_monitor_build_template($entity, $entity_type) {
-  $mc_banner = field_get_items($entity_type, $entity, 'field_mc_banner');
+  $list = $entity_type == 'cm_list' ? $entity : cm_list_load($entity->lid);
   $rows = array();
   // Top spacer row.
   $rows[] = array(
-    'data' => array(
-      array('data' => '', 'class' => 'w600', 'height' => '20'),
-    ),
-    'no_striping' => TRUE,
+    array('data' => '', 'class' => 'w600', 'height' => '20'),
   );
   // Top bar row.
   $top_bar_table = '
@@ -610,44 +615,159 @@ function campaign_monitor_build_template($entity, $entity_type) {
     </tr>
   </tbody></table>
   ';
+  /*
   $rows[] = array(
     'data' => array(
       array('data' => $top_bar_table, 'class' => 'w600', 'width' => '600'),
     ),
     'no_striping' => TRUE,
-  );
-  // Banner.
-  if ($mc_banner) {
-    $mc_banner_file = file_load($mc_banner[0]['fid']);
-    $mc_banner_output = array(
-      '#theme' => 'image_style',
-      '#style_name' => 'mc_banner',
-      '#path' => $mc_banner_file->uri,
-      '#width' => $mc_banner_file->width,
-      '#height' => $mc_banner_file->height,
-    );
-    $banner_table = '
-    <table id="banner" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+  );*/
+  // Logo region.
+  if ($entity->logo_region_status) {
+    $logo = field_get_items($entity_type, $entity, 'field_mc_logo');
+    if ($logo) {
+      $logo_file = file_load($logo[0]['fid']);
+      $logo_output = array(
+        '#theme' => 'image_style',
+        '#style_name' => 'mc_logo',
+        '#path' => $logo_file->uri,
+        '#width' => $logo_file->width,
+        '#height' => $logo_file->height,
+        '#alt' => 'Company Logo',
+      );
+      $logo_link = !empty($entity->logo_link) ? $entity->logo_link : $list->address['website'];
+      if (!empty($logo_link)) {
+        $logo_output = l(render($logo_output), $logo_link, array('external' => TRUE, 'html' => TRUE, 'attributes' => array('target' => '_blank')));
+      }
+      else {
+        $logo_output = render($logo_output);
+      }
+      $logo_table = '
+      <table id="logo-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr><td height="10"></td></tr>
         <tr>
             <td align="center" valign="top">
-            ' . render($mc_banner_output) . '
+            ' . $logo_output . '
             </td>
         </tr>
-    </tbody></table>';
-    $rows[] = array(
-      'data' => array(
+        <tr><td height="10"></td></tr>
+      </tbody></table>';
+      $rows[] = array(
+        array('data' => $logo_table, 'class' => 'w600', 'width' => '600'),
+      );
+    }
+  }
+  // Banner region.
+  if ($entity->banner_region_status) {
+    $banner = field_get_items($entity_type, $entity, 'field_mc_banner');
+    if ($banner) {
+      $banner_file = file_load($banner[0]['fid']);
+      $banner_output = array(
+        '#theme' => 'image_style',
+        '#style_name' => 'mc_banner',
+        '#path' => $banner_file->uri,
+        '#width' => $banner_file->width,
+        '#height' => $banner_file->height,
+      );
+      $banner_link = !empty($entity->banner_link) ? $entity->banner_link : $list->address['website'];
+      if (!empty($banner_link)) {
+        $banner_output = l(render($banner_output), $banner_link, array('external' => TRUE, 'html' => TRUE, 'attributes' => array('target' => '_blank')));
+      }
+      else {
+        $banner_output = render($banner_output);
+      }
+      $banner_table = '
+      <table id="banner-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+          <tr>
+              <td align="center" valign="top">
+              ' . render($banner_output) . '
+              </td>
+          </tr>
+      </tbody></table>';
+      $rows[] = array(
         array('data' => $banner_table, 'class' => 'w600', 'width' => '600'),
-      ),
-      'no_striping' => TRUE,
+      );
+    }
+  }
+  // Reuseable Address block;
+  $address = $list->address;
+  $profile = !empty($address['company_name']) ? '<strong>' . check_plain($address['company_name']) . '</strong><br />' : '';
+  if (!empty($address['street'])) {
+    $profile .= check_plain($address['street']);
+    $profile .= !empty($address['additional']) ? ', ' . check_plain($address['additional']) : '';
+  }
+  if (!empty($address['city'])) {
+    $profile .= '<br />' . check_plain($address['city']) . ', ' . check_plain($address['state']) . ' ' . check_plain($address['postal_code']);
+  }
+  if (!empty($address['website'])) {
+    if (preg_match('/^http:\/\//', $address['website']) || preg_match('/^https:\/\//', $address['website'])) {
+      $website = $address['website'];
+    }
+    else {
+      $website = 'http://' . $address['website'];
+    }
+    $profile .= '<br />' . l($address['website'], $website, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
+  }
+  if (!empty($address['phone_number'])) {
+    // @todo: research cm_dontconvertlink as link attribute to not track this link in campaign monitor.
+    $profile .= '<br />' . l($address['phone_number'], 'tel:' . $address['phone_number'], array('external' => TRUE));
+  }
+  // Profile region.
+  if ($entity->profile_region_status) {
+    $profile_pic = field_get_items($entity_type, $entity, 'field_mc_profile_pic');
+    if ($profile_pic) {
+      $profile_pic_file = file_load($profile_pic[0]['fid']);
+      $profile_pic_file_output = array(
+        '#theme' => 'image_style',
+        '#style_name' => 'mc_profile',
+        '#path' => $profile_pic_file->uri,
+        '#width' => $profile_pic_file->width,
+        '#height' => $profile_pic_file->height,
+      );
+      $profile_table = '
+      <table id="profile-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr><td height="10"></td></tr>
+        <tr>
+          <td align="center" valign="middle" style="width:420px;">
+            <table><tbody><tr><td align="center" valign="middle">' . $profile . '</td></tr></tbody></table>
+          </td>
+          <td align="center" valign="middle" style="width:180px;">
+            <table><tbody><tr><td>' . render($profile_pic_file_output) . '</td></tr></tbody></table>
+          </td>
+        </tr>
+        <tr><td height="10"></td></tr>
+      </tbody></table>';
+    }
+    else {
+      $profile_table = '
+      <table id="profile-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+        <tr><td height="10"></td></tr>
+        <tr>
+          <td align="center" valign="middle">' . $profile . '</td>
+        </tr>
+        <tr><td height="10"></td></tr>
+      </tbody></table>';
+    }
+    $rows[] = array(
+      array('data' => $profile_table, 'class' => 'w600', 'width' => '600'),
     );
   }
-  // Article
-  $article = variable_get('campaign_monitor_article_preview', FALSE);
+  // Content region.
+  $article = NULL;
+  if ($entity_type == 'cm_list') {
+    $article_title = variable_get('campaign_monitor_article_preview_title', 'Article Title');
+    $article = variable_get('campaign_monitor_article_preview', FALSE);
+  }
   if ($article) {
-    $article_output = check_markup($article['value'], $article['format']);
+    $article_output = '<h1>' . check_plain($article_title) . '</h1>';
+    $article_output .= check_markup($article['value'], $article['format']);
     $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
     if ($disclaimer) {
       $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+    }
+    // Append any member specific disclaimers.
+    if (!empty($list->disclaimer_text)) {
+      $article_output .= check_markup($list->disclaimer_text, 'full_html');
     }
     $article_table = '
     <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
@@ -658,12 +778,38 @@ function campaign_monitor_build_template($entity, $entity_type) {
         </tr>
     </tbody></table>';
     $rows[] = array(
-      'data' => array(
-        array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
-      ),
-      'no_striping' => TRUE,
+      array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
     );
   }
+  // Footer region.
+  $explanation = '';
+  if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {
+    $explanation = '<tr><td align="left" valign="top" colspan="2">' . $list->footer_region['other_settings']['explanation_text'] . '</td></tr>';
+  }
+  $footer_table = '
+  <table id="footer-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+    <tr><td height="10"></td></tr>
+    <tr>
+      <td align="center" valign="middle" style="width:300px;">
+        <table><tbody>
+        <tr><td align="center" valign="middle">' . $profile . '</td></tr>
+        ' . $explanation . '
+        </tbody></table>
+      </td>
+      <td align="center" valign="middle" style="width:300px;">
+        <table><tbody><tr><td></td></tr></tbody></table>
+      </td>
+    </tr>
+    <tr><td colspan="2">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</td></tr>
+    <tr><td height="10" colspan="2"></td></tr>
+  </tbody></table>';
+  $rows[] = array(
+    array('data' => $footer_table, 'class' => 'w600', 'width' => '600'),
+  );
+  // Bottom spacer row.
+  $rows[] = array(
+    array('data' => '', 'class' => 'w600', 'height' => '20'),
+  );
   $table = theme('table', array(
     'header' => array(),
     'rows' => $rows,
@@ -701,4 +847,134 @@ function campaign_monitor_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'campaign_monitor') . '/views',
   );
+}
+/**
+ * Returns the predefined administrative areas.
+ *
+ * @param $country_code
+ *   The country code for which administrative areas should be returned.
+ *
+ * @return
+ *   An array of predefined administrative areas for the given country code, or
+ *   NULL if not found.
+ */
+function campaign_monitor_get_administrative_areas($country_code) {
+  // Maintain a static cache to avoid passing the administrative areas through
+  // t() more than once per request.
+  $administrative_areas = &drupal_static(__FUNCTION__, array());
+  if (empty($administrative_areas)) {
+    // Get the default administrative areas.
+    $administrative_areas = campaign_monitor_get_administrative_areas_defaults();
+  }
+
+  return isset($administrative_areas[$country_code]) ? $administrative_areas[$country_code] : NULL;
+}
+/**
+ * Provides the default administrative areas for address element.
+ */
+function campaign_monitor_get_administrative_areas_defaults() {
+  // To avoid needless pollution of the strings list we only pass to t()
+  // those administrative areas that are in English (or a latin transcription),
+  // and belong to a country that either has multiple official languages (CA)
+  // or uses a non-latin script (AE, CN, JP, KR, UA, RU, etc).
+  // No translation is expected in other cases.
+  $administrative_areas = array();
+  $administrative_areas['CA'] = array(
+    'AB' => t('Alberta'),
+    'BC' => t('British Columbia'),
+    'MB' => t('Manitoba'),
+    'NB' => t('New Brunswick'),
+    'NL' => t('Newfoundland and Labrador'),
+    'NT' => t('Northwest Territories'),
+    'NS' => t('Nova Scotia'),
+    'NU' => t('Nunavut'),
+    'ON' => t('Ontario'),
+    'PE' => t('Prince Edward Island'),
+    'QC' => t('Quebec'),
+    'SK' => t('Saskatchewan'),
+    'YT' => t('Yukon Territory'),
+  );
+  $administrative_areas['US'] = array(
+    'AL' => t('Alabama'),
+    'AK' => t('Alaska'),
+    'AZ' => t('Arizona'),
+    'AR' => t('Arkansas'),
+    'CA' => t('California'),
+    'CO' => t('Colorado'),
+    'CT' => t('Connecticut'),
+    'DE' => t('Delaware'),
+    'DC' => t('District of Columbia'),
+    'FL' => t('Florida'),
+    'GA' => t('Georgia'),
+    'HI' => t('Hawaii'),
+    'ID' => t('Idaho'),
+    'IL' => t('Illinois'),
+    'IN' => t('Indiana'),
+    'IA' => t('Iowa'),
+    'KS' => t('Kansas'),
+    'KY' => t('Kentucky'),
+    'LA' => t('Louisiana'),
+    'ME' => t('Maine'),
+    'MD' => t('Maryland'),
+    'MA' => t('Massachusetts'),
+    'MI' => t('Michigan'),
+    'MN' => t('Minnesota'),
+    'MS' => t('Mississippi'),
+    'MO' => t('Missouri'),
+    'MT' => t('Montana'),
+    'NE' => t('Nebraska'),
+    'NV' => t('Nevada'),
+    'NH' => t('New Hampshire'),
+    'NJ' => t('New Jersey'),
+    'NM' => t('New Mexico'),
+    'NY' => t('New York'),
+    'NC' => t('North Carolina'),
+    'ND' => t('North Dakota'),
+    'OH' => t('Ohio'),
+    'OK' => t('Oklahoma'),
+    'OR' => t('Oregon'),
+    'PA' => t('Pennsylvania'),
+    'RI' => t('Rhode Island'),
+    'SC' => t('South Carolina'),
+    'SD' => t('South Dakota'),
+    'TN' => t('Tennessee'),
+    'TX' => t('Texas'),
+    'UT' => t('Utah'),
+    'VT' => t('Vermont'),
+    'VA' => t('Virginia'),
+    'WA' => t('Washington'),
+    'WV' => t('West Virginia'),
+    'WI' => t('Wisconsin'),
+    'WY' => t('Wyoming'),
+    ' ' => t('--'),
+    'AA' => t('Armed Forces (Americas)'),
+    'AE' => t('Armed Forces (Europe, Canada, Middle East, Africa)'),
+    'AP' => t('Armed Forces (Pacific)'),
+    'AS' => t('American Samoa'),
+    'FM' => t('Federated States of Micronesia'),
+    'GU' => t('Guam'),
+    'MH' => t('Marshall Islands'),
+    'MP' => t('Northern Mariana Islands'),
+    'PW' => t('Palau'),
+    'PR' => t('Puerto Rico'),
+    'VI' => t('Virgin Islands'),
+  );
+  return $administrative_areas;
+}
+/**
+ * After build callback for text_format element.
+ *
+ */
+function campaign_monitor_hide_format_info($element) {
+  if (isset($element['format'])) {
+    $element['format']['#access'] = FALSE;
+    // You can also hide specific parts if you comment out
+    // the line above.
+    /*
+    $element['format']['format']['#access'] = FALSE;
+    $element['format']['guidelines']['#access'] = FALSE;
+    $element['format']['help']['#access'] = FALSE;
+    */
+  }
+  return $element;
 }

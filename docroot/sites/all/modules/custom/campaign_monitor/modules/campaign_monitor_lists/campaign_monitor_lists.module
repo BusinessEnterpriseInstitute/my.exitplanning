@@ -87,6 +87,24 @@ function campaign_monitor_lists_menu() {
     'weight' => -7,
     'options' => array('attributes' => array('target' => '_blank')),
   );
+  $items['cm-list/%cm_list/stats'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Statistics',
+    'page callback' => 'campaign_monitor_lists_stats',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_list', 1),
+    'file' => 'includes/campaign_monitor_lists.pages.inc',
+    'weight' => -6,
+  );
+  $items['cm-list/webhook'] = array(
+    'title' => 'BEI List webhooks endpoint',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'campaign_monitor_lists_webhook_callback',
+    'access callback' => 'campaign_monitor_webhook_access',
+    'access arguments' => array(2),
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
   $items['cm-list/%cm_list/webhooks'] = array(
     'type' => MENU_LOCAL_TASK,
     'title' => 'Webhooks',
@@ -94,9 +112,58 @@ function campaign_monitor_lists_menu() {
     'page arguments' => array(1),
     'access arguments' => array('administer campaign monitor'),
     'file' => 'includes/campaign_monitor_lists.pages.inc',
-    'weight' => -6
+    'weight' => -5
   );
-
+  $items['cm-list/%cm_list/webhooks/add'] = array(
+    'title' => 'Add Webhook',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_webhook_add_form', 1),
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_LOCAL_ACTION,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
+  $items['cm-list/%cm_list/migrate'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Migrate',
+    'page callback' => 'drupal_get_form', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'page arguments' => array('campaign_monitor_lists_migrate_form', 1),
+    'access arguments' => array('administer campaign monitor'),
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+    'weight' => 5
+  );
+  // Webhook routes.
+  $items['cm-webhook/%cm_webhook/deactivate'] = array(
+    'title' => 'Deactivate webhook',
+    'page callback' => 'campaign_monitor_lists_webhook_deactivate',
+    'page arguments' => array(1),
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
+  $items['cm-webhook/%cm_webhook/activate'] = array(
+    'title' => 'Active webhook',
+    'page callback' => 'campaign_monitor_lists_webhook_activate',
+    'page arguments' => array(1),
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
+  $items['cm-webhook/%cm_webhook/test'] = array(
+    'title' => 'Test webhook',
+    'page callback' => 'campaign_monitor_lists_webhook_test',
+    'page arguments' => array(1),
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
+  $items['cm-webhook/%cm_webhook/delete'] = array(
+    'title' => 'Delete webhook',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_webhook_delete_form', 1),
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_lists.admin.inc',
+  );
   return $items;
 }
 
@@ -167,6 +234,24 @@ function campaign_monitor_lists_entity_info() {
     ),
     'uri callback' => 'entity_class_uri',
     'load hook' => 'cm_list_load',
+  );
+  $info['cm_webhook'] = array(
+    'label' => t('Webhook'),
+    'plural label' => t('Webhooks'),
+    'base table' => 'campaign_monitor_list_webhooks',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'webhook_id',
+    ),
+    'static cache' => TRUE,
+    'entity class' => 'WebhookEntity',
+    'controller class' => 'EntityAPIController',
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor_lists',
+    'bundles' => array(),
+    'access callback' => 'campaign_monitor_lists_webhooks_access',
+    'uri callback' => 'entity_class_uri',
+    'load hook' => 'cm_webhook_load',
   );
   return $info;
 }
@@ -277,6 +362,12 @@ function campaign_monitor_lists_access($op, $list = NULL, $account = NULL, $enti
   }
 }
 /**
+ * Access callback for Webhook entities.
+ */
+function campaign_monitor_lists_webhooks_access($op, $entity = NULL, $account = NULL, $entity_type = NULL) {
+  return user_access('administer campaign monitor');
+}
+/**
  *  Load a list.
  */
 function cm_list_load($id = NULL, $reset = FALSE){
@@ -288,11 +379,28 @@ function cm_list_load_multiple($ids = array(), $conditions = array(), $reset = F
   return entity_load('cm_list', $ids, $conditions, $reset);
 }
 /**
+ *  Load a webhook.
+ */
+function cm_webhook_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $list = cm_webhook_load_multiple($ids, $reset);
+  return $list ? reset ($list) : FALSE;
+}
+function cm_webhook_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_webhook', $ids, $conditions, $reset);
+}
+/**
  * Delete single list.
  */
 function cm_list_delete($list) {
-   // Delete the list entity
-   entity_delete('cm_list', entity_id('cm_list', $list));
+  
+  // Delete webhooks
+  db_delete('campaign_monitor_list_webhooks')
+  ->condition('lid', entity_id('cm_list', $list))
+  ->execute();
+  
+  // Delete the list entity
+  entity_delete('cm_list', entity_id('cm_list', $list));
 }
 /**
  * Delete multiple lists.
@@ -309,4 +417,29 @@ function campaign_monitor_lists_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'campaign_monitor_lists') . '/views',
   );
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function campaign_monitor_lists_admin_paths() {
+  $paths = array(
+    'cm-list/*/webhooks*' => TRUE,
+    'cm-webhook/*/delete' => TRUE,
+    'cm-webhook/*/test' => TRUE,
+  );
+  return $paths;
+}
+/**
+ * Implements hook_entity_delete().
+ */
+function campaign_monitor_lists_entity_delete($entity, $type) {
+  if ($type == 'cm_list') {
+    if (module_exists('campaign_monitor_subscribers')) {
+      // Delete the referenced subscribers.
+      db_delete('campaign_monitor_subscribers')
+      ->condition('lid', entity_id('cm_list', $entity))
+      ->execute();
+    }
+  }
 }

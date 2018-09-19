@@ -15,14 +15,20 @@ function campaign_monitor_admin_settings() {
     ),
     'absolute' => TRUE,
   ));
-  $form['campaign_monitor_api_key'] = array(
+  $form['api_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('API Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['api_settings']['campaign_monitor_api_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Campaign Monitor Administrator API Key'),
     '#required' => TRUE,
     '#default_value' => variable_get('campaign_monitor_api_key', ''),
     '#description' => t('The API key for your Campaign Monitor administrator account. Get or generate a valid API key at your !apilink.', array('!apilink' => l(t('Campaign Monitor API Dashboard'), 'https://www.campaignmonitor.com'))),
   );
-  $form['campaign_monitor_integrator_id'] = array(
+  $form['api_settings']['campaign_monitor_integrator_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Integrator ID'),
     '#default_value' => variable_get('campaign_monitor_integrator_id', ''),
@@ -30,18 +36,38 @@ function campaign_monitor_admin_settings() {
   );
   $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
   $article = variable_get('campaign_monitor_article_preview', FALSE);
-  $form['campaign_monitor_article_preview'] = array(
+  $form['default_article'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Default Article'),
+    '#description' => t('Specify a title and body of a newsletter article to display in List forms to serve as a sample when previewing the template.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['default_article']['campaign_monitor_article_preview_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Article title'),
+    '#default_value' => variable_get('campaign_monitor_article_preview_title', ''),
+  );
+  $form['default_article']['campaign_monitor_article_preview'] = array(
     '#type' => 'text_format',
-    '#title' => t('Article Preview'),
+    '#title' => t('Article body'),
     '#description' => t('A sample article to use during list design.'),
     '#default_value' => isset($article['value']) ? $article['value'] : '',
     '#format' => 'full_html',
+    '#rows' => 20,
   );
-  $form['campaign_monitor_disclaimer'] = array(
+  $form['disclaimer'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Disclaimer'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['disclaimer']['campaign_monitor_disclaimer'] = array(
     '#type' => 'text_format',
     '#title' => t('Disclaimer'),
     '#default_value' => isset($disclaimer['value']) ? $disclaimer['value'] : '',
     '#format' => 'full_html',
+    '#rows' => 20,
   );
   return system_settings_form($form);
 }
