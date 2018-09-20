@@ -107,7 +107,7 @@ function campaign_monitor_cm_client_session_view($client) {
   $output = '';
   if ($cm) {
     $result = $cm->external_session_url(array(
-      'Email' => 'apmsooner@gmail.com',
+      'Email' => 'amarquis@exitplanning.com',
       'Chrome' => 'Tabs',
       'Url' => '/subscribers',
       'IntegratorID' => $integrator_id,
