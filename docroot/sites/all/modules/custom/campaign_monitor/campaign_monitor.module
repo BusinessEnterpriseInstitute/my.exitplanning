@@ -548,6 +548,23 @@ function campaign_monitor_email_validate($element, &$form_state, $form) {
   }
 }
 /**
+ * URL validation.
+ */
+function campaign_monitor_url_validate($element, &$form_state, $form) {
+  if (!empty($element['#value'])) {
+    if (strpos($element['#value'], 'http') === FALSE) {
+      form_set_value($element, 'http://' . $element['#value'], $form_state);
+      $element['#value'] = 'http://' . $element['#value'];
+      if (!valid_url($element['#value'], TRUE)) {
+        form_error($element, t($element['#title'] . ' is not a valid email url.'));
+      }
+    }
+    elseif (!valid_url($element['#value'], TRUE)) {
+      form_error($element, t($element['#title'] . ' is not a valid email url.'));
+    }
+  }
+}
+/**
  * Autocomplete to pull newsletter node titles.
  */
 function campaign_monitor_newsletter_autocomplete($string) {
@@ -569,6 +586,7 @@ function campaign_monitor_newsletter_autocomplete($string) {
  */
 function campaign_monitor_build_template($entity, $entity_type) {
   $list = $entity_type == 'cm_list' ? $entity : cm_list_load($entity->lid);
+  $address = $list->address;
   $rows = array();
   // Top spacer row.
   $rows[] = array(
@@ -635,7 +653,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
         '#height' => $logo_file->height,
         '#alt' => 'Company Logo',
       );
-      $logo_link = !empty($entity->logo_link) ? $entity->logo_link : $list->address['website'];
+      $logo_link = !empty($entity->logo_link) ? $entity->logo_link : $list->address['website']['url'];
       if (!empty($logo_link)) {
         $logo_output = l(render($logo_output), $logo_link, array('external' => TRUE, 'html' => TRUE, 'attributes' => array('target' => '_blank')));
       }
@@ -669,7 +687,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
         '#width' => $banner_file->width,
         '#height' => $banner_file->height,
       );
-      $banner_link = !empty($entity->banner_link) ? $entity->banner_link : $list->address['website'];
+      $banner_link = !empty($entity->banner_link) ? $entity->banner_link : $list->address['website']['url'];
       if (!empty($banner_link)) {
         $banner_output = l(render($banner_output), $banner_link, array('external' => TRUE, 'html' => TRUE, 'attributes' => array('target' => '_blank')));
       }
@@ -690,7 +708,6 @@ function campaign_monitor_build_template($entity, $entity_type) {
     }
   }
   // Reuseable Address block;
-  $address = $list->address;
   $profile = !empty($address['company_name']) ? '<strong>' . check_plain($address['company_name']) . '</strong><br />' : '';
   if (!empty($address['street'])) {
     $profile .= check_plain($address['street']);
@@ -699,14 +716,9 @@ function campaign_monitor_build_template($entity, $entity_type) {
   if (!empty($address['city'])) {
     $profile .= '<br />' . check_plain($address['city']) . ', ' . check_plain($address['state']) . ' ' . check_plain($address['postal_code']);
   }
-  if (!empty($address['website'])) {
-    if (preg_match('/^http:\/\//', $address['website']) || preg_match('/^https:\/\//', $address['website'])) {
-      $website = $address['website'];
-    }
-    else {
-      $website = 'http://' . $address['website'];
-    }
-    $profile .= '<br />' . l($address['website'], $website, array('external' => TRUE, 'attributes' => array('target' => '_blank')));
+  if (!empty($address['website']['url'])) {
+    $website_title = empty($address['website']['title']) ? $address['website']['url'] : $address['website']['title'];
+    $profile .= '<br />' . l($website_title, $address['website']['url'], array('external' => TRUE, 'attributes' => array('target' => '_blank')));
   }
   if (!empty($address['phone_number'])) {
     // @todo: research cm_dontconvertlink as link attribute to not track this link in campaign monitor.

@@ -130,7 +130,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     'reply_to' => !$is_new ? $list->reply_to : '',
     'address' => !$is_new ? $list->address : array(
       'company_name' => '',
-      'website' => '',
+      'website' => array('title' => '', 'url' => ''),
       'country' => 'US',
       'street' => '',
       'additional' => '',
@@ -191,7 +191,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     }
     $defaults['address'] = array(
       'company_name' => $author_company_name ? $author_company_name[0]['value'] : '',
-      'website' => $author_website ? $author_website[0]['url'] : '',
+      'website' => $author_website ? array('title' => $author_website[0]['title'], 'url' => $author_website[0]['url']) : array(),
       'country' => $default_country,
       'street' => $author_address_field ? $author_address_field[0]['street'] : '',
       'additional' => $author_address_field ? $author_address_field[0]['additional'] : '',
@@ -393,15 +393,31 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     '#default_value' => $defaults['address']['postal_code'],
     '#required' => TRUE,
   );
-  $form['tabs']['defaults']['author_wrapper']['address']['website'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Website'),
-    '#default_value' => $defaults['address']['website'],
-  );
   $form['tabs']['defaults']['author_wrapper']['address']['phone_number'] = array(
     '#type' => 'textfield',
     '#title' => t('Phone Number'),
     '#default_value' => $defaults['address']['phone_number'],
+  );
+  $form['tabs']['defaults']['author_wrapper']['address']['website'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Website'),
+  );
+  $form['tabs']['defaults']['author_wrapper']['address']['website']['title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link Title'),
+    '#description' => t('An alternative to the actual url for visual output. Example: www.mysite.com vs. http://www.mysite.com.'),
+    '#maxlength' => 60,
+    '#default_value' => $defaults['address']['website']['title'],
+  );
+  $form['tabs']['defaults']['author_wrapper']['address']['website']['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#maxlength' => 128,
+    '#default_value' => $defaults['address']['website']['url'],
+    '#element_validate' => array('campaign_monitor_url_validate'),
+    '#attributes' => array(
+      'placeholder' => 'http://',
+    ),
   );
   // Attach field api fields.
   if (!$is_new) {
@@ -465,8 +481,9 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
       '#weight' => 2,
       '#maxlength' => 128,
       '#attributes' => array(
-        'placeholder' => t('http://www.mysite.com'),
+        'placeholder' => t('http://'),
       ),
+      '#element_validate' => array('campaign_monitor_url_validate'),
     );
     if (isset($form['field_mc_logo'])) {
       $form['tabs']['design']['logo_region']['logo_wrapper']['field_mc_logo'] = $form['field_mc_logo'];
@@ -499,7 +516,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
       '#weight' => 1,
       '#maxlength' => 128,
       '#attributes' => array(
-        'placeholder' => t('http://www.mysite.com'),
+        'placeholder' => t('http://'),
       ),
     );
     if (isset($form['field_mc_banner'])) {
@@ -589,7 +606,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
       '#title' => t('Facebook Like URL'),
       '#default_value' => $list->footer_region['share_widgets']['facebook_url'],
       '#attributes' => array(
-        'placeholder' => t('https://www.facebook.com/BEIexitplanning'),
+        'placeholder' => t('http://'),
       ),
       '#states' => array(
         'visible' => array(
@@ -597,6 +614,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
           ':input[name="footer_region[share_widgets][facebook_type]"]' => array('value' => 'url'),
         ),
       ),
+      '#element_validate' => array('campaign_monitor_url_validate'),
     );
     // LinkedIn
     $form['tabs']['design']['footer_region']['share_widgets']['linkedin'] = array(
@@ -712,19 +730,6 @@ function cm_list_form_validate($form, &$form_state) {
     }
     elseif ($form_state['triggering_element']['#name'] == 'author') {
       $form_state['author'] = $account;
-    }
-  }
-  // Enforce valid url for logo_link
-  if (!empty($values['logo_link'])) {
-    if (!valid_url($values['logo_link'], TRUE)) {
-      form_set_error('logo_link', t('Invalid url entered for %url. Be sure to prefix the url with a valid protocol ie; http:// or https://', array('%url' => $values['logo_link'])));
-    }
-    
-  }
-  // Enforce valid url for banner_link
-  if (!empty($values['banner_link'])) {
-    if (!valid_url($values['banner_link'], TRUE)) {
-      form_set_error('banner_link', t('Invalid url entered for %url. Be sure to prefix the url with a valid protocol ie; http:// or https://', array('%url' => $values['banner_link'])));
     }
   }
 }
