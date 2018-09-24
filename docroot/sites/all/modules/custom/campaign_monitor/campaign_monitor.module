@@ -770,29 +770,38 @@ function campaign_monitor_build_template($entity, $entity_type) {
     $article_title = variable_get('campaign_monitor_article_preview_title', 'Article Title');
     $article = variable_get('campaign_monitor_article_preview', FALSE);
   }
+  elseif ($entity_type == 'cm_campaign') {
+    $article_title = $entity->article_title;
+    $article = array('value' => $entity->article_body, 'format' => 'full_html');
+  }
+  $article_output = '';
   if ($article) {
     $article_output = '<h1>' . check_plain($article_title) . '</h1>';
     $article_output .= check_markup($article['value'], $article['format']);
-    $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
-    if ($disclaimer) {
-      $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
-    }
-    // Append any member specific disclaimers.
-    if (!empty($list->disclaimer_text)) {
-      $article_output .= check_markup($list->disclaimer_text, 'full_html');
-    }
-    $article_table = '
-    <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
-        <tr>
-            <td valign="top">
-            <div class="article-content">' . $article_output . '</div>
-            </td>
-        </tr>
-    </tbody></table>';
-    $rows[] = array(
-      array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
-    );
   }
+  // Append promotional text.
+  if (!empty($entity->promotional_text)) {
+    $article_output .= check_markup($entity->promotional_text, 'full_html');
+  }
+  $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
+  if ($disclaimer) {
+    $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+  }
+  // Append any member specific disclaimers.
+  if (!empty($entity->disclaimer_text)) {
+    $article_output .= check_markup($list->disclaimer_text, 'full_html');
+  }
+  $article_table = '
+  <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <tr>
+          <td valign="top">
+          <div class="article-content">' . $article_output . '</div>
+          </td>
+      </tr>
+  </tbody></table>';
+  $rows[] = array(
+    array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
+  );
   // Footer region.
   $explanation = '';
   if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {

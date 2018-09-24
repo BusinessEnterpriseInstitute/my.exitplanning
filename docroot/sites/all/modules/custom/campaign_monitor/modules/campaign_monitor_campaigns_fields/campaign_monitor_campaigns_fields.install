@@ -209,6 +209,7 @@ function _campaign_monitor_campaigns_fields_instance_data() {
     'bundle' => 'cm_campaign',
     'deleted' => '0',
   );
+  /*
   $instances['field_body'] = array(
     'label' => 'Body',
     'widget' => array(
@@ -288,7 +289,7 @@ function _campaign_monitor_campaigns_fields_instance_data() {
     'entity_type' => 'cm_campaign',
     'bundle' => 'cm_campaign',
     'deleted' => '0',
-  );
+  );*/
   return $instances;
 }
 /**
