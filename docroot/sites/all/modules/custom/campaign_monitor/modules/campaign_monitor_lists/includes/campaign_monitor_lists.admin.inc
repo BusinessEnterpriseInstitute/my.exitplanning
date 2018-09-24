@@ -51,7 +51,7 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
             $author_phone = field_get_items('user', $author, 'field_phone');
             $address = array(
               'company_name' => $author_company_name ? $author_company_name[0]['value'] : '',
-              'website' => $author_website ? $author_website[0]['url'] : '',
+              'website' => $author_website ? array('title' => $author_website[0]['title'], 'url' => $author_website[0]['url']) : array('title' => '', 'url' => ''),
               'country' => 'US',
               'street' => '',
               'additional' => '',
