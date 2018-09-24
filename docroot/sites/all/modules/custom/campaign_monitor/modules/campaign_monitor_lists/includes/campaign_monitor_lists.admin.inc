@@ -51,7 +51,7 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
             $author_phone = field_get_items('user', $author, 'field_phone');
             $address = array(
               'company_name' => $author_company_name ? $author_company_name[0]['value'] : '',
-              'website' => $author_website ? $author_website[0]['url'] : '',
+              'website' => $author_website ? array('title' => $author_website[0]['title'], 'url' => $author_website[0]['url']) : array('title' => '', 'url' => ''),
               'country' => 'US',
               'street' => '',
               'additional' => '',
@@ -116,7 +116,6 @@ function campaign_monitor_lists_import_form_submit(&$form, &$form_state) {
  * List entity form.
  */
 function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
-  global $user;
   $is_new = isset($list->is_new) || !isset($list->id) ? TRUE : FALSE;
   $is_administrator = user_access('administer campaign monitor');
   // Country options to populate dropdown since we need only a few common.
