@@ -36,25 +36,32 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $form['tabs'] = array(
     '#type' => $tabs_type,
   );
-  $form['tabs']['settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Settings'),
-  );
-  $form['tabs']['settings']['subject'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Write a subject line'),
-    '#description' => t('This text will display in the Subject field in your recipient\'s email client.'),
-    '#required' => TRUE,
-    '#default_value' => $campaign->subject,
-  );
-  $form['tabs']['settings']['from_name'] = array(
+  if ($is_new) {
+    $form['tabs']['content'] = array(
+      '#type' => 'container',
+    );
+    $form['tabs']['content']['email_settings'] = array(
+      '#type' => 'container',
+    );
+  }
+  else {
+    $form['tabs']['content'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Content'),
+    );
+    $form['tabs']['content']['email_settings'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('E-mail Settings'),
+    );
+  }
+  $form['tabs']['content']['email_settings']['from_name'] = array(
     '#type' => 'textfield',
     '#title' => t('From name'),
     '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
     '#default_value' => $campaign->from_name,
     '#required' => TRUE,
   );
-  $form['tabs']['settings']['from_email'] = array(
+  $form['tabs']['content']['email_settings']['from_email'] = array(
     '#type' => 'textfield',
     '#title' => t('From e-mail'),
     '#description' => t('This is the e-mail address your campaigns will come from.'),
@@ -62,7 +69,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#default_value' => $campaign->from_email,
     '#required' => TRUE,
   );
-  $form['tabs']['settings']['reply_to'] = array(
+  $form['tabs']['content']['email_settings']['reply_to'] = array(
     '#type' => 'textfield',
     '#title' => t('Replies should be sent to'),
     '#description' => t('Enter a valid email address that replies will be sent to.'),
@@ -80,8 +87,72 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
         unset($form_state['input']['article_reference']);
         unset($form_state['input']['article_title']);
         unset($form_state['input']['article_body']);
+        unset($form_state['input']['subject']);
       }
     }
+    // Content Region
+    $form['tabs']['content']['content_region'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Content region'),
+    );
+    $form['tabs']['content']['content_region']['article'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="article-wrapper">',
+      '#suffix' => '</div>',
+    );
+    $form['tabs']['content']['content_region']['article']['article_reference'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Newsletter Reference'),
+      '#description' => t('Choose an article from our database to populate the article fields or create your own content.'),
+      '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete',
+      '#attributes' => array(
+        'placeholder' => t('Enter some keywords'),
+      ),
+      '#ajax' => array(
+        'wrapper' => 'article-wrapper',
+        'method' => 'replace',
+        'callback' => 'cm_campaign_form_refresh_article',
+      ),
+    );
+    $form['tabs']['content']['content_region']['article']['subject'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Write a subject line'),
+      '#description' => t('This text will display in the Subject field in your recipient\'s email client.'),
+      '#required' => TRUE,
+      '#default_value' => isset($article_title) ? $article_title : $campaign->subject,
+    );
+    $form['tabs']['content']['content_region']['article']['article_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Article Title'),
+      '#default_value' => isset($article_title) ? $article_title : $campaign->article_title,
+      '#required' => TRUE,
+      '#maxlength' => 255,
+    );
+    $form['tabs']['content']['content_region']['article']['article_body'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Article Body'),
+      '#default_value' => isset($article_body) ? $article_body : $campaign->article_body,
+      '#format' => 'epic',
+      '#rows' => 10,
+      '#required' => TRUE,
+      '#after_build' => array('campaign_monitor_hide_format_info'),
+    );
+    $form['tabs']['content']['content_region']['promotional_text'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Promotional Text'),
+      '#default_value' => isset($campaign->promotional_text) ? $campaign->promotional_text : '',
+      '#format' => 'epic',
+      '#rows' => 10,
+      '#after_build' => array('campaign_monitor_hide_format_info'),
+    );
+    $form['tabs']['content']['content_region']['disclaimer_text'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Disclaimers'),
+      '#default_value' => isset($campaign->disclaimer_text) ? $campaign->disclaimer_text : '',
+      '#format' => 'epic',
+      '#rows' => 10,
+      '#after_build' => array('campaign_monitor_hide_format_info'),
+    );
     field_attach_form('cm_campaign', $campaign, $form, $form_state);
     // Attaches css and js from the field group module.
     $form['#attached']['css'] = array(
@@ -94,7 +165,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
       '#title' => t('Design'),
-      '#weight' => -10,
     );
     $form['tabs']['design']['background_color'] = array(
       '#type' => 'colorfield_picker',
@@ -210,59 +280,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       $form['tabs']['design']['profile_region']['profile_wrapper']['field_mc_profile_pic']['#weight'] = 5;
       unset($form['field_mc_profile_pic']);
     }
-    // Content Region
-    $form['tabs']['design']['content_region'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Content region'),
-    );
-    $form['tabs']['design']['content_region']['article'] = array(
-      '#type' => 'container',
-      '#prefix' => '<div id="article-wrapper">',
-      '#suffix' => '</div>',
-    );
-    $form['tabs']['design']['content_region']['article']['article_reference'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Newsletter Reference'),
-      '#description' => t('Choose an article from our database'),
-      '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete',
-      '#ajax' => array(
-        'wrapper' => 'article-wrapper',
-        'method' => 'replace',
-        'callback' => 'cm_campaign_form_refresh_article',
-      ),
-    );
-    $form['tabs']['design']['content_region']['article']['article_title'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Article Title'),
-      '#default_value' => isset($article_title) ? $article_title : $campaign->article_title,
-      '#required' => TRUE,
-      '#maxlength' => 255,
-    );
-    $form['tabs']['design']['content_region']['article']['article_body'] = array(
-      '#type' => 'text_format',
-      '#title' => t('Article Body'),
-      '#default_value' => isset($article_body) ? $article_body : $campaign->article_body,
-      '#format' => 'epic',
-      '#rows' => 10,
-      '#required' => TRUE,
-      '#after_build' => array('campaign_monitor_hide_format_info'),
-    );
-    $form['tabs']['design']['content_region']['disclaimer_text'] = array(
-      '#type' => 'text_format',
-      '#title' => t('Disclaimers'),
-      '#default_value' => isset($campaign->disclaimer_text) ? $campaign->disclaimer_text : '',
-      '#format' => 'epic',
-      '#rows' => 10,
-      '#after_build' => array('campaign_monitor_hide_format_info'),
-    );
-    $form['tabs']['design']['content_region']['promotional_text'] = array(
-      '#type' => 'text_format',
-      '#title' => t('Promotional Text'),
-      '#default_value' => isset($campaign->promotional_text) ? $campaign->promotional_text : '',
-      '#format' => 'epic',
-      '#rows' => 10,
-      '#after_build' => array('campaign_monitor_hide_format_info'),
-    );
   }
   $form['actions'] = array(
     '#type' => 'actions',
@@ -294,7 +311,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
  * AJAX callback for author form element.
  */
 function cm_campaign_form_refresh_article($form, $form_state) {
-  return $form['tabs']['design']['content_region']['article'];
+  return $form['tabs']['content']['content_region']['article'];
 }
 /**
  * Implements hook_validate().
@@ -362,7 +379,7 @@ function cm_campaign_form_submit(&$form, &$form_state) {
     // Save field_api fields.
     field_attach_submit('cm_campaign', $campaign, $form, $form_state);
   }
-  $campaign->subject = $values['subject'];
+  $campaign->subject = $is_new ? '' : $values['subject'];
   $campaign->from_name = $values['from_name'];
   $campaign->from_email = $values['from_email'];
   $campaign->reply_to = $values['reply_to'];
@@ -546,3 +563,24 @@ function campaign_monitor_campaigns_schedule_date_validate($element, &$form_stat
     form_error($element, t($element['#title'] . '  must be in the future.'));
   }
 }
+/**
+ * Helper function to schedule or send a campaign.
+ */
+/*
+function campaign_monitor_campaigns_send($campaign, $campaign_id, $send_option, $send_date) {
+  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
+  $result = $wrap->send(array(
+    'ConfirmationEmail' => 'amarquis@exitplanning.com',
+    'SendDate' => $send_date,
+  ));
+  if ($result->was_successful()) {
+    $campaign->campaign_status = $new_status;
+    $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
+    $campaign->save();
+    return TRUE;
+  }
+  else {
+    return;
+  }
+}*/
+
