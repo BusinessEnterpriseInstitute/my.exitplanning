@@ -72,6 +72,16 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   );
   // Attach field api fields.
   if (!$is_new) {
+    if (!empty($form_state['values']['article_reference'])) {
+      $node = node_load($form_state['values']['article_reference']);
+      if ($node) {
+        $article_title = $node->title;
+        $article_body = $node->body['und'][0]['value'];
+        unset($form_state['input']['article_reference']);
+        unset($form_state['input']['article_title']);
+        unset($form_state['input']['article_body']);
+      }
+    }
     field_attach_form('cm_campaign', $campaign, $form, $form_state);
     // Attaches css and js from the field group module.
     $form['#attached']['css'] = array(
@@ -205,11 +215,37 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       '#type' => 'fieldset',
       '#title' => t('Content region'),
     );
-    $form['tabs']['design']['content_region']['article_reference'] = array(
+    $form['tabs']['design']['content_region']['article'] = array(
+      '#type' => 'container',
+      '#prefix' => '<div id="article-wrapper">',
+      '#suffix' => '</div>',
+    );
+    $form['tabs']['design']['content_region']['article']['article_reference'] = array(
       '#type' => 'textfield',
       '#title' => t('Newsletter Reference'),
       '#description' => t('Choose an article from our database'),
       '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete',
+      '#ajax' => array(
+        'wrapper' => 'article-wrapper',
+        'method' => 'replace',
+        'callback' => 'cm_campaign_form_refresh_article',
+      ),
+    );
+    $form['tabs']['design']['content_region']['article']['article_title'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Article Title'),
+      '#default_value' => isset($article_title) ? $article_title : $campaign->article_title,
+      '#required' => TRUE,
+      '#maxlength' => 255,
+    );
+    $form['tabs']['design']['content_region']['article']['article_body'] = array(
+      '#type' => 'text_format',
+      '#title' => t('Article Body'),
+      '#default_value' => isset($article_body) ? $article_body : $campaign->article_body,
+      '#format' => 'epic',
+      '#rows' => 10,
+      '#required' => TRUE,
+      '#after_build' => array('campaign_monitor_hide_format_info'),
     );
     $form['tabs']['design']['content_region']['disclaimer_text'] = array(
       '#type' => 'text_format',
@@ -227,18 +263,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       '#rows' => 10,
       '#after_build' => array('campaign_monitor_hide_format_info'),
     );
-    // Content tab.
-    /*
-    $form['tabs']['content'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Content'),
-      '#weight' => -20,
-    );
-    if (isset($form['field_body'])) {
-      $form['tabs']['content']['field_body'] = $form['field_body'];
-      $form['tabs']['content']['field_body']['#weight'] = 2;
-      unset($form['field_body']);
-    }*/
   }
   $form['actions'] = array(
     '#type' => 'actions',
@@ -265,23 +289,43 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   }
   return $form;
 }
+
+/**
+ * AJAX callback for author form element.
+ */
+function cm_campaign_form_refresh_article($form, $form_state) {
+  return $form['tabs']['design']['content_region']['article'];
+}
+/**
+ * Implements hook_validate().
+ *
+ * Performs validation checks on the given list.
+ */
+/*
+function cm_campaign_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  // Validate the Article reference field.
+  if (!empty($values['article_reference'])) {
+    $node = node_load($values['article_reference']);
+    if (!$node) {
+      form_set_error('article_reference', t('The newsletter referenced does not exist.'));
+    }
+    elseif ($form_state['triggering_element']['#name'] == 'article_reference') {
+      $form_state['article_selected'] = $node;
+    }
+  }
+}*/
+
 function cm_campaign_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   $list = $form_state['cm_list'];
   $campaign = $form_state['cm_campaign'];
-  if (isset($campaign->is_new)) {
+  $is_new = isset($campaign->is_new) ? TRUE : FALSE;
+  if ($is_new) {
     // Save it now to get the entity id for unique campaign name.
     $campaign->save();
     // Set a unique campaign name to use on Campaign Monitor.
     $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
-    // Set values from list.
-    $campaign->background_color = $list->background_color;
-    $campaign->logo_background_color = $list->logo_background_color;
-    $campaign->logo_region_status = $list->logo_region_status;
-    $campaign->logo_link = $list->logo_link;
-    $campaign->banner_region_status = $list->banner_region_status;
-    $campaign->banner_link = $list->banner_link;
-    $campaign->profile_region_status = $list->profile_region_status;
     // Set values for field_api fields from list.
     $list_logo = field_get_items('cm_list', $list, 'field_mc_logo');
     $list_banner = field_get_items('cm_list', $list, 'field_mc_banner');
@@ -298,7 +342,6 @@ function cm_campaign_form_submit(&$form, &$form_state) {
       $file = file_load($list_profile_pic[0]['fid']);
       $campaign->field_mc_profile_pic[LANGUAGE_NONE][0] = (array) $file;
     }
-    $campaign->save();
     $redirect = 'cm-campaign/' . entity_id('cm_campaign', $campaign) . '/edit';
   }
   else {
@@ -316,13 +359,25 @@ function cm_campaign_form_submit(&$form, &$form_state) {
     else {
       $redirect = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
     }
-    $campaign->subject = $values['subject'];
-    $campaign->from_name = $values['from_name'];
-    $campaign->from_email = $values['from_email'];
-    $campaign->reply_to = $values['reply_to'];
+    // Save field_api fields.
     field_attach_submit('cm_campaign', $campaign, $form, $form_state);
-    $campaign->save();
   }
+  $campaign->subject = $values['subject'];
+  $campaign->from_name = $values['from_name'];
+  $campaign->from_email = $values['from_email'];
+  $campaign->reply_to = $values['reply_to'];
+  $campaign->background_color = $is_new ? $list->background_color : $values['background_color']['colorfield_picker'];
+  $campaign->logo_background_color = $is_new ? $list->logo_background_color : $values['logo_background_color']['colorfield_picker'];
+  $campaign->logo_region_status = $is_new ? $list->logo_region_status : $values['logo_region_status'];
+  $campaign->logo_link = $is_new ? $list->logo_link : $values['logo_link'];
+  $campaign->banner_region_status = $is_new ? $list->banner_region_status : $values['banner_region_status'];
+  $campaign->banner_link = $is_new ? $list->banner_link : $values['banner_link'];
+  $campaign->profile_region_status = $is_new ? $list->profile_region_status : $values['profile_region_status'];
+  $campaign->disclaimer_text = $is_new ? $list->disclaimer_text : $values['disclaimer_text']['value'];
+  $campaign->promotional_text = $is_new ? $list->promotional_text : $values['promotional_text']['value'];
+  $campaign->article_title = !empty($values['article_title']) ? $values['article_title'] : '';
+  $campaign->article_body = !empty($values['article_body']['value']) ? $values['article_body']['value'] : '';
+  $campaign->save();
   $form_state['redirect'] = $redirect;
 }
 

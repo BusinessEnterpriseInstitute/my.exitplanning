@@ -166,6 +166,18 @@ function campaign_monitor_campaigns_schema() {
         'not null' => FALSE, 
         'description' => 'Stores promotional text.',
       ),
+      'article_title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'Stores article title.',
+        'default' => '',
+      ),
+      'article_body' => array(
+        'type' => 'text', 
+        'size' => 'big',
+        'not null' => FALSE, 
+        'description' => 'Stores article body text.',
+      ),
       'created' => array(
         'description' => 'The Unix timestamp when the subscriber was created.',
         'type' => 'int',

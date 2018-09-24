@@ -201,6 +201,8 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     );
   }
   if ($is_new) {
+    $title = 'Create list';
+    $tabs_type = 'container';
     $defaults['from_name'] = $author->realname;
     $defaults['from_email'] = $author->mail;
     $defaults['reply_to'] = $author->mail;
@@ -215,13 +217,9 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
       'address' => $defaults['address'],
     ));
   }
-  $tabs_type = 'container';
-  if (!$is_new) {
+  else {
     $title = entity_label('cm_list', $list);
     $tabs_type = 'horizontal_tabs';
-  }
-  else {
-    $title = 'Create list';
   }
   drupal_set_title($title);
   $form_state['cm_client'] = $client;
@@ -517,6 +515,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
       '#attributes' => array(
         'placeholder' => t('http://'),
       ),
+      '#element_validate' => array('campaign_monitor_url_validate'),
     );
     if (isset($form['field_mc_banner'])) {
       $form['tabs']['design']['banner_region']['banner_wrapper']['field_mc_banner'] = $form['field_mc_banner'];
@@ -825,6 +824,8 @@ function cm_list_form_submit(&$form, &$form_state) {
         $list->banner_region_status = $values['banner_region_status'];
         $list->banner_link = $values['banner_link'];
         $list->profile_region_status = $values['profile_region_status'];
+        $list->promotional_text = $values['promotional_text']['value'];
+        $list->disclaimer_text = $values['disclaimer_text']['value'];
         $list->address = $values['address'];
         $list->footer_region = $values['footer_region'];
         field_attach_submit('cm_list', $list, $form, $form_state);
