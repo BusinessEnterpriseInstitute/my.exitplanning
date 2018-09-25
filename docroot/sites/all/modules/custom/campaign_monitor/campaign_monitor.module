@@ -783,13 +783,17 @@ function campaign_monitor_build_template($entity, $entity_type) {
   if (!empty($entity->promotional_text)) {
     $article_output .= check_markup($entity->promotional_text, 'full_html');
   }
+  $disclaimers = '';
   $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
   if ($disclaimer) {
-    $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+    $disclaimers .= check_markup($disclaimer['value'], $disclaimer['format']);
   }
   // Append any member specific disclaimers.
   if (!empty($entity->disclaimer_text)) {
-    $article_output .= check_markup($list->disclaimer_text, 'full_html');
+    $disclaimers .= check_markup($list->disclaimer_text, 'full_html');
+  }
+  if (!empty($disclaimers)) {
+    $article_output .= '<div id="disclaimers">' . $disclaimers . '</div>';
   }
   $article_table = '
   <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
@@ -805,24 +809,20 @@ function campaign_monitor_build_template($entity, $entity_type) {
   // Footer region.
   $explanation = '';
   if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {
-    $explanation = '<tr><td align="left" valign="top" colspan="2">' . $list->footer_region['other_settings']['explanation_text'] . '</td></tr>';
+    $explanation = '<p id="#permission-reminder">' . $list->footer_region['other_settings']['explanation_text'] . '</p>';
   }
   $footer_table = '
   <table id="footer-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
-    <tr><td height="10"></td></tr>
     <tr>
       <td align="center" valign="middle" style="width:300px;">
-        <table><tbody>
-        <tr><td align="center" valign="middle">' . $profile . '</td></tr>
+        <p>' . $profile . '</p>
         ' . $explanation . '
-        </tbody></table>
       </td>
       <td align="center" valign="middle" style="width:300px;">
         <table><tbody><tr><td></td></tr></tbody></table>
       </td>
     </tr>
-    <tr><td colspan="2">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</td></tr>
-    <tr><td height="10" colspan="2"></td></tr>
+    <tr><td colspan="2"><div id="copyright">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</div></td></tr>
   </tbody></table>';
   $rows[] = array(
     array('data' => $footer_table, 'class' => 'w600', 'width' => '600'),
