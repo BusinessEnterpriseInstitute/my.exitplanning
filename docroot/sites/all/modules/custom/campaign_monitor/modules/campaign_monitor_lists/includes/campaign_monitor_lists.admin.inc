@@ -813,6 +813,9 @@ function cm_list_form_submit(&$form, &$form_state) {
       ));
       if ($result->was_successful()) {
         $list->title = $values['title'];
+        $list->confirmed_opt_in = $values['confirmed_opt_in'];
+        $list->unsubscribe_page = $values['unsubscribe_page'];
+        $list->unsubscribe_setting = $values['unsubscribe_setting'];
         $list->from_name = $values['from_name'];
         $list->from_email = $values['from_email'];
         $list->reply_to = $values['reply_to'];

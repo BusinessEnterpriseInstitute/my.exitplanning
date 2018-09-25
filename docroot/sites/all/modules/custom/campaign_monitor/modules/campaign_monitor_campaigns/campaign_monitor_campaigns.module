@@ -35,7 +35,8 @@ function campaign_monitor_campaigns_menu() {
     'description' => 'Add campaign to Campaign Monitor.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cm_campaign_form', NULL, 1),
-    'access arguments' => array('administer campaign monitor'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
