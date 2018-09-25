@@ -74,40 +74,6 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
     $form['date_filter']['min']['#title'] = t('From');
     $form['date_filter']['max']['#title'] = t('To');
   }
-  // Alter the feeds import form
-  if ($form_id == 'feeds_import_form') {
-    $form['feeds']['FeedsCSVParser']['delimiter']['#disabled'] = TRUE;
-  }
-  // If message type is 'Private Message'.
-  // Make cancel link a button on message form and route to destination parameter or unset if unavailable.
-  if ($form_id == 'message_ui_instance_message_manage') {
-    $query_parameters = drupal_get_query_parameters();
-    $form['owner']['#access'] = user_access('edit any message type');
-    if ($form['#bundle'] == 'private_message') {
-      if (isset($form['text']['#type'])) {
-        $form['text']['#type'] = 'hidden';
-      }
-      $form['actions']['submit']['#value'] = t('Send');
-      if (!empty($query_parameters) && isset($_GET['destination'])) {
-        $form['actions']['cancel'] = array(
-          '#type' => 'submit',
-          '#value' => t('Cancel'),
-          '#submit' => array('callback_for_cancel_button'),
-        );
-      }
-      else {
-        unset($form['actions']['cancel']);
-      }
-    }
-  }
-  // Alter the Feeds import tab form.
-  if ($form_id == 'feeds_import_tab_form') {
-    if ($form['#importer_id'] == 'subscribers' && $form['#feed_nid']) {
-      $nid = $form['#feed_nid'];
-      $form['actions']['cancel']['#title'] = t('Return to Dashboard');
-      $form['#redirect'] = 'node/' . $nid . '/import';
-    }
-  }
   if ($form_id == 'webform_client_form_156896' || $form_id == 'webform_client_form_156906') {
     $wizard1 = 'webform_client_form_156896';
     $wizard2 = 'webform_client_form_156906';
@@ -483,28 +449,11 @@ function ep_alters_form_node_form_alter(&$form, &$form_state, $form_id) {
   if ($form['#form_id'] == 'subscriber_list_node_form' || $form['#form_id'] == 'campaign_node_form') {
     global $user;
     $is_administrator = in_array('administrator', array_values($user->roles)) || in_array('BEI Administrator', array_values($user->roles));
-
     if (!$is_administrator) {
       form_disable_vertical_tabs_member($form);
     }
     else {
       form_disable_vertical_tabs($form);
-    }
-    if ($form['#form_id'] == 'subscriber_list_node_form') {
-      if (isset($form['feeds'])) {
-        $form['feeds']['#title'] = t('Import Settings');
-        if ($form['#node_edit_form'] && arg(3) == 'import') {
-          $nid = $form['nid']['#value'];
-          if ($form['actions']['save_and_edit']) {
-            unset($form['actions']['save_and_edit']);
-          }
-          $form['actions']['submit']['#value'] = t('Next');
-        }
-        $form['feeds']['FeedsCSVParser']['encoding']['#default_value'] = 'auto';
-        if (!$is_administrator) {
-          $form['feeds']['FeedsCSVParser']['encoding']['#access'] = FALSE;
-        }
-      }
     }
   }
 }
@@ -524,14 +473,6 @@ function form_disable_vertical_tabs_member(&$form) {
     $form['additional_settings']['#type'] = 'fieldset';
     $form['additional_settings']['#attributes']['class'][] = 'element-invisible';
   }
-}
-
-/**
- * Implements hook_admin_paths_alter(&$paths).
- */
-function ep_alters_admin_paths_alter(&$paths) {
-  // Set the node import page to default theme.
-  $paths['node/*/import'] = FALSE;
 }
 
 function callback_for_cancel_button($form, &$form_state) {
@@ -1025,14 +966,7 @@ function ep_alters_block_view($delta = '') {
               }
               if (arg(2) == 'subscribers' && !arg(3)) {
                 if (user_access('create subscriber')) {
-                  $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscribers') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'subscriber-actions', 'class' => array('button success split'))));
-                  $subscriber_actions = array();
-                  $subscriber_actions[] = l(t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('attributes' => array('title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
-                  if (user_access('import bei_subscribers feeds') && !empty($node->import)) {
-                    $subscriber_actions[] = l(t('Import a List'), 'node/' . $nid . '/edit/import', array('query' => array('destination' => 'node/' . $nid . '/import')));
-                    $subscriber_actions[] = l(t('Import Status'), 'node/' . $nid . '/import', array('attributes' => array('title' => 'View the status of recent imports')));
-                  }
-                  $actions_drop .= ep_alters_item_list(array('items' => $subscriber_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'subscriber-actions', 'class' => 'f-dropdown')));
+                  $tabs[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('html' => TRUE, 'attributes' => array('class' => array('button success'), 'title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
                 }
                 if ($subscribers_view) {
                   $export[] = l('<i class="icon-download">&nbsp;&nbsp;</i>' . t('Export') . '<span></span>', '', array('html' => TRUE, 'fragment' => '', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'export-actions', 'class' => array('button split'))));

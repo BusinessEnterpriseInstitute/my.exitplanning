@@ -10,23 +10,6 @@
  */
 function bei_list_menu() {
   $items = array();
-  /*
-  $items['admin/config/bei_mailchimp/lists-update'] = array(
-    'title' => 'Import/Update Lists',
-    'description' => 'Updates the mailchimp cache with new/updated lists',
-    'access arguments' => array('administer bei mailchimp'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bei_list_batch_form'),
-    'file' => 'includes/bei_list.admin.inc',
-  );*/
-  $items['admin/config/bei_mailchimp/webhooks-update'] = array(
-    'title' => 'Update Webhooks',
-    'description' => 'Updates webhooks on Mailchimp',
-    'access arguments' => array('administer bei mailchimp'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bei_list_webhook_batch_form'),
-    'file' => 'includes/bei_list.admin.inc',
-  );
   $items['bei-list/webhook'] = array(
     'title' => 'BEI List webhooks endpoint',
     'type' => MENU_CALLBACK,
@@ -65,7 +48,6 @@ function bei_list_node_load($nodes, $types) {
          $nodes[$record->nid]->from_name = $record->from_name;
          $nodes[$record->nid]->list_id = $record->list_id;
          $nodes[$record->nid]->mc_data = unserialize($record->mc_data);
-         $nodes[$record->nid]->import = $record->import;
       }
    }
 }
@@ -84,7 +66,6 @@ function bei_list_node_insert($node) {
         'from_name' => $node->from_name,
         'list_id' => isset($node->list_id) ? $node->list_id : NULL,
         'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
-        'import' => isset($node->import) ? $node->import : 0,
      ))
      ->execute();
      //bei_list_add_list($node);
@@ -105,7 +86,6 @@ function bei_list_node_update($node) {
           'from_name' => $node->from_name,
           'list_id' => $node->list_id,
           'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
-          'import' => $node->import,
        ))
        ->condition('nid', $node->nid)
        ->execute();
@@ -119,7 +99,6 @@ function bei_list_node_update($node) {
           'from_name' => $node->from_name,
           'list_id' => isset($node->list_id) ? $node->list_id : NULL,
           'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
-          'import' => $node->import,
        ))
        ->execute();
     }
@@ -181,32 +160,6 @@ function bei_list_node_delete($node) {
   }
 }
 
-
-/**
- * Implements hook_node_validate().
- */
-function bei_list_node_validate($node, &$form, $form_state) {
-  if ($node->type == 'subscriber_list') {
-    // If there are no feed associations cancel out.
-    if (!$importer_id = feeds_get_importer_id($node->type)) {
-      return;
-    }
-    // Make sure that there isn't already a CSV uploaded.
-    if (isset($node->feeds) && empty($node->feeds['FeedsFileFetcher']['fid'])) {
-      // We need to put a default csv up there so that the node can be saved.
-      $fid = db_query("SELECT fid FROM {file_managed} WHERE uri = 'private://subscribers_template.csv'")->fetchField();
-      $file = file_load($fid);
-
-      $node->feeds = array(
-        'FeedsFileFetcher' => array(
-          'fid' => $file->fid,
-          'source' => $file->uri,
-        ),
-      );
-    }
-  }
-}
-
 /**
  * Implements hook_form_alter().
  * Perform alterations before a form is rendered.
@@ -215,12 +168,6 @@ function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $fo
   $node = $form_state['node'];
   $is_new = isset($node->is_new) || !isset($node->nid);
   $is_administrator = user_access('administer bei mailchimp');
-  $form['import'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow import subscribers'),
-    '#default_value' => $node->import,
-    '#access' => $is_administrator,
-  );
   $form['from_email'] = array(
     '#type' => 'textfield',
     '#title' => t('From e-mail'),
@@ -248,8 +195,6 @@ function bei_list_form_subscriber_list_node_form_alter(&$form, &$form_state, $fo
     '#required' => TRUE,
     '#maxlength' => 200,
   );
-  // Add our own custom callback to the submit handler.
-  //$form['actions']['submit']['#submit'][] = 'bei_campaign_submit_callback';
 }
 
 /**
@@ -269,10 +214,6 @@ function bei_list_email_validate($element, &$form_state, $form) {
 function bei_list_field_extra_fields() {
   $extra['node']['subscriber_list'] = array(
     'form' => array(
-      'import' => array(
-        'label' => t('List: Import settings'),
-        'weight' => -5,
-      ),
       'from_email' => array(
         'label' => t('List: From Email'),
         'description' => t('Default from email'),
@@ -356,59 +297,6 @@ function bei_list_batch_processing($lists) {
 }
 
 /**
- * Batch processor function that will update webhooks for lists.
- *
- * @see bei_list_webhook_batch_form_submit()
- */
-function bei_list_webhook_batch_processing($lists) {
-  foreach ($lists as $list) {
-    /*
-    $query = 'SELECT l.nid FROM {bei_list} l ' .
-           'WHERE l.list_id = :lid';
-    $nid = db_query($query, array(':lid' => $list->id))->fetchField();
-    // An array of events the webhook will respond to.
-    $events = array(
-      'subscribe' => TRUE,
-      'unsubscribe' => TRUE,
-      'profile' => TRUE,
-      'cleaned' => TRUE,
-      'upemail' => TRUE,
-      'campaign' => TRUE,
-    );
-    // An array of sources the webhook will respond to.
-    $sources = array(
-      'user' => TRUE,
-      'admin' => TRUE,
-      'api' => FALSE,
-    );
-    $url = bei_list_webhook_url();
-    global $base_url;*/
-    /*
-    if (empty($nid)) {
-      // The node doesn't exist. We should create it.
-      $node = new stdClass();
-      $node->type = 'subscriber_list';
-      node_object_prepare($node);
-      $node->title = $list->name;
-      $node->list_id = $list->id;
-      $node->from_name = $list->campaign_defaults->from_name;
-      $node->from_email = $list->campaign_defaults->from_email;
-      $node->subject = $list->campaign_defaults->subject;
-      // Save the node!
-      node_save($node);
-      // Add our webhook back to mailchimp for the new list.
-      mailchimp_webhook_add($list->id, $url, $events, $sources);
-    }*/
-  }
-}
-/**
- * Batch complete function.
- */
-function bei_list_webhook_batch_finished() {
-  drupal_set_message(t('Webhook updates finished.'));
-}
-
-/**
  * Batch complete function.
  */
 function bei_list_batch_finished() {
@@ -463,20 +351,6 @@ function bei_list_webhook() {
         bei_list_webhook_update_email($old_email, $member, $subscriber);
       }
       break;
-    /*
-    case 'campaign':
-      $query = "SELECT c.nid FROM {bei_campaign} c WHERE c.campaign_id = :campaign_id AND c.list_id = :list_id";
-      $nid = db_query($query, array(':campaign_id' => $data['id'], ':list_id' => $data['list_id']))->fetchField();
-      if ($nid) {
-        $node = node_load($nid);
-        if ($node) {
-          $node->campaign_status = $data['status'];
-          $node->sent_date = strtotime($fired_at);
-          node_save($node);
-        }
-      }
-      break;
-      */
   }
 
   // Log event:
@@ -608,14 +482,6 @@ function bei_list_entity_property_info_alter(&$info) {
    'setter callback' => 'entity_property_verbatim_set',
    'entity views field' => TRUE,
   );
-  $properties['import'] = array(
-   'label' => t('List: Import settings'),
-   'type' => 'boolean',
-   'description' => t('The status of whether or not importing is allowed for this list.'),
-   'getter callback' => 'bei_list_get_properties',
-   'setter callback' => 'entity_property_verbatim_set',
-   'entity views field' => TRUE,
-  );
 }
 
 /**
@@ -623,28 +489,24 @@ function bei_list_entity_property_info_alter(&$info) {
  *
  */
 function bei_list_get_properties($node, array $options, $name, $entity_type) {
-   switch ($name) {
-      case 'from_email':
-        $value = isset($node->from_email) ? $node->from_email : NULL;
-        return $value;
-        break;
-      case 'from_name':
-        $value = isset($node->from_name) ? $node->from_name : NULL;
-        return $value;
-        break;
-      case 'subject':
-        $value = isset($node->subject) ? $node->subject : NULL;
-        return $value;
-        break;
-      case 'list_id':
-        $value = isset($node->list_id) ? $node->list_id : NULL;
-        return $value;
-        break;
-      case 'import':
-        $value = $node->import;
-        return $value;
-        break;
-   }
+  switch ($name) {
+    case 'from_email':
+      $value = isset($node->from_email) ? $node->from_email : NULL;
+      return $value;
+      break;
+    case 'from_name':
+      $value = isset($node->from_name) ? $node->from_name : NULL;
+      return $value;
+      break;
+    case 'subject':
+      $value = isset($node->subject) ? $node->subject : NULL;
+      return $value;
+      break;
+    case 'list_id':
+      $value = isset($node->list_id) ? $node->list_id : NULL;
+      return $value;
+      break;
+  }
 }
 
 /**
