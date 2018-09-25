@@ -77,15 +77,13 @@ function campaign_monitor_lists_menu() {
     'weight' => -8,
   );
   $items['cm-list/%cm_list/raw'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Preview',
     'page callback' => 'campaign_monitor_lists_cm_list_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
     'page arguments' => array(1, 'raw'),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_list', 1),
     'file' => 'includes/campaign_monitor_lists.pages.inc',
-    'weight' => -7,
-    'options' => array('attributes' => array('target' => '_blank')),
   );
   $items['cm-list/%cm_list/stats'] = array(
     'type' => MENU_LOCAL_TASK,

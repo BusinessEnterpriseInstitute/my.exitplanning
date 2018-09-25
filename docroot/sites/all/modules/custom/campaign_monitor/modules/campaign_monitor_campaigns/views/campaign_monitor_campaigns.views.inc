@@ -32,23 +32,16 @@ function campaign_monitor_campaigns_views_default_views() {
   $handler->display->display_options['style_plugin'] = 'table';
   $handler->display->display_options['style_options']['columns'] = array(
     'id' => 'id',
-    'name' => 'name',
     'subject' => 'subject',
-    'status' => 'status',
     'created' => 'created',
+    'send_date' => 'send_date',
     'edit_url' => 'edit_url',
     'delete_url' => 'delete_url',
+    'send_link' => 'send_link',
   );
   $handler->display->display_options['style_options']['default'] = 'created';
   $handler->display->display_options['style_options']['info'] = array(
     'id' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
-    'name' => array(
       'sortable' => 0,
       'default_sort_order' => 'asc',
       'align' => '',
@@ -62,13 +55,6 @@ function campaign_monitor_campaigns_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
-    'status' => array(
-      'sortable' => 0,
-      'default_sort_order' => 'asc',
-      'align' => '',
-      'separator' => '',
-      'empty_column' => 0,
-    ),
     'created' => array(
       'sortable' => 1,
       'default_sort_order' => 'desc',
@@ -76,12 +62,24 @@ function campaign_monitor_campaigns_views_default_views() {
       'separator' => '',
       'empty_column' => 0,
     ),
+    'send_date' => array(
+      'sortable' => 1,
+      'default_sort_order' => 'desc',
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 1,
+    ),
     'edit_url' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 1,
     ),
     'delete_url' => array(
+      'align' => '',
+      'separator' => '',
+      'empty_column' => 1,
+    ),
+    'send_link' => array(
       'align' => '',
       'separator' => '',
       'empty_column' => 1,
@@ -98,20 +96,23 @@ function campaign_monitor_campaigns_views_default_views() {
   $handler->display->display_options['fields']['id']['id'] = 'id';
   $handler->display->display_options['fields']['id']['table'] = 'campaign_monitor_campaigns';
   $handler->display->display_options['fields']['id']['field'] = 'id';
+  $handler->display->display_options['fields']['id']['exclude'] = TRUE;
   /* Field: Campaign: Subject */
   $handler->display->display_options['fields']['subject']['id'] = 'subject';
   $handler->display->display_options['fields']['subject']['table'] = 'campaign_monitor_campaigns';
   $handler->display->display_options['fields']['subject']['field'] = 'subject';
-  /* Field: Campaign: Status */
-  $handler->display->display_options['fields']['status']['id'] = 'status';
-  $handler->display->display_options['fields']['status']['table'] = 'campaign_monitor_campaigns';
-  $handler->display->display_options['fields']['status']['field'] = 'status';
   /* Field: Campaign: Date created */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'campaign_monitor_campaigns';
   $handler->display->display_options['fields']['created']['field'] = 'created';
   $handler->display->display_options['fields']['created']['date_format'] = 'short';
   $handler->display->display_options['fields']['created']['second_date_format'] = 'search_api_facetapi_YEAR';
+  /* Field: Campaign: Send date */
+  $handler->display->display_options['fields']['send_date']['id'] = 'send_date';
+  $handler->display->display_options['fields']['send_date']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['send_date']['field'] = 'send_date';
+  $handler->display->display_options['fields']['send_date']['date_format'] = 'short';
+  $handler->display->display_options['fields']['send_date']['second_date_format'] = 'search_api_facetapi_YEAR';
   /* Field: Campaign: Edit Link */
   $handler->display->display_options['fields']['edit_url']['id'] = 'edit_url';
   $handler->display->display_options['fields']['edit_url']['table'] = 'views_entity_cm_campaign';
@@ -136,12 +137,6 @@ function campaign_monitor_campaigns_views_default_views() {
   $handler->display->display_options['fields']['delete_url']['element_wrapper_type'] = '0';
   $handler->display->display_options['fields']['delete_url']['element_default_classes'] = FALSE;
   $handler->display->display_options['fields']['delete_url']['link_to_entity'] = 0;
-  /* Field: Campaign: Send date */
-  $handler->display->display_options['fields']['send_date']['id'] = 'send_date';
-  $handler->display->display_options['fields']['send_date']['table'] = 'campaign_monitor_campaigns';
-  $handler->display->display_options['fields']['send_date']['field'] = 'send_date';
-  $handler->display->display_options['fields']['send_date']['date_format'] = 'short';
-  $handler->display->display_options['fields']['send_date']['second_date_format'] = 'search_api_facetapi_YEAR';
   /* Field: Campaign: Send link */
   $handler->display->display_options['fields']['send_link']['id'] = 'send_link';
   $handler->display->display_options['fields']['send_link']['table'] = 'views_entity_cm_campaign';
@@ -159,6 +154,26 @@ function campaign_monitor_campaigns_views_default_views() {
   $handler->display->display_options['arguments']['lid']['summary']['number_of_records'] = '0';
   $handler->display->display_options['arguments']['lid']['summary']['format'] = 'default_summary';
   $handler->display->display_options['arguments']['lid']['summary_options']['items_per_page'] = '25';
+  /* Contextual filter: Status */
+  $handler->display->display_options['arguments']['status']['id'] = 'status';
+  $handler->display->display_options['arguments']['status']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['arguments']['status']['field'] = 'campaign_status';
+  $handler->display->display_options['arguments']['status']['ui_name'] = 'Status';
+  $handler->display->display_options['arguments']['status']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['status']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['status']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['status']['summary_options']['items_per_page'] = '25';
+  /* Contextual filter: Exclude Statuses */
+  $handler->display->display_options['arguments']['status_1']['id'] = 'status_1';
+  $handler->display->display_options['arguments']['status_1']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['arguments']['status_1']['field'] = 'campaign_status';
+  $handler->display->display_options['arguments']['status_1']['ui_name'] = 'Exclude Statuses';
+  $handler->display->display_options['arguments']['status_1']['default_argument_type'] = 'fixed';
+  $handler->display->display_options['arguments']['status_1']['summary']['number_of_records'] = '0';
+  $handler->display->display_options['arguments']['status_1']['summary']['format'] = 'default_summary';
+  $handler->display->display_options['arguments']['status_1']['summary_options']['items_per_page'] = '25';
+  $handler->display->display_options['arguments']['status_1']['break_phrase'] = TRUE;
+  $handler->display->display_options['arguments']['status_1']['not'] = TRUE;
   
   $views['campaign_monitor_campaigns'] = $view;
   $views['administer_campaign_monitor_campaigns'] = _campaign_monitor_campaigns_views_admin();
@@ -275,6 +290,10 @@ function _campaign_monitor_campaigns_views_admin() {
   $handler->display->display_options['fields']['edit_url']['alter']['text'] = 'Edit';
   $handler->display->display_options['fields']['edit_url']['element_label_colon'] = FALSE;
   $handler->display->display_options['fields']['edit_url']['link_to_entity'] = 0;
+  /* Field: Campaign: Status */
+  $handler->display->display_options['fields']['campaign_status']['id'] = 'campaign_status';
+  $handler->display->display_options['fields']['campaign_status']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['fields']['campaign_status']['field'] = 'campaign_status';
   /* Field: Global: Dropdown links */
   $handler->display->display_options['fields']['ctools_dropdown']['id'] = 'ctools_dropdown';
   $handler->display->display_options['fields']['ctools_dropdown']['table'] = 'views';
@@ -285,6 +304,7 @@ function _campaign_monitor_campaigns_views_admin() {
     'edit_url' => 'edit_url',
   );
   $handler->display->display_options['fields']['ctools_dropdown']['check_access'] = 0;
+  $handler->display->display_options['fields']['ctools_dropdown']['destination'] = FALSE;
   /* Filter criterion: List: Label */
   $handler->display->display_options['filters']['title']['id'] = 'title';
   $handler->display->display_options['filters']['title']['table'] = 'campaign_monitor_lists';
@@ -342,10 +362,36 @@ function _campaign_monitor_campaigns_views_admin() {
     12 => 0,
     3 => 0,
   );
+  /* Filter criterion: Campaign: Status */
+  $handler->display->display_options['filters']['campaign_status']['id'] = 'campaign_status';
+  $handler->display->display_options['filters']['campaign_status']['table'] = 'campaign_monitor_campaigns';
+  $handler->display->display_options['filters']['campaign_status']['field'] = 'campaign_status';
+  $handler->display->display_options['filters']['campaign_status']['exposed'] = TRUE;
+  $handler->display->display_options['filters']['campaign_status']['expose']['operator_id'] = 'campaign_status_op';
+  $handler->display->display_options['filters']['campaign_status']['expose']['label'] = 'Status';
+  $handler->display->display_options['filters']['campaign_status']['expose']['operator'] = 'campaign_status_op';
+  $handler->display->display_options['filters']['campaign_status']['expose']['identifier'] = 'campaign_status';
+  $handler->display->display_options['filters']['campaign_status']['expose']['remember_roles'] = array(
+    2 => '2',
+    1 => 0,
+    18 => 0,
+    9 => 0,
+    7 => 0,
+    16 => 0,
+    8 => 0,
+    17 => 0,
+    6 => 0,
+    15 => 0,
+    5 => 0,
+    11 => 0,
+    14 => 0,
+    12 => 0,
+    3 => 0,
+  );
   
   /* Display: System */
   $handler = $view->new_display('system', 'System', 'system_1');
   $handler->display->display_options['defaults']['access'] = FALSE;
   $handler->display->display_options['path'] = 'admin/campaign-monitor/campaigns';
-  return $view;
+return $view;
 }

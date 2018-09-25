@@ -12,20 +12,21 @@
 /*
  * Page callback to return view of campaigns referenced to list.
  */
-function campaign_monitor_campaigns_list($list, $status = 'draft') {
+function campaign_monitor_campaigns_list($list, $status = 'all') {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   $list_uri = entity_uri('cm_list', $list);
   $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
+  $exclude = NULL;
   if ($status == 'sent') {
-    $status = 'Scheduled, Sent';
+    $status = 3;
     drupal_set_title('Campaigns Sent');
   }
   else {
-    $status = 'Design, Draft';
+    $exclude = 3;
   }
-  $output = views_embed_view('campaign_monitor_campaigns', 'default', $list->id, $status);
+  $output = views_embed_view('campaign_monitor_campaigns', 'default', $list->id, $status, $exclude);
   return $output;
 }
 
