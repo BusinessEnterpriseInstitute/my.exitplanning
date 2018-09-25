@@ -429,6 +429,7 @@ function campaign_monitor_preprocess_html(&$variables) {
       $extra_styles .= "#logo-table {background-color: $logo_bg_color;}";
       $extra_styles .= "#banner-table, #footer-table {background-color: #FFFFFF;}";
       $extra_styles .= "#profile-table {background-color: #F4F4F4;}";
+      $extra_styles .= "#disclaimers {font-size: 12px; color: #808080;}";
       $variables['extra_styles'] = $extra_styles;
       $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
     }
@@ -783,13 +784,17 @@ function campaign_monitor_build_template($entity, $entity_type) {
   if (!empty($entity->promotional_text)) {
     $article_output .= check_markup($entity->promotional_text, 'full_html');
   }
+  $disclaimers = '';
   $disclaimer = variable_get('campaign_monitor_disclaimer', FALSE);
   if ($disclaimer) {
-    $article_output .= check_markup($disclaimer['value'], $disclaimer['format']);
+    $disclaimers .= check_markup($disclaimer['value'], $disclaimer['format']);
   }
   // Append any member specific disclaimers.
   if (!empty($entity->disclaimer_text)) {
-    $article_output .= check_markup($list->disclaimer_text, 'full_html');
+    $disclaimers .= check_markup($list->disclaimer_text, 'full_html');
+  }
+  if (!empty($disclaimers)) {
+    $article_output .= '<div id="disclaimers">' . $disclaimers . '</div>';
   }
   $article_table = '
   <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
