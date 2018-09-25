@@ -966,10 +966,7 @@ function ep_alters_block_view($delta = '') {
               }
               if (arg(2) == 'subscribers' && !arg(3)) {
                 if (user_access('create subscriber')) {
-                  $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscribers') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'subscriber-actions', 'class' => array('button success split'))));
-                  $subscriber_actions = array();
-                  $subscriber_actions[] = l(t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('attributes' => array('title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
-                  $actions_drop .= ep_alters_item_list(array('items' => $subscriber_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'subscriber-actions', 'class' => 'f-dropdown')));
+                  $tabs[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('html' => TRUE, 'attributes' => array('class' => array('button success'), 'title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
                 }
                 if ($subscribers_view) {
                   $export[] = l('<i class="icon-download">&nbsp;&nbsp;</i>' . t('Export') . '<span></span>', '', array('html' => TRUE, 'fragment' => '', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'export-actions', 'class' => array('button split'))));
