@@ -84,7 +84,6 @@ function campaign_monitor_campaigns_menu() {
     'page callback' => 'campaign_monitor_campaigns_cm_campaign_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
     'page arguments' => array(1, 'raw'),
     'access callback' => TRUE,
-    //'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
   );
   $items['cm-campaign/%cm_campaign/send'] = array(
@@ -105,7 +104,8 @@ function campaign_monitor_campaigns_menu() {
  */
 function campaign_monitor_send_access($campaign) {
   $can_update = entity_access('update', 'cm_campaign', $campaign);
-  $statuses = array('Scheduled', 'Sent');
+  $statuses = array(2, 3);
+  // Don't allow campaign sending if status is one of "Pending" or "Sent"
   if ($can_update && !in_array($campaign->campaign_status, $statuses)) {
     return TRUE;
   }
@@ -229,7 +229,7 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
   );
   $properties['campaign_status'] = array(
     'label' => t('Status'),
-    'type' => 'text',
+    'type' => 'integer',
     'description' => t('The status of the campaign.'),
     'schema field' => 'campaign_status',
     'options list' => 'campaign_monitor_campaigns_status_list',
@@ -273,8 +273,7 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
       return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/delete', $options);
       break;
     case 'preview_url':
-      $options = array('query' => drupal_get_destination());
-      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/raw', $options);
+      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/raw');
       break;
     case 'send_link':
       if (campaign_monitor_send_access($campaign)) {
@@ -289,13 +288,12 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
  * Callback for returning a list of subsriber states.
  */
 function campaign_monitor_campaigns_status_list($campaign) {
-  $statuses = array(
-    'Design',
-    'Draft',
-    'Scheduled',
-    'Sent',
+  return array(
+    0 => 'Design',
+    1 => 'Draft',
+    2 => 'Pending Approval',
+    3 => 'Sent'
   );
-  return drupal_map_assoc($statuses);
 }
 
 /*******************************************************************************
@@ -318,7 +316,7 @@ function campaign_monitor_campaigns_access($op, $campaign = NULL, $account = NUL
       (user_access('view own campaigns', $account) && ($campaign->uid === $account->uid));
     case 'update':
       return user_access('administer campaign monitor', $account) ||
-      (user_access('edit own campaigns', $account) && ($campaign->uid === $account->uid));
+      (user_access('edit own campaigns', $account) && ($campaign->uid === $account->uid) && (empty($campaign->campaign_status)));
     case 'delete':
       return user_access('administer campaign monitor', $account);
   }

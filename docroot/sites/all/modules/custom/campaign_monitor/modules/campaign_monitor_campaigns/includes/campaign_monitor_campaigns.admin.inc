@@ -10,6 +10,7 @@
  */
 function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $is_new = isset($campaign->is_new) || !isset($campaign->id) ? TRUE : FALSE;
+  $disabled = $is_new || empty($campaign->campaign_status) ? FALSE : TRUE;
   if ($is_new) {
     $title = 'Create campaign';
     $tabs_type = 'container';
@@ -18,7 +19,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       'uid' => $list->uid,
       'list_id' => $list->list_id,
       'client_id' => $list->client_id,
-      'campaign_status' => 'Design',
       'subject' => '',
       'from_name' => $list->from_name,
       'from_email' => $list->from_email,
@@ -35,6 +35,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $form_state['cm_campaign'] = $campaign;
   $form['tabs'] = array(
     '#type' => $tabs_type,
+    '#disabled' => $disabled,
   );
   if ($is_new) {
     $form['tabs']['content'] = array(
@@ -284,7 +285,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
   $form['actions'] = array(
     '#type' => 'actions',
   );
-  if ($is_new || !$is_new && $campaign->campaign_status == 'Design') {
+  if ($is_new || !$is_new && empty($campaign->campaign_status)) {
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $is_new ? t('Next') : t('Finish'),
@@ -293,7 +294,7 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       ),
     );
   }
-  if (!$is_new && $campaign->campaign_status == 'Design') {
+  if (!$is_new && empty($campaign->campaign_status)) {
     $form['actions']['save_edit'] = array(
       '#type' => 'submit',
       '#value' => t('Save & Continue'),
@@ -523,7 +524,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
       if ($result->was_successful()) {
         $campaign_id = $result->response;
         $campaign->campaign_id = $result->response;
-        $campaign->campaign_status = 'Draft';
+        $campaign->campaign_status = 1;
         $campaign->save();
       }
       else {
@@ -540,12 +541,17 @@ function cm_campaign_send_form_submit($form, &$form_state) {
       'SendDate' => $schedule_date,
     ));
     if ($result->was_successful()) {
-      $new_status = $send_option == 1 ? 'Sent' : 'Scheduled';
-      $campaign->campaign_status = $new_status;
+      $campaign->campaign_status = 3;
       $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
       $campaign->save();
     }
     else {
+      // Check for list size approval error which is code 334.
+      // @see https://www.campaignmonitor.com/api/campaigns/#sending-draft-campaign
+      if ($result->http_status_code == 334) {
+        $campaign->campaign_status = 2;
+        $campaign->save();
+      }
       $error = $result->response->Message;
       $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
       drupal_set_message($message, 'error');
