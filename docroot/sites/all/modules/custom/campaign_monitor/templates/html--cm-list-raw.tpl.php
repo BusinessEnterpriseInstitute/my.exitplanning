@@ -113,7 +113,6 @@ code {
 /* Webkit Elements */
 #top-bar { border-radius:6px 6px 0px 0px; -moz-border-radius: 6px 6px 0px 0px; -webkit-border-radius:6px 6px 0px 0px; -webkit-font-smoothing: antialiased; background-color: #E4E4E4; color: #cccccc; }
 #top-bar a { font-weight: bold; color: #444444; text-decoration: none;}
-#footer { border-radius:0px 0px 6px 6px; -moz-border-radius: 0px 0px 6px 6px; -webkit-border-radius:0px 0px 6px 6px; -webkit-font-smoothing: antialiased; }
 /* Fonts and Content */
 body { font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
 .header-content, .footer-content-left, .footer-content-right { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
@@ -127,19 +126,18 @@ body { font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
 .article-title a { color: #444444; text-decoration: none; }
 .article-title.with-meta {margin-bottom: 0;}
 .article-meta { font-size: 13px; line-height: 20px; color: #ccc; font-weight: bold; margin-top: 0;}
-.article-content { font-size: 14px; line-height: 18px; color: #505050; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; padding: 20px;}
+.article-content { font-size: 16px; line-height: 150%; color: #505050; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; padding: 20px;}
 .article-content a { color: #3CA7DD; font-weight:bold; text-decoration:none; }
 .article-content img { max-width: 100% }
 .article-content ol, .article-content ul { margin-top:0px; margin-bottom:18px; margin-left:19px; padding:0; }
-.article-content li { font-size: 13px; line-height: 18px; color: #888888; }
-.article-content li a { color: #3CA7DD; text-decoration:underline; }
 .article-content p {margin-bottom: 15px;}
 .footer-content-left { font-size: 12px; line-height: 15px; color: #A6A6A6; margin-top: 0px; margin-bottom: 15px; }
 .footer-content-left a { color: #3CA7DD; font-weight: bold; text-decoration: none; }
 .footer-content-right { font-size: 11px; line-height: 16px; color: #A6A6A6; margin-top: 0px; margin-bottom: 15px; }
 .footer-content-right a { color: #3CA7DD; font-weight: bold; text-decoration: none; }
-#footer { background-color: #f2f2f2; color: #A6A6A6; }
-#footer a { color: #3CA7DD; text-decoration: none; font-weight: bold; }
+#disclaimers { font-size: 12px; color: #A6A6A6; line-height: 14px; }
+#footer-table { font-size: 12px; line-height: 15px; color: #A6A6A6;}
+#footer-table a { color: #A6A6A6; text-decoration: none;}
 #permission-reminder { white-space: pre-wrap; }
 #street-address { color: #B3B3B3; white-space: pre-wrap; }
 </style>
