@@ -50,7 +50,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
   $list_uri = entity_uri('cm_list', $list);
   $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
-  $title = 'Active Subscribers';
+  $title = 'Subscribers';
   $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
   $header = array();
   $rows = array();
@@ -75,14 +75,36 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
           break;
       }
     }
-    if ($status == 'active') {
-      $header = array(
-        array('data' => t('E-mail'), 'field' => 'email'),
-        array('data' => t('Name'), 'field' => 'name'),
-        t('Date'),
-        t('Reads e-mail with')
-      );
-      $result = $wrap->get_active_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+    $header = array(
+      array('data' => t('E-mail'), 'field' => 'email'),
+      array('data' => t('Name'), 'field' => 'name'),
+      t('Date'),
+      t('Reads e-mail with')
+    );
+    $result = NULL;
+    switch ($status) {
+      case 'active':
+        $title = 'Active Subscribers';
+        $result = $wrap->get_active_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        break;
+      case 'unconfirmed':
+        $title = 'Unconfirmed Subscribers';
+        $result = $wrap->get_unconfirmed_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        break;
+      case 'unsubscribed':
+        $title = 'Unsubscribed Subscribers';
+        $result = $wrap->get_unsubscribed_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        break;
+      case 'bounced':
+        $title = 'Bounced Subscribers';
+        $result = $wrap->get_bounced_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        break;
+      case 'deleted':
+        $title = 'Deleted Subscribers';
+        $result = $wrap->get_deleted_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        break;
+    }
+    if ($result) {
       if ($result->was_successful()) {
         $total_records = $result->response->TotalNumberOfRecords;
         $page_records = $result->response->RecordsOnThisPage;

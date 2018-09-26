@@ -50,48 +50,32 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $breadcrumb[] = l(t('@client', array('@client' => $client->name)), $client_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
-    $rows = array();
-    $rows[] = array(
-      'data' => array(
-        array('data' => t('List ID:'), 'header' => TRUE),
-        array('data' => $entity->list_id),
-      ),
-      'no_striping' => TRUE,
-    );
-    $rows[] = array(
-      'data' => array(
-        array('data' => t('Unsubscribe Page:'), 'header' => TRUE),
-        array('data' => $entity->unsubscribe_page),
-      ),
-      'no_striping' => TRUE,
-    );
-    $rows[] = array(
-      'data' => array(
-        array('data' => t('Confirmed Opt-in:'), 'header' => TRUE),
-        array('data' => $entity->confirmed_opt_in ? t('Yes') : t('No')),
-      ),
-      'no_striping' => TRUE,
-    );
-    $rows[] = array(
-      'data' => array(
-        array('data' => t('Confirmation Success Page:'), 'header' => TRUE),
-        array('data' => $entity->confirmation_success_page),
-      ),
-      'no_striping' => TRUE,
-    );
-    $rows[] = array(
-      'data' => array(
-        array('data' => t('Unsubscribe Setting:'), 'header' => TRUE),
-        array('data' => $entity->unsubscribe_setting == 'AllClientLists' ? t('All client lists') : t('Only this list')),
-      ),
-      'no_striping' => TRUE,
-    );
-    $entity->content['summary'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Summary'),
-      '#theme' => 'table',
-      '#header' => array(),
-      '#rows' => $rows,
+    $items = '';
+    $destination = drupal_get_destination();
+    $link_attributes = array('class' => array('icon'));
+    if (entity_access('update', 'cm_list', $entity)) {
+      $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
+      $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
+      if (module_exists('campaign_monitor_subscribers')) {
+        $link = l('<i class="icon-address-book"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/subscribers', array('html' => TRUE, 'attributes' => $link_attributes));
+        $items .= '<li><div class="panel"><h2>Subscribers</h2>' . $link . '</div></li>';
+      }
+      if (module_exists('campaign_monitor_campaigns')) {
+        $link = l('<i class="icon-mail3"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/campaigns', array('html' => TRUE, 'attributes' => $link_attributes));
+        $items .= '<li><div class="panel"><h2>Campaigns</h2>' . $link . '</div></li>';
+      }
+      $stats_link = l('<i class="icon-pie"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/stats', array('html' => TRUE, 'attributes' => $link_attributes));
+      $items .= '<li><div class="panel"><h2>Statistics</h2>' . $stats_link . '</div></li>';
+    }
+    if (!empty($items)) {
+      $dashboard = '<div class="newsletter-dashboard"><ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul></div>';
+    }
+    else {
+      $dashboard = '';
+    }
+    $entity->content['dashboard'] = array(
+      '#type' => 'markup',
+      '#markup' => $dashboard,
     );
   }
   if ($view_mode == 'raw') {
@@ -158,10 +142,10 @@ function campaign_monitor_lists_stats($list) {
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($client) {
     $client_uri = entity_uri('cm_client', $client);
-    $breadcrumb[] = l(t('@client', array('@client' => entity_label('cm_client', $client))), $client_uri['path']);
+    $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
   }
   $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   
   $header = array();
