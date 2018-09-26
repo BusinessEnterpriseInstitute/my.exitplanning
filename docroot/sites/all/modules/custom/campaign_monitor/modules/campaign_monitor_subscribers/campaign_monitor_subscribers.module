@@ -15,11 +15,12 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.pages.inc',
     'weight' => -8,
   );
-  $items['cm-list/%cm_list/subscribers/list'] = array(
-    'title' => 'List',
+  $items['cm-list/%cm_list/subscribers/active'] = array(
+    'title' => 'Active Subscribers',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  /*
   $items['cm-list/%cm_list/subscribers/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
@@ -28,13 +29,14 @@ function campaign_monitor_subscribers_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'weight' => -8,
-  );
+  );*/
   $items['cm-list/%cm_list/subscribers/add'] = array(
     'title' => 'Create Subscriber',
     'description' => 'Add subscriber to Campaign Monitor.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('cm_subscriber_form', NULL, 1),
-    'access arguments' => array('administer campaign monitor'),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'type' => MENU_LOCAL_ACTION,
   );
@@ -137,12 +139,13 @@ function campaign_monitor_subscribers_entity_info() {
       ),
     ),
     'access callback' => 'campaign_monitor_subscribers_access',
+    /*
     'admin ui' => array(
       'path' => 'admin/campaign-monitor/subscribers',
       'controller class' => 'CmSubscriberEntityUIController',
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor_subscribers.admin.inc',
-    ),
+    ),*/
     'uri callback' => 'entity_class_uri',
     'load hook' => 'cm_subscriber_load',
   );

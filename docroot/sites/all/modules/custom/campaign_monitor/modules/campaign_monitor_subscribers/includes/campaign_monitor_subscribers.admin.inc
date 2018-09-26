@@ -164,6 +164,7 @@ function campaign_monitor_subscribers_email_validate($element, &$form_state, $fo
     if (!valid_email_address($element['#value'])) {
       form_error($element, t($element['#title'] . ' is not a valid email address.'));
     }
+    /*
     else {
       $unique = campaign_monitor_subscribers_unique_email($element['#value'], $list->list_id);
       if (is_array($unique)) {
@@ -177,7 +178,7 @@ function campaign_monitor_subscribers_email_validate($element, &$form_state, $fo
         }
         form_error($element, $message);
       }
-    }
+    }*/
   }
 }
 function cm_subscriber_form_submit(&$form, &$form_state) {
@@ -194,13 +195,14 @@ function cm_subscriber_form_submit(&$form, &$form_state) {
         'ConsentToTrack' => 'Unchanged',
       ));
       if ($result->was_successful()) {
+        /*
         $subscriber->lid = $list->id;
         $subscriber->list_id = $list->list_id;
         $subscriber->email = $values['email'];
         $subscriber->name = $values['name'];
         $subscriber->state = 'Active';
         $subscriber->uid = $list->uid;
-        $subscriber->save();
+        $subscriber->save();*/
         
         $form_state['redirect'] = 'cm-list/' . $list->id . '/subscribers';
         $message = t('Added new E-mail address %email to List %list', array('%email' => $values['email'], '%list' => entity_label('cm_list', $list)));
