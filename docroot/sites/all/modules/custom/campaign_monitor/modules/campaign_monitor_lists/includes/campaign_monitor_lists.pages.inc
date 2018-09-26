@@ -50,6 +50,57 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $breadcrumb[] = l(t('@client', array('@client' => $client->name)), $client_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
+   /* <ul class="large-block-grid-4 small-block-grid-2 dashboard">
+        <li>
+       <div class="panel">
+       <h2>Settings</h2>
+       <a href="%node:edit-url" class="icon"><i class="icon-cog"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Subscribers</h2>
+       <a href="/node/%node:nid/subscribers" class="icon"><i class="icon-address-book"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Campaigns</h2>
+       <a href="/node/%node:nid/campaigns" class="icon"><i class="icon-mail3"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Statistics</h2>
+       <a href="/node/%node:nid/archives" class="icon"><i class="icon-pie"></i></a></div>
+       </li>
+       </ul>
+    */
+    $items = array();
+    $destination = drupal_get_destination();
+    $link_attributes = array('class' => array('icon'));
+    if (entity_access('update', 'cm_list', $entity)) {
+      $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
+      $items[] = '<div class="panel"><h2>Settings</h2>' . $link . '</div>';
+      if (module_exists('campaign_monitor_subscribers')) {
+        $link = l('<i class="icon-address-book"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/subscribers', array('html' => TRUE, 'attributes' => $link_attributes));
+        $items[] = '<div class="panel"><h2>Subscribers</h2>' . $link . '</div>';
+      }
+      if (module_exists('campaign_monitor_campaigns')) {
+        $link = l('<i class="icon-mail3"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/campaigns', array('html' => TRUE, 'attributes' => $link_attributes));
+        $items[] = '<div class="panel"><h2>Campaigns</h2>' . $link . '</div>';
+      }
+      $stats_link = l('<i class="icon-pie"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/stats', array('html' => TRUE, 'attributes' => $link_attributes));
+      $items[] = '<div class="panel"><h2>Statistics</h2>' . $stats_link . '</div>';
+    }
+    if (!empty($items)) {
+      $dashboard = '<div class="newsletter-dashboard">' . theme_item_list(array('items' => $items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => array('large-block-grid-4 small-block-grid-2 dashboard')))) . '</div>';
+    }
+    else {
+      $dashboard = '';
+    }
+    $entity->content['dashboard'] = array(
+      '#type' => 'markup',
+      '#markup' => $dashboard,
+    );
+    /*
     $rows = array();
     $rows[] = array(
       'data' => array(
@@ -92,7 +143,7 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       '#theme' => 'table',
       '#header' => array(),
       '#rows' => $rows,
-    );
+    );*/
   }
   if ($view_mode == 'raw') {
     $output = campaign_monitor_build_template($entity, $entity_type);
