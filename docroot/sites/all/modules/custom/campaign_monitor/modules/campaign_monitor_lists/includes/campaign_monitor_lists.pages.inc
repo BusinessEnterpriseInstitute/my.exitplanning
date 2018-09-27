@@ -50,6 +50,29 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $breadcrumb[] = l(t('@client', array('@client' => $client->name)), $client_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
+   /* <ul class="large-block-grid-4 small-block-grid-2 dashboard">
+        <li>
+       <div class="panel">
+       <h2>Settings</h2>
+       <a href="%node:edit-url" class="icon"><i class="icon-cog"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Subscribers</h2>
+       <a href="/node/%node:nid/subscribers" class="icon"><i class="icon-address-book"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Campaigns</h2>
+       <a href="/node/%node:nid/campaigns" class="icon"><i class="icon-mail3"></i></a></div>
+       </li>
+       <li>
+       <div class="panel">
+       <h2>Statistics</h2>
+       <a href="/node/%node:nid/archives" class="icon"><i class="icon-pie"></i></a></div>
+       </li>
+       </ul>
+    */
     $items = '';
     $destination = drupal_get_destination();
     $link_attributes = array('class' => array('icon'));
@@ -77,6 +100,50 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       '#type' => 'markup',
       '#markup' => $dashboard,
     );
+    /*
+    $rows = array();
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('List ID:'), 'header' => TRUE),
+        array('data' => $entity->list_id),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribe Page:'), 'header' => TRUE),
+        array('data' => $entity->unsubscribe_page),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Confirmed Opt-in:'), 'header' => TRUE),
+        array('data' => $entity->confirmed_opt_in ? t('Yes') : t('No')),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Confirmation Success Page:'), 'header' => TRUE),
+        array('data' => $entity->confirmation_success_page),
+      ),
+      'no_striping' => TRUE,
+    );
+    $rows[] = array(
+      'data' => array(
+        array('data' => t('Unsubscribe Setting:'), 'header' => TRUE),
+        array('data' => $entity->unsubscribe_setting == 'AllClientLists' ? t('All client lists') : t('Only this list')),
+      ),
+      'no_striping' => TRUE,
+    );
+    $entity->content['summary'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Summary'),
+      '#theme' => 'table',
+      '#header' => array(),
+      '#rows' => $rows,
+    );*/
   }
   if ($view_mode == 'raw') {
     $output = campaign_monitor_build_template($entity, $entity_type);
@@ -142,10 +209,10 @@ function campaign_monitor_lists_stats($list) {
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($client) {
     $client_uri = entity_uri('cm_client', $client);
-    $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
+    $breadcrumb[] = l(t('@client', array('@client' => entity_label('cm_client', $client))), $client_uri['path']);
   }
   $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   
   $header = array();
