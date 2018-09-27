@@ -785,7 +785,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
   }
   // Append any member specific disclaimers.
   if (!empty($entity->disclaimer_text)) {
-    $disclaimers .= check_markup($list->disclaimer_text, 'full_html');
+    $disclaimers .= check_markup($entity->disclaimer_text, 'full_html');
   }
   if (!empty($disclaimers)) {
     $article_output .= '<div id="disclaimers">' . $disclaimers . '</div>';
