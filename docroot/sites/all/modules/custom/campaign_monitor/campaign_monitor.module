@@ -408,80 +408,6 @@ function campaign_monitor_get_countries() {
 }
 
 /**
- * Implements hook_preprocess_html().
- */
-function campaign_monitor_preprocess_html(&$variables) {
-  $cm_entity = FALSE;
-  $entity_type = NULL;
-  if ($entity = menu_get_object('cm_campaign')) {
-    $cm_entity = TRUE;
-    $entity_type = 'cm_campaign';
-  }
-  elseif ($entity = menu_get_object('cm_list')) {
-    $cm_entity = TRUE;
-    $entity_type = 'cm_list';
-  }
-  if ($cm_entity) {
-    if (arg(2) == 'raw') {
-      $bg_color = !empty($entity->background_color) ? $entity->background_color : '#E4E4E4';
-      $logo_bg_color = !empty($entity->logo_background_color) ? $entity->logo_background_color : '#FFFFFF';
-      $extra_styles = "html, body, #background-table {background-color: $bg_color;}";
-      $extra_styles .= "#logo-table {background-color: $logo_bg_color;}";
-      $extra_styles .= "#banner-table, #footer-table {background-color: #FFFFFF;}";
-      $extra_styles .= "#profile-table {background-color: #F4F4F4;}";
-      $variables['extra_styles'] = $extra_styles;
-      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
-    }
-  }
-}
-
-/**
- * Implements hook_preprocess_page().
- */
-function campaign_monitor_preprocess_page(&$variables) {
-  //$list = menu_get_object('cm_list');
-  if ($entity = menu_get_object('cm_list')) {
-    if (arg(2) == 'raw') {
-      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
-      $variables['cm_html'] = entity_view('cm_list', array($entity), 'raw', NULL, TRUE);
-    }
-    if (arg(2) == 'edit') {
-      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
-      $variables['form_preview'] = '<iframe src="/cm-list/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
-    }
-  }
-  elseif ($entity = menu_get_object('cm_campaign')) {
-    if (arg(2) == 'raw') {
-      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
-      $variables['cm_html'] = entity_view('cm_campaign', array($entity), 'raw', NULL, TRUE);
-    }
-    if (arg(2) == 'edit') {
-      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
-      $variables['form_preview'] = '<iframe src="/cm-campaign/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
-    }
-  }
-}
-/**
- * Implements hook_theme_registry_alter().
- */
-function campaign_monitor_theme_registry_alter(&$theme_registry) {
-  // Defined path to the current module.
-  $module_path = drupal_get_path('module', 'campaign_monitor');
-  // Find all .tpl.php files in this module's folder recursively.
-  $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path . '/templates');
-  // Iterate through all found template file objects.
-  foreach ($template_file_objects as $key => $template_file_object) {
-    // If the template has not already been overridden by a theme.
-    if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
-      // Alter the theme path and template elements.
-      $theme_registry[$key]['theme path'] = $module_path;
-      $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
-      $theme_registry[$key]['type'] = 'module';
-    }
-  }
-}
-
-/**
  * Generate a key to include in the webhook url based on a hash.
  *
  * @string $list_id
@@ -582,16 +508,83 @@ function campaign_monitor_newsletter_autocomplete($string) {
   drupal_json_output($matches);
 }
 /**
+ * Implements hook_preprocess_html().
+ */
+function campaign_monitor_preprocess_html(&$variables) {
+  $cm_entity = FALSE;
+  $entity_type = NULL;
+  if ($entity = menu_get_object('cm_campaign')) {
+    $cm_entity = TRUE;
+    $entity_type = 'cm_campaign';
+  }
+  elseif ($entity = menu_get_object('cm_list')) {
+    $cm_entity = TRUE;
+    $entity_type = 'cm_list';
+  }
+  if ($cm_entity) {
+    if (arg(2) == 'raw') {
+      $bg_color = !empty($entity->background_color) ? $entity->background_color : '#E4E4E4';
+      $logo_bg_color = !empty($entity->logo_background_color) ? $entity->logo_background_color : '#FFFFFF';
+      $extra_styles = "html, body, #background-table, #background-cell {background-color: $bg_color;}";
+      $extra_styles .= "#logo-table {background-color: $logo_bg_color;}";
+      $variables['extra_styles'] = $extra_styles;
+      $variables['theme_hook_suggestions'][] = 'html__cm_list_raw';
+    }
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function campaign_monitor_preprocess_page(&$variables) {
+  //$list = menu_get_object('cm_list');
+  if ($entity = menu_get_object('cm_list')) {
+    if (arg(2) == 'raw') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
+      $variables['cm_html'] = entity_view('cm_list', array($entity), 'raw', NULL, TRUE);
+    }
+    if (arg(2) == 'edit') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
+      $variables['form_preview'] = '<iframe src="/cm-list/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+    }
+  }
+  elseif ($entity = menu_get_object('cm_campaign')) {
+    if (arg(2) == 'raw') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
+      $variables['cm_html'] = entity_view('cm_campaign', array($entity), 'raw', NULL, TRUE);
+    }
+    if (arg(2) == 'edit') {
+      $variables['theme_hook_suggestions'][] = 'page__cm_form_design';
+      $variables['form_preview'] = '<iframe src="/cm-campaign/' . $entity->id . '/raw" width="100%" height="100%" frameborder="0"></iframe>';
+    }
+  }
+}
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function campaign_monitor_theme_registry_alter(&$theme_registry) {
+  // Defined path to the current module.
+  $module_path = drupal_get_path('module', 'campaign_monitor');
+  // Find all .tpl.php files in this module's folder recursively.
+  $template_file_objects = drupal_find_theme_templates($theme_registry, '.tpl.php', $module_path . '/templates');
+  // Iterate through all found template file objects.
+  foreach ($template_file_objects as $key => $template_file_object) {
+    // If the template has not already been overridden by a theme.
+    if (!isset($theme_registry[$key]['theme path']) || !preg_match('#/themes/#', $theme_registry[$key]['theme path'])) {
+      // Alter the theme path and template elements.
+      $theme_registry[$key]['theme path'] = $module_path;
+      $theme_registry[$key] = array_merge($theme_registry[$key], $template_file_object);
+      $theme_registry[$key]['type'] = 'module';
+    }
+  }
+}
+/**
  * Custom callback to build raw template output.
  */
 function campaign_monitor_build_template($entity, $entity_type) {
   $list = $entity_type == 'cm_list' ? $entity : cm_list_load($entity->lid);
   $address = $list->address;
   $rows = array();
-  // Top spacer row.
-  $rows[] = array(
-    array('data' => '', 'class' => 'w600', 'height' => '20'),
-  );
   // Top bar row.
   $top_bar_table = '
   <table id="top-bar" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
@@ -661,7 +654,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
         $logo_output = render($logo_output);
       }
       $logo_table = '
-      <table id="logo-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="logo-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
         <tr><td height="10"></td></tr>
         <tr>
             <td align="center" valign="top">
@@ -671,7 +664,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
         <tr><td height="10"></td></tr>
       </tbody></table>';
       $rows[] = array(
-        array('data' => $logo_table, 'class' => 'w600', 'width' => '600'),
+        array('data' => $logo_table, 'align' => 'center', 'valign' => 'top'),
       );
     }
   }
@@ -695,7 +688,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
         $banner_output = render($banner_output);
       }
       $banner_table = '
-      <table id="banner-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="banner-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
           <tr>
               <td align="center" valign="top">
               ' . render($banner_output) . '
@@ -703,7 +696,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
           </tr>
       </tbody></table>';
       $rows[] = array(
-        array('data' => $banner_table, 'class' => 'w600', 'width' => '600'),
+        array('data' => $banner_table, 'align' => 'center', 'valign' => 'top'),
       );
     }
   }
@@ -739,13 +732,13 @@ function campaign_monitor_build_template($entity, $entity_type) {
         '#height' => $profile_pic_file->height,
       );
       $profile_table = '
-      <table id="profile-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
         <tr><td height="10"></td></tr>
         <tr>
-          <td align="center" valign="middle" style="width:420px;">
+          <td class="template-column" align="center" valign="middle" style="width:420px;">
             <table><tbody><tr><td align="center" valign="middle">' . $profile_name . $profile . '</td></tr></tbody></table>
           </td>
-          <td align="center" valign="middle" style="width:180px;">
+          <td class="template-column" align="center" valign="middle" style="width:180px;">
             <table><tbody><tr><td>' . render($profile_pic_file_output) . '</td></tr></tbody></table>
           </td>
         </tr>
@@ -754,7 +747,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
     }
     else {
       $profile_table = '
-      <table id="profile-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
         <tr><td height="10"></td></tr>
         <tr>
           <td align="center" valign="middle">' . $profile_name . $profile . '</td>
@@ -763,7 +756,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
       </tbody></table>';
     }
     $rows[] = array(
-      array('data' => $profile_table, 'class' => 'w600', 'width' => '600'),
+      array('data' => $profile_table, 'align' => 'center', 'valign' => 'top'),
     );
   }
   // Content region.
@@ -798,7 +791,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
     $article_output .= '<div id="disclaimers">' . $disclaimers . '</div>';
   }
   $article_table = '
-  <table id="article" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+  <table id="article" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
       <tr>
           <td valign="top">
           <div class="article-content">' . $article_output . '</div>
@@ -806,38 +799,62 @@ function campaign_monitor_build_template($entity, $entity_type) {
       </tr>
   </tbody></table>';
   $rows[] = array(
-    array('data' => $article_table, 'class' => 'w600', 'width' => '600'),
+    array('data' => $article_table, 'align' => 'center', 'valign' => 'top'),
   );
   // Footer region.
-  $explanation = '';
-  if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {
-    $explanation = '<p id="#permission-reminder">' . $list->footer_region['other_settings']['explanation_text'] . '</p>';
+  $footer_output = '';
+  // Share icons.
+  $share_widgets = $list->footer_region['share_widgets'];
+  $share_links = array();
+  if (!empty($share_widgets['facebook'])) {
+    if ($share_widgets['facebook_type'] == 'email') {
+      $share_links[] = '<fblike>Facebook</fblike>';
+    }
+    elseif ($share_widgets['facebook_type'] == 'url' && !empty($share_widgets['facebook_url'])) {
+      $share_links[] = '<fblike likeurl="' . $share_widgets['facebook_url'] . '">Facebook</fblike>';
+    }
   }
+  if (!empty($share_widgets['linkedin'])) {
+    $share_links[] = '<linkedinshare>LinkedIn</linkedinshare>';
+  }
+  if (!empty($share_widgets['twitter'])) {
+    $share_links[] = !empty($share_widgets['twitter_handle']) ? '<tweet via="' . $share_widgets['twitter_handle'] . '">Twitter</tweet>' : '<tweet>Twitter</tweet>';
+  }
+  if (!empty($share_widgets['forward'])) {
+    $share_links[] = '<forwardtoafriend>Forward</forwardtoafriend>';
+  }
+  if (!empty($share_links)) {
+    $footer_output .= '<p id="share-links">' . implode(' ', $share_links) . '</p>';
+  }
+  $footer_output .= '<p>' . $profile . '</p>';
+  if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {
+    $footer_output .= '<p id="#permission-reminder">' . $list->footer_region['other_settings']['explanation_text'] . '</p>';
+  }
+  $footer_links = '<unsubscribe>Unsubscribe</unsubscribe>';
+  if (!empty($list->footer_region['other_settings']['edit_subscription'])) {
+    $footer_links .= ' | <preferences>Preferences</preferences>';
+  }
+  $footer_links .= ' | <webversion>Web version</webversion>';
   $footer_table = '
-  <table id="footer-table" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
+  <table id="footer-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
     <tr>
-      <td align="center" valign="middle" style="width:300px;">
-        <p>' . $profile . '</p>
-        ' . $explanation . '
-      </td>
-      <td align="center" valign="middle" style="width:300px;">
-        <table><tbody><tr><td></td></tr></tbody></table>
+      <td align="center" valign="middle">
+      <div class="footer-content">
+        ' . $footer_output . '
+        <p id="footer-links">' . $footer_links . '</p>
+        <p id="copyright" class="footer-content">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</p>
+      </div>
       </td>
     </tr>
-    <tr><td colspan="2"><div id="copyright">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</div></td></tr>
   </tbody></table>';
   $rows[] = array(
-    array('data' => $footer_table, 'class' => 'w600', 'width' => '600'),
-  );
-  // Bottom spacer row.
-  $rows[] = array(
-    array('data' => '', 'class' => 'w600', 'height' => '20'),
+    array('data' => $footer_table, 'align' => 'center', 'valign' => 'top'),
   );
   $table = theme('table', array(
     'header' => array(),
     'rows' => $rows,
     'attributes' => array(
-      'class' => 'w600',
+      'id' => 'template-table',
       'width' => '600',
       'cellpadding' => '0',
       'cellspacing' => '0',
@@ -848,7 +865,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
     'header' => array(),
     'rows' => array(
       array(
-        array('data' => $table, 'align' => 'center'),
+        array('data' => $table, 'align' => 'center', 'valign' => 'top', 'id' => 'background-cell'),
       ),
     ),
     'attributes' => array(
