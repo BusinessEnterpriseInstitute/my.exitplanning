@@ -139,7 +139,7 @@ body { font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
 #disclaimers { font-size: 12px; color: #808080; line-height: 125%; background-color: #F4F4F4; padding: 15px }
 #footer-table { font-size: 12px; line-height: 15px; color: #808080;}
 #footer-table a { color: #808080; text-decoration: none;}
-#permission-reminder { white-space: pre-wrap; }
+#permission-reminder { white-space: pre-wrap; text-align: left; }
 #street-address { color: #B3B3B3; white-space: pre-wrap; }
 </style>
 <!--[if gte mso 9]>
