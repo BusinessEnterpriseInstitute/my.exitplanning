@@ -11,7 +11,7 @@ function campaign_monitor_campaigns_menu() {
     'page arguments' => array(1),
     'access callback' => 'entity_access',
     'access arguments' => array('update', 'cm_list', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
     'weight' => -8,
   );
