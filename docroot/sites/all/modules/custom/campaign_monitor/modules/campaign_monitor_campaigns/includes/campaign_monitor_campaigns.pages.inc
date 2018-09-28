@@ -121,38 +121,41 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
       $unopened = $recipients - ($unique_opened + $bounced);
       
       if ($recipients > 0) {
-        $header_text = t('<span>!count</span> e-mails were sent', array('!count' => number_format($recipients)), array('html' => TRUE));
+        $header_string = $recipients > 1 ? 'e-mails were' : 'e-mail was';
+        $header_text = l(t('<span>!count</span> !string sent', array('!count' => number_format($recipients), '!string' => $header_string)), 'cm-campaign/' . $entity->id . '/recipients', array('html' => TRUE, 'attributes' => array('title' => t('View recipients'))));
         if ($unique_opened > 0) {
           $opened_calc = ($unique_opened / $recipients) * 100;
-          $stats['opens']['count'] = t('!count opened', array('!count' => number_format($unique_opened)));
+          $stats['opens']['count'] = l(t('!count opened', array('!count' => number_format($unique_opened))), 'cm-campaign/' . $entity->id . '/opens', array('attributes' => array('title' => t('View opens'))));
           $stats['opens']['percent'] = $opened_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($opened_calc)));
         }
         if ($clicks > 0) {
           $clicked_calc = ($clicks / $recipients) * 100;
-          $stats['clicks']['count'] = t('!count clicked', array('!count' => number_format($clicks)));
+          $stats['clicks']['count'] = l(t('!count clicked', array('!count' => number_format($clicks))), 'cm-campaign/' . $entity->id . '/clicks', array('attributes' => array('title' => t('View clicks'))));
           $stats['clicks']['percent'] = $clicked_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($clicked_calc)));
         }
         if ($forwards > 0) {
+          // No detailed forwards report available in api to link to.
           $forwards_calc = ($forwards / $recipients) * 100;
           $stats['forwards']['count'] = t('!count forwarded', array('!count' => number_format($forwards)));
           $stats['forwards']['percent'] = $forwards_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($forwards_calc)));
         }
         if ($bounced > 0) {
           $bounced_calc = ($bounced / $recipients) * 100;
-          $stats['bounces']['count'] = t('!count bounced', array('!count' => number_format($bounced)));
+          $stats['bounces']['count'] = l(t('!count bounced', array('!count' => number_format($bounced))), 'cm-campaign/' . $entity->id . '/bounces', array('attributes' => array('title' => t('View bounces'))));
           $stats['bounces']['percent'] = $bounced_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($bounced_calc)));
         }
         if ($spam_complaints > 0) {
           $spam_calc = ($spam_complaints / $recipients) * 100;
-          $stats['spam']['count'] = t('!count spam complaints', array('!count' => number_format($spam_complaints)));
+          $stats['spam']['count'] = l(t('!count spam complaints', array('!count' => number_format($spam_complaints))), 'cm-campaign/' . $entity->id . '/spam', array('attributes' => array('title' => t('View spam complaints'))));
           $stats['spam']['percent'] = $spam_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($spam_calc)));
         }
         if ($unsubscribed > 0) {
           $unsubscribed_calc = ($unsubscribed / $recipients) * 100;
-          $stats['unsubscribed']['count'] = t('!count unsubscribed', array('!count' => number_format($unsubscribed)));
+          $stats['unsubscribed']['count'] = l(t('!count unsubscribed', array('!count' => number_format($unsubscribed))), 'cm-campaign/' . $entity->id . '/unsubscribes', array('attributes' => array('title' => t('View unsubscribes'))));
           $stats['unsubscribed']['percent'] = $unsubscribed_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($unsubscribed_calc)));
         }
         $unopened_calc = ($unopened / $recipients) * 100;
+        // No detailed unopens report available in api to link to.
         $stats['unopens']['count'] = t('!count unopened', array('!count' => number_format($unopened)));
         $stats['unopens']['percent'] = $unopened_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($unopened_calc)));
       }
@@ -235,4 +238,178 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     );
   }
   return $entity->content;
+}
+
+function campaign_monitor_campaigns_stats($entity, $type = NULL) {
+  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $entity->campaign_id);
+  $header = array();
+  $rows = array();
+  $pager = '';
+  $parameters = array(
+    'date' => '',
+    'page' => !empty($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1,
+    'pagesize' => 100,
+    'orderfield' => 'email',
+    'orderdirection' => 'asc',
+  );
+  if (!empty($_GET['sort']) && !empty($_GET['order'])) {
+    $parameters['orderdirection'] = $_GET['sort'];
+    switch($_GET['order']) {
+      case 'E-mail':
+        $parameters['orderfield'] = 'email';
+        break;
+      case 'Name':
+        $parameters['orderfield'] = 'name';
+        break;
+    }
+  }
+  switch ($type) {
+    case 'recipients':
+      $result = $wrap->get_recipients($parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+    case 'bounces':
+      $result = $wrap->get_bounces('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+    case 'opens':
+      $result = $wrap->get_opens('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+    case 'clicks':
+      $result = $wrap->get_clicks('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+    case 'unsubscribes':
+      $result = $wrap->get_unsubscribes('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+    case 'spam':
+      $result = $wrap->get_spam('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+      break;
+  }
+  if ($result && $result->was_successful()) {
+    $total_records = $result->response->TotalNumberOfRecords;
+    $page_records = $result->response->RecordsOnThisPage;
+    $number_pages = $result->response->NumberOfPages;
+    $items = $result->response->Results;
+    // Recipients.
+    if ($type == 'recipients') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    // Bounces.
+    elseif ($type == 'bounces') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+        array('data' => t('Type'), 'field' => 'type'),
+        array('data' => t('Date')),
+        array('data' => t('Reason')),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+            'type' => array('data' => $item->BounceType),
+            'date' => array('data' => format_date(strtotime($item->Date), 'short')),
+            'reason' => array('data' => $item->Reason),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    // Opens.
+    elseif ($type == 'opens') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+        array('data' => t('Date')),
+        array('data' => t('City'), 'field' => 'city'),
+        array('data' => t('Region'), 'field' => 'region'),
+        array('data' => t('Country'), 'field' => 'country'),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+            'date' => array('data' => format_date(strtotime($item->Date), 'short')),
+            'city' => array('data' => $item->City),
+            'region' => array('data' => $item->Region),
+            'country' => array('data' => $item->CountryName),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    // Clicks.
+    elseif ($type == 'clicks') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+        array('data' => t('URL'), 'field' => 'url'),
+        array('data' => t('Date')),
+        array('data' => t('City'), 'field' => 'city'),
+        array('data' => t('Region'), 'field' => 'region'),
+        array('data' => t('Country'), 'field' => 'country'),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+            'url' => array('data' => $item->URL),
+            'date' => array('data' => format_date(strtotime($item->Date), 'short')),
+            'city' => array('data' => $item->City),
+            'region' => array('data' => $item->Region),
+            'country' => array('data' => $item->CountryName),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    // Unsubscribes.
+    elseif ($type == 'unsubscribes') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+        array('data' => t('Date')),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+            'date' => array('data' => format_date(strtotime($item->Date), 'short')),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    // Spam.
+    elseif ($type == 'spam') {
+      $header = array(
+        array('data' => t('E-mail'), 'field' => 'email'),
+        array('data' => t('Date')),
+      );
+      foreach ($items as $item) {
+        $row = array(
+          'data' => array(
+            'email' => array('data' => $item->EmailAddress),
+            'date' => array('data' => format_date(strtotime($item->Date), 'short')),
+          ),
+        );
+        $rows[] = $row;
+      }
+    }
+    pager_default_initialize($total_records, $parameters['pagesize']);
+    $pager = theme('pager');
+  }
+  $table = theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('No stats for %type available from this campaign.', array('%type' => $type)),
+    'attributes' => array(
+      'id' => 'cm-campaign-stats',
+    ),
+  ));
+  return $table . $pager;
 }

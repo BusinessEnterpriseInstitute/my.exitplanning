@@ -57,6 +57,73 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  // Campaigns
+  $items['cm-campaign/%cm_campaign/recipients'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Recipients',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 1,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
+  $items['cm-campaign/%cm_campaign/opens'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Opens',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 2,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
+  $items['cm-campaign/%cm_campaign/bounces'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Bounces',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 3,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
+  $items['cm-campaign/%cm_campaign/clicks'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Clicks',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 4,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
+  $items['cm-campaign/%cm_campaign/unsubscribes'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Unsubscribes',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 5,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
+  $items['cm-campaign/%cm_campaign/spam'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Spam Complaints',
+    'page callback' => 'campaign_monitor_campaigns_stats',
+    'page arguments' => array(1, 2),
+    'access callback' => 'entity_access',
+    'access arguments' => array('view', 'cm_campaign', 1),
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 6,
+    'tab_parent' => 'cm-campaign/%/view',
+  );
   $items['cm-campaign/%cm_campaign/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'entity_ui_get_form',
@@ -93,7 +160,7 @@ function campaign_monitor_campaigns_menu() {
     'page arguments' => array('cm_campaign_send_form', 1),
     'access callback' => 'campaign_monitor_send_access',
     'access arguments' => array(1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
     'weight' => -7,
   );
@@ -129,6 +196,10 @@ function campaign_monitor_campaigns_permission() {
     'edit own campaigns' => array(
       'title' => t('Edit own campaigns in design status'),
       'description' => t('Access to edit own Campaign Monitor campaigns'),
+    ),
+    'delete own campaigns' => array(
+      'title' => t('Delete own campaigns'),
+      'description' => t('Access to delete own Campaign Monitor campaigns'),
     ),
   );
 }
@@ -319,7 +390,8 @@ function campaign_monitor_campaigns_access($op, $campaign = NULL, $account = NUL
       return user_access('administer campaign monitor', $account) ||
       (user_access('edit own campaigns', $account) && ($campaign->uid === $account->uid) && (empty($campaign->campaign_status)));
     case 'delete':
-      return user_access('administer campaign monitor', $account);
+      return user_access('administer campaign monitor', $account) ||
+      (user_access('delete own campaigns', $account) && ($campaign->uid === $account->uid));
   }
 }
 /**
