@@ -187,11 +187,13 @@ if (!class_exists('CS_REST_Campaigns')) {
          *         }
          *     )
          * }
+         *
+         * @see correction made and noted in https://github.com/campaignmonitor/createsend-php/issues/82;
          */
         function get_recipients($page_number = NULL, $page_size = NULL, $order_field = NULL, 
             $order_direction = NULL) {            
-            return $this->get_request_paged($this->_campaigns_base_route.'recipients.json', $page_number, 
-                $page_size, $order_field, $order_direction, '?');
+            return $this->get_request_paged($this->_campaigns_base_route.'recipients.json?', $page_number, 
+                $page_size, $order_field, $order_direction);
         }
 
         /**
