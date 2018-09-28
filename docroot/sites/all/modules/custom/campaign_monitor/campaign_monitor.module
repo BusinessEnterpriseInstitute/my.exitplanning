@@ -733,7 +733,6 @@ function campaign_monitor_build_template($entity, $entity_type) {
       );
       $profile_table = '
       <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
-        <tr><td height="10"></td></tr>
         <tr>
           <td class="template-column" align="center" valign="middle" style="width:420px;">
             <table><tbody><tr><td align="center" valign="middle">' . $profile_name . $profile . '</td></tr></tbody></table>
@@ -742,17 +741,14 @@ function campaign_monitor_build_template($entity, $entity_type) {
             <table><tbody><tr><td>' . render($profile_pic_file_output) . '</td></tr></tbody></table>
           </td>
         </tr>
-        <tr><td height="10"></td></tr>
       </tbody></table>';
     }
     else {
       $profile_table = '
       <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
-        <tr><td height="10"></td></tr>
         <tr>
           <td align="center" valign="middle">' . $profile_name . $profile . '</td>
         </tr>
-        <tr><td height="10"></td></tr>
       </tbody></table>';
     }
     $rows[] = array(

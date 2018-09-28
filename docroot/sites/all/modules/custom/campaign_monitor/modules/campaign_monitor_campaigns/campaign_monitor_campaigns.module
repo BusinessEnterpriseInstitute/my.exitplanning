@@ -143,7 +143,6 @@ function campaign_monitor_campaigns_menu() {
     'access arguments' => array(1),
     'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
-    'weight' => -7,
   );
 
   return $items;
