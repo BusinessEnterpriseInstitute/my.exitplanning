@@ -52,77 +52,60 @@ function campaign_monitor_campaigns_menu() {
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
   );
-  $items['cm-campaign/%cm_campaign/view'] = array(
-    'title' => 'Summary',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
   // Campaigns
   $items['cm-campaign/%cm_campaign/recipients'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Recipients',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 1,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/opens'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Opens',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 2,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/bounces'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Bounces',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 3,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/clicks'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Clicks',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 4,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/unsubscribes'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Unsubscribes',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 5,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/spam'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Spam Complaints',
     'page callback' => 'campaign_monitor_campaigns_stats',
     'page arguments' => array(1, 2),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_campaign', 1),
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
-    'weight' => 6,
-    'tab_parent' => 'cm-campaign/%/view',
   );
   $items['cm-campaign/%cm_campaign/edit'] = array(
     'title' => 'Edit',
@@ -130,9 +113,8 @@ function campaign_monitor_campaigns_menu() {
     'page arguments' => array('cm_campaign', 1, 'edit'),
     'access callback' => 'entity_access',
     'access arguments' => array('update', 'cm_campaign', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
-    'weight' => -9,
   );
   $items['cm-campaign/%cm_campaign/delete'] = array(
     'title' => 'Delete',
@@ -140,9 +122,8 @@ function campaign_monitor_campaigns_menu() {
     'page arguments' => array('cm_campaign_delete_form', 1),
     'access callback' => 'entity_access',
     'access arguments' => array('delete', 'cm_campaign', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
-    'weight' => -8,
   );
   $items['cm-campaign/%cm_campaign/raw'] = array(
     'type' => MENU_CALLBACK,
@@ -171,7 +152,8 @@ function campaign_monitor_campaigns_menu() {
  * Access callback for sending a campaign.
  */
 function campaign_monitor_send_access($campaign) {
-  $can_update = entity_access('update', 'cm_campaign', $campaign);
+  global $user;
+  $can_update = user_access('administer campaign monitor') || $campaign->uid === $user->uid;
   $statuses = array(2, 3);
   // Don't allow campaign sending if status is one of "Pending" or "Sent"
   if ($can_update && !in_array($campaign->campaign_status, $statuses)) {
@@ -337,8 +319,11 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
 function campaign_monitor_campaigns_get_properties($campaign, array $options, $name, $entity_type) {
   switch ($name) {
     case 'edit_url':
-      $options = array('query' => drupal_get_destination());
-      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/edit', $options);
+      if (empty($campaign->campaign_status)) {
+        $options = array('query' => drupal_get_destination());
+        return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/edit', $options);
+      }
+      return;
       break;
     case 'delete_url':
       $options = array('query' => drupal_get_destination());
