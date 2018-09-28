@@ -11,9 +11,8 @@ function campaign_monitor_subscribers_menu() {
     'page arguments' => array(1),
     'access callback' => 'entity_access',
     'access arguments' => array('update', 'cm_list', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_subscribers.pages.inc',
-    'weight' => -8,
   );
   $items['cm-list/%cm_list/subscribers/active'] = array(
     'title' => 'Active',
