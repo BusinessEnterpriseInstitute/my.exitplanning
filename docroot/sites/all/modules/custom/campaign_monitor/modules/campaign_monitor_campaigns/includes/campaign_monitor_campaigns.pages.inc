@@ -63,7 +63,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     drupal_set_title($title);
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $entity->campaign_id);
     $result = $wrap->get_summary();
-    $header_text = t('0 e-mails were sent');
+    $header_text = t('<span><em>0 </em></span> e-mails were sent', array('html' => TRUE));
     $stats = array(
       'opens' => array(
         'title' => t('Opens'),
@@ -121,7 +121,8 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
       $unopened = $recipients - ($unique_opened + $bounced);
       
       if ($recipients > 0) {
-        $header_text = l(t('<span>!count</span> e-mails were sent', array('!count' => number_format($recipients))), 'cm-campaign/' . $entity->id . '/recipients', array('html' => TRUE, 'attributes' => array('title' => t('View recipients'))));
+        $header_string = $recipients > 1 ? 'e-mails were' : 'e-mail was';
+        $header_text = l(t('<span><em>!count </em></span> !string sent', array('!count' => number_format($recipients), '!string' => $header_string)), 'cm-campaign/' . $entity->id . '/recipients', array('html' => TRUE, 'attributes' => array('title' => t('View recipients'))));
         if ($unique_opened > 0) {
           $opened_calc = ($unique_opened / $recipients) * 100;
           $stats['opens']['count'] = l(t('!count opened', array('!count' => number_format($unique_opened))), 'cm-campaign/' . $entity->id . '/opens', array('attributes' => array('title' => t('View opens'))));
@@ -210,6 +211,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     $entity->content['summary'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array(
+        'id' => 'campaign-summary-table-wrapper',
         'class' => array('columns large-4'),
       ),
       'header' => array(

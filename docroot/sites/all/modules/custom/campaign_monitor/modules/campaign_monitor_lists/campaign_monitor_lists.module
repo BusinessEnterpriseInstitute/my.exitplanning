@@ -24,8 +24,7 @@ function campaign_monitor_lists_menu() {
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('campaign_monitor_lists_import_form', 1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('update', 'cm_client', 1),
+    'access arguments' => array('administer campaign monitor'),
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_lists.admin.inc',
     'weight' => -8,
@@ -51,18 +50,13 @@ function campaign_monitor_lists_menu() {
     'access arguments' => array('view', 'cm_list', 1),
     'file' => 'includes/campaign_monitor_lists.pages.inc',
   );
-  $items['cm-list/%cm_list/view'] = array(
-    'title' => 'Summary',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
   $items['cm-list/%cm_list/edit'] = array(
     'title' => 'Edit',
     'page callback' => 'entity_ui_get_form',
     'page arguments' => array('cm_list', 1, 'edit'),
     'access callback' => 'entity_access',
     'access arguments' => array('update', 'cm_list', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_lists.admin.inc',
     'weight' => -9,
   );
@@ -72,7 +66,7 @@ function campaign_monitor_lists_menu() {
     'page arguments' => array('cm_list_delete_form', 1),
     'access callback' => 'entity_access',
     'access arguments' => array('delete', 'cm_list', 1),
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_lists.admin.inc',
     'weight' => -8,
   );
@@ -86,7 +80,7 @@ function campaign_monitor_lists_menu() {
     'file' => 'includes/campaign_monitor_lists.pages.inc',
   );
   $items['cm-list/%cm_list/stats'] = array(
-    'type' => MENU_LOCAL_TASK,
+    'type' => MENU_CALLBACK,
     'title' => 'Statistics',
     'page callback' => 'campaign_monitor_lists_stats',
     'page arguments' => array(1),
