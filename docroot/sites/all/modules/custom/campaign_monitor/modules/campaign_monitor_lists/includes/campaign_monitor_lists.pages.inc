@@ -136,24 +136,60 @@ function campaign_monitor_lists_webhooks($list) {
 /**
  * Page callback to display campaign monitor stats for list.
  */
-function campaign_monitor_lists_stats($list) {
-  $client = cm_client_load($list->cid);
+function campaign_monitor_lists_stats($entity) {
+  $client = cm_client_load($entity->cid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($client) {
     $client_uri = entity_uri('cm_client', $client);
     $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
   }
-  $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $list_uri = entity_uri('cm_list', $entity);
+  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $entity))), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
+  $entity->content = array();
   
   $header = array();
   $rows = array();
-  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
+  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $entity->list_id);
   $result = $wrap->get_stats();
   if ($result->was_successful()) {
     $stats = $result->response;
+    if (module_exists('charts_google')) {
+      $chart = array(
+        '#type' => 'chart',
+        '#chart_type' => 'pie',
+        '#chart_library' => 'google',
+        '#legend_position' => 'right',
+        '#data_labels' => FALSE,
+        '#tooltips' => TRUE,
+        '#width' => '900',
+        '#height' => '500',
+        '#raw_options' => array(
+          'title' => 'List Statistics',
+          'titleTextStyle' => array(
+            'bold' => TRUE,
+            'fontSize' => 20,
+          ),
+          'is3D' => TRUE,
+          'slices' => array(
+            0 => array('color' => '#24CBE5'),
+            1 => array('color' => '#5D5D5D'),
+            2 => array('color' => '#FFC001'),
+            3 => array('color' => '#ED561B'),
+          ),
+        ),
+      );
+      $chart['pie_data'] = array(
+        '#type' => 'chart_data',
+        '#title' => t('Status'),
+        '#labels' => array('Active', 'Unsubscribed', 'Bounces', 'Deleted'),
+        '#data' => array($stats->TotalActiveSubscribers, $stats->TotalUnsubscribes, $stats->TotalBounces, $stats->TotalDeleted),
+      );
+      $entity->content['chart'] = array(
+        '#markup' => '<div id="list-summary-chart">' . drupal_render($chart) . '</div>',
+      );
+    }
     $rows[] = array(
       'data' => array(
         array('data' => t('Total Active Subscribers'), 'header' => TRUE),
@@ -332,6 +368,6 @@ function campaign_monitor_lists_stats($list) {
     '#type' => 'markup',
     '#markup' => $table,
   );
-  return $output;
+  return $entity->content;
 }
 
