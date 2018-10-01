@@ -654,15 +654,17 @@ function campaign_monitor_build_template($entity, $entity_type) {
         $logo_output = render($logo_output);
       }
       $logo_table = '
-      <table id="logo-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="logo-table" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
         <tr><td height="10"></td></tr>
         <tr>
-            <td align="center" valign="top">
-            ' . $logo_output . '
-            </td>
+          <td align="center" valign="top">
+          ' . $logo_output . '
+          </td>
         </tr>
         <tr><td height="10"></td></tr>
-      </tbody></table>';
+      </tbody>
+      </table>';
       $rows[] = array(
         array('data' => $logo_table, 'align' => 'center', 'valign' => 'top'),
       );
@@ -688,20 +690,23 @@ function campaign_monitor_build_template($entity, $entity_type) {
         $banner_output = render($banner_output);
       }
       $banner_table = '
-      <table id="banner-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="banner-table" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
           <tr>
-              <td align="center" valign="top">
-              ' . render($banner_output) . '
-              </td>
+            <td align="center" valign="top">
+            ' . render($banner_output) . '
+            </td>
           </tr>
-      </tbody></table>';
+      </tbody>
+      </table>';
       $rows[] = array(
         array('data' => $banner_table, 'align' => 'center', 'valign' => 'top'),
       );
     }
   }
   // Reuseable Address block;
-  $profile = !empty($address['company_name']) ? '<strong>' . check_plain($address['company_name']) . '</strong><br />' : '';
+  $profile = '<p>';
+  $profile .= !empty($address['company_name']) ? '<strong>' . check_plain($address['company_name']) . '</strong><br />' : '';
   if (!empty($address['street'])) {
     $profile .= check_plain($address['street']);
     $profile .= !empty($address['additional']) ? ', ' . check_plain($address['additional']) : '';
@@ -714,9 +719,9 @@ function campaign_monitor_build_template($entity, $entity_type) {
     $profile .= '<br />' . l($website_title, $address['website']['url'], array('external' => TRUE, 'attributes' => array('target' => '_blank')));
   }
   if (!empty($address['phone_number'])) {
-    // @todo: research cm_dontconvertlink as link attribute to not track this link in campaign monitor.
-    $profile .= '<br />' . l($address['phone_number'], 'tel:' . $address['phone_number'], array('external' => TRUE));
+    $profile .= '<br />' . $address['phone_number'];
   }
+  $profile .= '</p>';
   $profile_email = l($entity->from_email, 'mailto:' . $entity->from_email, array('external' => TRUE));
   $profile_name = '<p><strong>' . check_plain($entity->from_name) . '</strong><br />' . $profile_email . '</p>';
   // Profile region.
@@ -732,22 +737,36 @@ function campaign_monitor_build_template($entity, $entity_type) {
         '#height' => $profile_pic_file->height,
       );
       $profile_table = '
-      <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
+      <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
         <tr>
           <td class="template-column" align="center" valign="middle" style="width:420px;">
-            <table><tbody><tr><td align="center" valign="middle">' . $profile_name . $profile . '</td></tr></tbody></table>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+              <tr>
+                <td class="profile-bio" align="center" valign="middle">' . $profile_name . $profile . '</td>
+              </tr>
+            </tbody>
+            </table>
           </td>
           <td class="template-column" align="center" valign="middle" style="width:180px;">
-            <table><tbody><tr><td>' . render($profile_pic_file_output) . '</td></tr></tbody></table>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+              <tr>
+                <td class="profile-pic" align="center" valign="middle">' . render($profile_pic_file_output) . '</td>
+              </tr>
+            </tbody>
+            </table>
           </td>
         </tr>
-      </tbody></table>';
+      </tbody>
+      </table>';
     }
     else {
       $profile_table = '
       <table id="profile-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
         <tr>
-          <td align="center" valign="middle">' . $profile_name . $profile . '</td>
+          <td class="template-column profile-bio" align="center" valign="middle">' . $profile_name . $profile . '</td>
         </tr>
       </tbody></table>';
     }
@@ -767,7 +786,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
   }
   $article_output = '';
   if ($article) {
-    $article_output = '<h1>' . check_plain($article_title) . '</h1>';
+    $article_output = '<h1 id="article-title">' . check_plain($article_title) . '</h1>';
     $article_output .= check_markup($article['value'], $article['format']);
   }
   // Append promotional text.
@@ -784,16 +803,23 @@ function campaign_monitor_build_template($entity, $entity_type) {
     $disclaimers .= check_markup($entity->disclaimer_text, 'full_html');
   }
   if (!empty($disclaimers)) {
-    $article_output .= '<div id="disclaimers">' . $disclaimers . '</div>';
+    $article_output .= '
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+    <tbody>
+      <tr>
+        <td class="disclaimer-content" valign="top">' . $disclaimers . '</td>
+      </tr>
+    </tbody>
+    </table>';
   }
   $article_table = '
-  <table id="article" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
-      <tr>
-          <td valign="top">
-          <div class="article-content">' . $article_output . '</div>
-          </td>
-      </tr>
-  </tbody></table>';
+  <table id="article" width="100%" cellspacing="0" cellpadding="0" border="0">
+  <tbody>
+    <tr>
+      <td class ="article-content" valign="top">' . $article_output . '</td>
+    </tr>
+  </tbody>
+  </table>';
   $rows[] = array(
     array('data' => $article_table, 'align' => 'center', 'valign' => 'top'),
   );
@@ -822,7 +848,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
   if (!empty($share_links)) {
     $footer_output .= '<p id="share-links">' . implode(' ', $share_links) . '</p>';
   }
-  $footer_output .= '<p>' . $profile . '</p>';
+  $footer_output .= $profile;
   if (!empty($list->footer_region['other_settings']['explanation']) && !empty($list->footer_region['other_settings']['explanation_text'])) {
     $footer_output .= '<p id="#permission-reminder">' . $list->footer_region['other_settings']['explanation_text'] . '</p>';
   }
@@ -834,12 +860,10 @@ function campaign_monitor_build_template($entity, $entity_type) {
   $footer_table = '
   <table id="footer-table" width="100%" cellspacing="0" cellpadding="0" border="0"><tbody>
     <tr>
-      <td align="center" valign="middle">
-      <div class="footer-content">
+      <td  class="footer-content" align="center" valign="middle">
         ' . $footer_output . '
         <p id="footer-links">' . $footer_links . '</p>
         <p id="copyright" class="footer-content">Copyright &copy; ' . date('Y') . ' Business Enterprise Institute, Inc. All rights reserved.</p>
-      </div>
       </td>
     </tr>
   </tbody></table>';
