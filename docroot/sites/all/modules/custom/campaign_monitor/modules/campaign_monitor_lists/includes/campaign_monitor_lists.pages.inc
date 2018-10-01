@@ -154,6 +154,41 @@ function campaign_monitor_lists_stats($list) {
   $result = $wrap->get_stats();
   if ($result->was_successful()) {
     $stats = $result->response;
+    if (module_exists('charts_google')) {
+      $chart = array(
+        '#type' => 'chart',
+        '#chart_type' => 'pie',
+        '#chart_library' => 'google',
+        '#legend_position' => 'right',
+        '#data_labels' => FALSE,
+        '#tooltips' => TRUE,
+        '#width' => '900',
+        '#height' => '500',
+        '#raw_options' => array(
+          'title' => 'List Statistics',
+          'titleTextStyle' => array(
+            'bold' => TRUE,
+            'fontSize' => 20,
+          ),
+          'is3D' => TRUE,
+          'slices' => array(
+            0 => array('color' => '#24CBE5'),
+            1 => array('color' => '#5D5D5D'),
+            2 => array('color' => '#FFC001'),
+            3 => array('color' => '#ED561B'),
+          ),
+        ),
+      );
+      $chart['pie_data'] = array(
+        '#type' => 'chart_data',
+        '#title' => t('Status'),
+        '#labels' => array('Active', 'Unsubscribed', 'Bounces', 'Deleted'),
+        '#data' => array(number_format($stats->TotalActiveSubscribers), number_format($stats->TotalUnsubscribes), number_format($stats->TotalBounces), number_format($stats->TotalDeleted)),
+      );
+      $entity->content['chart'] = array(
+        '#markup' => '<div id="campaign-summary-chart" class="columns large-8">' . drupal_render($chart) . '</div>',
+      );
+    }
     $rows[] = array(
       'data' => array(
         array('data' => t('Total Active Subscribers'), 'header' => TRUE),
