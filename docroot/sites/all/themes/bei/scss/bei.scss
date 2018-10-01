@@ -547,6 +547,11 @@ table {
   .form-item, .form-actions {
     margin: 0;
   }
+  tbody {
+    th {
+      border-bottom: none;
+    }
+  }
   button, .button {
     margin-bottom: 0;
   }
@@ -799,11 +804,10 @@ p.a2a_floating_style.a2a_vertical_style {
 .mem-left-panel h2.pane-title {
   color: #fff !important;
   line-height: 1.4;
-  
 }
 .pane-conference-tabs .tabs dd>a, .tabs .tab-title>a {
-    padding: 1rem !important;
-    border-right: 1px solid #fff !important;
+  padding: 1rem !important;
+  border-right: 1px solid #fff !important;
 }
 .has-tip{
   cursor: pointer !important;
@@ -869,12 +873,9 @@ p.a2a_floating_style.a2a_vertical_style {
   height: 26.25rem;
   color:#fff;
   z-index: 101;
-    h3 {
-      text-transform: uppercase;
-      color:#fff !important;
-      text-align: center;
-    }
-} 
-table tr.even, table tr.alt, table tr:nth-of-type(2n) {
-      background-color: #d8d8d8 !important;
-}  
+  h3 {
+    text-transform: uppercase;
+    color:#fff !important;
+    text-align: center;
+  }
+}
