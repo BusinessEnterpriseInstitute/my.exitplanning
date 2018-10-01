@@ -211,6 +211,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     $entity->content['summary'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array(
+        'id' => 'campaign-summary-table-wrapper',
         'class' => array('columns large-4'),
       ),
       'header' => array(
