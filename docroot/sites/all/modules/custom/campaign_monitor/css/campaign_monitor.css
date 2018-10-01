@@ -1,0 +1,95 @@
+/**
+ * @file
+ * CSS instructions for theming Campaign Monitor Statistics.
+ */
+
+.table-header {
+  background-color: #f3fafd;
+  border: 10px solid #e3f1fa;
+  border-bottom: none;
+  font-weight: bold;
+  padding: 15px 10px;
+  width: 100%;
+}
+
+.table-header span {
+  color: #0a274b;
+  font-size: 200%;
+}
+
+#campaign-summary-table-wrapper table {
+  border: 10px solid #e3f1fa;
+  display: table;
+  margin-top: 0;
+}
+
+.table-header,
+.table-header *,
+#campaign-summary-table-wrapper * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  line-height: normal;
+}
+
+#campaign-summary-table-wrapper table tbody {
+  width: 100%;
+}
+
+#campaign-summary-table-wrapper table tr {
+  border-bottom: 5px solid #e3f1fa;
+}
+
+#campaign-summary-table-wrapper .details {
+  float: right;
+}
+
+#campaign-summary-table-wrapper table td:first-child {
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+  width: 25%;
+
+  -webkit-text-shadow: 1px 1px 3px #555;
+  text-shadow: 1px 1px 3px #555;
+}
+
+#campaign-summary-table-wrapper table td:first-child span {
+  font-size: 200%;
+}
+
+#campaign-summary-table-wrapper table td:last-child {
+  background-color: #F3FAFD;
+  color: #0A274B;
+  font-size: 115%;
+  font-weight: bold;
+  width: 75%;
+}
+
+#campaign-summary-table-wrapper tr.opens td:first-child {
+  background-color: #24cbe5;
+}
+
+#campaign-summary-table-wrapper tr.clicks td:first-child {
+  background-color: #50B432;
+}
+
+#campaign-summary-table-wrapper tr.forwards td:first-child {
+  background-color: #5D5D5D;
+}
+
+#campaign-summary-table-wrapper tr.bounces td:first-child {
+  background-color: #FFC001;
+}
+
+#campaign-summary-table-wrapper tr.spam td:first-child {
+  background-color: #B32CDA;
+}
+
+#campaign-summary-table-wrapper tr.unsubscribed td:first-child {
+  background-color: #ED561B;
+}
+
+#campaign-summary-table-wrapper tr.unopens td:first-child {
+  background-color: #5D5D5D;
+}
