@@ -151,6 +151,13 @@ function campaign_monitor_lists_stats($entity) {
   
   $header = array();
   $rows = array();
+  $entity->content['stats_wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'id' => 'stats-wrapper',
+      'class' => array('columns large-6'),
+    ),
+  );
   $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $entity->list_id);
   $result = $wrap->get_stats();
   if ($result->was_successful()) {
@@ -160,13 +167,13 @@ function campaign_monitor_lists_stats($entity) {
         '#type' => 'chart',
         '#chart_type' => 'pie',
         '#chart_library' => 'google',
-        '#legend_position' => 'bottom',
+        //'#legend_position' => 'right',
         '#data_labels' => TRUE,
         '#tooltips' => FALSE,
-        '#width' => '400',
-        '#height' => '240',
+        //'#width' => '100%',
+        //'#height' => '300',
         '#raw_options' => array(
-          'title' => 'Subscriber Summary',
+          //'title' => 'Subscriber Summary',
           'titleTextStyle' => array(
             'bold' => TRUE,
             //'fontSize' => 20,
@@ -178,6 +185,14 @@ function campaign_monitor_lists_stats($entity) {
             2 => array('color' => '#FFC001'),
             3 => array('color' => '#ED561B'),
           ),
+          'width' => '100%',
+          'height' => '300',
+          'chartArea' => array(
+            'left' => 'auto',
+            'top' => 'auto',
+            'height' => '75%',
+            'width' => '100%',
+          ),
         ),
       );
       $chart['pie_data'] = array(
@@ -186,8 +201,8 @@ function campaign_monitor_lists_stats($entity) {
         '#labels' => array('Active', 'Unsubscribed', 'Bounces', 'Deleted'),
         '#data' => array($stats->TotalActiveSubscribers, $stats->TotalUnsubscribes, $stats->TotalBounces, $stats->TotalDeleted),
       );
-      $entity->content['chart'] = array(
-        '#markup' => '<div id="list-summary-chart" style="border:1px solid #ccc;">' . drupal_render($chart) . '</div>',
+      $entity->content['stats_wrapper']['chart'] = array(
+        '#markup' => '<div id="list-summary-chart" style="border:1px solid #ccc; margin-bottom: 20px; padding:10px;"><h6 class="text-center">Subscriber Summary</h6>' . drupal_render($chart) . '</div>',
       );
     }
     $rows[] = array(
@@ -364,9 +379,9 @@ function campaign_monitor_lists_stats($entity) {
     'rows' => $rows,
     'empty' => t('Unable to produce stats for this list.'),
   ));
-  $output = array(
+  $entity->content['stats_wrapper']['table'] = array(
     '#type' => 'markup',
-    '#markup' => $table,
+    '#markup' => '<div>' . $table . '</div>',
   );
   return $entity->content;
 }
