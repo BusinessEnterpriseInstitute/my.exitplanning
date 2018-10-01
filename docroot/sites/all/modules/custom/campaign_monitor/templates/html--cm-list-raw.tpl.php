@@ -56,52 +56,53 @@
 </style>
 <style type="text/css">
   #background-cell { padding: 20px; }
-  /* Mobile-specific Styles */
-  @media only screen and (max-width: 480px) {
-    #template-table {
-      max-width:600px !important;
-      width:100% !important;
-    }
-    #background-cell { padding: 10px; }
-    #logo-table img,
-    #banner-table img,
-    #profile-table img {
-      height: auto !important;
-      max-width: 100% !important;
-    }
-    .template-column {
-      display:block !important;
-      width:100% !important;
-    }
-    .article-content, #disclaimers, .footer-content {
-      padding: 10px !important;
-    }
-    #copyright, #permission-reminder {
-      text-align: left !important;
-    }
-    table[class=hide], td[class=hide], img[class=hide], p[class=hide], span[class=hide], .hide { display:none !important; }
-    table[class=h0], td[class=h0] { height: 0 !important; }
-    p[class=footer-content-left] { text-align: center !important; }
-    #headline p { font-size: 30px !important; }
-  } 
   /* Client-specific Styles */
   #outlook a { padding: 0; } /* Force Outlook to provide a "view in browser" button. */
   body { width: 100% !important; }
   .ReadMsgBody { width: 100%; }
   .ExternalClass { width: 100%; display:block !important; } /* Force Hotmail to display emails at full width */
+  .ExternalClass,
+  .ExternalClass p,
+  .ExternalClass span,
+  .ExternalClass font,
+  .ExternalClass td,
+  .ExternalClass div {
+    line-height: 100%; /* Force Hotmail to display normal line spacing */
+  }
+  body, table, td, p, a, li, blockquote {
+    -webkit-text-size-adjust:100%;
+    -ms-text-size-adjust:100%;
+  } /* Prevent WebKit and Windows mobile changing default text sizes */
+  table, td {
+    mso-table-lspace: 0pt;
+    mso-table-rspace: 0pt;
+  } /* Remove spacing between tables in Outlook 2007 and up */
+  img{-ms-interpolation-mode:bicubic;} /* Allow smoother rendering of resized image in Internet Explorer */
+  
   /* Reset Styles */
-  /* Add 100px so mobile switch bar doesn't cover street address. */
   html, body { margin: 0; padding: 0; }
-  img { height: auto; line-height: 100%; outline: none; text-decoration: none; display: block;}
+  img {
+    border: 0;
+    height: auto;
+    line-height: 100%;
+    outline: none;
+    text-decoration: none;
+  }
   br, strong br, b br, em br, i br { line-height:100%; }
   p { margin-top: 0};
-  h1, h2, h3, h4, h5, h6 { line-height: 100% !important; -webkit-font-smoothing: antialiased; }
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 100% !important;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: normal;
+  }
   h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: blue !important; }
   h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {	color: red !important; }
   /* Preferably not the same color as the normal header link color.  There is limited support for psuedo classes in email clients, this was added just for good measure. */
   h1 a:visited, h2 a:visited,  h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited { color: purple !important; }
   /* Preferably not the same color as the normal header link color. There is limited support for psuedo classes in email clients, this was added just for good measure. */  
-  table td, table tr { border-collapse: collapse; }
+  table {
+    border-collapse: collapse !important;
+  }
   .yshortcuts, .yshortcuts a, .yshortcuts a:link,.yshortcuts a:visited, .yshortcuts a:hover, .yshortcuts a span {
   color: black; text-decoration: none !important; border-bottom: none !important; background: none !important;
   } /* Body text color for the New Yahoo.  This example sets the font of Yahoo's Shortcuts to black. */
@@ -114,13 +115,19 @@
   #top-bar a { font-weight: bold; color: #444444; text-decoration: none;}
   /* Fonts and Content */
   body { font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
-  .header-content, .footer-content-left, .footer-content-right { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
+  .header-content, .footer-content { -webkit-text-size-adjust: none; -ms-text-size-adjust: none; }
   /* Prevent Webkit and Windows Mobile platforms from changing default font sizes on header and footer. */
   #banner-table,
   #footer-table {
     background-color: #FFFFFF;
   }
   #profile-table {background-color: #F4F4F4;}
+  #profile-table .template-column {
+    padding: 10px;
+  }
+  .profile-pic {
+    text-align: right;
+  }
   #article { background-color: #FFFFFF; }
   .article-title { font-size: 18px; line-height:24px; color: #444444; font-weight:bold; margin-top:0px; margin-bottom:18px; font-family: "Helvetica Neue", Arial, Helvetica, sans-serif; }
   .article-title a { color: #444444; text-decoration: none; }
@@ -137,16 +144,47 @@
     list-style-position: inside;
   }
   .article-content p {margin-bottom: 15px;}
+  .disclaimer-content { font-size: 12px; color: #808080; line-height: 125%; background-color: #F4F4F4; padding: 15px }
   .footer-content {padding: 20px;}
   #copyright {text-align: center;}
   .footer-content-left a { color: #3CA7DD; font-weight: bold; text-decoration: none; }
   .footer-content-right { font-size: 11px; line-height: 16px; color: #A6A6A6; margin-top: 0px; margin-bottom: 15px; }
   .footer-content-right a { color: #3CA7DD; font-weight: bold; text-decoration: none; }
-  #disclaimers { font-size: 12px; color: #808080; line-height: 125%; background-color: #F4F4F4; padding: 15px }
   #footer-table { font-size: 12px; line-height: 15px; color: #808080;}
   #footer-table a { color: #808080; text-decoration: none;}
   #permission-reminder { white-space: pre-wrap; text-align: left; }
   #street-address { color: #B3B3B3; white-space: pre-wrap; }
+  /* Mobile-specific Styles */
+  @media only screen and (max-width: 480px) {
+    #template-table {
+      max-width:600px !important;
+      width:100% !important;
+    }
+    #background-cell { padding: 10px; }
+    #logo-table img,
+    #banner-table img,
+    #profile-table img {
+      height: auto !important;
+      max-width: 100% !important;
+    }
+    .profile-pic {
+      text-align: center;
+    }
+    .template-column {
+      display:block !important;
+      width:100% !important;
+    }
+    .article-content, #disclaimers, .footer-content {
+      padding: 10px !important;
+    }
+    #copyright, #permission-reminder {
+      text-align: left !important;
+    }
+    table[class=hide], td[class=hide], img[class=hide], p[class=hide], span[class=hide], .hide { display:none !important; }
+    table[class=h0], td[class=h0] { height: 0 !important; }
+    p[class=footer-content-left] { text-align: center !important; }
+    #headline p { font-size: 30px !important; }
+  } 
 </style>
 
 </head>
