@@ -80,8 +80,7 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
   }
   if ($view_mode == 'raw') {
     $output = campaign_monitor_build_template($entity, $entity_type);
-    
-    $entity->content['footer'] = array(
+    $entity->content['html_markup'] = array(
       '#type' => 'markup',
       '#markup' => $output,
     );
@@ -145,7 +144,7 @@ function campaign_monitor_lists_stats($entity) {
     $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
   }
   $list_uri = entity_uri('cm_list', $entity);
-  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $entity))), $list_uri['path']);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $entity->content = array();
   

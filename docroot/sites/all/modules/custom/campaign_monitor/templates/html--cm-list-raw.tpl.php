@@ -91,9 +91,10 @@
   br, strong br, b br, em br, i br { line-height:100%; }
   p { margin-top: 0};
   h1, h2, h3, h4, h5, h6 {
-    line-height: 100% !important;
+    line-height: 125% !important;
     -webkit-font-smoothing: antialiased;
     letter-spacing: normal;
+    margin-top: 0;
   }
   h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: blue !important; }
   h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {	color: red !important; }
