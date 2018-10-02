@@ -537,7 +537,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
   if ($campaign_id) {
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
     $result = $wrap->send(array(
-      'ConfirmationEmail' => 'amarquis@exitplanning.com',
+      'ConfirmationEmail' => 'confirmations@exitplanning.com',
       'SendDate' => $schedule_date,
     ));
     if ($result->was_successful()) {
