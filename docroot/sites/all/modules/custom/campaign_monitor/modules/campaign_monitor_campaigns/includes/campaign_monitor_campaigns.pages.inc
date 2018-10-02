@@ -16,7 +16,7 @@ function campaign_monitor_campaigns_list($list, $status = 'all') {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $exclude = NULL;
   if ($status == 'sent') {
@@ -56,7 +56,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     $breadcrumb[] = l(t('Home'), '<front>');
     if ($list) {
       $list_uri = entity_uri('cm_list', $list);
-      $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+      $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
     $title = !empty($entity->subject) ? $entity->subject : 'Campaign Summary';
@@ -233,7 +233,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
   if ($view_mode == 'raw') {
     $output = campaign_monitor_build_template($entity, $entity_type);
     
-    $entity->content['footer'] = array(
+    $entity->content['html_markup'] = array(
       '#type' => 'markup',
       '#markup' => $output,
     );
@@ -247,10 +247,10 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
   $breadcrumb[] = l(t('Home'), '<front>');
   if ($list) {
     $list_uri = entity_uri('cm_list', $list);
-    $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+    $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   }
   $campaign_uri = entity_uri('cm_campaign', $entity);
-  $breadcrumb[] = l(t('Summary'), $campaign_uri['path']);
+  $breadcrumb[] = l(t('Campaign Summary'), $campaign_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $entity->campaign_id);
   $header = array();
