@@ -50,9 +50,11 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $breadcrumb[] = l(t('!client', array('!client' => $client->name)), $client_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
+    
     $items = '';
     $destination = drupal_get_destination();
     $link_attributes = array('class' => array('icon'));
+    $dashboard = '';
     if (entity_access('update', 'cm_list', $entity)) {
       $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
       $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
@@ -68,14 +70,19 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $items .= '<li><div class="panel"><h2>Statistics</h2>' . $stats_link . '</div></li>';
     }
     if (!empty($items)) {
-      $dashboard = '<div class="newsletter-dashboard"><ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul></div>';
+      $dashboard .= '<ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul>';
     }
-    else {
-      $dashboard = '';
+    if (empty($entity->manage_campaigns)) {
+      $dashboard .= '<div class="columns large-8 large-centered panel">
+      <h3>Campaign Autopilot</h3>
+      <p>Take the hassle out of creating and sending your own campaigns and let BEI do it for you! Simply setup some default settings in your
+      list and we will take care of the rest by filling it with content from our proprietary Newsletter library.</p>'
+      . l(t('Update Settings'), 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'attributes' => array('class' => array('button')))) .
+      '</div>';
     }
     $entity->content['dashboard'] = array(
       '#type' => 'markup',
-      '#markup' => $dashboard,
+      '#markup' => '<div class="newsletter-dashboard">' . $dashboard . '</div>',
     );
   }
   if ($view_mode == 'raw') {

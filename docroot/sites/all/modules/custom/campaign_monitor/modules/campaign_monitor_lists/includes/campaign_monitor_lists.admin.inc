@@ -224,6 +224,15 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   drupal_set_title($title);
   $form_state['cm_client'] = $client;
   $form_state['cm_list'] = $list;
+  $form['manage_campaigns'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Send campaigns for me'),
+    '#description' => t('By Checking this box, BEI will select a unique article from our Newsletter library and
+                        send campaigns for you bi-weekly based on a template comprised of the design elements from this list.'),
+    '#default_value' => $list->manage_campaigns,
+    '#prefix' => '<div class="panel">',
+    '#suffix' => '</div>',
+  );
   $form['tabs'] = array(
     '#type' => $tabs_type,
   );
@@ -238,14 +247,6 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     '#title' => t('List Name'),
     '#required' => TRUE,
     '#default_value' => isset($list->title) ? $list->title : '',
-  );
-  $form['tabs']['settings']['manage_campaigns'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Manage Campaigns'),
-    '#description' => t('Check this box if you prefer to create and send your own campaigns. Otherwise, BEI
-                        will select a unique article from our Newsletter library and send campaigns for you bi-weekly
-                        based on a template comprised of the design elements from this list.'),
-    '#default_value' => $list->manage_campaigns,
   );
   $form['tabs']['settings']['confirmed_opt_in'] = array(
     '#type' => 'checkbox',
@@ -286,7 +287,8 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   // Defaults tab.
   $form['tabs']['defaults'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Campaign Defaults'),
+    '#title' => t('Sender Info'),
+    '#description' => t('<div class="panel">These settings will be used for newly created campaigns.</div>', array('html' => TRUE)),
     '#weight' => $is_new ? 2 : -11,
   );
   // Only allow administrators to set author.
@@ -429,7 +431,9 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     // Design tab.
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Campaign Template'),
+      '#title' => t('Branding'),
+      '#description' => t('<div class="panel">These settings serve as a template for the default branding options, supplemental
+                          content and social media sharing widgets for newly created campaigns.</div>', array('html' => TRUE)),
       '#weight' => -10,
     );
     $form['tabs']['design']['background_color'] = array(
