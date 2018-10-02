@@ -585,54 +585,6 @@ function campaign_monitor_build_template($entity, $entity_type) {
   $list = $entity_type == 'cm_list' ? $entity : cm_list_load($entity->lid);
   $address = $list->address;
   $rows = array();
-  // Top bar row.
-  $top_bar_table = '
-  <table id="top-bar" class="w600" width="600" cellspacing="0" cellpadding="0" border="0"><tbody>
-    <tr>
-      <td class="w15" width="15"></td>
-      <td class="w340" width="340" valign="middle" align="left">
-          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
-            <tr><td class="w340" width="340" height="8"></td></tr>
-          </tbody></table>
-          <div class="header-content"><webversion>Web version</webversion><span class="hide">&nbsp;&nbsp;|&nbsp; <preferences>Update preferences</preferences>&nbsp;&nbsp;|&nbsp; <unsubscribe>Unsubscribe</unsubscribe></span></div>
-          <table class="w340" width="340" cellspacing="0" cellpadding="0" border="0"><tbody>
-            <tr><td class="w340" width="340" height="8"></td></tr>
-          </tbody></table>
-      </td>
-      <td class="w230" width="230" valign="middle" align="right">
-        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
-          <tr><td class="w230" width="230" height="8"></td></tr>
-        </tbody></table>
-        <table cellspacing="0" cellpadding="0" border="0"><tbody>
-          <tr>
-            <td valign="middle"><fblike><img src="https://img.createsend1.com/img/templatebuilder/like-glyph.png" alt="Facebook icon" =""="" width="8" height="14" border="0"></fblike></td>
-            <td width="3"></td>
-            <td valign="middle"><div class="header-content"><fblike>Like</fblike></div></td>
-            <td class="w10" width="10"></td>
-            <td valign="middle"><tweet><img src="https://img.createsend1.com/img/templatebuilder/tweet-glyph.png" alt="Twitter icon" =""="" width="17" height="13" border="0"></tweet></td>
-            <td width="3"></td>
-            <td valign="middle"><div class="header-content"><tweet>Tweet</tweet></div></td>
-            <td class="w10" width="10"></td>
-            <td valign="middle"><forwardtoafriend><img src="https://img.createsend1.com/img/templatebuilder/forward-glyph.png" alt="Forward icon" =""="" width="19" height="14" border="0"></forwardtoafriend></td>
-            <td width="3"></td>
-            <td valign="middle"><div class="header-content"><forwardtoafriend>Forward</forwardtoafriend></div></td>
-          </tr>
-        </tbody></table>
-        <table class="w230" width="230" cellspacing="0" cellpadding="0" border="0"><tbody>
-          <tr><td class="w230" width="230" height="8"></td></tr>
-        </tbody></table>
-      </td>
-      <td class="w15" width="15"></td>
-    </tr>
-  </tbody></table>
-  ';
-  /*
-  $rows[] = array(
-    'data' => array(
-      array('data' => $top_bar_table, 'class' => 'w600', 'width' => '600'),
-    ),
-    'no_striping' => TRUE,
-  );*/
   // Logo region.
   if ($entity->logo_region_status) {
     $logo = field_get_items($entity_type, $entity, 'field_mc_logo');
