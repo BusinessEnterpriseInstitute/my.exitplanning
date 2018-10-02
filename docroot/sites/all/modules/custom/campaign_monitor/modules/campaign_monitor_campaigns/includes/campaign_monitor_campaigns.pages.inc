@@ -242,6 +242,16 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
 }
 
 function campaign_monitor_campaigns_stats($entity, $type = NULL) {
+  $list = cm_list_load($entity->lid);
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  if ($list) {
+    $list_uri = entity_uri('cm_list', $list);
+    $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+  }
+  $campaign_uri = entity_uri('cm_campaign', $entity);
+  $breadcrumb[] = l(t('Summary'), $campaign_uri['path']);
+  drupal_set_breadcrumb($breadcrumb);
   $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $entity->campaign_id);
   $header = array();
   $rows = array();
