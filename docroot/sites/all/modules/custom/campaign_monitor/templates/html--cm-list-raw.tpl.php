@@ -60,7 +60,10 @@
   #outlook a { padding: 0; } /* Force Outlook to provide a "view in browser" button. */
   body { width: 100% !important; }
   .ReadMsgBody { width: 100%; }
-  .ExternalClass { width: 100%; display:block !important; } /* Force Hotmail to display emails at full width */
+  .ExternalClass {
+    width: 100%;
+    display:block !important;
+  } /* Force Hotmail to display emails at full width */
   .ExternalClass,
   .ExternalClass p,
   .ExternalClass span,
@@ -97,15 +100,22 @@
     margin-top: 0;
   }
   h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: blue !important; }
-  h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {	color: red !important; }
+  h1 a:active, h2 a:active,  h3 a:active, h4 a:active, h5 a:active, h6 a:active {
+    color: red !important;
+  }
   /* Preferably not the same color as the normal header link color.  There is limited support for psuedo classes in email clients, this was added just for good measure. */
-  h1 a:visited, h2 a:visited,  h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited { color: purple !important; }
+  h1 a:visited, h2 a:visited,  h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
+    color: purple !important;
+  }
   /* Preferably not the same color as the normal header link color. There is limited support for psuedo classes in email clients, this was added just for good measure. */  
   table {
     border-collapse: collapse !important;
   }
   .yshortcuts, .yshortcuts a, .yshortcuts a:link,.yshortcuts a:visited, .yshortcuts a:hover, .yshortcuts a span {
-  color: black; text-decoration: none !important; border-bottom: none !important; background: none !important;
+    color: black;
+    text-decoration: none !important;
+    border-bottom: none !important;
+    background: none !important;
   } /* Body text color for the New Yahoo.  This example sets the font of Yahoo's Shortcuts to black. */
   /* This most probably won't work in all email clients. Don't include <code _tmplitem="277" > blocks in email. */
   code {
