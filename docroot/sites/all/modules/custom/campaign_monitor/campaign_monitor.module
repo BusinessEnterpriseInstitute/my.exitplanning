@@ -829,21 +829,23 @@ function campaign_monitor_build_template($entity, $entity_type) {
   $share_widgets = $list->footer_region['share_widgets'];
   $share_links = array();
   if (!empty($share_widgets['facebook'])) {
+    $facebook = '<img src="' . $GLOBALS['base_url'] . '/sites/default/files/cm_icons/facebook.png" width="32" height="32">';
     if ($share_widgets['facebook_type'] == 'email') {
-      $share_links[] = '<fblike>Facebook</fblike>';
+      $share_links[] = '<fblike>' . $facebook . '</fblike>';
     }
     elseif ($share_widgets['facebook_type'] == 'url' && !empty($share_widgets['facebook_url'])) {
-      $share_links[] = '<fblike likeurl="' . $share_widgets['facebook_url'] . '">Facebook</fblike>';
+      $share_links[] = '<fblike likeurl="' . $share_widgets['facebook_url'] . '">' . $facebook . '</fblike>';
     }
   }
   if (!empty($share_widgets['linkedin'])) {
-    $share_links[] = '<linkedinshare>LinkedIn</linkedinshare>';
+    $share_links[] = '<linkedinshare><img src="' . $GLOBALS['base_url'] . '/sites/default/files/cm_icons/linkedin.png" width="32" height="32"></linkedinshare>';
   }
   if (!empty($share_widgets['twitter'])) {
-    $share_links[] = !empty($share_widgets['twitter_handle']) ? '<tweet via="' . $share_widgets['twitter_handle'] . '">Twitter</tweet>' : '<tweet>Twitter</tweet>';
+    $twitter = '<img src="' . $GLOBALS['base_url'] . '/sites/default/files/cm_icons/twitter.png" width="32" height="32">';
+    $share_links[] = !empty($share_widgets['twitter_handle']) ? '<tweet via="' . $share_widgets['twitter_handle'] . '">' . $twitter . '</tweet>' : '<tweet>' . $twitter . '</tweet>';
   }
   if (!empty($share_widgets['forward'])) {
-    $share_links[] = '<forwardtoafriend>Forward</forwardtoafriend>';
+    $share_links[] = '<forwardtoafriend><img src="' . $GLOBALS['base_url'] . '/sites/default/files/cm_icons/mail.png" width="32" height="32"></forwardtoafriend>';
   }
   if (!empty($share_links)) {
     $footer_output .= '<p id="share-links">' . implode(' ', $share_links) . '</p>';
