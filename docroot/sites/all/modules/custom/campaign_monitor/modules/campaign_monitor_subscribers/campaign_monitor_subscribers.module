@@ -69,7 +69,7 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'weight' => -8,
   );*/
-  $items['cm-list/%cm_list/subscribers/add'] = array(
+  $items['cm-list/%cm_list/add-subscriber'] = array(
     'title' => 'Create Subscriber',
     'description' => 'Add subscriber to Campaign Monitor.',
     'page callback' => 'drupal_get_form',
@@ -80,6 +80,7 @@ function campaign_monitor_subscribers_menu() {
     'type' => MENU_LOCAL_ACTION,
   );
   // Subscribers
+  /*
   $items['cm-subscriber/%cm_subscriber'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'List',
@@ -115,7 +116,7 @@ function campaign_monitor_subscribers_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'weight' => -8,
-  );
+  );*/
 
   return $items;
 }
