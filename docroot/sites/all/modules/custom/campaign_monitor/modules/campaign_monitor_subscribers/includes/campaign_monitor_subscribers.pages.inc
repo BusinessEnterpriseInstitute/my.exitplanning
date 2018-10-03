@@ -33,9 +33,10 @@ function campaign_monitor_subscribers_cm_subscriber_view($entity, $view_mode = '
     $list = cm_list_load($entity->lid);
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), '<front>');
+    $breadcrumb[] = l(t('My Newsletter', 'member/newsletter'));
     if ($list) {
       $list_uri = entity_uri('cm_list', $list);
-      $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+      $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
     }
     drupal_set_breadcrumb($breadcrumb);
   }
@@ -47,8 +48,9 @@ function campaign_monitor_subscribers_cm_subscriber_view($entity, $view_mode = '
 function campaign_monitor_subscribers_list($list, $status = 'active') {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $title = 'Subscribers';
   $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
