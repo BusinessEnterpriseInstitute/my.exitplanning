@@ -1139,7 +1139,6 @@ function campaign_monitor_lists_migrate_form_submit($form, &$form_state) {
   $list = $form_state['cm_list'];
   $node = node_load($form_state['values']['mailchimp_list']);
   $author = user_load($list->uid);
-  $node_manage_campaigns = field_get_items('node', $node, 'field_campaign_management');
   $node_email_bg_color = field_get_items('node', $node, 'field_mc_color_email_bg');
   $node_logo_bg_color = field_get_items('node', $node, 'field_mc_color_primary');
   $user_disclaimer = field_get_items('user', $author, 'field_mc_disclaimer');
@@ -1147,9 +1146,6 @@ function campaign_monitor_lists_migrate_form_submit($form, &$form_state) {
   $list->from_name = $node->from_name;
   $list->from_email = $node->from_email;
   $list->reply_to = $node->from_email;
-  if ($node_manage_campaigns) {
-    $list->manage_campaigns = $node_manage_campaigns[0]['value'];
-  }
   if ($node_email_bg_color) {
     $list->background_color = $node_email_bg_color[0]['rgb'];
   }
