@@ -16,12 +16,12 @@ function campaign_monitor_campaigns_menu() {
     'weight' => -8,
   );
   $items['cm-list/%cm_list/campaigns/drafts'] = array(
-    'title' => 'Campaign Drafts',
+    'title' => 'Drafts',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
   $items['cm-list/%cm_list/campaigns/sent'] = array(
-    'title' => 'Campaigns Sent',
+    'title' => 'Scheduled/Sent',
     'page callback' => 'campaign_monitor_campaigns_list',
     'page arguments' => array(1, 3),
     'access callback' => 'entity_access',

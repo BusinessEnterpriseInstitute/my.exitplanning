@@ -20,14 +20,25 @@ function campaign_monitor_campaigns_list($list, $status = 'all') {
   $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $exclude = NULL;
+  $help_text = '<div class="panel callout">';
   if ($status == 'sent') {
     $status = 3;
-    drupal_set_title('Campaigns Sent');
+    drupal_set_title('Scheduled/Sent Campaigns');
+    $help_text .= 'These are campaigns that have been sent or are scheduled to be sent.';
   }
   else {
+    drupal_set_title('Draft Campaigns');
+    $help_text .= '
+    <p>These are campaigns that you can customize until you are ready to schedule or send them.</p>
+    <ol>
+      <li>Build your campaign here and click Finish.</li>
+      <li>Schedule or send your campaign.</li>
+    </ol>
+    ';
     $exclude = 3;
   }
-  $output = views_embed_view('campaign_monitor_campaigns', 'default', $list->id, $status, $exclude);
+  $help_text .= '</div>';
+  $output = $help_text . views_embed_view('campaign_monitor_campaigns', 'default', $list->id, $status, $exclude);
   return $output;
 }
 
