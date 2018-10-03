@@ -45,7 +45,7 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     $client = cm_client_load($entity->cid);
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), '<front>');
-    if ($client) {
+    if ($client && entity_access('view', 'cm_client', $client)) {
       $client_uri = entity_uri('cm_client', $client);
       $breadcrumb[] = l(t('!client', array('!client' => $client->name)), $client_uri['path']);
     }
