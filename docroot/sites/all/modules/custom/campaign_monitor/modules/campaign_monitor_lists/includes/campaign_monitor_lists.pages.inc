@@ -56,6 +56,14 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     $link_attributes = array('class' => array('icon'));
     $dashboard = '';
     if (entity_access('update', 'cm_list', $entity)) {
+      $change_settings = l(t('Change Settings'), 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination));
+      if (empty($entity->manage_campaigns)) {
+        $automate = 'BEI is <strong><u>not</u></strong> building your brand through automated marketing content! Let us help! ' . $change_settings;
+      }
+      else {
+        $automate = 'BEI is building your brand by sending high-quality automated marketing content to this list! ' . $change_settings;
+      }
+      $dashboard .= '<p class="panel callout">' . $automate . '</p>';
       $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
       $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
       if (module_exists('campaign_monitor_subscribers')) {
@@ -71,14 +79,6 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     }
     if (!empty($items)) {
       $dashboard .= '<ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul>';
-    }
-    if (empty($entity->manage_campaigns)) {
-      $dashboard .= '<div class="columns large-8 large-centered panel">
-      <h3>Campaign Autopilot</h3>
-      <p>Take the hassle out of creating and sending your own campaigns and let BEI do it for you! Simply setup some default settings in your
-      list and we will take care of the rest by filling it with content from our proprietary Newsletter library.</p>'
-      . l(t('Update Settings'), 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'attributes' => array('class' => array('button')))) .
-      '</div>';
     }
     $entity->content['dashboard'] = array(
       '#type' => 'markup',
