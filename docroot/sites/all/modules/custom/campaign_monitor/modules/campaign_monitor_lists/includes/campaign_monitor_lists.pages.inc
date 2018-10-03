@@ -15,6 +15,7 @@
 function campaign_monitor_lists_list($client) {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   $client_uri = entity_uri('cm_client', $client);
   $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
@@ -45,15 +46,24 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     $client = cm_client_load($entity->cid);
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), '<front>');
-    if ($client) {
-      $client_uri = entity_uri('cm_client', $client);
-      $breadcrumb[] = l(t('!client', array('!client' => $client->name)), $client_uri['path']);
-    }
+    $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
     drupal_set_breadcrumb($breadcrumb);
+    
     $items = '';
     $destination = drupal_get_destination();
     $link_attributes = array('class' => array('icon'));
+    $dashboard = '';
     if (entity_access('update', 'cm_list', $entity)) {
+      $change_settings = l(t('Change Settings'), 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination));
+      if (empty($entity->manage_campaigns)) {
+        $automate_class = 'warning';
+        $automate = 'BEI is <strong><u>not</u></strong> building your brand through automated marketing content! Let us help! ' . $change_settings;
+      }
+      else {
+        $automate_class = 'success';
+        $automate = 'BEI is building your brand by sending high-quality automated marketing content to this list! ' . $change_settings;
+      }
+      $dashboard .= '<p class="panel callout ' . $automate_class . '">' . $automate . '</p>';
       $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
       $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
       if (module_exists('campaign_monitor_subscribers')) {
@@ -68,14 +78,11 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $items .= '<li><div class="panel"><h2>Statistics</h2>' . $stats_link . '</div></li>';
     }
     if (!empty($items)) {
-      $dashboard = '<div class="newsletter-dashboard"><ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul></div>';
-    }
-    else {
-      $dashboard = '';
+      $dashboard .= '<ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul>';
     }
     $entity->content['dashboard'] = array(
       '#type' => 'markup',
-      '#markup' => $dashboard,
+      '#markup' => '<div class="newsletter-dashboard">' . $dashboard . '</div>',
     );
   }
   if ($view_mode == 'raw') {
@@ -94,12 +101,8 @@ function campaign_monitor_lists_webhooks($list) {
   $client = cm_client_load($list->cid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
-  if ($client) {
-    $client_uri = entity_uri('cm_client', $client);
-    $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
-  }
   $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('!list', array('!list' => entity_label('cm_list', $list))), $list_uri['path']);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
   $webhooks = db_query('SELECT * FROM {campaign_monitor_list_webhooks} w WHERE w.lid = :lid', array(':lid' => entity_id('cm_list', $list)))->fetchAll();
   $header = array(t('URL'), t('Events'), t('Status'), t('Operations'));
@@ -139,10 +142,7 @@ function campaign_monitor_lists_stats($entity) {
   $client = cm_client_load($entity->cid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
-  if ($client) {
-    $client_uri = entity_uri('cm_client', $client);
-    $breadcrumb[] = l(t('!client', array('!client' => entity_label('cm_client', $client))), $client_uri['path']);
-  }
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   $list_uri = entity_uri('cm_list', $entity);
   $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);

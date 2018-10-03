@@ -226,9 +226,11 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   $form_state['cm_list'] = $list;
   $form['manage_campaigns'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Send campaigns for me'),
-    '#description' => t('By Checking this box, BEI will select a unique article from our Newsletter library and
-                        send campaigns for you bi-weekly based on a template comprised of the design elements from this list.'),
+    '#title' => t('Automate My Marketing'),
+    '#description' => t('Check the box if you want BEI to send newsletters/articles for you.
+                        If checked, BEI will automatically send your newsletter/article to your
+                        list of subscribers with your branding on the first and third Tuesday of each month.
+                        Regardless of whether you automate, you can always send your own campaigns from the Campaigns area.'),
     '#default_value' => $list->manage_campaigns,
     '#prefix' => '<div class="panel">',
     '#suffix' => '</div>',
@@ -240,6 +242,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   $form['tabs']['settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('List Settings'),
+    '#description' => t('<div class="panel callout">Control your list name and settings.</div>', array('html' => TRUE)),
     '#weight' => 1,
   );
   $form['tabs']['settings']['title'] = array(
@@ -287,8 +290,9 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   // Defaults tab.
   $form['tabs']['defaults'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Sender Info'),
-    '#description' => t('<div class="panel">These settings will be used for newly created campaigns.</div>', array('html' => TRUE)),
+    '#title' => t('Content Defaults'),
+    '#description' => t('<div class="panel callout">These defaults are used in all automated campaigns and can be changed for one-time
+                        campaigns that you create in the Campaigns area.</div>', array('html' => TRUE)),
     '#weight' => $is_new ? 2 : -11,
   );
   // Only allow administrators to set author.
@@ -431,9 +435,10 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     // Design tab.
     $form['tabs']['design'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Branding'),
-      '#description' => t('<div class="panel">These settings serve as a template for the default branding options, supplemental
-                          content and social media sharing widgets for newly created campaigns.</div>', array('html' => TRUE)),
+      '#title' => t('Design Defaults'),
+      '#description' => t('<div class="panel callout">These defaults control your design elements in automated
+                          campaigns and can be changed for one-time campaigns that you create in the
+                          Campaigns area.</div>', array('html' => TRUE)),
       '#weight' => -10,
     );
     $form['tabs']['design']['background_color'] = array(
@@ -1134,7 +1139,6 @@ function campaign_monitor_lists_migrate_form_submit($form, &$form_state) {
   $list = $form_state['cm_list'];
   $node = node_load($form_state['values']['mailchimp_list']);
   $author = user_load($list->uid);
-  $node_manage_campaigns = field_get_items('node', $node, 'field_campaign_management');
   $node_email_bg_color = field_get_items('node', $node, 'field_mc_color_email_bg');
   $node_logo_bg_color = field_get_items('node', $node, 'field_mc_color_primary');
   $user_disclaimer = field_get_items('user', $author, 'field_mc_disclaimer');
@@ -1142,9 +1146,6 @@ function campaign_monitor_lists_migrate_form_submit($form, &$form_state) {
   $list->from_name = $node->from_name;
   $list->from_email = $node->from_email;
   $list->reply_to = $node->from_email;
-  if ($node_manage_campaigns) {
-    $list->manage_campaigns = $node_manage_campaigns[0]['value'];
-  }
   if ($node_email_bg_color) {
     $list->background_color = $node_email_bg_color[0]['rgb'];
   }

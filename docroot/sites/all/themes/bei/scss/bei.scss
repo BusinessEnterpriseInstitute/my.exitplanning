@@ -67,7 +67,7 @@
 @import "../../zurb_foundation/scss/foundation/components/side-nav";
 @import "../../zurb_foundation/scss/foundation/components/split-buttons";
 @import "../../zurb_foundation/scss/foundation/components/sub-nav";
-//@import "../../zurb_foundation/scss/foundation/components/switches";
+@import "../../zurb_foundation/scss/foundation/components/switches";
 @import "../../zurb_foundation/scss/foundation/components/tables";
 @import "../../zurb_foundation/scss/foundation/components/tabs";
 @import "../../zurb_foundation/scss/foundation/components/thumbs";
@@ -473,6 +473,26 @@ ul.breadcrumbs {
 // Messages
 .alert-box {
   margin: 1.25rem 0;
+}
+// Panels
+.panel.callout {
+  &.success,
+  &.warning {
+    padding-left: 60px;
+    background-position: 20px 50%;
+    background-repeat: no-repeat;
+  }
+  &.success {
+    background-image: url(/misc/message-24-ok.png);
+    background-color: #f8fff0;
+    border-color: #bbee77;
+  }
+  &.warning {
+    background-image: url(/misc/message-24-warning.png);
+    background-color: #fffce5;
+    border-color: #EEDD55;
+    color: #884400;
+  }
 }
 // Book
 .book-navigation {
