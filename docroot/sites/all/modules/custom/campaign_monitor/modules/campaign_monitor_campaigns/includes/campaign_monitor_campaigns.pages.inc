@@ -15,6 +15,7 @@
 function campaign_monitor_campaigns_list($list, $status = 'all') {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   $list_uri = entity_uri('cm_list', $list);
   $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
@@ -54,6 +55,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
     $list = cm_list_load($entity->lid);
     $breadcrumb = array();
     $breadcrumb[] = l(t('Home'), '<front>');
+    $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
     if ($list) {
       $list_uri = entity_uri('cm_list', $list);
       $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
@@ -245,6 +247,7 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
   $list = cm_list_load($entity->lid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   if ($list) {
     $list_uri = entity_uri('cm_list', $list);
     $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
