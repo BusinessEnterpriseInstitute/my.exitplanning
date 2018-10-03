@@ -500,12 +500,16 @@ function cm_campaign_send_form_submit($form, &$form_state) {
   $values = $form_state['values'];
   $send_option = $values['send_options'];
   $campaign_id = !empty($campaign->campaign_id) ? $campaign->campaign_id : NULL;
+  // Scheduled date.
   if ($send_option == 2) {
     $date = new DateTime($values['send_date'], new DateTimeZone('America/Denver'));
     $schedule_date = $date->format('Y-m-d H:i');
+    $message = t('Your campaign has been scheduled!');
   }
+  // Send immediately.
   else {
     $schedule_date = 'Immediately';
+    $message = t('Your campaign has been sent!');
   }
   // First create a draft campaign.
   if (!$campaign_id) {
@@ -534,7 +538,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
       }
     }
   }
-  if ($campaign_id) {
+  else {
     $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
     $result = $wrap->send(array(
       'ConfirmationEmail' => 'confirmations@exitplanning.com',
@@ -544,6 +548,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
       $campaign->campaign_status = 3;
       $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
       $campaign->save();
+      drupal_set_message($message);
     }
     else {
       // Check for list size approval error which is code 334.
