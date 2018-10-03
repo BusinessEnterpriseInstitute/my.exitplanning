@@ -84,27 +84,38 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
       t('Reads e-mail with')
     );
     $result = NULL;
+    $help_text = '';
     switch ($status) {
       case 'active':
         $title = 'Active Subscribers';
         $result = $wrap->get_active_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        $help_text = t('E-mails sent to your subscriber list are only sent to active subscribers on the list.');
         break;
       case 'unconfirmed':
         $title = 'Unconfirmed Subscribers';
         $result = $wrap->get_unconfirmed_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        $help_text = t('These are people who subscribed to a confirmed opt-in list but have not clicked the link in the verification email sent to them.');
         break;
       case 'unsubscribed':
         $title = 'Unsubscribed Subscribers';
         $result = $wrap->get_unsubscribed_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        $help_text = t('These are people who have either opted out via an unsubscribe link, or form, or their status has been changed to unsubscribed through your account.');
         break;
       case 'bounced':
         $title = 'Bounced Subscribers';
         $result = $wrap->get_bounced_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        $help_text = t('These are email addresses that have hard bounced, meaning we cannot deliver emails to them. Hard bounces are automatically removed from your list so
+                       you don\'t send to them again, and are also added to a suppression list to prevent them from being accidentally re-added.');
         break;
       case 'deleted':
         $title = 'Deleted Subscribers';
         $result = $wrap->get_deleted_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
+        $help_text = t('You will only see subscribers with this status if they have been deleted from the list through your account or were imported from a previous
+                       newsletter platform with the same status.');
         break;
+    }
+    if (!empty($help_text)) {
+      $help_text = '<p class="panel callout">' . $help_text . '</p>';
     }
     if ($result) {
       if ($result->was_successful()) {
@@ -148,5 +159,5 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
 
   $output = $view->preview();*/
   
-  return $table . $pager;
+  return $help_text . $table . $pager;
 }
