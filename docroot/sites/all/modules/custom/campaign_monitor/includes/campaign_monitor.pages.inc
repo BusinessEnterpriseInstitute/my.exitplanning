@@ -101,12 +101,12 @@ function campaign_monitor_client_view_lists($entity, $view_mode = 'full') {
 
 function campaign_monitor_cm_client_session_view($client) {
   $integrator_id = variable_get('campaign_monitor_integrator_id', '');
-  $cm = campaign_monitor_get_api_object();
+  $wrap = campaign_monitor_get_api_object();
   $session_url = NULL;
   $error = '';
   $output = '';
-  if ($cm) {
-    $result = $cm->external_session_url(array(
+  if ($wrap) {
+    $result = $wrap->external_session_url(array(
       'Email' => 'amarquis@exitplanning.com',
       'Chrome' => 'Tabs',
       'Url' => '/subscribers',

@@ -291,8 +291,7 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
   $form['tabs']['defaults'] = array(
     '#type' => 'fieldset',
     '#title' => t('Content Defaults'),
-    '#description' => t('<div class="panel callout">These defaults are used in all automated campaigns and can be changed for one-time
-                        campaigns that you create in the Campaigns area.</div>', array('html' => TRUE)),
+    '#description' => t('<div class="panel callout">These defaults are used in all automated campaigns.</div>', array('html' => TRUE)),
     '#weight' => $is_new ? 2 : -11,
   );
   // Only allow administrators to set author.
@@ -762,39 +761,37 @@ function cm_list_form_submit(&$form, &$form_state) {
       ));
       if ($result->was_successful()) {
         $id = $result->response;
-        $list_wrap = campaign_monitor_get_api_object('CS_REST_Lists', $id);
-        if ($list_wrap) {
-          $list->manage_campaigns = $values['manage_campaigns'];
-          $list->list_id = $id;
-          $list->title = $values['title'];
-          $list->confirmed_opt_in = $values['confirmed_opt_in'];
-          $list->unsubscribe_page = $values['unsubscribe_page'];
-          $list->unsubscribe_setting = $values['unsubscribe_setting'];
-          $list->confirmation_success_page = '';
-          //field_attach_submit('cm_list', $list, $form, $form_state);
-          $list->save();
-          // Now create the webhook.
-          $webhook_settings = array(
-            'Events' => array(CS_REST_LIST_WEBHOOK_SUBSCRIBE, CS_REST_LIST_WEBHOOK_DEACTIVATE, CS_REST_LIST_WEBHOOK_UPDATE),
-            'Url' => campaign_monitor_webhook_url(),
-            'PayLoadFormat' => CS_REST_WEBHOOK_FORMAT_JSON,
-          );
-          $webhook_create = $list_wrap->create_webhook($webhook_settings);
-          if ($webhook_create->was_successful()) {
-            $webhook_entity = entity_create('cm_webhook', array(
-              'lid' => entity_id('cm_list', $list),
-              'webhook_id' => $webhook_create->response,
-              'url' => campaign_monitor_webhook_url(),
-              'status' => 'Active',
-              'events' => $webhook_settings['Events'],
-              'payload_format' => CS_REST_WEBHOOK_FORMAT_JSON,
-            ));
-            $webhook_entity->save();
-          }
-          $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/edit';
-          $message = t('Added new list %title to Campaign Monitor', array('%title' => $values['title']));
-          drupal_set_message($message);
-        }
+        $list->manage_campaigns = $values['manage_campaigns'];
+        $list->list_id = $id;
+        $list->title = $values['title'];
+        $list->confirmed_opt_in = $values['confirmed_opt_in'];
+        $list->unsubscribe_page = $values['unsubscribe_page'];
+        $list->unsubscribe_setting = $values['unsubscribe_setting'];
+        $list->confirmation_success_page = '';
+        //field_attach_submit('cm_list', $list, $form, $form_state);
+        $list->save();
+        /*
+        // Now create the webhook.
+        $webhook_settings = array(
+          'Events' => array(CS_REST_LIST_WEBHOOK_SUBSCRIBE, CS_REST_LIST_WEBHOOK_DEACTIVATE, CS_REST_LIST_WEBHOOK_UPDATE),
+          'Url' => campaign_monitor_webhook_url(),
+          'PayLoadFormat' => CS_REST_WEBHOOK_FORMAT_JSON,
+        );
+        $webhook_create = $list_wrap->create_webhook($webhook_settings);
+        if ($webhook_create->was_successful()) {
+          $webhook_entity = entity_create('cm_webhook', array(
+            'lid' => entity_id('cm_list', $list),
+            'webhook_id' => $webhook_create->response,
+            'url' => campaign_monitor_webhook_url(),
+            'status' => 'Active',
+            'events' => $webhook_settings['Events'],
+            'payload_format' => CS_REST_WEBHOOK_FORMAT_JSON,
+          ));
+          $webhook_entity->save();
+        }*/
+        $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/edit';
+        $message = t('Added new list %title to Campaign Monitor', array('%title' => $values['title']));
+        drupal_set_message($message);
       }
       else {
         $error = $result->response->Message;
