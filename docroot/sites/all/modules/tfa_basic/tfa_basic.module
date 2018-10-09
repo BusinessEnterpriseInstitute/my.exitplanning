@@ -566,7 +566,6 @@ function tfa_basic_form_tfa_admin_settings_alter(&$form, &$form_state, $form_id)
   if ($twilio_available) {
     $sms_states = array(
       'visible' => array(
-        ':input[name="tfa_enabled"]' => array('checked' => TRUE),
         array(
           array(':input[name="tfa_fallback[tfa_basic_sms][enable]"]' => array('checked' => TRUE)),
           'or',
@@ -652,7 +651,6 @@ function tfa_basic_form_tfa_admin_settings_alter(&$form, &$form_state, $form_id)
     '#description' => t('Text to display on help page. Plain text only.'),
     '#states' => array(
       'visible' => array(
-        ':input[name="tfa_enabled"]' => array('checked' => TRUE),
         array(
           array(':input[name="tfa_fallback[tfa_basic_help][enable]"]' => array('checked' => TRUE)),
           'or',
