@@ -68,7 +68,6 @@ function bei_list_node_insert($node) {
         'mc_data' => isset($node->mc_data) ? serialize($node->mc_data) : NULL,
      ))
      ->execute();
-     //bei_list_add_list($node);
   }
 }
 
@@ -103,52 +102,6 @@ function bei_list_node_update($node) {
        ->execute();
     }
   }
-}
-
-function bei_list_add_list($node) {
-   /* @var \Mailchimp\MailchimpLists $mc_lists */
-   $mc_lists = mailchimp_get_api_object('MailchimpLists');
-   try {
-     if (!$mc_lists) {
-       throw new MailchimpException('Cannot create a list without Mailchimp API. Check API key has been entered.');
-     }
-     $contact = array(
-       'company' => 'ABC Company',
-       'address1' => '2000 S. Colorado Blvd.',
-       'address2' => 'Suite 460',
-       'city' => 'Denver',
-       'state' => 'CO',
-       'zip' => '80012',
-       'country' => 'US',
-       'phone' => '',
-     );
-     // Build options.
-     $campaign_defaults = array(
-       'subject' => 'Subject',
-       'from_name' => 'Andy',
-       'from_email' => 'amarquis@exitplanning.com',
-       'language' => 'en',
-     );
-     $result = $mc_lists->addList($node->title, $contact, $campaign_defaults);
-
-     if (!empty($result->id)) {
-      db_update('bei_list')
-      ->fields(array(
-         'list_id' => $result->id,
-      ))
-      ->condition('nid', $node->nid)
-      ->execute();
-     }
-   }
-   catch (Exception $e) {
-     drupal_set_message($e->getMessage(), 'error');
-     watchdog('bei_list', 'An error occurred while creating this list: %message', array(
-       '%message' => $e->getMessage(),
-       ), WATCHDOG_ERROR);
-     return NULL;
-   }
-   drupal_set_message('Created a list and sent it to mailchimp.');
-   watchdog('bei_list', t('A new list !title added', array('!title' => $node->title)));
 }
 
 /**
@@ -234,73 +187,6 @@ function bei_list_field_extra_fields() {
     )
   );
   return $extra;
-}
-
-/**
- * Batch processor function that will create lists if they do not exist.
- *
- * @see bei_list_batch_form_submit()
- */
-function bei_list_batch_processing($lists) {
-  foreach ($lists as $list) {
-    $query = 'SELECT l.nid FROM {bei_list} l ' .
-           'WHERE l.list_id = :lid';
-    $nid = db_query($query, array(':lid' => $list->id))->fetchField();
-    // An array of events the webhook will respond to.
-    $events = array(
-      'subscribe' => TRUE,
-      'unsubscribe' => TRUE,
-      'profile' => TRUE,
-      'cleaned' => TRUE,
-      'upemail' => TRUE,
-      'campaign' => TRUE,
-    );
-    // An array of sources the webhook will respond to.
-    $sources = array(
-      'user' => TRUE,
-      'admin' => TRUE,
-      'api' => FALSE,
-    );
-    $url = bei_list_webhook_url();
-    global $base_url;
-    if (empty($nid)) {
-      // The node doesn't exist. We should create it.
-      $node = new stdClass();
-      $node->type = 'subscriber_list';
-      node_object_prepare($node);
-      $node->title = $list->name;
-      $node->language = LANGUAGE_NONE;
-      $node->list_id = $list->id;
-      $node->from_name = $list->campaign_defaults->from_name;
-      $node->from_email = $list->campaign_defaults->from_email;
-      $node->subject = $list->campaign_defaults->subject;
-      // Save the node!
-      node_save($node);
-      // Add our webhook back to mailchimp for the new list.
-      mailchimp_webhook_add($list->id, $url, $events, $sources);
-    }
-    else {
-      $node = node_load($nid);
-      if ($node->from_email !== $list->campaign_defaults->from_email) {
-        $current_email = $node->from_email;
-        $new_email = $list->campaign_defaults->from_email;
-        $node->from_email = $new_email;
-        node_save($node);
-        watchdog('bei_list', 'Updated email @old_email to @new_email for list node @nid.', array(
-          '@old_email' => $current_email,
-          '@new_email' => $new_email,
-          '@nid' => $node->nid,
-        ), WATCHDOG_INFO);
-      }
-    }
-  }
-}
-
-/**
- * Batch complete function.
- */
-function bei_list_batch_finished() {
-  drupal_set_message(t('List syncing finished.'));
 }
 
 /**
