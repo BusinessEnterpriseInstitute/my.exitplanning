@@ -251,6 +251,17 @@ function cm_list_form($form, &$form_state, $list = NULL, $client = NULL) {
     '#required' => TRUE,
     '#default_value' => isset($list->title) ? $list->title : '',
   );
+  $form['tabs']['settings']['subscribe_link'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subscribe Link'),
+    '#maxlength' => 128,
+    '#default_value' => $list->subscribe_link,
+    '#element_validate' => array('campaign_monitor_url_validate'),
+    '#attributes' => array(
+      'placeholder' => 'http://',
+    ),
+    '#access' => $is_administrator,
+  );
   $form['tabs']['settings']['confirmed_opt_in'] = array(
     '#type' => 'checkbox',
     '#title' => t('Confirmed opt in'),
@@ -837,6 +848,9 @@ function cm_list_form_submit(&$form, &$form_state) {
         $list->disclaimer_text = $values['disclaimer_text']['value'];
         $list->address = $values['address'];
         $list->footer_region = $values['footer_region'];
+        if (isset($values['subscribe_link'])) {
+          $list->subscribe_link = $values['subscribe_link'];
+        }
         field_attach_submit('cm_list', $list, $form, $form_state);
         $list->save();
         $message = t('Updated list %title on Campaign Monitor', array('%title' => $values['title']));

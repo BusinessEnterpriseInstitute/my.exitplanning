@@ -185,6 +185,12 @@ function campaign_monitor_lists_schema() {
         'not null' => FALSE, 
         'description' => 'Stores promotional text.',
       ),
+      'subscribe_link' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'description' => 'The URL of the list subscribe form.',
+        'default' => '',
+      ),
       'created' => array(
         'description' => 'The Unix timestamp when the list was created.',
         'type' => 'int',
@@ -259,4 +265,16 @@ function campaign_monitor_lists_schema() {
     ),
   );
   return $schema;
+}
+/**
+ * Create subscribe link field.
+ */
+function campaign_monitor_lists_update_7001() {
+  $field = array(
+    'type' => 'varchar',
+    'length' => 128,
+    'description' => 'The URL of the list subscribe form.',
+    'default' => '',
+  );
+  db_add_field('campaign_monitor_lists', 'subscribe_link', $field);
 }
