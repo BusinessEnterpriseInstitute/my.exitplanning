@@ -64,11 +64,6 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
         $automate = 'BEI is building your brand by sending high-quality automated marketing content to this list! ' . $change_settings;
       }
       $dashboard .= '<p class="panel callout ' . $automate_class . '">' . $automate . '</p>';
-      // Subscribe link output if it exists.
-      if (!empty($entity->subscribe_link)) {
-        $subscribe_box = '<textarea readonly="readonly" wrap="off">' . check_plain($entity->subscribe_link) . '</textarea>';
-        $dashboard .= '<p class="panel callout">' . $subscribe_box . '</p>';
-      }
       $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
       $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
       if (module_exists('campaign_monitor_subscribers')) {
@@ -84,6 +79,20 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     }
     if (!empty($items)) {
       $dashboard .= '<ul class="large-block-grid-4 small-block-grid-2 dashboard">' . $items . '</ul>';
+    }
+    // Subscribe link output if it exists.
+    if (!empty($entity->subscribe_link)) {
+      $subscribe_link = l(t('Preview'), $entity->subscribe_link, array('external' => TRUE, 'attributes' => array('target' => '_blank', 'class' => array('button postfix'))));
+      $subscribe_box = '
+      <div class="form-item form-type-textfield row collapse">
+      <label>Subscribe link for your website</label>
+        <div class="small-10 columns">
+          <input type="text" class="form-text" style="background-color:#fff;" onClick="this.setSelectionRange(0, this.value.length)" readonly="readonly" value=' . check_plain($entity->subscribe_link) . '>
+        </div>
+        <div class="small-2 columns">' . $subscribe_link . '</div>
+        <div class="description" style="margin:0;">Share this link with anyone so they can join your list.</div>
+      </div>';
+      $dashboard .= '<div class="panel callout">' . $subscribe_box . '</div>';
     }
     $entity->content['dashboard'] = array(
       '#type' => 'markup',
