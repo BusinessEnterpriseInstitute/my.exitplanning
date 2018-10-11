@@ -11,6 +11,7 @@ function lockr_admin_status($status) {
 
   $cert_valid = $status['cert_valid'];
   $exists = $status['exists'];
+  $created = isset($status['created']) ? $status['created'] : FALSE;
 
   $cert_valid_text = <<<EOL
 You're a certified Lockr user!
@@ -77,6 +78,28 @@ EOL;
   );
 
   if ($cert_valid) {
+    $has_cc = $status['has_cc'];
+
+    if ($created) {
+      $expires = (new \DateTime())
+        ->setTimestamp($created)
+        ->add(new \DateInterval('P14D'));
+      if ($expires > (new \DateTime())) {
+        $reqs[] = array(
+          'title' => 'Trial Expiration Date',
+          'value' => $expires->format('M jS, Y'),
+          'severity' => REQUIREMENT_INFO,
+        );
+      }
+      elseif (!$has_cc) {
+        $reqs[] = array(
+          'title' => 'Trial Expiration Date',
+          'value' => $expires->format('M jS, Y'),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+    }
+
     $partner = $status['info']['partner'];
     $is_custom = in_array($partner, array('custom', 'lockr'));
     $default = $is_custom
@@ -87,14 +110,13 @@ Uh oh!
 Without a credit card we cannot issue a production certificate.
 Please add one before migrating to production.
 EOL;
-    $is_not_custom_text = "You're all set, no credit card needed for your account.";
+    $is_not_custom_text = "Since you're on a partnering host, a credit card is not necessary to move to production. However, please make sure you get a card on file ASAP. We will contact you if there is no card on file within 30 days of moving to production use.";
     $default_description = $is_custom ? $is_custom_text : $is_not_custom_text;
     $has_cc_text = <<<EOL
 We've got your credit card safely on file and you'll be receiving regular
 invoice for your key usage.
 EOL;
 
-    $has_cc = $status['has_cc'];
     $reqs[] = array(
       'title' => 'Credit Card on File',
       'value' => $has_cc ? 'Yes' : 'No',

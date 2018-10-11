@@ -6,9 +6,8 @@ core = 7.x
 dependencies[] = lockr
 dependencies[] = field_encrypt
 
-; Information added by Drupal.org packaging script on 2017-10-03
-version = "7.x-2.4"
+; Information added by Drupal.org packaging script on 2018-07-20
+version = "7.x-2.5"
 core = "7.x"
 project = "lockr"
-datestamp = "1507065851"
-
+datestamp = "1532129583"

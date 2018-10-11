@@ -134,7 +134,7 @@ function lockr_partner() {
 
   if (variable_get('lockr_custom', FALSE)) {
     $cert_path = variable_get('lockr_cert');
-    if ($cert_path) {
+    if ($cert_path && is_readable($cert_path)) {
       $partner = new Partner($cert_path, 'custom', $region);
       return $partner;
     }

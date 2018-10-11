@@ -28,6 +28,7 @@ function lockr_admin_csr_form() {
     '#title' => 'Country',
     '#default' => isset($dn['countryName']) ? $dn['countryName'] : NULL,
     '#maxlength' => 2,
+    '#required' => TRUE,
     '#attributes' => array(
       'placeholder' => array('US'),
     ),
@@ -37,6 +38,7 @@ function lockr_admin_csr_form() {
     '#type' => 'textfield',
     '#title' => 'State or Province',
     '#default' => isset($dn['stateOrProvinceName']) ? $dn['stateOrProvinceName'] : NULL,
+    '#required' => TRUE,
     '#attributes' => array(
       'placeholder' => array('Washington'),
     ),
@@ -46,6 +48,7 @@ function lockr_admin_csr_form() {
     '#type' => 'textfield',
     '#title' => 'Locality',
     '#default' => isset($dn['localityName']) ? $dn['localityName'] : NULL,
+    '#required' => TRUE,
     '#attributes' => array(
       'placeholder' => array('Seattle'),
     ),
@@ -55,6 +58,7 @@ function lockr_admin_csr_form() {
     '#type' => 'textfield',
     '#title' => 'Organization',
     '#default' => isset($dn['organizationName']) ? $dn['organizationName'] : NULL,
+    '#required' => TRUE,
     '#attributes' => array(
       'placeholder' => array('ACME Inc.'),
     ),
