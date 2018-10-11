@@ -361,9 +361,9 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
           'data' => array(
             'email' => array('data' => $item->EmailAddress),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
-            'city' => array('data' => $item->City),
-            'region' => array('data' => $item->Region),
-            'country' => array('data' => $item->CountryName),
+            'city' => array('data' => isset($item->City) ? $item->City : ''),
+            'region' => array('data' => isset($item->Region) ? $item->Region : ''),
+            'country' => array('data' => isset($item->CountryName) ? $item->CountryName : ''),
           ),
         );
         $rows[] = $row;
@@ -385,9 +385,9 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
             'email' => array('data' => $item->EmailAddress),
             'url' => array('data' => $item->URL),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
-            'city' => array('data' => $item->City),
-            'region' => array('data' => $item->Region),
-            'country' => array('data' => $item->CountryName),
+            'city' => array('data' => isset($item->City) ? $item->City : ''),
+            'region' => array('data' => isset($item->Region) ? $item->Region : ''),
+            'country' => array('data' => isset($item->CountryName) ? $item->CountryName : ''),
           ),
         );
         $rows[] = $row;
