@@ -457,6 +457,16 @@ function cm_campaign_load_multiple($ids = array(), $conditions = array(), $reset
   return entity_load('cm_campaign', $ids, $conditions, $reset);
 }
 /**
+ * Helper function to get the campaign entity id for a corresponding campaign id.
+ */
+function cm_campaign_get_campaign_entity_id($campaign_id) {
+  $id = db_query('SELECT id FROM {campaign_monitor_campaigns} c WHERE c.campaign_id = :campaign_id', array(':campaign_id' => $campaign_id))->fetchField();
+  if (!empty($id)) {
+    return $id;
+  }
+  return;
+}
+/**
  * Delete single campaign.
  */
 function cm_campaign_delete($campaign) {

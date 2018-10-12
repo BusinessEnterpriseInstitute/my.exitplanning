@@ -60,8 +60,9 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
   if ($wrap) {
     $parameters = array(
       //'date' => NULL,
-      'page' => !empty($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1,
-      'pagesize' => 10,
+      // Drupal pagers start with 0 so we have to add 1 to query parameter for CM request.
+      'page' => !empty($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] + 1 : 1,
+      'pagesize' => 100,
       'orderfield' => 'email',
       'orderdirection' => 'asc',
       'includetrackingpreference' => TRUE,
@@ -81,10 +82,12 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
       array('data' => t('E-mail'), 'field' => 'email'),
       array('data' => t('Name'), 'field' => 'name'),
       t('Date'),
-      t('Reads e-mail with')
+      t('Reads e-mail with'),
+      ''
     );
     $result = NULL;
     $help_text = '';
+    $counter = '';
     switch ($status) {
       case 'active':
         $title = 'Active Subscribers';
@@ -122,13 +125,23 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         $total_records = $result->response->TotalNumberOfRecords;
         $page_records = $result->response->RecordsOnThisPage;
         $number_pages = $result->response->NumberOfPages;
+        $page_size = $result->response->PageSize;
+        $page_number = $result->response->PageNumber;
+        if ($total_records >= 1) {
+          $start = $page_number === 1 ? 1 : ($page_size * ($page_number - 1)) + 1;
+          $end = $page_number === 1 ? $page_records : (($page_number - 1) * $page_size) + $page_records;
+          $total = number_format($total_records);
+          $counter = '<p class="subheader">' . t('Displaying !start - !end of !total', array('!start' => $start, '!end' => $end, '!total' => $total)) . '</p>';
+        }
         foreach ($result->response->Results as $item) {
+          $subscriber_view = l(t('<i class="icon-pie"></i>'), 'cm-list/' . $list->id . '/subscribers/history', array('html' => TRUE, 'query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
           $row = array(
             'data' => array(
               'email' => array('data' => $item->EmailAddress),
               'name' => array('data' => $item->Name),
               'date' => array('data' => format_date(strtotime($item->Date), 'short')),
               array('data' => $item->ReadsEmailWith),
+              array('data' => $subscriber_view, 'class' => array('icon')),
             ),
           );
           $rows[] = $row;
@@ -159,5 +172,67 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
 
   $output = $view->preview();*/
   
-  return $help_text . $table . $pager;
+  return $help_text . $counter . $table . $pager;
+}
+
+/**
+ * Menu callback to display subscriber history.
+ */
+function campaign_monitor_subscribers_subscriber_history($list) {
+  //$email = base64_decode($email);
+  $email = !empty($_GET['email']) ? $_GET['email'] : NULL;
+  $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
+  $result = $wrap->get_history($email);
+  $campaigns = '';
+  if ($result->was_successful()) {
+    $items = $result->response;
+    foreach ($items as $item) {
+      $cid = cm_campaign_get_campaign_entity_id($item->ID);
+      $campaign_entity = $cid ? cm_campaign_load($cid) : NULL;
+      $campaign = '<h6 class="subheader">Activity for ' . check_plain($item->Name);
+      if ($campaign_entity) {
+        $campaign_uri = entity_uri('cm_campaign', $campaign_entity);
+        $campaign .= l(t('&nbsp;&nbsp;<i class="icon-pie"></i>'), $campaign_uri['path'], array('html' => TRUE));
+      }
+      $campaign .= '</h6>';
+      $header = array(t('Action'), t('Date'));
+      $rows = array();
+      foreach ($item->Actions as $action) {
+        $event = $action->Event;
+        switch ($event) {
+          case 'Open':
+            $event = t('<strong>Opened</strong> your e-mail', array('html' => TRUE));
+            break;
+          case 'Click':
+            $event = t('<strong>Clicked</strong> !link', array('html' => TRUE, '!link' => $action->Detail));
+            break;
+          case 'Forward':
+            $event = t('<strong>Forwarded</strong> your e-mail to a friend', array('html' => TRUE));
+            break;
+          case 'Bounce':
+            $event = t('<strong>Bounced</strong>', array('html' => TRUE));
+            break;
+        }
+        $row = array(
+          'data' => array(
+            array('data' => $event, 'style' => 'width:50%;'),
+            array('data' => format_date(strtotime($action->Date), 'short')),
+          ),
+          'no_striping' => TRUE,
+        );
+        $rows[] = $row;
+      }
+      $table = theme('table', array(
+        'header' => $header,
+        'rows' => $rows,
+        'attributes' => array(
+          'id' => 'cm-subscribers-history',
+        ),
+        'empty' => t('There hasn\'t been any activity for this e-mail yet.'),
+      ));
+      $campaign .= $table;
+      $campaigns .= $campaign;
+    }
+  }
+  return $campaigns;
 }

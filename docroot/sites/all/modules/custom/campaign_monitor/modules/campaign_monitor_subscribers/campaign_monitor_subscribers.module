@@ -79,14 +79,23 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['cm-list/%cm_list/subscribers/history'] = array(
+    'title' => 'Subscriber History',
+    'description' => 'Add subscriber to Campaign Monitor.',
+    'page callback' => 'campaign_monitor_subscribers_subscriber_history',
+    'page arguments' => array(1),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'file' => 'includes/campaign_monitor_subscribers.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  
   // Subscribers
   /*
   $items['cm-subscriber/%cm_subscriber'] = array(
     'type' => MENU_CALLBACK,
-    'title' => 'List',
-    'title callback' => 'entity_label',
-    'title arguments' => array('cm_subscriber', 1),
-    'page callback' => 'campaign_monitor_subscribers_cm_subscriber_view', // change to 'entity_ui_entity_page_view' to show default extra fields.
+    'title' => 'View Subscriber',
+    'page callback' => 'campaign_monitor_subscribers_subscriber_history', // change to 'entity_ui_entity_page_view' to show default extra fields.
     'page arguments' => array(1),
     'access callback' => 'entity_access',
     'access arguments' => array('view', 'cm_subscriber', 1),
