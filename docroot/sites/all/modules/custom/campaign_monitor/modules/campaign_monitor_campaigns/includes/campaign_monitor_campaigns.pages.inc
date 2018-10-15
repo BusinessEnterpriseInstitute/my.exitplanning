@@ -173,7 +173,6 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
         $stats['unopens']['percent'] = $unopened_calc < 1 ? '&lt;1%' : t('!count%', array('!count' => number_format($unopened_calc)));
       }
       foreach ($stats as $key => $stat) {
-        $first_cell = 
         $row = array(
           'data' => array(
             array('data' => $stat['title'] . '<br /><span>' . $stat['percent'] . '</span>'),
@@ -328,10 +327,12 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('E-mail'), 'field' => 'email'),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
@@ -345,13 +346,15 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('Reason')),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
             'type' => array('data' => $item->BounceType),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
             'reason' => array('data' => $item->Reason),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
@@ -366,14 +369,16 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('Country'), 'field' => 'country'),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
             'city' => array('data' => isset($item->City) ? $item->City : ''),
             'region' => array('data' => isset($item->Region) ? $item->Region : ''),
             'country' => array('data' => isset($item->CountryName) ? $item->CountryName : ''),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
@@ -389,15 +394,17 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('Country'), 'field' => 'country'),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
             'url' => array('data' => $item->URL),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
             'city' => array('data' => isset($item->City) ? $item->City : ''),
             'region' => array('data' => isset($item->Region) ? $item->Region : ''),
             'country' => array('data' => isset($item->CountryName) ? $item->CountryName : ''),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
@@ -409,11 +416,13 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('Date')),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
@@ -425,11 +434,13 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
         array('data' => t('Date')),
       );
       foreach ($items as $item) {
+        $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
         $row = array(
           'data' => array(
-            'email' => array('data' => $item->EmailAddress),
+            'email' => array('data' => $linked_email),
             'date' => array('data' => format_date(strtotime($item->Date), 'short')),
           ),
+          'no_striping' => TRUE,
         );
         $rows[] = $row;
       }
