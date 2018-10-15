@@ -177,60 +177,75 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
  * Menu callback to display subscriber history.
  */
 function campaign_monitor_subscribers_subscriber_history($list) {
-  //$email = base64_decode($email);
-  $email = !empty($_GET['email']) ? $_GET['email'] : NULL;
+  $email = $_GET['email'];
+  drupal_set_title($email);
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
+  $list_uri = entity_uri('cm_list', $list);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
+  $breadcrumb[] = l(t('Subscribers'), $list_uri['path'] . '/subscribers');
+  drupal_set_breadcrumb($breadcrumb);
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
   $result = $wrap->get_history($email);
   $campaigns = '';
   if ($result->was_successful()) {
     $items = $result->response;
-    foreach ($items as $item) {
-      $cid = cm_campaign_get_campaign_entity_id($item->ID);
-      $campaign_entity = $cid ? cm_campaign_load($cid) : NULL;
-      $campaign = '<h6 class="subheader">Activity for ' . check_plain($item->Name);
-      if ($campaign_entity) {
-        $campaign_uri = entity_uri('cm_campaign', $campaign_entity);
-        $campaign .= l(t('&nbsp;&nbsp;<i class="icon-pie"></i>'), $campaign_uri['path'], array('html' => TRUE));
-      }
-      $campaign .= '</h6>';
-      $header = array(t('Action'), t('Date'));
-      $rows = array();
-      foreach ($item->Actions as $action) {
-        $event = $action->Event;
-        switch ($event) {
-          case 'Open':
-            $event = t('<strong>Opened</strong> your e-mail', array('html' => TRUE));
-            break;
-          case 'Click':
-            $event = t('<strong>Clicked</strong> !link', array('html' => TRUE, '!link' => $action->Detail));
-            break;
-          case 'Forward':
-            $event = t('<strong>Forwarded</strong> your e-mail to a friend', array('html' => TRUE));
-            break;
-          case 'Bounce':
-            $event = t('<strong>Bounced</strong>', array('html' => TRUE));
-            break;
+    if (!empty($items)) {
+      foreach ($items as $item) {
+        $cid = cm_campaign_get_campaign_entity_id($item->ID);
+        $campaign_entity = $cid ? cm_campaign_load($cid) : NULL;
+        $campaign = '<h6 class="subheader">Activity for ' . check_plain($item->Name);
+        if ($campaign_entity) {
+          $campaign_uri = entity_uri('cm_campaign', $campaign_entity);
+          $campaign .= l(t('&nbsp;&nbsp;<i class="icon-pie"></i>'), $campaign_uri['path'], array('html' => TRUE));
         }
-        $row = array(
-          'data' => array(
-            array('data' => $event, 'style' => 'width:50%;'),
-            array('data' => format_date(strtotime($action->Date), 'short')),
+        $campaign .= '</h6>';
+        $header = array(t('Action'), t('Date'));
+        $rows = array();
+        foreach ($item->Actions as $action) {
+          $event = $action->Event;
+          switch ($event) {
+            case 'Open':
+              $event = t('<strong>Opened</strong> your e-mail', array('html' => TRUE));
+              break;
+            case 'Click':
+              $event = t('<strong>Clicked</strong> !link', array('html' => TRUE, '!link' => $action->Detail));
+              break;
+            case 'Forward':
+              $event = t('<strong>Forwarded</strong> your e-mail to a friend', array('html' => TRUE));
+              break;
+            case 'Bounce':
+              $event = t('<strong>Bounced</strong>', array('html' => TRUE));
+              break;
+          }
+          $row = array(
+            'data' => array(
+              array('data' => $event, 'style' => 'width:50%;'),
+              array('data' => format_date(strtotime($action->Date), 'short')),
+            ),
+            'no_striping' => TRUE,
+          );
+          $rows[] = $row;
+        }
+        $table = theme('table', array(
+          'header' => $header,
+          'rows' => $rows,
+          'attributes' => array(
+            'id' => 'cm-subscribers-history',
           ),
-          'no_striping' => TRUE,
-        );
-        $rows[] = $row;
+          'empty' => t('There hasn\'t been any activity for this e-mail yet.'),
+        ));
+        $campaign .= $table;
+        $campaigns .= $campaign;
       }
-      $table = theme('table', array(
-        'header' => $header,
-        'rows' => $rows,
-        'attributes' => array(
-          'id' => 'cm-subscribers-history',
-        ),
-        'empty' => t('There hasn\'t been any activity for this e-mail yet.'),
-      ));
-      $campaign .= $table;
-      $campaigns .= $campaign;
     }
+    else {
+      $campaigns = '<p class="panel callout">' . t('You haven\'t sent any trackable emails to !email yet. As soon as you do, we\'ll show you a full breakdown here.', array('!email' => $email)) . '</p>';
+    }
+  }
+  else {
+    dpm($result);
   }
   return $campaigns;
 }
