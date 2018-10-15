@@ -83,7 +83,6 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
       array('data' => t('Name'), 'field' => 'name'),
       t('Date'),
       t('Reads e-mail with'),
-      ''
     );
     $result = NULL;
     $help_text = '';
@@ -134,14 +133,13 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
           $counter = '<p class="subheader">' . t('Displaying !start - !end of !total', array('!start' => $start, '!end' => $end, '!total' => $total)) . '</p>';
         }
         foreach ($result->response->Results as $item) {
-          $subscriber_view = l(t('<i class="icon-pie"></i>'), 'cm-list/' . $list->id . '/subscribers/history', array('html' => TRUE, 'query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
+          $linked_email = l($item->EmailAddress, 'cm-list/' . $list->id . '/subscribers/history', array('query' => array('email' => $item->EmailAddress), 'attributes' => array('title'=> 'View e-mail history')));
           $row = array(
             'data' => array(
-              'email' => array('data' => $item->EmailAddress),
+              'email' => array('data' => $linked_email),
               'name' => array('data' => $item->Name),
               'date' => array('data' => format_date(strtotime($item->Date), 'short')),
               array('data' => $item->ReadsEmailWith),
-              array('data' => $subscriber_view, 'class' => array('icon')),
             ),
           );
           $rows[] = $row;
