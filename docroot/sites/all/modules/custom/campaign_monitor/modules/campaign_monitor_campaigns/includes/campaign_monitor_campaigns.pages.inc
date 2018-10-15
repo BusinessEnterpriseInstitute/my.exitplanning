@@ -270,9 +270,10 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
   $header = array();
   $rows = array();
   $pager = '';
+  $counter = '';
   $parameters = array(
     'date' => '',
-    'page' => !empty($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1,
+    'page' => !empty($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] + 1 : 1,
     'pagesize' => 100,
     'orderfield' => 'email',
     'orderdirection' => 'asc',
@@ -312,6 +313,14 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
     $total_records = $result->response->TotalNumberOfRecords;
     $page_records = $result->response->RecordsOnThisPage;
     $number_pages = $result->response->NumberOfPages;
+    $page_size = $result->response->PageSize;
+    $page_number = $result->response->PageNumber;
+    if ($total_records >= 1) {
+      $start = $page_number === 1 ? 1 : ($page_size * ($page_number - 1)) + 1;
+      $end = $page_number === 1 ? $page_records : (($page_number - 1) * $page_size) + $page_records;
+      $total = number_format($total_records);
+      $counter = '<p class="subheader">' . t('Displaying !start - !end of !total', array('!start' => $start, '!end' => $end, '!total' => $total)) . '</p>';
+    }
     $items = $result->response->Results;
     // Recipients.
     if ($type == 'recipients') {
@@ -436,5 +445,5 @@ function campaign_monitor_campaigns_stats($entity, $type = NULL) {
       'id' => 'cm-campaign-stats',
     ),
   ));
-  return $table . $pager;
+  return $counter . $table . $pager;
 }
