@@ -377,6 +377,13 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $properties['automated'] = array(
+    'label' => t('Automated flag'),
+    'description' => t('A boolean value that determines if campaign was created through automation.'),
+    'type' => 'boolean',
+    'schema field' => 'automated',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
 }
 /**
  * Callback for getting campaign properties.
@@ -488,4 +495,181 @@ function campaign_monitor_campaigns_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'campaign_monitor_campaigns') . '/views',
   );
+}
+/**
+ * Helper function to ensure schedule date is not in the past.
+ */
+function campaign_monitor_campaigns_schedule_date_validate($element, &$form_state, $form) {
+  $now = strtotime('now');
+  $schedule_date = strtotime($element['#value']['date'] . ' ' . $element['#value']['time']);
+  if ($schedule_date <= $now) {
+    form_error($element, t($element['#title'] . '  must be in the future.'));
+  }
+}
+/**
+ * Implements hook_action_info().
+ */
+function campaign_monitor_campaigns_action_info() {
+  return array(
+    'campaign_monitor_campaigns_schedule_action' => array(
+      'type' => 'cm_list',
+      'label' => t('Schedule Campaign'),
+      'configurable' => TRUE,
+      'vbo_configurable' => FALSE,
+      'triggers' => array('any'),
+      'permissions' => array('administer campaign monitor'),
+    ),
+  );
+}
+function campaign_monitor_campaigns_schedule_action_form() {
+  $form = array();
+  $form['article'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Newsletter'),
+    '#description' => t('Choose an article from our database.'),
+    '#autocomplete_path' => 'campaign-monitor/newsletter-autocomplete',
+    '#required' => TRUE,
+    '#attributes' => array(
+      'placeholder' => t('Enter some keywords'),
+    ),
+  );
+  $form['schedule_date'] = array(
+    '#type' => 'date_popup',
+    '#date_format' => 'Y-m-d h:i:sa',
+    '#date_year_range' => '0:+1',
+    '#date_timezone' => date_default_timezone(),
+    '#title' => t('Schedule Date'),
+    '#description' => t('Choose a time in which this campaign should be sent.'),
+    '#required' => TRUE,
+    '#datepicker_options' => array('minDate' => 0),
+    '#date_increment' => 15,
+    '#element_validate' => array('campaign_monitor_campaigns_schedule_date_validate'),
+  );
+  return $form;
+}
+function campaign_monitor_campaigns_schedule_action_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  // Validate the article node.
+  if (!empty($values['article'])) {
+    if (!is_numeric($values['article'])) {
+      form_set_error('article', t('%id is not a valid article id.', array('%id' => $values['article'])));
+    }
+    else {
+    $node = node_load($values['article']);
+      if (!$node) {
+        form_set_error('article', t('Unable to load article with id @id', array('@id' => $values['article'])));
+      }
+    }
+  }
+}
+/**
+ * Helper function to submit schedule form for the schedule action.
+ */
+function campaign_monitor_campaigns_schedule_action_submit($form, $form_state) {
+  $values = $form_state['values'];
+  // This has to be returned as an array or it blows up. (Unsupported Operand)
+  return array('schedule_date' => $values['schedule_date'], 'article' => node_load($values['article']));
+}
+/**
+ * Action submit function to run an action's action!
+ */
+function campaign_monitor_campaigns_schedule_action($list, $context) {
+  $date = new DateTime($context['schedule_date'], new DateTimeZone('America/Denver'));
+  $schedule_date = $date->format('Y-m-d H:i');
+  $article = $context['article'];
+  $title = 'Create campaign';
+  $campaign = entity_create('cm_campaign', array(
+    'lid' => $list->id,
+    'uid' => $list->uid,
+    'list_id' => $list->list_id,
+    'client_id' => $list->client_id,
+    'subject' => $article->title,
+    'from_name' => $list->from_name,
+    'from_email' => $list->from_email,
+    'reply_to' => $list->reply_to,
+    'automated' => 1,
+    'background_color' => $list->background_color,
+    'logo_region_status' => $list->logo_region_status,
+    'logo_background_color' => $list->logo_background_color,
+    'logo_link' => $list->logo_link,
+    'banner_region_status' => $list->banner_region_status,
+    'banner_link' => $list->banner_link,
+    'profile_region_status' => $list->profile_region_status,
+    'disclaimer_text' => $list->disclaimer_text,
+    'promotional_text' => $list->promotional_text,
+    'article_title' => $article->title,
+    'article_body' => $article->body['und'][0]['value'],
+  ));
+  $campaign->save();
+  // Set a unique campaign name to use on Campaign Monitor.
+  $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
+  // Set values for field_api fields from list.
+  $list_logo = field_get_items('cm_list', $list, 'field_mc_logo');
+  $list_banner = field_get_items('cm_list', $list, 'field_mc_banner');
+  $list_profile_pic = field_get_items('cm_list', $list, 'field_mc_profile_pic');
+  if ($list_logo) {
+    $file = file_load($list_logo[0]['fid']);
+    $campaign->field_mc_logo[LANGUAGE_NONE][0] = (array) $file;
+  }
+  if ($list_banner) {
+    $file = file_load($list_banner[0]['fid']);
+    $campaign->field_mc_banner[LANGUAGE_NONE][0] = (array) $file;
+  }
+  if ($list_profile_pic) {
+    $file = file_load($list_profile_pic[0]['fid']);
+    $campaign->field_mc_profile_pic[LANGUAGE_NONE][0] = (array) $file;
+  }
+  $campaign->save();
+  
+  // Now create a draft campaign on Campaign monitor.
+  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
+  $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
+  $campaign_id = NULL;
+  $result = $wrap->create($campaign->client_id, array(
+    'Subject' => $campaign->subject,
+    'Name' => entity_label('cm_campaign', $campaign),
+    'FromName' => $campaign->from_name,
+    'FromEmail' => $campaign->from_email,
+    'ReplyTo' => $campaign->reply_to,
+    'HtmlUrl' => $html_url,
+    'ListIDs' => array($campaign->list_id),
+  ));
+  if ($result->was_successful()) {
+    $campaign_id = $result->response;
+    $campaign->campaign_id = $result->response;
+    $campaign->campaign_status = 1;
+    $campaign->save();
+  }
+  else {
+    $error = $result->response->Message;
+    $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+    drupal_set_message($message, 'error');
+  }
+  // If we were able to create a draft campaign, lets schedule it.
+  if ($campaign_id) {
+    $send_wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
+    $result = $send_wrap->send(array(
+      'ConfirmationEmail' => 'confirmations@exitplanning.com',
+      'SendDate' => $schedule_date,
+    ));
+    if ($result->was_successful()) {
+      $campaign->campaign_status = 3;
+      $campaign->send_date = strtotime($schedule_date);
+      $campaign->save();
+    }
+    else {
+      // Check for list size approval error which is code 334.
+      // @see https://www.campaignmonitor.com/api/campaigns/#sending-draft-campaign
+      if ($result->http_status_code == 334) {
+        $campaign->campaign_status = 2;
+        $campaign->save();
+      }
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      drupal_set_message($message, 'error');
+    }
+    // Set the list to locked to remove it from queue.
+    $list->locked = 1;
+    $list->save();
+  }
 }

@@ -190,6 +190,13 @@ function campaign_monitor_campaigns_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'automated' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate if campaign was created through automation.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -200,4 +207,17 @@ function campaign_monitor_campaigns_schema() {
     ),
   );
   return $schema;
+}
+/**
+ * Create automated field to specify campaigns created through automation queue.
+ */
+function campaign_monitor_campaigns_update_7001() {
+  $field = array(
+    'type' => 'int',
+    'description' => 'A boolean to indicate if campaign was created through automation.',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('campaign_monitor_campaigns', 'automated', $field);
 }

@@ -306,6 +306,20 @@ function campaign_monitor_lists_entity_property_info_alter(&$info) {
     'schema field' => 'changed',
     'setter callback' => 'entity_property_verbatim_set',
   );
+  $properties['manage_campaigns'] = array(
+    'label' => t('Automated marketing'),
+    'description' => t('Boolean indicating whether campaigns will be automatically scheduled and sent for this list.'),
+    'type' => 'boolean',
+    'schema field' => 'manage_campaigns',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
+  $properties['locked'] = array(
+    'label' => t('Locked status'),
+    'description' => t('The status of the list for campaign automation.'),
+    'type' => 'boolean',
+    'schema field' => 'locked',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
 }
 /**
  * Callback for getting subscriber properties.

@@ -203,6 +203,13 @@ function campaign_monitor_lists_schema() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'locked' => array(
+        'type' => 'int',
+        'description' => 'A boolean to indicate if list is locked from automation lists.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
     ),
     'primary key' => array('id'),
     'indexes' => array(
@@ -277,4 +284,17 @@ function campaign_monitor_lists_update_7001() {
     'default' => '',
   );
   db_add_field('campaign_monitor_lists', 'subscribe_link', $field);
+}
+/**
+ * Create locked field to remove lists from automation queue.
+ */
+function campaign_monitor_lists_update_7002() {
+  $field = array(
+    'type' => 'int',
+    'description' => 'A boolean to indicate if list is locked from automation queue.',
+    'unsigned' => TRUE,
+    'not null' => TRUE,
+    'default' => 0,
+  );
+  db_add_field('campaign_monitor_lists', 'locked', $field);
 }

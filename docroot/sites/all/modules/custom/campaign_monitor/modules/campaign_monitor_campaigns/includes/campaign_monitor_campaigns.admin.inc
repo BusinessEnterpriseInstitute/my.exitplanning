@@ -565,16 +565,6 @@ function cm_campaign_send_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
 }
 /**
- * Helper function to ensure schedule date is not in the past.
- */
-function campaign_monitor_campaigns_schedule_date_validate($element, &$form_state, $form) {
-  $now = strtotime('now');
-  $schedule_date = strtotime($element['#value']['date'] . ' ' . $element['#value']['time']);
-  if ($schedule_date <= $now) {
-    form_error($element, t($element['#title'] . '  must be in the future.'));
-  }
-}
-/**
  * Helper function to schedule or send a campaign.
  */
 /*
