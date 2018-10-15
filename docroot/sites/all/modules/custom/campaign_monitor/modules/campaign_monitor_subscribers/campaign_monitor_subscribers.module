@@ -84,8 +84,8 @@ function campaign_monitor_subscribers_menu() {
     'description' => 'Add subscriber to Campaign Monitor.',
     'page callback' => 'campaign_monitor_subscribers_subscriber_history',
     'page arguments' => array(1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('update', 'cm_list', 1),
+    'access callback' => 'campaign_monitor_subscribers_history_access',
+    'access arguments' => array(1),
     'file' => 'includes/campaign_monitor_subscribers.pages.inc',
     'type' => MENU_CALLBACK,
   );
@@ -334,6 +334,10 @@ function campaign_monitor_subscribers_access($op, $subscriber = NULL, $account =
       return user_access('administer campaign monitor', $account) ||
       (user_access('delete own subscribers', $account) && ($subscriber->uid === $account->uid));
   }
+}
+function campaign_monitor_subscribers_history_access($list) {
+  $access = !empty($_GET['email']) && entity_access('update', 'cm_list', $list);
+  return $access;
 }
 /**
  *  Load a subscriber.
