@@ -177,8 +177,15 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
  * Menu callback to display subscriber history.
  */
 function campaign_monitor_subscribers_subscriber_history($list) {
-  //$email = base64_decode($email);
-  $email = !empty($_GET['email']) ? $_GET['email'] : NULL;
+  $email = $_GET['email'];
+  drupal_set_title($email);
+  $breadcrumb = array();
+  $breadcrumb[] = l(t('Home'), '<front>');
+  $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
+  $list_uri = entity_uri('cm_list', $list);
+  $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
+  $breadcrumb[] = l(t('Subscribers'), $list_uri['path'] . '/subscribers');
+  drupal_set_breadcrumb($breadcrumb);
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
   $result = $wrap->get_history($email);
   $campaigns = '';
@@ -231,6 +238,9 @@ function campaign_monitor_subscribers_subscriber_history($list) {
       $campaign .= $table;
       $campaigns .= $campaign;
     }
+  }
+  else {
+    $campaigns = '<p class="panel callout">' . t('You haven\'t sent any trackable emails to !email yet. As soon as you do, weÕll show you a full breakdown here.', array('!email' => $email)) . '</p>';
   }
   return $campaigns;
 }
