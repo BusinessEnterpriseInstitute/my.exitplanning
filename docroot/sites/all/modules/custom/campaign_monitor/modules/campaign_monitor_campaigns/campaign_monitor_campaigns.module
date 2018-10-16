@@ -399,8 +399,11 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
       return;
       break;
     case 'delete_url':
-      $options = array('query' => drupal_get_destination());
-      return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/delete', $options);
+      if ($campaign->campaign_status !== 3) {
+        $options = array('query' => drupal_get_destination());
+        return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/delete', $options);
+      }
+      return;
       break;
     case 'preview_url':
       return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/raw');
