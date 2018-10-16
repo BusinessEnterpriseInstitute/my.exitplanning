@@ -21,7 +21,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
       'client_id' => $list->client_id,
       'subject' => '',
       'from_name' => $list->from_name,
-      'from_email' => $list->from_email,
       'reply_to' => $list->reply_to,
     ));
   }
@@ -60,14 +59,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
     '#title' => t('From name'),
     '#description' => t('This is who your emails will come from. Use something they\'ll instantly recognize, like your company name.'),
     '#default_value' => $campaign->from_name,
-    '#required' => TRUE,
-  );
-  $form['tabs']['content']['email_settings']['from_email'] = array(
-    '#type' => 'textfield',
-    '#title' => t('From e-mail'),
-    '#description' => t('This is the e-mail address your campaigns will come from.'),
-    '#element_validate' => array('campaign_monitor_email_validate'),
-    '#default_value' => $campaign->from_email,
     '#required' => TRUE,
   );
   $form['tabs']['content']['email_settings']['reply_to'] = array(
@@ -314,25 +305,6 @@ function cm_campaign_form($form, &$form_state, $campaign = NULL, $list = NULL) {
 function cm_campaign_form_refresh_article($form, $form_state) {
   return $form['tabs']['content']['content_region']['article'];
 }
-/**
- * Implements hook_validate().
- *
- * Performs validation checks on the given list.
- */
-/*
-function cm_campaign_form_validate($form, &$form_state) {
-  $values = $form_state['values'];
-  // Validate the Article reference field.
-  if (!empty($values['article_reference'])) {
-    $node = node_load($values['article_reference']);
-    if (!$node) {
-      form_set_error('article_reference', t('The newsletter referenced does not exist.'));
-    }
-    elseif ($form_state['triggering_element']['#name'] == 'article_reference') {
-      $form_state['article_selected'] = $node;
-    }
-  }
-}*/
 
 function cm_campaign_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
@@ -382,7 +354,6 @@ function cm_campaign_form_submit(&$form, &$form_state) {
   }
   $campaign->subject = $is_new ? '' : $values['subject'];
   $campaign->from_name = $values['from_name'];
-  $campaign->from_email = $values['from_email'];
   $campaign->reply_to = $values['reply_to'];
   $campaign->background_color = $is_new ? $list->background_color : $values['background_color']['colorfield_picker'];
   $campaign->logo_background_color = $is_new ? $list->logo_background_color : $values['logo_background_color']['colorfield_picker'];
@@ -520,7 +491,7 @@ function cm_campaign_send_form_submit($form, &$form_state) {
         'Subject' => $campaign->subject,
         'Name' => entity_label('cm_campaign', $campaign),
         'FromName' => $campaign->from_name,
-        'FromEmail' => $campaign->from_email,
+        'FromEmail' => $list->from_email,
         'ReplyTo' => $campaign->reply_to,
         'HtmlUrl' => $html_url,
         'ListIDs' => array($campaign->list_id),

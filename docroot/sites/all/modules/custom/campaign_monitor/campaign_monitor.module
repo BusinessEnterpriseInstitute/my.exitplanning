@@ -674,7 +674,7 @@ function campaign_monitor_build_template($entity, $entity_type) {
     $profile .= '<br />' . $address['phone_number'];
   }
   $profile .= '</p>';
-  $profile_email = l($entity->from_email, 'mailto:' . $entity->from_email, array('external' => TRUE));
+  $profile_email = l($list->from_email, 'mailto:' . $list->from_email, array('external' => TRUE));
   $profile_name = '<p><strong>' . check_plain($entity->from_name) . '</strong><br />' . $profile_email . '</p>';
   // Profile region.
   if ($entity->profile_region_status) {
