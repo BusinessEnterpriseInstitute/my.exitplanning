@@ -513,8 +513,16 @@ function campaign_monitor_campaigns_action_info() {
   return array(
     'campaign_monitor_campaigns_schedule_action' => array(
       'type' => 'cm_list',
-      'label' => t('Schedule Campaign'),
+      'label' => t('Schedule campaigns'),
       'configurable' => TRUE,
+      'vbo_configurable' => FALSE,
+      'triggers' => array('any'),
+      'permissions' => array('administer campaign monitor'),
+    ),
+    'campaign_monitor_campaigns_unlock_list_action' => array(
+      'type' => 'cm_list',
+      'label' => t('Unlock lists'),
+      'configurable' => FALSE,
       'vbo_configurable' => FALSE,
       'triggers' => array('any'),
       'permissions' => array('administer campaign monitor'),
@@ -672,4 +680,11 @@ function campaign_monitor_campaigns_schedule_action($list, $context) {
     $list->locked = 1;
     $list->save();
   }
+}
+/**
+ * Action submit function to unlock lists.
+ */
+function campaign_monitor_campaigns_unlock_list_action($list, $context) {
+  $list->locked = 0;
+  $list->save();
 }
