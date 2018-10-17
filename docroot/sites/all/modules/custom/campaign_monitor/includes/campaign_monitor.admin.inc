@@ -315,3 +315,65 @@ function cm_client_delete_form_submit($form, &$form_state) {
 
   $form_state['redirect'] = 'admin/campaign-monitor/clients';
 }
+/**
+ * Domain form.
+ */
+function cm_domain_form($form, &$form_state, $cm_domain, $op = 'edit') {
+  $is_new = isset($cm_domain->is_new) || !isset($cm_domain->id) ? TRUE : FALSE;
+  $form_state['is_new'] = $is_new;
+  $form['domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Domain'),
+    '#default_value' => isset($cm_domain->domain) ? $cm_domain->domain : '',
+    '#required' => TRUE,
+    '#maxlength' => 128,
+    '#disabled' => $is_new ? FALSE : TRUE,
+  );
+  $form['txt_value'] = array(
+    '#type' => 'textarea',
+    '#title' => t('TXT Value'),
+    '#default_value' => isset($cm_domain->txt_value) ? $cm_domain->txt_value : '',
+    '#required' => TRUE,
+    '#rows' => 3,
+    '#resizable' => FALSE,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => $is_new ? t('Submit') : t('Save Changes'),
+  );
+  return $form;
+}
+/**
+ * Implements hook_validate().
+ *
+ * Performs validation checks on the given client.
+ */
+function cm_domain_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
+  $is_new = $form_state['is_new'];
+  if ($is_new) {
+    $domain_name = trim(strtolower($values['domain']));
+    $domain_exists = db_query('SELECT id FROM {campaign_monitor_domains} d WHERE d.domain = :domain', array(':domain' => $domain_name))->fetchField();
+    // Validate the domain field.
+    if ($domain_exists) {
+      form_set_error('domain', t('The domain %domain already exists.', array('%domain' => $values['domain'])));
+    }
+    else {
+      // Set the value for domain name to lowercase.
+      $form_state['values']['domain'] = $domain_name;
+    }
+  }
+}
+
+/**
+ * Domain form submit handler.
+ */
+function cm_domain_form_submit($form, &$form_state) {
+  $is_new = $form_state['is_new'];
+  $domain = entity_ui_form_submit_build_entity($form, $form_state);
+  entity_save('cm_domain', $domain);
+  $form_state['redirect'] = 'admin/campaign-monitor/domains';
+}

@@ -108,5 +108,160 @@ function campaign_monitor_schema() {
       'client_id' => array('client_id'),
     ),
   );
+  $schema['campaign_monitor_domains'] = array(
+    'description' => 'Table for Campaign Monitor domain names',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'domain' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The domain name to authenticate on Campaign Monitor.',
+        'default' => '',
+      ),
+      'txt_value' => array(
+        'type' => 'text',
+        'description' => 'The domain host to authenticate on Campaign Monitor.',
+      ),
+      'status' => array(
+        'description' => 'The domain authentication status.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'domain' => array('domain'),
+    ),
+  );
+  $schema['campaign_monitor_client_domains'] = array(
+    'description' => 'Table for Campaign Monitor client domains',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'domain_id' => array(
+        'type' => 'int',
+        'description' => 'The domain id referenced.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cid' => array(
+        'type' => 'int',
+        'description' => 'The Client Entity ID for the associated domain.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'The domain authentication status.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'domain_id' => array('domain_id'),
+      'cid' => array('cid'),
+    ),
+  );
   return $schema;
+}
+
+/**
+ * Create table to store campaign monitor domains.
+ */
+function campaign_monitor_update_7000() {
+  $table = array(
+    'description' => 'Table for Campaign Monitor domain names',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'domain' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The domain name to authenticate on Campaign Monitor.',
+        'default' => '',
+      ),
+      'txt_value' => array(
+        'type' => 'text',
+        'description' => 'The domain host to authenticate on Campaign Monitor.',
+      ),
+      'status' => array(
+        'description' => 'The domain authentication status.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'domain' => array('domain'),
+    ),
+  );
+  db_create_table('campaign_monitor_domains', $table);
+}
+/**
+ * Create table to store campaign monitor client domains.
+ */
+function campaign_monitor_update_7001() {
+  $table = array(
+    'description' => 'Table for Campaign Monitor client domains',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The unique identifier',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'domain_id' => array(
+        'type' => 'int',
+        'description' => 'The domain id referenced.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cid' => array(
+        'type' => 'int',
+        'description' => 'The Client Entity ID for the associated domain.',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'status' => array(
+        'description' => 'The domain authentication status.',
+        'type' => 'int',
+        'size' => 'tiny',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'domain_id' => array('domain_id'),
+      'cid' => array('cid'),
+    ),
+  );
+  db_create_table('campaign_monitor_client_domains', $table);
 }

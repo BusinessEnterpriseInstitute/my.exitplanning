@@ -129,6 +129,17 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.admin.inc',
     'weight' => -8,
   );
+  // Domains
+  $items['cm-domain/%cm_domain/edit'] = array(
+    'title' => 'Edit',
+    'page callback' => 'entity_ui_get_form',
+    'page arguments' => array('cm_domain', 1, 'edit'),
+    //'access callback' => 'entity_access',
+    'access arguments' => array('administer campaign monitor'),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor.admin.inc',
+    'weight' => -9,
+  );
 
   return $items;
 }
@@ -198,6 +209,39 @@ function campaign_monitor_entity_info() {
     ),
     'uri callback' => 'entity_class_uri',
     'load hook' => 'cm_client_load',
+  );
+  $info['cm_domain'] = array(
+    'label' => t('Domain'),
+    'plural label' => t('Domains'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'campaign_monitor_domains',
+    'entity keys' => array(
+      'id' => 'id',
+      'label' => 'domain',
+    ),
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor',
+    'access callback' => 'campaign_monitor_domain_access',
+    'admin ui' => array(
+      'path' => 'admin/campaign-monitor/domains',
+      'controller class' => 'EntityDefaultUIController',
+      'access arguments' => array('administer campaign monitor'),
+      'file' => 'includes/campaign_monitor.admin.inc',
+    ),
+  );
+  $info['cm_client_domain'] = array(
+    'label' => t('Client Domain'),
+    'plural label' => t('Client Domains'),
+    'entity class' => 'Entity',
+    'controller class' => 'EntityAPIController',
+    'base table' => 'campaign_monitor_client_domains',
+    'entity keys' => array(
+      'id' => 'id',
+    ),
+    'views controller class' => 'EntityDefaultViewsController',
+    'module' => 'campaign_monitor',
+    'access callback' => 'campaign_monitor_domain_access',
   );
   return $info;
 }
@@ -287,6 +331,12 @@ function campaign_monitor_client_access($op, $client = NULL, $account = NULL, $e
     case 'delete':
       return user_access('administer campaign monitor', $account);
   }
+}
+/**
+ * Access callback for Domain entities.
+ */
+function campaign_monitor_domain_access($op, $domain = NULL, $account = NULL, $entity_type = NULL) {
+  return user_access('administer campaign monitor', $account);
 }
 /**
  * Access callback for client session.

@@ -96,6 +96,12 @@ function campaign_monitor_lists_schema() {
         'description' => 'The default FromEmail for campaigns on Campaign Monitor.',
         'default' => '',
       ),
+      'from_domain' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'description' => 'The domain part of the sender from email.',
+        'default' => '',
+      ),
       'reply_to' => array(
         'type' => 'varchar',
         'length' => 255,
@@ -297,4 +303,16 @@ function campaign_monitor_lists_update_7002() {
     'default' => 0,
   );
   db_add_field('campaign_monitor_lists', 'locked', $field);
+}
+/**
+ * Create from_domain field to associate with authenticated domains table.
+ */
+function campaign_monitor_lists_update_7003() {
+  $field = array(
+    'type' => 'varchar',
+    'length' => 255,
+    'description' => 'The domain part of the sender from email.',
+    'default' => '',
+  );
+  db_add_field('campaign_monitor_lists', 'from_domain', $field);
 }
