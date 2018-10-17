@@ -261,12 +261,14 @@ function cm_subscriber_form_submit(&$form, &$form_state) {
 /**
  * Delete confirmation form.
  */
-function cm_subscriber_delete_form($form, &$form_state, $subscriber) {
-  $form_state['cm_subscriber'] = $subscriber;
-  $subscriber_uri = entity_uri('cm_subscriber', $subscriber);
+function campaign_monitor_subscribers_delete_form($form, &$form_state, $list) {
+  $email = $_GET['email'];
+  $form_state['email'] = $email;
+  $form_state['cm_list'] = $list;
+  $list_uri = entity_uri('cm_list', $list);
   return confirm_form($form,
-    t('Are you sure you want to delete subscriber %label?', array('%label' => entity_label('cm_subscriber', $subscriber))),
-    $subscriber_uri['path'],
+    t('Are you sure you want to delete e-mail %email from %list?', array('%email' => $email, '%list' => entity_label('cm_list', $list))),
+    $list_uri['path'] . '/subscribers',
     t('This action cannot be undone.'),
     t('Delete'),
     t('Cancel')
@@ -275,18 +277,15 @@ function cm_subscriber_delete_form($form, &$form_state, $subscriber) {
 /**
  * Delete form submit handler.
  */
-function cm_subscriber_delete_form_submit($form, &$form_state) {
-  $subscriber = $form_state['cm_subscriber'];
-  $lid = $subscriber->lid;
-  $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $subscriber->list_id);
-  $redirect = 'cm-list/' . $lid . '/subscribers';
+function campaign_monitor_subscribers_delete_form_submit($form, &$form_state) {
+  $list = $form_state['cm_list'];
+  $email = $form_state['email'];
+  $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
+  $redirect = 'cm-list/' . $list->id . '/subscribers';
   if ($wrap) {
-    $result = $wrap->delete($subscriber->email);
-    // Delete our entity if subscriber could be deleted on CM or the list id couldn't be found.
+    $result = $wrap->delete($email);
     if ($result->was_successful()) {
-      $subscriber->state = 'Deleted';
-      $subscriber->save();
-      drupal_set_message(t('Subscriber %email was deleted from this list.', array('%email' => entity_label('cm_subscriber', $subscriber))));
+      drupal_set_message(t('E-mail %email was deleted from list %list.', array('%email' => $email, '%list' => entity_label('cm_list', $list))));
     }
     else {
       $error = $result->response->Message;
@@ -294,6 +293,6 @@ function cm_subscriber_delete_form_submit($form, &$form_state) {
       drupal_set_message($message, 'error');
     }
   }
-
   $form_state['redirect'] = $redirect;
 }
+

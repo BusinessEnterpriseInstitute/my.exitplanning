@@ -81,12 +81,22 @@ function campaign_monitor_subscribers_menu() {
   );
   $items['cm-list/%cm_list/subscribers/history'] = array(
     'title' => 'Subscriber History',
-    'description' => 'Add subscriber to Campaign Monitor.',
+    'description' => 'Add subscriber to list.',
     'page callback' => 'campaign_monitor_subscribers_subscriber_history',
     'page arguments' => array(1),
-    'access callback' => 'campaign_monitor_subscribers_history_access',
+    'access callback' => 'campaign_monitor_subscribers_update_access',
     'access arguments' => array(1),
     'file' => 'includes/campaign_monitor_subscribers.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['cm-list/%cm_list/subscribers/delete'] = array(
+    'title' => 'Delete Subscriber',
+    'description' => 'Delete subscriber from list.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('campaign_monitor_subscribers_delete_form', 1),
+    'access callback' => 'campaign_monitor_subscribers_update_access',
+    'access arguments' => array(1),
+    'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'type' => MENU_CALLBACK,
   );
   
@@ -335,7 +345,7 @@ function campaign_monitor_subscribers_access($op, $subscriber = NULL, $account =
       (user_access('delete own subscribers', $account) && ($subscriber->uid === $account->uid));
   }
 }
-function campaign_monitor_subscribers_history_access($list) {
+function campaign_monitor_subscribers_update_access($list) {
   $access = !empty($_GET['email']) && entity_access('update', 'cm_list', $list);
   return $access;
 }
