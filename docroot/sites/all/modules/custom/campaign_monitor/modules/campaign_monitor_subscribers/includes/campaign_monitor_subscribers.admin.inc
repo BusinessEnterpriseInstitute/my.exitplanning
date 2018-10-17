@@ -102,7 +102,8 @@ function campaign_monitor_subscribers_import_form_submit(&$form, &$form_state) {
  * Subscriber entity form.
  */
 function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = NULL) {
-  drupal_set_breadcrumb();
+  $breadcrumb = array();
+  drupal_set_breadcrumb($breadcrumb);
   global $user;
   if (!isset($cm_subscriber->id)) {
     $cm_subscriber = entity_create('cm_subscriber', array(
@@ -194,6 +195,8 @@ function cm_subscriber_form_submit(&$form, &$form_state) {
  * Delete confirmation form.
  */
 function campaign_monitor_subscribers_delete_form($form, &$form_state, $list) {
+  $breadcrumb = array();
+  drupal_set_breadcrumb($breadcrumb);
   $email = $_GET['email'];
   $form_state['email'] = $email;
   $form_state['cm_list'] = $list;
