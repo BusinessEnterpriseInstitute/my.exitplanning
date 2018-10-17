@@ -57,6 +57,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
   $rows = array();
   $pager = '';
   $delete_link = TRUE;
+  $update_link = FALSE;
   if ($wrap) {
     $parameters = array(
       //'date' => NULL,
@@ -86,6 +87,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         $title = 'Active Subscribers';
         $result = $wrap->get_active_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
         $help_text = t('E-mails sent to your subscriber list are only sent to active subscribers on the list.');
+        $update_link = TRUE;
         break;
       case 'unconfirmed':
         $title = 'Unconfirmed Subscribers';
@@ -138,6 +140,11 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
               array('data' => $item->ReadsEmailWith),
             ),
           );
+          // Add an update link on every page applicable.
+          if ($update_link) {
+            $options = array('html' => TRUE, 'query' => array('email' => $item->EmailAddress, drupal_get_destination()), 'attributes' => array('title' => t('Update this subscriber')));
+            $row['data'][] = array('data' => l(t('<i class="icon-pencil"></i>'), 'cm-list/' . $list->id . '/subscribers/update', $options), 'class' => array('icon'));
+          }
           // Add a delete link on every page applicable.
           if ($delete_link) {
             $options = array('html' => TRUE, 'query' => array('email' => $item->EmailAddress, drupal_get_destination()));
@@ -161,6 +168,10 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
     t('Date'),
     t('Reads e-mail with'),
   );
+  // Add extra header column for update link on applicable pages.
+  if ($update_link) {
+    $header[] = '';
+  }
   // Add extra header column for delete link on applicable pages.
   if ($delete_link) {
     $header[] = '';

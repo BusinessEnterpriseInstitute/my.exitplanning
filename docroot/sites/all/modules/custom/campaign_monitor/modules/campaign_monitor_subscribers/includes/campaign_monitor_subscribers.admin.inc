@@ -157,103 +157,30 @@ function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = 
  * Errors should be signaled with form_set_error().
  */
 function campaign_monitor_subscribers_email_validate($element, &$form_state, $form) {
-  $subscriber = $form_state['cm_subscriber'];
-  $is_new = isset($subscriber->is_new) || !isset($subscriber->id);
-  if ($is_new) {
-    $list = $form_state['cm_list'];
-    if (!valid_email_address($element['#value'])) {
-      form_error($element, t($element['#title'] . ' is not a valid email address.'));
-    }
-    /*
-    else {
-      $unique = campaign_monitor_subscribers_unique_email($element['#value'], $list->list_id);
-      if (is_array($unique)) {
-        $status = $unique['status'];
-        // Email is already on the current list.
-        if ($unique['match'] == 'self') {
-          $message = t($element['#title'] . ' already exists on your list with a status of !status.', array('!status' => $status));
-        }
-        elseif ($unique['match'] == 'other') {
-          $message = t($element['#title'] . ' already exists on another list.');
-        }
-        form_error($element, $message);
-      }
-    }*/
+  $list = $form_state['cm_list'];
+  if (!valid_email_address($element['#value'])) {
+    form_error($element, t($element['#title'] . ' is not a valid email address.'));
   }
 }
 function cm_subscriber_form_submit(&$form, &$form_state) {
   $values = $form_state['values'];
   $list = $form_state['cm_list'];
-  $subscriber = $form_state['cm_subscriber'];
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
-  $is_new = isset($subscriber->is_new) || !isset($subscriber->id);
-  if ($is_new) {
-    if ($wrap) {
-      $result = $wrap->add(array(
-        'EmailAddress' => $values['email'],
-        'Name' => $values['name'],
-        'ConsentToTrack' => 'Unchanged',
-      ));
-      if ($result->was_successful()) {
-        /*
-        $subscriber->lid = $list->id;
-        $subscriber->list_id = $list->list_id;
-        $subscriber->email = $values['email'];
-        $subscriber->name = $values['name'];
-        $subscriber->state = 'Active';
-        $subscriber->uid = $list->uid;
-        $subscriber->save();*/
-        
-        $form_state['redirect'] = 'cm-list/' . $list->id . '/subscribers';
-        $message = t('Added new E-mail address %email to List %list', array('%email' => $values['email'], '%list' => entity_label('cm_list', $list)));
-        drupal_set_message($message);
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
+  if ($wrap) {
+    $result = $wrap->add(array(
+      'EmailAddress' => $values['email'],
+      'Name' => $values['name'],
+      'ConsentToTrack' => 'Unchanged',
+    ));
+    if ($result->was_successful()) {
+      $form_state['redirect'] = 'cm-list/' . $list->id . '/subscribers';
+      $message = t('Added new E-mail address %email to List %list', array('%email' => $values['email'], '%list' => entity_label('cm_list', $list)));
+      drupal_set_message($message);
     }
-  }
-  else {
-    $unchanged_subscriber = entity_load_unchanged('cm_subscriber', $subscriber->id);
-    $changed = FALSE;
-    $messages = array();
-    if ($unchanged_subscriber->email != $values['email']) {
-      $changed = TRUE;
-      $messages[] = t('Updated e-mail address %old_email to %new_email', array('%old_email' => $unchanged_subscriber->email, '%new_email' => $values['email']));
-    }
-    if ($unchanged_subscriber->name != $values['name']) {
-      $changed = TRUE;
-      $messages[] = t('Updated name %old_name to %new_name', array('%old_name' => $unchanged_subscriber->name, '%new_name' => $values['name']));
-    }
-    if (!empty($values['resubscribe'])) {
-      $changed = TRUE;
-      $messages[] = t('Resubscribed this e-mail to %list.', array('%list' => entity_label('cm_list', $list)));
-    }
-    if ($changed) {
-      $result = $wrap->update($unchanged_subscriber->email, array(
-        'EmailAddress' => $values['email'],
-        'Name' => $values['name'],
-        'ConsentToTrack' => 'Unchanged',
-        'Resubscribe' => isset($values['resubscribe']) ? $values['resubscribe'] : FALSE,
-      ));
-      if ($result->was_successful()) {
-        $subscriber->email = $values['email'];
-        $subscriber->name = $values['name'];
-        if (!empty($values['resubscribe'])) {
-          $subscriber->state = 'Active';
-        }
-        $subscriber->save();
-        foreach ($messages as $message) {
-          drupal_set_message($message);
-        }
-      }
-      else {
-        $error = $result->response->Message;
-        $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-        drupal_set_message($message, 'error');
-      }
+    else {
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      drupal_set_message($message, 'error');
     }
   }
 }
@@ -294,5 +221,81 @@ function campaign_monitor_subscribers_delete_form_submit($form, &$form_state) {
     }
   }
   $form_state['redirect'] = $redirect;
+}
+/**
+ * Update page callback for subscribers.
+ */
+function campaign_monitor_subscribers_update_page($list) {
+  $email = $_GET['email'];
+  $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
+  $result = $wrap->get($email);
+  $output = '';
+  if ($result->was_successful()) {
+    $subscriber = $result->response;
+    $form = drupal_get_form('campaign_monitor_subscribers_update_form', $list, $subscriber);
+    $output = drupal_render($form);
+  }
+  return $output;
+}
+/**
+ * Campaign monitor subscribers update form.
+ */
+function campaign_monitor_subscribers_update_form($form, &$form_state, $list, $subscriber) {
+  $form_state['cm_list'] = $list;
+  $form_state['old_email'] = $subscriber->EmailAddress;
+  $form['email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail Address'),
+    '#default_value' => $subscriber->EmailAddress,
+    '#required' => TRUE,
+    '#element_validate' => array('campaign_monitor_subscribers_email_validate'),
+  );
+  $form['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#default_value' => $subscriber->Name,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+    '#attributes' => array(
+      'class' => array('button small'),
+    ),
+  );
+  if (!empty($_GET['destination'])) {
+    $form['actions']['cancel'] = array(
+      '#type' => 'markup',
+      '#markup' => l(t('Cancel'), $_GET['destination'], array('attributes' => array('id' => 'edit-cancel'))),
+    );
+  }
+  
+  return $form;
+}
+function campaign_monitor_subscribers_update_form_submit(&$form, &$form_state) {
+  $list = $form_state['cm_list'];
+  $old_email = $form_state['old_email'];
+  $changed = FALSE;
+  $values = $form_state['values'];
+  $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
+  $change_values = array(
+    'ConsentToTrack' => 'Unchanged',
+  );
+  $result = $wrap->update($old_email, array(
+    'Name' => $values['name'],
+    'EmailAddress' => $values['email'],
+    'ConsentToTrack' => 'Unchanged',
+  ));
+  if ($result->was_successful()) {
+    drupal_set_message(t('Updated subscriber %email.', array('%email' => $old_email)));
+  }
+  else {
+    $error = $result->response->Message;
+    $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
+    drupal_set_message($message, 'error');
+    $form_state['rebuild'] = TRUE;
+  }
 }
 

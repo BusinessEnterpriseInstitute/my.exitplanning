@@ -99,6 +99,16 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['cm-list/%cm_list/subscribers/update'] = array(
+    'title' => 'Update Subscriber',
+    'description' => 'Update a subscriber.',
+    'page callback' => 'campaign_monitor_subscribers_update_page',
+    'page arguments' => array(1),
+    'access callback' => 'campaign_monitor_subscribers_update_access',
+    'access arguments' => array(1),
+    'file' => 'includes/campaign_monitor_subscribers.admin.inc',
+    'type' => MENU_CALLBACK,
+  );
   
   // Subscribers
   /*
