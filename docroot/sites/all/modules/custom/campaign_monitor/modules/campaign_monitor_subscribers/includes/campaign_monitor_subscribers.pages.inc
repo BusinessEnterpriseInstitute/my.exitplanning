@@ -84,6 +84,10 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
       t('Date'),
       t('Reads e-mail with'),
     );
+    // Add extra header column for delete link on applicable pages.
+    if ($status != 'deleted') {
+      $header[] = '';
+    }
     $result = NULL;
     $help_text = '';
     $counter = '';
@@ -142,6 +146,11 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
               array('data' => $item->ReadsEmailWith),
             ),
           );
+          // Add a delete link on every page except deleted.
+          if ($status != 'deleted') {
+            $options = array('html' => TRUE, 'query' => array('email' => $item->EmailAddress, drupal_get_destination()));
+            $row['data'][] = array('data' => l(t('<i class="icon-remove"></i>'), 'cm-list/' . $list->id . '/subscribers/delete', $options), 'class' => array('icon'));
+          }
           $rows[] = $row;
         }
         pager_default_initialize($total_records, $parameters['pagesize']);
