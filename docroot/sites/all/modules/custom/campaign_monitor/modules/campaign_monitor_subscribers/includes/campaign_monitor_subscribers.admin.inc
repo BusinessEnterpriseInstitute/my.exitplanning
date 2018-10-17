@@ -226,6 +226,8 @@ function campaign_monitor_subscribers_delete_form_submit($form, &$form_state) {
  * Update page callback for subscribers.
  */
 function campaign_monitor_subscribers_update_page($list) {
+  $breadcrumb = array();
+  drupal_set_breadcrumb($breadcrumb);
   $email = $_GET['email'];
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
   $result = $wrap->get($email);
@@ -234,6 +236,13 @@ function campaign_monitor_subscribers_update_page($list) {
     $subscriber = $result->response;
     $form = drupal_get_form('campaign_monitor_subscribers_update_form', $list, $subscriber);
     $output = drupal_render($form);
+  }
+  else {
+    $error = $result->response->Message;
+    $output = '<p class="panel callout warning">' . $error . '</p>';
+    if (!empty($_GET['destination'])) {
+      $output .= l(t('Return to previous page'), $_GET['destination']);
+    }
   }
   return $output;
 }
@@ -277,7 +286,6 @@ function campaign_monitor_subscribers_update_form($form, &$form_state, $list, $s
 function campaign_monitor_subscribers_update_form_submit(&$form, &$form_state) {
   $list = $form_state['cm_list'];
   $old_email = $form_state['old_email'];
-  $changed = FALSE;
   $values = $form_state['values'];
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
   $change_values = array(
@@ -289,7 +297,7 @@ function campaign_monitor_subscribers_update_form_submit(&$form, &$form_state) {
     'ConsentToTrack' => 'Unchanged',
   ));
   if ($result->was_successful()) {
-    drupal_set_message(t('Updated subscriber %email.', array('%email' => $old_email)));
+    drupal_set_message(t('Subscriber details updated.'));
   }
   else {
     $error = $result->response->Message;
