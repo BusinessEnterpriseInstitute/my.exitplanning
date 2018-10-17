@@ -231,8 +231,7 @@ function campaign_monitor_subscribers_delete_form_submit($form, &$form_state) {
  * Update page callback for subscribers.
  */
 function campaign_monitor_subscribers_update_page($list) {
-  $breadcrumb = array();
-  drupal_set_breadcrumb($breadcrumb);
+  drupal_set_breadcrumb();
   $email = $_GET['email'];
   $wrap = campaign_monitor_get_api_object('CS_REST_Subscribers', $list->list_id);
   $result = $wrap->get($email);
