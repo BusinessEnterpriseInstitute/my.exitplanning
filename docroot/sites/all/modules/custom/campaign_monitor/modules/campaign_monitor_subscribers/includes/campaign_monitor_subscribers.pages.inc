@@ -54,9 +54,9 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
   drupal_set_breadcrumb($breadcrumb);
   $title = 'Subscribers';
   $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
-  $header = array();
   $rows = array();
   $pager = '';
+  $delete_link = TRUE;
   if ($wrap) {
     $parameters = array(
       //'date' => NULL,
@@ -78,12 +78,6 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
           break;
       }
     }
-    $header = array(
-      array('data' => t('E-mail'), 'field' => 'email'),
-      array('data' => t('Name'), 'field' => 'name'),
-      t('Date'),
-      t('Reads e-mail with'),
-    );
     $result = NULL;
     $help_text = '';
     $counter = '';
@@ -102,6 +96,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         $title = 'Unsubscribed Subscribers';
         $result = $wrap->get_unsubscribed_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
         $help_text = t('These are people who have either opted out via an unsubscribe link, or form, or their status has been changed to unsubscribed through your account.');
+        $delete_link = FALSE;
         break;
       case 'bounced':
         $title = 'Bounced Subscribers';
@@ -114,6 +109,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         $result = $wrap->get_deleted_subscribers('', $parameters['page'], $parameters['pagesize'], $parameters['orderfield'], $parameters['orderdirection']);
         $help_text = t('You will only see subscribers with this status if they have been deleted from the list through your account or were imported from a previous
                        newsletter platform with the same status.');
+        $delete_link = FALSE;
         break;
     }
     if (!empty($help_text)) {
@@ -142,6 +138,11 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
               array('data' => $item->ReadsEmailWith),
             ),
           );
+          // Add a delete link on every page applicable.
+          if ($delete_link) {
+            $options = array('html' => TRUE, 'query' => array('email' => $item->EmailAddress, drupal_get_destination()));
+            $row['data'][] = array('data' => l(t('<i class="icon-remove"></i>'), 'cm-list/' . $list->id . '/subscribers/delete', $options), 'class' => array('icon'));
+          }
           $rows[] = $row;
         }
         pager_default_initialize($total_records, $parameters['pagesize']);
@@ -153,6 +154,16 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         drupal_set_message($message, 'error');
       }
     }
+  }
+  $header = array(
+    array('data' => t('E-mail'), 'field' => 'email'),
+    array('data' => t('Name'), 'field' => 'name'),
+    t('Date'),
+    t('Reads e-mail with'),
+  );
+  // Add extra header column for delete link on applicable pages.
+  if ($delete_link) {
+    $header[] = '';
   }
   drupal_set_title($title);
   $table = theme('table', array(
