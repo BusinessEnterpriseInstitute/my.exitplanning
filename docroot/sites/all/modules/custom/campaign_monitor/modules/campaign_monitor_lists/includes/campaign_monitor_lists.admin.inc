@@ -755,11 +755,24 @@ function cm_list_form_submit(&$form, &$form_state) {
   $client = $form_state['cm_client'];
   $list = $form_state['cm_list'];
   $author = $form_state['author'];
+  $from_email = trim(strtolower($values['from_email']));
   if (!empty($values['author'])) {
     if ($account = user_load_by_name($values['author'])) {
       $list->uid = $account->uid;
     }
   }
+  // Set list values.
+  $list->manage_campaigns = $values['manage_campaigns'];
+  $list->title = $values['title'];
+  $list->unsubscribe_page = $values['unsubscribe_page'];
+  $list->unsubscribe_setting = $values['unsubscribe_setting'];
+  $list->confirmation_success_page = '';
+  $list->confirmed_opt_in = $values['confirmed_opt_in'];
+  $list->from_name = $values['from_name'];
+  $list->from_email = $from_email;
+  $list->from_domain = substr($from_email, strpos($from_email, '@') + 1);
+  $list->reply_to = $values['reply_to'];
+  $list->address = $values['address'];
   if (isset($list->is_new)) {
     $wrap = campaign_monitor_get_api_object('CS_REST_Lists', NULL);
     if ($wrap) {
@@ -772,36 +785,11 @@ function cm_list_form_submit(&$form, &$form_state) {
       ));
       if ($result->was_successful()) {
         $id = $result->response;
-        $list->manage_campaigns = $values['manage_campaigns'];
         $list->list_id = $id;
-        $list->title = $values['title'];
-        $list->confirmed_opt_in = $values['confirmed_opt_in'];
-        $list->unsubscribe_page = $values['unsubscribe_page'];
-        $list->unsubscribe_setting = $values['unsubscribe_setting'];
-        $list->confirmation_success_page = '';
         //field_attach_submit('cm_list', $list, $form, $form_state);
         $list->save();
-        /*
-        // Now create the webhook.
-        $webhook_settings = array(
-          'Events' => array(CS_REST_LIST_WEBHOOK_SUBSCRIBE, CS_REST_LIST_WEBHOOK_DEACTIVATE, CS_REST_LIST_WEBHOOK_UPDATE),
-          'Url' => campaign_monitor_webhook_url(),
-          'PayLoadFormat' => CS_REST_WEBHOOK_FORMAT_JSON,
-        );
-        $webhook_create = $list_wrap->create_webhook($webhook_settings);
-        if ($webhook_create->was_successful()) {
-          $webhook_entity = entity_create('cm_webhook', array(
-            'lid' => entity_id('cm_list', $list),
-            'webhook_id' => $webhook_create->response,
-            'url' => campaign_monitor_webhook_url(),
-            'status' => 'Active',
-            'events' => $webhook_settings['Events'],
-            'payload_format' => CS_REST_WEBHOOK_FORMAT_JSON,
-          ));
-          $webhook_entity->save();
-        }*/
         $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/edit';
-        $message = t('Added new list %title to Campaign Monitor', array('%title' => $values['title']));
+        $message = t('Added new list %title', array('%title' => $values['title']));
         drupal_set_message($message);
       }
       else {
@@ -829,14 +817,6 @@ function cm_list_form_submit(&$form, &$form_state) {
         'ConfirmedOptIn' => $values['confirmed_opt_in'],
       ));
       if ($result->was_successful()) {
-        $list->title = $values['title'];
-        $list->confirmed_opt_in = $values['confirmed_opt_in'];
-        $list->unsubscribe_page = $values['unsubscribe_page'];
-        $list->unsubscribe_setting = $values['unsubscribe_setting'];
-        $list->from_name = $values['from_name'];
-        $list->from_email = $values['from_email'];
-        $list->reply_to = $values['reply_to'];
-        $list->manage_campaigns = $values['manage_campaigns'];
         $list->background_color = $values['background_color']['colorfield_picker'];
         $list->logo_background_color = $values['logo_background_color']['colorfield_picker'];
         $list->logo_region_status = $values['logo_region_status'];
@@ -846,7 +826,6 @@ function cm_list_form_submit(&$form, &$form_state) {
         $list->profile_region_status = $values['profile_region_status'];
         $list->promotional_text = $values['promotional_text']['value'];
         $list->disclaimer_text = $values['disclaimer_text']['value'];
-        $list->address = $values['address'];
         $list->footer_region = $values['footer_region'];
         if (isset($values['subscribe_link'])) {
           $list->subscribe_link = $values['subscribe_link'];
