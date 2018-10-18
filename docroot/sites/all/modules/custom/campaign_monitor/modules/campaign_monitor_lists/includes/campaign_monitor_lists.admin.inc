@@ -756,6 +756,7 @@ function cm_list_form_submit(&$form, &$form_state) {
   $list = $form_state['cm_list'];
   $author = $form_state['author'];
   $from_email = trim(strtolower($values['from_email']));
+  $from_domain = substr($from_email, strpos($from_email, '@') + 1);
   if (!empty($values['author'])) {
     if ($account = user_load_by_name($values['author'])) {
       $list->uid = $account->uid;
@@ -770,7 +771,7 @@ function cm_list_form_submit(&$form, &$form_state) {
   $list->confirmed_opt_in = $values['confirmed_opt_in'];
   $list->from_name = $values['from_name'];
   $list->from_email = $from_email;
-  $list->from_domain = substr($from_email, strpos($from_email, '@') + 1);
+  $list->from_domain = $from_domain;
   $list->reply_to = $values['reply_to'];
   $list->address = $values['address'];
   if (isset($list->is_new)) {

@@ -44,6 +44,33 @@ class ListEntityController extends EntityAPIController {
       $entity->created = REQUEST_TIME;
     }
     $entity->changed = REQUEST_TIME;
+    $from_domain = $entity->from_domain;
+    $domain = db_query('SELECT * FROM {campaign_monitor_domains} d WHERE d.domain = :from_domain', array(':from_domain' => $from_domain))->fetchObject();
+    if (!$domain) {
+      // Create a new cm_domain entity.
+      $cm_domain = entity_create('cm_domain', array(
+        'domain' => $from_domain,
+      ));
+      $cm_domain->save();
+      // Create a new cm_client_domain entity referencing the cm_domain entity.
+      $cm_client_domain = entity_create('cm_client_domain', array(
+        'domain_id' => entity_id('cm_domain', $cm_domain),
+        'cid' => $entity->cid,
+      ));
+      $cm_client_domain->save();
+    }
+    else {
+      // Check to see if the referenced client for the list is associated with the existing domain.
+      $client_domain = db_query('SELECT id FROM {campaign_monitor_client_domains} cd WHERE cd.domain_id = :domain_id AND cd.cid = :cid', array(':domain_id' => $domain->id, ':cid' => $entity->cid))->fetchField();
+      if (!$client_domain) {
+        // Create a new cm_client_domain entity referencing the cm_domain entity.
+        $cm_client_domain = entity_create('cm_client_domain', array(
+          'domain_id' => $domain->id,
+          'cid' => $entity->cid,
+        ));
+        $cm_client_domain->save();
+      }
+    }
     return parent::save($entity, $transaction);
   }
 }
