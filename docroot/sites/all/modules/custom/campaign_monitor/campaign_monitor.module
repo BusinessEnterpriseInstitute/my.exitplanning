@@ -229,6 +229,7 @@ function campaign_monitor_entity_info() {
       'access arguments' => array('administer campaign monitor'),
       'file' => 'includes/campaign_monitor.admin.inc',
     ),
+    'load hook' => 'cm_domain_load',
   );
   $info['cm_client_domain'] = array(
     'label' => t('Client Domain'),
@@ -249,8 +250,10 @@ function campaign_monitor_entity_info() {
  * Implements hook_entity_property_info_alter().
  */
 function campaign_monitor_entity_property_info_alter(&$info) {
-  $properties = &$info['cm_client']['properties'];
-  $properties['uid'] = array(
+  $client = &$info['cm_client']['properties'];
+  $domain = &$info['cm_domain']['properties'];
+  $client_domain = &$info['cm_client_domain']['properties'];
+  $client['uid'] = array(
     'label' => t('User'),
     'type' => 'user',
     'description' => t('The user associated with the client'),
@@ -258,42 +261,68 @@ function campaign_monitor_entity_property_info_alter(&$info) {
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'uid',
   );
-  $properties['edit_url'] = array(
+  $client['edit_url'] = array(
     'label' => t('Edit Link'),
     'description' => t('The URL of the list\'s edit page.'),
-    'getter callback' => 'campaign_monitor_get_properties',
+    'getter callback' => 'campaign_monitor_get_client_properties',
     'type' => 'uri',
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
-  $properties['delete_url'] = array(
+  $client['delete_url'] = array(
     'label' => t('Delete Link'),
     'description' => t('The URL to delete a client.'),
-    'getter callback' => 'campaign_monitor_get_properties',
+    'getter callback' => 'campaign_monitor_get_client_properties',
     'type' => 'uri',
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
-  $properties['created'] = array(
+  $client['created'] = array(
     'label' => t('Date created'),
     'description' => t('The date the client was created.'),
     'type' => 'date',
     'schema field' => 'created',
     'setter callback' => 'entity_property_verbatim_set',
   );
-  $properties['changed'] = array(
+  $client['changed'] = array(
     'label' => t('Date updated'),
     'description' => t('The date the client was last updated.'),
     'type' => 'date',
     'schema field' => 'changed',
     'setter callback' => 'entity_property_verbatim_set',
   );
+  // Domain
+  $domain['edit_url'] = array(
+    'label' => t('Edit Link'),
+    'description' => t('The URL of the domain\'s edit page.'),
+    'getter callback' => 'campaign_monitor_get_domain_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
+  // Client domain
+  $client_domain['cid'] = array(
+    'label' => t('Client'),
+    'type' => 'cm_client',
+    'description' => t('The client entity associated with the domain'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'cid',
+  );
+  $client_domain['domain_id'] = array(
+    'label' => t('Domain Entity'),
+    'type' => 'cm_domain',
+    'description' => t('The domain entity referenced.'),
+    'setter callback' => 'entity_property_verbatim_set',
+    'setter permission' => 'administer campaign monitor',
+    'schema field' => 'domain_id',
+  );
 }
 /**
- * Callback for getting subscriber properties.
+ * Callback for getting cm_client properties.
  *
  */
-function campaign_monitor_get_properties($client, array $options, $name, $entity_type) {
+function campaign_monitor_get_client_properties($client, array $options, $name, $entity_type) {
   switch ($name) {
     case 'edit_url':
       $options = array('query' => drupal_get_destination());
@@ -305,10 +334,18 @@ function campaign_monitor_get_properties($client, array $options, $name, $entity
       break;
   }
 }
-/*******************************************************************************
- ********************************* Client API's ****************************
- ******************************************************************************/
-
+/**
+ * Callback for getting cm_domain properties.
+ *
+ */
+function campaign_monitor_get_domain_properties($domain, array $options, $name, $entity_type) {
+  switch ($name) {
+    case 'edit_url':
+      $options = array('query' => drupal_get_destination());
+      return url('cm-domain/' . entity_id($entity_type, $domain) . '/edit', $options);
+      break;
+  }
+}
 /**
  * Access callback for Client entities.
  */
@@ -347,6 +384,11 @@ function campaign_monitor_cm_client_session_access($client) {
   $access = strlen($integrator_id) && $permission ? TRUE : FALSE;
   return $access;
 }
+
+/*******************************************************************************
+ ********************************* Client API's ****************************
+ ******************************************************************************/
+
 /**
  *  Load a client.
  */
@@ -358,7 +400,6 @@ function cm_client_load($id = NULL, $reset = FALSE){
 function cm_client_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
   return entity_load('cm_client', $ids, $conditions, $reset);
 }
-
 /**
  * Delete single client.
  */
@@ -371,6 +412,20 @@ function cm_client_delete($client) {
  */
 function cm_client_delete_multiple($ids) {
   entity_delete_multiple('cm_client', $ids);
+}
+/*******************************************************************************
+ ********************************* Domain API's ****************************
+ ******************************************************************************/
+/**
+ *  Load a domain.
+ */
+function cm_domain_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $domain = cm_domain_load_multiple($ids, $reset);
+  return $domain ? reset ($domain) : FALSE;
+}
+function cm_domain_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_domain', $ids, $conditions, $reset);
 }
 
 /**
@@ -1041,4 +1096,18 @@ function campaign_monitor_hide_format_info($element) {
     */
   }
   return $element;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function campaign_monitor_admin_paths() {
+  $paths = array(
+    'cm-domain/*/edit' => TRUE,
+    'cm-list/*/migrate' => TRUE,
+    'cm-list/*/webhooks*' => TRUE,
+    'cm-webhook/*/delete' => TRUE,
+    'cm-webhook/*/test' => TRUE,
+  );
+  return $paths;
 }
