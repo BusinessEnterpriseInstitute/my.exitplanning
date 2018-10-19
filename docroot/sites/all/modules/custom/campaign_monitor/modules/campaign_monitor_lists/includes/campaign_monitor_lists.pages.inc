@@ -95,8 +95,7 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $dashboard .= '<div class="panel callout">' . $subscribe_box . '</div>';
     }
     // Domain authentication.
-    $email = strtolower($entity->from_email);
-    $domain = substr($email, strpos($email, '@') + 1);
+    $domain = $entity->from_domain;
     $domain_box = '
     <div class="panel callout">' . $domain . '</div>';
     //$dashboard .= $domain_box;
