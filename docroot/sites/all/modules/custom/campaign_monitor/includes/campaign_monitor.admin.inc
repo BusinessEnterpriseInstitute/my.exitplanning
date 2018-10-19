@@ -333,7 +333,6 @@ function cm_domain_form($form, &$form_state, $cm_domain, $op = 'edit') {
     '#type' => 'textarea',
     '#title' => t('TXT Value'),
     '#default_value' => isset($cm_domain->txt_value) ? $cm_domain->txt_value : '',
-    '#required' => TRUE,
     '#rows' => 3,
     '#resizable' => FALSE,
   );

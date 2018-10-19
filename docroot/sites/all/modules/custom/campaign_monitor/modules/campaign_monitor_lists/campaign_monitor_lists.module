@@ -426,17 +426,6 @@ function campaign_monitor_lists_views_api() {
 }
 
 /**
- * Implements hook_admin_paths().
- */
-function campaign_monitor_lists_admin_paths() {
-  $paths = array(
-    'cm-list/*/webhooks*' => TRUE,
-    'cm-webhook/*/delete' => TRUE,
-    'cm-webhook/*/test' => TRUE,
-  );
-  return $paths;
-}
-/**
  * Implements hook_entity_delete().
  */
 function campaign_monitor_lists_entity_delete($entity, $type) {
