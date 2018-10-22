@@ -240,39 +240,7 @@ DirectoryIndex index.php index.html index.htm
 	AddType image/webp webp
 	AddType image/x-icon ico
   AddType image/png .png .PNG
-  AddType image/jpeg .jpeg .jpg .jpe .JPG
-  
-  # Expiry Dates
-  ExpiresActive On
-  ExpiresByType text/css A31536000
-  ExpiresByType application/x-javascript A31536000
-  ExpiresByType application/javascript A31536000
-  ExpiresByType text/javascript A31536000
-  ExpiresByType text/x-js A31536000
-  ExpiresByType image/bmp A31536000
-  ExpiresByType image/gif A31536000
-  ExpiresByType application/x-gzip A31536000
-  ExpiresByType image/x-icon A31536000
-  ExpiresByType image/jpeg A31536000
-  ExpiresByType application/x-font-otf A31536000
-  ExpiresByType image/png A31536000
-  ExpiresByType application/x-font-ttf A31536000
-  ExpiresByType application/zip A31536000
+  AddType image/jpeg .jpeg .jpg .jpe .JPG 
 	
 </IfModule>
-<IfModule mod_deflate.c>
-    <IfModule mod_headers.c>
-        Header append Vary User-Agent env=!dont-vary
-    </IfModule>
-        AddOutputFilterByType DEFLATE text/html text/css text/x-component application/x-javascript application/javascript text/javascript text/x-js text/plain image/x-icon image/png image/gif
-    <IfModule mod_mime.c>
-        # DEFLATE by extension
-        AddOutputFilter DEFLATE js css htm html xml png gif
-    </IfModule>
-</IfModule>
-<FilesMatch "\.(gif|ico|jpg|jpeg|png|GIF|ICO|JPG|JPEG|PNG|css|js|woff|CSS|JS|WOFF|ttf|TTF)$">
-    <IfModule mod_headers.c>
-         Header unset Set-Cookie
-         Header set Cache-Control "max-age=31536000, public"
-    </IfModule>
-</FilesMatch>
+
