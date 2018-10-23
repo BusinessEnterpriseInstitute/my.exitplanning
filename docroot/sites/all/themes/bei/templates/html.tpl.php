@@ -70,6 +70,15 @@
       $(document).foundation();
     })(jQuery, Drupal, this, this.document);
   </script>
-  <script async src='https://content.maropost.com/uploads/1378/websites/1/22025b8dcd130a353c1228aab2c414625946be11-v2.js' type='text/javascript'></script>
+  <!-- RTP tag -->
+    <script type='text/javascript'>
+    (function(c,h,a,f,i,e){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    c[a].a=i;c[a].e=e;var g=h.createElement("script");g.async=true;g.type="text/javascript";
+    g.src=f+'?aid='+i;var b=h.getElementsByTagName("script")[0];b.parentNode.insertBefore(g,b);
+    })(window,document,"rtp","//abrtp1-cdn.marketo.com/rtp-api/v1/rtp.js","bei");
+    rtp('send','view');
+    rtp('get', 'campaign',true);
+    </script>
+    <!-- End of RTP tag -->
 </body>
 </html>
