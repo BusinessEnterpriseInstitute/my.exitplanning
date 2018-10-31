@@ -902,3 +902,31 @@ p.a2a_floating_style.a2a_vertical_style {
     text-align: center;
   }
 }
+/**** Blog Subscription form ******/
+.block-webform-client-block-181086 {
+    position: sticky;
+    top: 75rem;
+    left: 0;
+    width: 80%;
+    height: 100%;
+    background: rgba(255, 255, 255, .6);
+    z-index: 1001;
+    border-radius: 12px !important; 
+}
+.popup {
+    width: 350px;
+    height: 240px;
+    padding: 20px;
+    background: #F2F2F2;
+    border: 1px solid #222;
+    border-radius: 25px;
+    -moz-border-radius: 25px;
+    -webkit-border-radius: 25px;
+    box-shadow: #64686e 0px 0px 3px 3px;
+    -moz-box-shadow: #64686e 0px 0px 3px 3px;
+    -webkit-box-shadow: #64686e 0px 0px 3px 3px;
+    position: fixed;
+    top: 60vh;
+    bottom: 20rem;
+    left: auto;
+}
