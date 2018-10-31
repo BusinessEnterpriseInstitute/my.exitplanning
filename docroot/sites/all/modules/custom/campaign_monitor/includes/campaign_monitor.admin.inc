@@ -336,6 +336,13 @@ function cm_domain_form($form, &$form_state, $cm_domain, $op = 'edit') {
     '#rows' => 3,
     '#resizable' => FALSE,
   );
+  $form['status'] = array(
+    '#type' => 'select',
+    '#title' => t('Authentication status'),
+    '#options' => campaign_monitor_domain_status_list(),
+    '#default_value' => $cm_domain->status,
+    '#required' => TRUE,
+  );
   $form['actions'] = array(
     '#type' => 'actions',
   );
