@@ -383,3 +383,36 @@ function cm_domain_form_submit($form, &$form_state) {
   entity_save('cm_domain', $domain);
   $form_state['redirect'] = 'admin/campaign-monitor/domains';
 }
+
+/**
+ * Client Domain form.
+ */
+function cm_client_domain_form($form, &$form_state, $cm_client_domain, $op = 'edit') {
+  $client = cm_client_load($cm_client_domain->cid);
+  $form['client'] = array(
+    '#type' => 'item',
+    '#title' => t('Client'),
+    '#markup' => $client ? entity_label('cm_client', $client) : 'Unavailable',
+  );
+  $form['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enabled'),
+    '#default_value' => $cm_client_domain->status,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+  );
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save Changes'),
+  );
+  return $form;
+}
+/**
+ * Client Domain form submit handler.
+ */
+function cm_client_domain_form_submit($form, &$form_state) {
+  $domain = entity_ui_form_submit_build_entity($form, $form_state);
+  entity_save('cm_client_domain', $domain);
+  $form_state['redirect'] = 'admin/campaign-monitor/client-domains';
+}
