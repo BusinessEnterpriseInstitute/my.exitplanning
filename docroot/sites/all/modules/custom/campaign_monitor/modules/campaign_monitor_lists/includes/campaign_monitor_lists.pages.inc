@@ -96,6 +96,10 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
     }
     // Domain authentication.
     $domain = $entity->from_domain;
+    /*
+    $query = db_query('SELECT d.domain, d.txt_value, d.status, cd.cid, cd.status AS cd_status FROM {campaign_monitor_domains} d LEFT JOIN campaign_monitor_client_domains cd ON d.id = cd.domain_id
+                      WHERE d.domain = :domain AND cd.cid = :client_id', array(':domain' => $domain, ':client_id' => $entity->cid))->fetchObject();
+    dpm($query);*/
     $domain_box = '
     <div class="panel callout">' . $domain . '</div>';
     //$dashboard .= $domain_box;

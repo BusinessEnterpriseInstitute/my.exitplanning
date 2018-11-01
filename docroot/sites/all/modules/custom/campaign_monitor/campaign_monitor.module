@@ -300,6 +300,14 @@ function campaign_monitor_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $domain['status'] = array(
+    'label' => t('Status'),
+    'type' => 'integer',
+    'description' => t('The authentication status of the domain.'),
+    'schema field' => 'status',
+    'options list' => 'campaign_monitor_domain_status_list',
+    'setter callback' => 'entity_property_verbatim_set',
+  );
   // Client domain
   $client_domain['cid'] = array(
     'label' => t('Client'),
@@ -316,6 +324,13 @@ function campaign_monitor_entity_property_info_alter(&$info) {
     'setter callback' => 'entity_property_verbatim_set',
     'setter permission' => 'administer campaign monitor',
     'schema field' => 'domain_id',
+  );
+  $client_domain['status'] = array(
+    'label' => t('Status'),
+    'type' => 'boolean',
+    'description' => t('The status of the client domain.'),
+    'schema field' => 'status',
+    'setter callback' => 'entity_property_verbatim_set',
   );
 }
 /**
@@ -345,6 +360,17 @@ function campaign_monitor_get_domain_properties($domain, array $options, $name, 
       return url('cm-domain/' . entity_id($entity_type, $domain) . '/edit', $options);
       break;
   }
+}
+/**
+ * Callback for returning a list of domain authentication statuses.
+ */
+function campaign_monitor_domain_status_list() {
+  return array(
+    0 => 'Not verified',
+    1 => 'Generated code',
+    2 => 'Uploaded',
+    3 => 'Verified'
+  );
 }
 /**
  * Access callback for Client entities.
