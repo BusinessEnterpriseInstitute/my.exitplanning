@@ -243,6 +243,13 @@ function campaign_monitor_entity_info() {
     'views controller class' => 'EntityDefaultViewsController',
     'module' => 'campaign_monitor',
     'access callback' => 'campaign_monitor_domain_access',
+    'admin ui' => array(
+      'path' => 'admin/campaign-monitor/client-domains',
+      'controller class' => 'EntityDefaultUIController',
+      'access arguments' => array('administer campaign monitor'),
+      'file' => 'includes/campaign_monitor.admin.inc',
+    ),
+    'load hook' => 'cm_client_domain_load',
   );
   return $info;
 }
@@ -452,6 +459,20 @@ function cm_domain_load($id = NULL, $reset = FALSE){
 }
 function cm_domain_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
   return entity_load('cm_domain', $ids, $conditions, $reset);
+}
+/*******************************************************************************
+ ********************************* Client Domain API's ****************************
+ ******************************************************************************/
+/**
+ *  Load a client domain.
+ */
+function cm_client_domain_load($id = NULL, $reset = FALSE){
+  $ids = (isset ($id) ? array($id) : array());
+  $domain = cm_client_domain_load_multiple($ids, $reset);
+  return $domain ? reset ($domain) : FALSE;
+}
+function cm_client_domain_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
+  return entity_load('cm_client_domain', $ids, $conditions, $reset);
 }
 
 /**
