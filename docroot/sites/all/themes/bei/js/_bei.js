@@ -35,6 +35,7 @@
           // clear the scroll listener
         if (reached) {
           window.clearInterval(scrollListener);
+          $('.block-webform-client-block-170460').show();
         }
       }
 
