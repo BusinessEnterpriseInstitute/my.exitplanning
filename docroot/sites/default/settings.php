@@ -679,3 +679,9 @@ $conf['views_data_export_directory'] = 'private://';
 
 $conf['image_suppress_itok_output'] = TRUE;
 $conf['image_allow_insecure_derivatives'] = TRUE;
+
+if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
+  if (extension_loaded('newrelic')) { // Ensure PHP agent is available
+    newrelic_disable_autorum();
+  }
+}
