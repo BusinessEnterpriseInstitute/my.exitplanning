@@ -36,6 +36,8 @@
         if (reached) {
           window.clearInterval(scrollListener);
           $('.block-webform-client-block-181086').show();
+          $('.block-webform-client-block-181086').prepend('<div class="alert-close">X</div>');
+
         }
       }
 
@@ -46,6 +48,13 @@
         else {
           window.location.href = "/wizard-b";
         }
+      });
+
+      $(function(c) {
+      $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){
+        $(this).closest($('.popup')).fadeOut('slow', function(c){
+          });
+        }); 
       });
     }
   };     
