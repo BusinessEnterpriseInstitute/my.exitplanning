@@ -52,7 +52,8 @@
 
       $(function(c) {
       $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){
-        $(this).closest($('.popup')).hide(function(c){
+        $(this).closest($('.popup')).hide( 'slow', function(c){
+          $( this ).remove();
           });
         }); 
       });
