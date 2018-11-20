@@ -173,7 +173,13 @@ function campaign_monitor_lists_stats($entity) {
   
   $header = array();
   $rows = array();
-  $entity->content['stats_wrapper'] = array(
+  $entity->content['stats'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('row'),
+    ),
+  );
+  $entity->content['stats']['stats_wrapper'] = array(
     '#type' => 'container',
     '#attributes' => array(
       'id' => 'stats-wrapper',
@@ -223,7 +229,7 @@ function campaign_monitor_lists_stats($entity) {
         '#labels' => array('Active', 'Unsubscribed', 'Bounces', 'Deleted'),
         '#data' => array($stats->TotalActiveSubscribers, $stats->TotalUnsubscribes, $stats->TotalBounces, $stats->TotalDeleted),
       );
-      $entity->content['stats_wrapper']['chart'] = array(
+      $entity->content['stats']['stats_wrapper']['chart'] = array(
         '#markup' => '<div id="list-summary-chart" style="border:1px solid #ccc; margin-bottom: 20px; padding:10px;"><h6 class="text-center">Subscriber Summary</h6>' . drupal_render($chart) . '</div>',
       );
     }
@@ -401,9 +407,13 @@ function campaign_monitor_lists_stats($entity) {
     'rows' => $rows,
     'empty' => t('Unable to produce stats for this list.'),
   ));
-  $entity->content['stats_wrapper']['table'] = array(
+  $entity->content['stats']['stats_wrapper']['table'] = array(
     '#type' => 'markup',
     '#markup' => '<div>' . $table . '</div>',
+  );
+  $entity->content['stats']['recent_campaigns'] = array(
+    '#type' => 'markup',
+    '#markup' => '<div class="columns large-6" id="list-stats-campaigns-recent"><h2>Campaign History</h2>' . views_embed_view('recent_campaigns', 'default', $entity->id) . '</div>',
   );
   return $entity->content;
 }
