@@ -192,20 +192,21 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
         '#legend_position' => 'right',
         '#data_labels' => TRUE,
         '#tooltips' => FALSE,
-        '#width' => '900',
-        '#height' => '500',
         '#raw_options' => array(
-          'title' => 'Distribution of E-mails',
-          'titleTextStyle' => array(
-            'bold' => TRUE,
-            'fontSize' => 20,
-          ),
           'is3D' => TRUE,
           'slices' => array(
             0 => array('color' => '#24CBE5'),
             1 => array('color' => '#5D5D5D'),
             2 => array('color' => '#FFC001'),
             3 => array('color' => '#ED561B'),
+          ),
+          'width' => '100%',
+          'height' => '400',
+          'chartArea' => array(
+            'left' => 'auto',
+            'top' => 'auto',
+            'height' => '75%',
+            'width' => '100%',
           ),
         ),
       );
@@ -216,7 +217,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
         '#data' => array($unique_opened, $unopened, $bounced, $unsubscribed),
       );
       $entity->content['chart'] = array(
-        '#markup' => '<div id="campaign-summary-chart" class="columns large-8">' . drupal_render($chart) . '</div>',
+        '#markup' => '<div id="campaign-summary-chart" class="columns large-8"><h6 class="text-center">Distribution of E-mails</h6>' . drupal_render($chart) . '</div>',
       );
     }
     
