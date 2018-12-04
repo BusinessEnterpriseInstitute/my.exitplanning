@@ -132,6 +132,19 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
       $unique_opened = $response->UniqueOpened;
       $spam_complaints = $response->SpamComplaints;
       $unopened = $recipients - ($unique_opened + $bounced);
+      $web_url = $response->WebVersionURL;
+
+      // Create a section to copy a public web-url to the campaign.
+      $web_version = l(t('Campaign Link'), $web_url, array('external' => TRUE, 'attributes' => array('target' => '_blank', 'class' => array('button postfix'))));
+      $web_version_box = '
+      <div class="panel-callout"><div class="form-item form-type-textfield row collapse">
+      <label>Campaign on the web</label>
+        <div class="small-10 columns">
+          <input type="text" class="form-text" style="background-color:#fff;" onClick="this.setSelectionRange(0, this.value.length)" readonly="readonly" value=' . check_plain($web_url) . '>
+        </div>
+        <div class="small-2 columns">' . $web_version . '</div>
+        <div class="description" style="margin:0;">Share this link on your website or social media platforms to promote this campaign.</div>
+      </div></div>';
       
       if ($recipients > 0) {
         $header_string = $recipients > 1 ? 'e-mails were' : 'e-mail was';
@@ -217,10 +230,16 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
         '#data' => array($unique_opened, $unopened, $bounced, $unsubscribed),
       );
       $entity->content['chart'] = array(
-        '#markup' => '<div id="campaign-summary-chart" class="columns large-8"><h6 class="text-center">Distribution of E-mails</h6>' . drupal_render($chart) . '</div>',
+        '#markup' => '<div id="campaign-summary-chart" class="columns large-8"><h6 class="text-center">Distribution of E-mails</h6>' . drupal_render($chart) . $web_version_box . '</div>',
       );
     }
-    
+    $summary_table = theme('table', array(
+      'header' => array(),
+      'rows' => $rows,
+      'attributes' => array(
+        'width' => '100%',
+      ),
+    ));
     $entity->content['summary'] = array(
       '#theme_wrappers' => array('container'),
       '#attributes' => array(
@@ -233,13 +252,7 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
         '#suffix' => '</div>',
       ),
       'table' => array(
-        '#markup' => theme('table', array(
-          'header' => array(),
-          'rows' => $rows,
-          'attributes' => array(
-            'width' => '100%',
-          ),
-        )),
+        '#markup' => $summary_table,
       ),
     );
   }
