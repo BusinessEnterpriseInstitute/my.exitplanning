@@ -444,36 +444,6 @@ function ep_alters_postal_code_validate(&$form, &$form_state) {
     }
   }
 }
-// Alter node form.
-function ep_alters_form_node_form_alter(&$form, &$form_state, $form_id) {
-  if ($form['#form_id'] == 'subscriber_list_node_form' || $form['#form_id'] == 'campaign_node_form') {
-    global $user;
-    $is_administrator = in_array('administrator', array_values($user->roles)) || in_array('BEI Administrator', array_values($user->roles));
-    if (!$is_administrator) {
-      form_disable_vertical_tabs_member($form);
-    }
-    else {
-      form_disable_vertical_tabs($form);
-    }
-  }
-}
-
-/**
- * Disable Vertical tabs on a form with simply changing the value of $form['additional_settings']['#type']
- * @see https://drupal.org/node/1048644
- */
-function form_disable_vertical_tabs(&$form){
-  // originally $form['additional_settings']['#type'] equals to 'vertical_tabs'
-  if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
-    $form['additional_settings']['#type'] = 'fieldset';
-  }
-}
-function form_disable_vertical_tabs_member(&$form) {
-  if(isset($form['additional_settings']['#type']) && ($form['additional_settings']['#type'] == 'vertical_tabs')){
-    $form['additional_settings']['#type'] = 'fieldset';
-    $form['additional_settings']['#attributes']['class'][] = 'element-invisible';
-  }
-}
 
 function callback_for_cancel_button($form, &$form_state) {
   if (isset($_GET['destination'])) {
@@ -543,29 +513,6 @@ function ep_alters_form_rules_panes_render_form_alter(&$form, &$form_state, $for
       '#required' => FALSE,
       '#description' => t('A personal message will be prepended to the body of the article.'),
     );
-  }
-  if ($form['component']['#value'] == 'rules_create_custom_campaign') {
-    $form['parameter']['title']['settings']['title'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Administrative Title'),
-      '#required' => TRUE,
-      '#description' => t('Enter a name for this campaign to identify this Campaign internally.')
-    );
-    $form['parameter']['headline']['settings']['headline'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Article Headline'),
-      '#required' => TRUE,
-      '#description' => t('Enter the title of the article for this Campaign.')
-    );
-    if (!empty($query_parameters)) {
-      $form['actions']['cancel'] = array(
-        '#type'   => 'submit',
-        '#value'  => t('Cancel'),
-        '#submit' => array('callback_for_cancel_button'),
-        '#limit_validation_errors' => array(),
-        '#weight' => 10000,
-      );
-    }
   }
 }
 function ep_alters_email_validation($element, &$form_state) {
@@ -898,105 +845,6 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
       );
     }
   }
-}
-
- /**
- * Implements hook_block_info().
- */
-function ep_alters_block_info() {
-  $blocks = array();
-  $blocks['newsletter_tabs'] = array(
-    'info' => t('Newsletter Tabs'),
-    'cache' => DRUPAL_NO_CACHE
-  );
-  return $blocks;
-}
-/**
- * Implements hook_block_view().
- */
-function ep_alters_block_view($delta = '') {
-  $block = array();
-  // The $delta parameter tells us which block is being requested.
-  switch ($delta) {
-    case 'newsletter_tabs':
-      global $user;
-      //$node = menu_get_object();
-      if (arg(0) == 'node' && is_numeric(arg(1))) {
-        $nid = arg(1);
-        $node = node_load($nid);
-        $tabs = array();
-        $actions = array();
-        $actions_drop = '';
-        $export = array();
-        if ($node->type == 'subscriber_list') {
-          $manage_campaigns = field_get_items('node', $node, 'field_campaign_management');
-          $subscribers_view = views_get_view_result('bei_subscribers_export', 'default', $nid);
-          // Lets make sure the user has access to edit the node.
-          if (node_access('update', $node)) {
-            // Lets make tabs everything beyond the default page.
-            if (arg(2) && arg(2) != 'edit') {
-              $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Dashboard'), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Dashboard'))));
-              if (arg(2) == 'campaigns' && !arg(3)) {
-                // Lets make sure the list is flagged as "Email Verified".
-                // If we don't check for this, we get problems on the mailchimp side at time of scheduling or sending a campaign.
-                $email_verified = flag_get_flag('email_verified');
-                if ($email_verified->is_flagged($nid)) {
-                  // Since email is verified, we can let someone create campaigns.
-                  $campaign_actions = array();
-                  // Lets check for some additional permissions before we create the links.
-                  if ($manage_campaigns[0]['value'] == 1) {
-                    // Check to see if user can access template library page.
-                    if (user_access('bei_mailchimp_access_campaign_templates')) {
-                      $campaign_actions[] = l(t('Use a BEI Article'), 'node/' . $nid . '/campaigns/templates', array('attributes' => array('title' => t('Create campaigns from BEI article content'))));
-                    }
-                    // Check to see if user can create a custom campaign.
-                    if (user_access('bei_mailchimp_create_campaign')) {
-                      $campaign_actions[] = l(t('Use my own Article'), 'node/' . $nid . '/create-campaign', array('attributes' => array('title' => t('Create a campaign with your own article content')), 'query' => array(drupal_get_destination())));
-                    }
-                    if (!empty($campaign_actions)) {
-                      $actions[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Create Campaign') . '<span></span>', '', array('html' => TRUE, 'fragment' => ' ', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'campaign-actions', 'class' => array('button success split'))));
-                      $actions_drop .= ep_alters_item_list(array('items' => $campaign_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'campaign-actions', 'class' => 'f-dropdown')));
-                    }
-                  }
-                }
-                $tabs[] = l('<i class="icon-calendar3">&nbsp;&nbsp;</i>' . t('Scheduled'), 'node/' . $nid . '/campaigns/scheduled', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('View scheduled campaigns'))));
-              }
-              if (arg(3) == 'templates' || arg(3) == 'scheduled') {
-                $tabs[] = l('<i class="icon-arrow-left4">&nbsp;&nbsp;</i>' . t('Campaigns'), 'node/' . $nid . '/campaigns', array('html' => TRUE, 'attributes' => array('class' => 'button secondary', 'title' => t('Return to Campaigns'))));
-              }
-              if (arg(2) == 'subscribers' && !arg(3)) {
-                if (user_access('create subscriber')) {
-                  $tabs[] = l('<i class="icon-plus-circle">&nbsp;&nbsp;</i>' . t('Add Subscriber'), 'node/' . $nid . '/subscribers/add', array('html' => TRUE, 'attributes' => array('class' => array('button success'), 'title' => t('Add a subscriber to @list', array('@list' => $node->title))), 'query' => array(drupal_get_destination())));
-                }
-                if ($subscribers_view) {
-                  $export[] = l('<i class="icon-download">&nbsp;&nbsp;</i>' . t('Export') . '<span></span>', '', array('html' => TRUE, 'fragment' => '', 'external' => TRUE, 'attributes' => array('data-dropdown' => 'export-actions', 'class' => array('button split'))));
-                  $export_actions = array(
-                    l(t('Export to CSV'), 'node/' . $nid . '/export/subscribers-csv', array('attributes' => array('title' => 'Export to comma delimited file'))),
-                    l(t('Export to Excel'), 'node/' . $nid . '/export/subscribers-xls', array('attributes' => array('title' => 'Export to Excel file')))
-                  );
-                  $actions_drop .= ep_alters_item_list(array('items' => $export_actions, 'type' => 'ul', 'title' => '', 'attributes' => array('id' => 'export-actions', 'class' => 'f-dropdown')));
-                }
-              }
-            }
-          }
-        }
-        if (!empty($tabs) || !empty($actions)) {
-          $block['content'] = '<div class="button-bar">';
-          if (!empty($tabs)) {
-            $block['content'] .= ep_alters_item_list(array('items' => $tabs, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group')));
-          }
-          if (!empty($actions)) {
-            $block['content'] .= ep_alters_item_list(array('items' => $actions, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
-          }
-          if (!empty($export)) {
-            $block['content'] .= ep_alters_item_list(array('items' => $export, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'button-group'))) . $actions_drop;
-          }
-          $block['content'] .= '</div>';
-        }
-      }
-    break;
-  }
-  return $block;
 }
 
 /**
