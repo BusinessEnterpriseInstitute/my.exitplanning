@@ -1129,7 +1129,7 @@ function bei_recurly_checkout_move_to_previous_stage($form, &$form_state) {
   }
 }
 
-function ajax_apply_coupon($form,&$form_state) {
+function ajax_apply_coupon($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 
   $commands = array();
