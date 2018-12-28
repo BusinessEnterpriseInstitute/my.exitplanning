@@ -18,6 +18,12 @@ function ep_alters_menu_alter(&$items) {
   }
 }
 function ep_alters_form_alter(&$form, $form_state, $form_id) {
+  // User profile form.
+  if ($form_id == 'user_profile_form') {
+    if (isset($form['field_address']['und'][0])) {
+      $form['field_address']['und'][0]['#after_build'][] = 'ep_alters_location_after_build';
+    }
+  }
   // User login form.
   if ($form_id == 'user_login' || $form_id == 'user_login_block') {
     $form['#attributes']['autocomplete'] = 'off';
@@ -1023,4 +1029,25 @@ function ep_alters_views_api() {
     'api' => 3,
     'path' => drupal_get_path('module', 'ep_alters') . '/views',
   );
+}
+/**
+ * Implements hook_location_element_alter().
+ */
+function ep_alters_location_element_alter(&$element) {
+  if (isset($element['country'])) {
+    $element['country']['#weight'] = 3;
+  }
+}
+
+/**
+ *  Modify the user profile address field.
+ */
+function ep_alters_location_after_build(&$form_element, &$form_state) {
+  if (isset($form_element['name'])) {
+    unset($form_element['name']);
+  }
+  if (isset($form_element['country'])) {
+    $form_element['country']['#weight'] = 3;
+  }
+  return $form_element;
 }
