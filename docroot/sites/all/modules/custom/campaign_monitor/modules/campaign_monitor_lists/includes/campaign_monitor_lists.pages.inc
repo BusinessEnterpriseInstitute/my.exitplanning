@@ -66,10 +66,10 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       $dashboard .= '<p class="panel callout ' . $automate_class . '">' . $automate . '</p>';
       $link = l('<i class="icon-cog"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/edit', array('query' => $destination, 'html' => TRUE, 'attributes' => $link_attributes));
       $items .= '<li><div class="panel"><h2>Settings</h2>' . $link . '</div></li>';
-      if (module_exists('campaign_monitor_subscribers')) {
-        $link = l('<i class="icon-address-book"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/subscribers', array('html' => TRUE, 'attributes' => $link_attributes));
-        $items .= '<li><div class="panel"><h2>Subscribers</h2>' . $link . '</div></li>';
-      }
+      // Subscribers.
+      $subscribers_link = l('<i class="icon-address-book"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/subscribers', array('html' => TRUE, 'attributes' => $link_attributes));
+      $items .= '<li><div class="panel"><h2>Subscribers</h2>' . $subscribers_link . '</div></li>';
+      // Campaigns.
       if (module_exists('campaign_monitor_campaigns')) {
         $link = l('<i class="icon-mail3"></i>', 'cm-list/' . entity_id('cm_list', $entity) . '/campaigns', array('html' => TRUE, 'attributes' => $link_attributes));
         $items .= '<li><div class="panel"><h2>Campaigns</h2>' . $link . '</div></li>';
