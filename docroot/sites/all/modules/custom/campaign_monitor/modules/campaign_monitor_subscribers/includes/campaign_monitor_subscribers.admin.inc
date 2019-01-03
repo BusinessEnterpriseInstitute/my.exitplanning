@@ -6,99 +6,6 @@
  */
 
 /*
- * Subscribers form.
- */
-function campaign_monitor_subscribers_import_form($form, &$form_state, $list) {
-  $breadcrumb = array();
-  $breadcrumb[] = l(t('Home'), '<front>');
-  $list_uri = entity_uri('cm_list', $list);
-  $breadcrumb[] = l(t('@list', array('@list' => entity_label('cm_list', $list))), $list_uri['path']);
-  $breadcrumb[] = l(t('Subscribers'), $list_uri['path'] . '/subscribers');
-  drupal_set_breadcrumb($breadcrumb);
-  drupal_set_title('Sync Subscribers');
-  $form_state['cm_list'] = $list;
-  $form['report_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Subscriber status'),
-    '#options' => array(
-      'active' => t('Active'),
-      'unconfirmed' => t('Unconfirmed'),
-      'unsubscribed' => t('Unsubscribed'),
-      'bounced' => t('Bounced'),
-      'deleted' => t('Deleted'),
-    ),
-    '#required' => TRUE,
-  );
-  $form['actions'] = array(
-    '#type' => 'actions',
-  );
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit'),
-  );
-  return $form;
-}
-function campaign_monitor_subscribers_import_form_submit(&$form, &$form_state) {
-  $list = $form_state['cm_list'];
-  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
-  $values = $form_state['values'];
-  $report_type = $values['report_type'];
-  $result = NULL;
-  switch ($report_type) {
-    case 'active':
-      $result = $wrap->get_active_subscribers();
-      break;
-    case 'unconfirmed':
-      $result = $wrap->get_unconfirmed_subscribers();
-      break;
-    case 'unsubscribed':
-      $result = $wrap->get_unsubscribed_subscribers();
-      break;
-    case 'bounced':
-      $result = $wrap->get_bounced_subscribers();
-      break;
-    case 'deleted':
-      $result = $wrap->get_deleted_subscribers();
-      break;
-  }
-  if ($result && $result->was_successful()) {
-    $count = $result->response->TotalNumberOfRecords;
-    if ($count >= 1) {
-      $subscribers = $result->response->Results;
-      $counter = 0;
-      foreach ($subscribers as $item) {
-        $query = 'SELECT s.id FROM {campaign_monitor_subscribers} s WHERE s.lid = :lid AND s.email = :email';
-        $subscriber_exists = db_query($query, array(':lid' => $list->id, ':email' => $item->EmailAddress))->fetchField();
-        if (!$subscriber_exists) {
-          $subscriber = entity_create('cm_subscriber', array(
-            'email' => $item->EmailAddress,
-            'name' => $item->Name,
-            'created' => strtotime($item->Date),
-            'changed' => strtotime($item->Date),
-            'state' => $item->State,
-            'lid' => $list->id,
-            'list_id' => $list->list_id,
-            'uid' => $list->uid,
-          ));
-          $subscriber->save();
-          $counter++;
-        }
-      }
-      $message = t('Imported @count new subscribers for %list', array('@count' => number_format($counter), '%list' => entity_label('cm_list', $list)));
-      drupal_set_message($message);
-    }
-    else {
-      $message = t('No %type subscribers found for %list', array('%type' => $report_type, '%list' => entity_label('cm_list', $list)));
-      drupal_set_message($message, 'error');
-    }
-  }
-  else {
-    $error = $result->response->Message;
-    $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-    drupal_set_message($message, 'error');
-  }
-}
-/*
  * Subscriber entity form.
  */
 function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = NULL) {
@@ -111,7 +18,6 @@ function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = 
       'uid' => $user->uid
     ));
   }
-  $data = isset($cm_subscriber->id) ? $cm_subscriber->subscriber_data : array();
   $is_new = isset($cm_subscriber->is_new) ? TRUE : FALSE;
   if (!$is_new) {
     $title = entity_label('cm_subscriber', $cm_subscriber);

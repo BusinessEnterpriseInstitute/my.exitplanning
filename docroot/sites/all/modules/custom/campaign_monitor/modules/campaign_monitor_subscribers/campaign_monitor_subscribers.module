@@ -59,16 +59,6 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.pages.inc',
     'weight' => 5,
   );
-  /*
-  $items['cm-list/%cm_list/subscribers/import'] = array(
-    'title' => 'Import',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('campaign_monitor_subscribers_import_form', 1),
-    'access arguments' => array('administer campaign monitor'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/campaign_monitor_subscribers.admin.inc',
-    'weight' => -8,
-  );*/
   $items['cm-list/%cm_list/add-subscriber'] = array(
     'title' => 'Add Subscriber',
     'description' => 'Add subscriber to Campaign Monitor.',
@@ -109,43 +99,6 @@ function campaign_monitor_subscribers_menu() {
     'file' => 'includes/campaign_monitor_subscribers.admin.inc',
     'type' => MENU_CALLBACK,
   );
-  
-  // Subscribers
-  /*
-  $items['cm-subscriber/%cm_subscriber'] = array(
-    'type' => MENU_CALLBACK,
-    'title' => 'View Subscriber',
-    'page callback' => 'campaign_monitor_subscribers_subscriber_history', // change to 'entity_ui_entity_page_view' to show default extra fields.
-    'page arguments' => array(1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('view', 'cm_subscriber', 1),
-    'file' => 'includes/campaign_monitor_subscribers.pages.inc',
-  );
-  $items['cm-subscriber/%cm_subscriber/view'] = array(
-    'title' => 'View',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'weight' => -10,
-  );
-  $items['cm-subscriber/%cm_subscriber/edit'] = array(
-    'title' => 'Edit',
-    'page callback' => 'entity_ui_get_form',
-    'page arguments' => array('cm_subscriber', 1, 'edit'),
-    'access callback' => 'entity_access',
-    'access arguments' => array('update', 'cm_subscriber', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/campaign_monitor_subscribers.admin.inc',
-    'weight' => -9,
-  );
-  $items['cm-subscriber/%cm_subscriber/delete'] = array(
-    'title' => 'Delete',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('cm_subscriber_delete_form', 1),
-    'access callback' => 'entity_access',
-    'access arguments' => array('delete', 'cm_subscriber', 1),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'includes/campaign_monitor_subscribers.admin.inc',
-    'weight' => -8,
-  );*/
 
   return $items;
 }
@@ -224,97 +177,11 @@ function campaign_monitor_subscribers_entity_info() {
         ),
       ),
     ),
-    'access callback' => 'campaign_monitor_subscribers_access',
-    /*
-    'admin ui' => array(
-      'path' => 'admin/campaign-monitor/subscribers',
-      'controller class' => 'CmSubscriberEntityUIController',
-      'access arguments' => array('administer campaign monitor'),
-      'file' => 'includes/campaign_monitor_subscribers.admin.inc',
-    ),*/
     'uri callback' => 'entity_class_uri',
-    'load hook' => 'cm_subscriber_load',
   );
   return $info;
 }
-/**
- * Implements hook_entity_property_info_alter().
- */
-function campaign_monitor_subscribers_entity_property_info_alter(&$info) {
-  $properties = &$info['cm_subscriber']['properties'];
-  $properties['uid'] = array(
-    'label' => t('User'),
-    'type' => 'user',
-    'description' => t('The user associated with the subscriber'),
-    'setter callback' => 'entity_property_verbatim_set',
-    'setter permission' => 'administer campaign monitor',
-    'schema field' => 'uid',
-  );
-  $properties['lid'] = array(
-    'label' => t('List'),
-    'type' => 'cm_list',
-    'description' => t('The list entity associated with the subscriber'),
-    'setter callback' => 'entity_property_verbatim_set',
-    'setter permission' => 'administer campaign monitor',
-    'schema field' => 'lid',
-  );
-  $properties['edit_url'] = array(
-    'label' => t('Edit Link'),
-    'description' => t('The URL of the subscriber\'s edit page.'),
-    'getter callback' => 'campaign_monitor_subscribers_get_properties',
-    'type' => 'uri',
-    'computed' => TRUE,
-    'entity views field' => TRUE,
-  );
-  $properties['delete_url'] = array(
-    'label' => t('Delete Link'),
-    'description' => t('The URL to delete a subscriber.'),
-    'getter callback' => 'campaign_monitor_subscribers_get_properties',
-    'type' => 'uri',
-    'computed' => TRUE,
-    'entity views field' => TRUE,
-  );
-  $properties['state'] = array(
-    'label' => t('Status'),
-    'type' => 'text',
-    'description' => t('The status of the subscriber.'),
-    'schema field' => 'state',
-    'options list' => 'campaign_monitor_subscribers_status_list',
-    'setter callback' => 'entity_property_verbatim_set',
-  );
-  $properties['created'] = array(
-    'label' => t('Date Created'),
-    'type' => 'date',
-    'description' => t('The date the subsciber was created.'),
-    'schema field' => 'created',
-    'setter callback' => 'entity_property_verbatim_set',
-  );
-  $properties['changed'] = array(
-    'label' => t('Date Updated'),
-    'type' => 'date',
-    'description' => t('The date the subsciber was most recently updated.'),
-    'schema field' => 'changed',
-    'setter callback' => 'entity_property_verbatim_set',
-  );
-}
-/**
- * Callback for getting subscriber properties.
- *
- */
-function campaign_monitor_subscribers_get_properties($subscriber, array $options, $name, $entity_type) {
-  switch ($name) {
-    case 'edit_url':
-      $options = array('query' => drupal_get_destination());
-      return url('cm-subscriber/' . $subscriber->id . '/edit', $options);
-      break;
-    case 'delete_url':
-      if ($subscriber->state != 'Deleted') {
-        $options = array('query' => drupal_get_destination());
-        return url('cm-subscriber/' . $subscriber->id . '/delete', $options);
-      }
-      break;
-  }
-}
+
 /**
  * Callback for returning a list of subsriber states.
  */
@@ -329,97 +196,7 @@ function campaign_monitor_subscribers_status_list($subscriber) {
   return drupal_map_assoc($statuses);
 }
 
-/*******************************************************************************
- ********************************* Subscriber API's ****************************
- ******************************************************************************/
-/**
- * Access callback for cm_subscriber entities.
- */
-function campaign_monitor_subscribers_access($op, $subscriber = NULL, $account = NULL, $entity_type = NULL) {
-  global $user;
-  if (!isset($account)) {
-    $account = $user;
-  }
-  switch ($op) {
-    case 'create':
-      return user_access('administer campaign monitor', $account) ||
-      user_access('create subscriber', $account);
-    case 'view':
-      return user_access('administer campaign monitor', $account) ||
-      (user_access('view own subscribers', $account) && ($subscriber->uid === $account->uid));
-    case 'update':
-      return user_access('administer campaign monitor', $account) ||
-      (user_access('edit own subscribers', $account) && ($subscriber->uid === $account->uid));
-    case 'delete':
-      return user_access('administer campaign monitor', $account) ||
-      (user_access('delete own subscribers', $account) && ($subscriber->uid === $account->uid));
-  }
-}
 function campaign_monitor_subscribers_update_access($list) {
   $access = !empty($_GET['email']) && entity_access('update', 'cm_list', $list);
   return $access;
-}
-/**
- *  Load a subscriber.
- */
-function cm_subscriber_load($id = NULL, $reset = FALSE){
-  $ids = (isset ($id) ? array($id) : array());
-  $subscriber = cm_subscriber_load_multiple($ids, $reset);
-  return $subscriber ? reset ($subscriber) : FALSE;
-}
-function cm_subscriber_load_multiple($ids = array(), $conditions = array(), $reset = FALSE){
-  return entity_load('cm_subscriber', $ids, $conditions, $reset);
-}
-/**
- * Delete single subscriber.
- */
-function cm_subscriber_delete($subscriber) {
-   // Delete the subscriber entity
-   entity_delete('cm_subscriber', entity_id('cm_subscriber', $subscriber));
-}
-/**
- * Delete multiple subscribers.
- */
-function cm_subscriber_delete_multiple($ids) {
-  entity_delete_multiple('cm_list', $ids);
-}
-/**
- * Implements hook_views_api().
- */
-function campaign_monitor_subscribers_views_api() {
-  return array(
-    'api' => 3,
-    'path' => drupal_get_path('module', 'campaign_monitor_subscribers') . '/views',
-  );
-}
-
-/**
- * Helper function to check for duplicate e-mail addresses.
- */
-function campaign_monitor_subscribers_unique_email($email, $list_id) {
-  $query = "SELECT e.email, e.list_id, e.state " .
-           "FROM {campaign_monitor_subscribers} e " .
-           "WHERE email = :email";
-  $email_items = db_query($query, array(':email' => $email))->fetchAll();
-  if (!empty($email_items)) {
-      $my_list = FALSE;
-      $other_list = FALSE;
-      foreach($email_items as $item) {
-        if ($item->list_id == $list_id) {
-          $my_list = TRUE;
-          break;
-        }
-        if ($item->state == 'Active') {
-          $other_list = TRUE;
-          break;
-        }
-      }
-      if ($my_list) {
-        return array('match' => 'self', 'status' => $item->state);
-      }
-      elseif ($other_list) {
-        return array('match' => 'other', 'status' => 'Active');
-      }
-  }
-  return;
 }

@@ -20,6 +20,11 @@ function campaign_monitor_lists_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
+  /**
+   * Don't need this unless lists were added through CM ui and want
+   * to sync to site.
+   */
+  /*
   $items['cm-client/%cm_client/lists/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
@@ -29,6 +34,7 @@ function campaign_monitor_lists_menu() {
     'file' => 'includes/campaign_monitor_lists.admin.inc',
     'weight' => -8,
   );
+  */
   $items['cm-client/%cm_client/lists/add'] = array(
     'title' => 'Create list',
     'description' => 'Add list to Campaign Monitor.',
@@ -113,15 +119,6 @@ function campaign_monitor_lists_menu() {
     'access arguments' => array('administer campaign monitor'),
     'type' => MENU_LOCAL_ACTION,
     'file' => 'includes/campaign_monitor_lists.admin.inc',
-  );
-  $items['cm-list/%cm_list/migrate'] = array(
-    'type' => MENU_LOCAL_TASK,
-    'title' => 'Migrate',
-    'page callback' => 'drupal_get_form', // change to 'entity_ui_entity_page_view' to show default extra fields.
-    'page arguments' => array('campaign_monitor_lists_migrate_form', 1),
-    'access arguments' => array('administer campaign monitor'),
-    'file' => 'includes/campaign_monitor_lists.admin.inc',
-    'weight' => 5
   );
   // Webhook routes.
   $items['cm-webhook/%cm_webhook/deactivate'] = array(

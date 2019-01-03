@@ -5,32 +5,10 @@
  * Installation instructions for the campaign_monitor module.
  */
 
-// Set the module weight to 0 to make sure it is run before feeds.
-/*
-db_update('system')
-  ->fields(array('weight' => 0))
-  ->condition('name', 'campaign_monitor', '=')
-  ->execute();
-*/
-
-/**
- * Implements hook_install().
- */
-/*
-function campaign_monitor_install() {
-}*/
-
 /**
  * Implements hook_uninstall().
  */
 function campaign_monitor_uninstall() {
-  /*
-  $fid = db_query("SELECT fid FROM {file_managed} WHERE filename = 'subscribers_template.csv'")->fetchField();
-  if (!empty($fid)) {
-    $file = file_load($fid);
-    file_usage_delete($file, 'campaign_monitor', 'module', 0);
-    file_delete($file);
-  }*/
   // Clean up settings.
   variable_del('campaign_monitor_article_preview');
   variable_del('campaign_monitor_disclaimer');

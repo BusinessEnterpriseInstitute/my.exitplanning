@@ -588,7 +588,6 @@ function campaign_monitor_campaigns_schedule_action($list, $context) {
   $date = new DateTime($context['schedule_date'], new DateTimeZone('America/Denver'));
   $schedule_date = $date->format('Y-m-d H:i');
   $article = $context['article'];
-  $title = 'Create campaign';
   $campaign = entity_create('cm_campaign', array(
     'lid' => $list->id,
     'uid' => $list->uid,

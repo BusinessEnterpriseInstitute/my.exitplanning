@@ -94,15 +94,6 @@ function campaign_monitor_lists_cm_list_view($entity, $view_mode = 'full') {
       </div>';
       $dashboard .= '<div class="panel callout">' . $subscribe_box . '</div>';
     }
-    // Domain authentication.
-    $domain = $entity->from_domain;
-    /*
-    $query = db_query('SELECT d.domain, d.txt_value, d.status, cd.cid, cd.status AS cd_status FROM {campaign_monitor_domains} d LEFT JOIN campaign_monitor_client_domains cd ON d.id = cd.domain_id
-                      WHERE d.domain = :domain AND cd.cid = :client_id', array(':domain' => $domain, ':client_id' => $entity->cid))->fetchObject();
-    dpm($query);*/
-    $domain_box = '
-    <div class="panel callout">' . $domain . '</div>';
-    //$dashboard .= $domain_box;
     $entity->content['dashboard'] = array(
       '#type' => 'markup',
       '#markup' => '<div class="newsletter-dashboard">' . $dashboard . '</div>',
@@ -162,7 +153,6 @@ function campaign_monitor_lists_webhooks($list) {
  * Page callback to display campaign monitor stats for list.
  */
 function campaign_monitor_lists_stats($entity) {
-  $client = cm_client_load($entity->cid);
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');

@@ -1,5 +1,9 @@
 <?php
-
+/**
+ * Set some default variables for CM api.
+ * Timezones dont map up to drupal format so normally the default should always
+ * be used.
+ */
 define('CAMPAIGN_MONITOR_DEFAULT_TIMEZONE', '(GMT-07:00) Mountain Time (US & Canada)');
 define('CAMPAIGN_MONITOR_DEFAULT_COUNTRY', 'United States of America');
 
@@ -63,6 +67,8 @@ function campaign_monitor_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -19,
   );
+  /** Batch function to import clients.
+   * Was added for testing but not necessary.
   $items['admin/campaign-monitor/clients/import'] = array(
     'title' => 'Import clients',
     'description' => 'Test various campaign monitor classes.',
@@ -72,16 +78,7 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.admin.inc',
     'type' => MENU_LOCAL_TASK,
   );
-  /*
-  $items['admin/config/campaign-monitor/clients/add'] = array(
-    'title' => 'Create client',
-    'description' => 'Add client to Campaign Monitor.',
-    'page callback' => 'entity_ui_get_form',
-    'page arguments' => array('cm_client', NULL, 'add'),
-    'access arguments' => array('administer campaign monitor'),
-    'file' => 'includes/campaign_monitor.admin.inc',
-    'type' => MENU_LOCAL_ACTION,
-  );*/
+  */
   $items['cm-client/%cm_client'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'Client',
@@ -108,6 +105,11 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.admin.inc',
     'weight' => -9,
   );
+  /**
+   * This embeds an iframe using the integrator id from CM.
+   * Not currently working on live site now due to https mixed content.
+   */
+  /*
   $items['cm-client/%cm_client/session'] = array(
     'title' => 'Session',
     'description' => 'Embedded Campaign Monitor session.',
@@ -118,6 +120,7 @@ function campaign_monitor_menu() {
     'file' => 'includes/campaign_monitor.pages.inc',
     'type' => MENU_LOCAL_TASK,
   );
+  */
   $items['cm-client/%cm_client/delete'] = array(
     'type' => MENU_CALLBACK,
     'title' => 'Delete',
@@ -622,15 +625,6 @@ function campaign_monitor_form_alter(&$form, &$form_state, $form_id) {
   }
 }
 /**
- * Implements hook_location_element_alter().
- */
-/*
-function campaign_monitor_location_element_alter(&$element) {
-  $element['country']['#weight'] = 1;
-  //unset($element['re_geocode_location']);
-  //unset($element['delete_location']);
-}*/
-/**
  * Color validation.
  */
 function campaign_monitor_color_validate($element, &$form_state, $form) {
@@ -686,14 +680,11 @@ function campaign_monitor_newsletter_autocomplete($string) {
  */
 function campaign_monitor_preprocess_html(&$variables) {
   $cm_entity = FALSE;
-  $entity_type = NULL;
   if ($entity = menu_get_object('cm_campaign')) {
     $cm_entity = TRUE;
-    $entity_type = 'cm_campaign';
   }
   elseif ($entity = menu_get_object('cm_list')) {
     $cm_entity = TRUE;
-    $entity_type = 'cm_list';
   }
   if ($cm_entity) {
     if (arg(2) == 'raw') {
@@ -711,7 +702,6 @@ function campaign_monitor_preprocess_html(&$variables) {
  * Implements hook_preprocess_page().
  */
 function campaign_monitor_preprocess_page(&$variables) {
-  //$list = menu_get_object('cm_list');
   if ($entity = menu_get_object('cm_list')) {
     if (arg(2) == 'raw') {
       $variables['theme_hook_suggestions'][] = 'page__cm_list_raw';
@@ -1157,9 +1147,8 @@ function campaign_monitor_hide_format_info($element) {
   if (isset($element['format'])) {
     $element['format']['#access'] = FALSE;
     // You can also hide specific parts if you comment out
-    // the line above.
+    // the lines below.
     /*
-    $element['format']['format']['#access'] = FALSE;
     $element['format']['guidelines']['#access'] = FALSE;
     $element['format']['help']['#access'] = FALSE;
     */
