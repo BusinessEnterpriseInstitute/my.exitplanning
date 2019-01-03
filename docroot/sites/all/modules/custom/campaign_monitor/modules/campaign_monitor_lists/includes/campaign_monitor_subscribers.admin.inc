@@ -143,6 +143,7 @@ function campaign_monitor_subscribers_update_page($list) {
 function campaign_monitor_subscribers_update_form($form, &$form_state, $list, $subscriber) {
   $form_state['cm_list'] = $list;
   $form_state['old_email'] = $subscriber->EmailAddress;
+  $is_deleted = $subscriber->State == 'Deleted' ? TRUE : FALSE;
   $form['email'] = array(
     '#type' => 'textfield',
     '#title' => t('E-mail Address'),
@@ -155,17 +156,13 @@ function campaign_monitor_subscribers_update_form($form, &$form_state, $list, $s
     '#title' => t('Name'),
     '#default_value' => $subscriber->Name,
   );
-  /**
-   * @todo
-   * Tell api to resubscribe deleted subscriber.
-   */
-  /*
-  if ($subscriber->state == 'Deleted') {
+  // Add resubscribe checkbox if deleted status.
+  if ($is_deleted) {
     $form['resubscribe'] = array(
       '#type' => 'checkbox',
       '#title' => t('Resubscribe'),
     );
-  }*/
+  }
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -193,10 +190,12 @@ function campaign_monitor_subscribers_update_form_submit(&$form, &$form_state) {
   $change_values = array(
     'ConsentToTrack' => 'Unchanged',
   );
+  $resubscribe = !empty($values['resubscribe']) ? TRUE : FALSE;
   $result = $wrap->update($old_email, array(
     'Name' => $values['name'],
     'EmailAddress' => $values['email'],
     'ConsentToTrack' => 'Unchanged',
+    'Resubscribe' => $resubscribe,
   ));
   if ($result->was_successful()) {
     drupal_set_message(t('Subscriber details updated.'));

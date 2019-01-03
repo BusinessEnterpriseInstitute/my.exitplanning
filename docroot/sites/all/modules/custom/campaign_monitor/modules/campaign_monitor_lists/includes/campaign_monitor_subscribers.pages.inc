@@ -70,6 +70,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         $help_text = t('You will only see subscribers with this status if they have been deleted from the list through your account or were imported from a previous
                        newsletter platform with the same status.');
         $delete_link = FALSE;
+        $update_link = TRUE;
         break;
     }
     if (!empty($help_text)) {
