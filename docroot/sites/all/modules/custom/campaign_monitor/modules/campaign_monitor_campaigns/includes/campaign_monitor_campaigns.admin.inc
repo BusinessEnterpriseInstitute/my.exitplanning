@@ -535,24 +535,3 @@ function cm_campaign_send_form_submit($form, &$form_state) {
   }
   $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
 }
-/**
- * Helper function to schedule or send a campaign.
- */
-/*
-function campaign_monitor_campaigns_send($campaign, $campaign_id, $send_option, $send_date) {
-  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
-  $result = $wrap->send(array(
-    'ConfirmationEmail' => 'amarquis@exitplanning.com',
-    'SendDate' => $send_date,
-  ));
-  if ($result->was_successful()) {
-    $campaign->campaign_status = $new_status;
-    $campaign->send_date = $send_option == 1 ? REQUEST_TIME : strtotime($schedule_date);
-    $campaign->save();
-    return TRUE;
-  }
-  else {
-    return;
-  }
-}*/
-

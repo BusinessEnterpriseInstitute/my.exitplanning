@@ -49,7 +49,6 @@ function campaign_monitor_campaigns_cm_campaign_view($entity, $view_mode = 'full
   $entity->content = array(
     '#view_mode' => $view_mode,
   );
-  //$data = $entity->list_data;
   // Build fields content - this is where the Field API really comes in to play.
   // The task has very little code here because it all gets taken care of by
   // field module.
