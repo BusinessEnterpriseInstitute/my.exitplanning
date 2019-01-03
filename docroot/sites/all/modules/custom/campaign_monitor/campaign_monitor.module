@@ -1170,3 +1170,35 @@ function campaign_monitor_admin_paths() {
   );
   return $paths;
 }
+
+/**
+ * Implements hook_entity_delete().
+ */
+function campaign_monitor_entity_delete($entity, $type) {
+  if ($type == 'cm_client') {
+    // Remove campaign monitor list entities related to client.
+    if (module_exists('campaign_monitor_lists')) {
+      $lists = new EntityFieldQuery();
+      $lists->entityCondition('entity_type', 'cm_list');
+      $lists->propertyCondition('cid', entity_id('cm_client', $entity), '=');
+      $result = $lists->execute();
+      if (isset($result['cm_list'])) {
+        $ids = array_keys($result['cm_list']);
+        entity_delete_multiple('cm_list', $ids);
+      }
+    }
+  }
+  if ($type == 'cm_list') {
+    // Remove campaign monitor campaign entities related to list.
+    if (module_exists('campaign_monitor_campaigns')) {
+      $campaigns = new EntityFieldQuery();
+      $campaigns->entityCondition('entity_type', 'cm_campaign');
+      $campaigns->propertyCondition('lid', entity_id('cm_list', $entity), '=');
+      $result = $campaigns->execute();
+      if (isset($result['cm_campaign'])) {
+        $ids = array_keys($result['cm_campaign']);
+        entity_delete_multiple('cm_campaign', $ids);
+      }
+    }
+  }
+}

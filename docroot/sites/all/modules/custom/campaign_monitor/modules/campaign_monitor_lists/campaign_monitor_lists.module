@@ -558,17 +558,3 @@ function campaign_monitor_lists_views_api() {
     'path' => drupal_get_path('module', 'campaign_monitor_lists') . '/views',
   );
 }
-
-/**
- * Implements hook_entity_delete().
- */
-function campaign_monitor_lists_entity_delete($entity, $type) {
-  if ($type == 'cm_list') {
-    if (module_exists('campaign_monitor_subscribers')) {
-      // Delete the referenced subscribers.
-      db_delete('campaign_monitor_subscribers')
-      ->condition('lid', entity_id('cm_list', $entity))
-      ->execute();
-    }
-  }
-}
