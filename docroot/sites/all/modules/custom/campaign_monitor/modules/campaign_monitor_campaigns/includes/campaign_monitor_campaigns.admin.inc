@@ -524,12 +524,12 @@ function cm_campaign_send_form_submit($form, &$form_state) {
     else {
       // Check for list size approval error which is code 334.
       // @see https://www.campaignmonitor.com/api/campaigns/#sending-draft-campaign
-      if ($result->http_status_code == 334) {
+      if ($result->response->Code == 334) {
         $campaign->campaign_status = 2;
         $campaign->save();
       }
       $error = $result->response->Message;
-      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
       drupal_set_message($message, 'error');
     }
   }

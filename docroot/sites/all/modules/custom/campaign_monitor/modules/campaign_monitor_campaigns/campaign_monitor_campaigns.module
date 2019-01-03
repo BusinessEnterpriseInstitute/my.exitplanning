@@ -588,99 +588,131 @@ function campaign_monitor_campaigns_schedule_action($list, $context) {
   $date = new DateTime($context['schedule_date'], new DateTimeZone('America/Denver'));
   $schedule_date = $date->format('Y-m-d H:i');
   $article = $context['article'];
-  $campaign = entity_create('cm_campaign', array(
-    'lid' => $list->id,
-    'uid' => $list->uid,
-    'list_id' => $list->list_id,
-    'client_id' => $list->client_id,
-    'subject' => $article->title,
-    'from_name' => $list->from_name,
-    'reply_to' => $list->reply_to,
-    'automated' => 1,
-    'background_color' => $list->background_color,
-    'logo_region_status' => $list->logo_region_status,
-    'logo_background_color' => $list->logo_background_color,
-    'logo_link' => $list->logo_link,
-    'banner_region_status' => $list->banner_region_status,
-    'banner_link' => $list->banner_link,
-    'profile_region_status' => $list->profile_region_status,
-    'disclaimer_text' => $list->disclaimer_text,
-    'promotional_text' => $list->promotional_text,
-    'article_title' => $article->title,
-    'article_body' => $article->body['und'][0]['value'],
-  ));
-  $campaign->save();
-  // Set a unique campaign name to use on Campaign Monitor.
-  $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
-  // Set values for field_api fields from list.
-  $list_logo = field_get_items('cm_list', $list, 'field_mc_logo');
-  $list_banner = field_get_items('cm_list', $list, 'field_mc_banner');
-  $list_profile_pic = field_get_items('cm_list', $list, 'field_mc_profile_pic');
-  if ($list_logo) {
-    $file = file_load($list_logo[0]['fid']);
-    $campaign->field_mc_logo[LANGUAGE_NONE][0] = (array) $file;
-  }
-  if ($list_banner) {
-    $file = file_load($list_banner[0]['fid']);
-    $campaign->field_mc_banner[LANGUAGE_NONE][0] = (array) $file;
-  }
-  if ($list_profile_pic) {
-    $file = file_load($list_profile_pic[0]['fid']);
-    $campaign->field_mc_profile_pic[LANGUAGE_NONE][0] = (array) $file;
-  }
-  $campaign->save();
-  
-  // Now create a draft campaign on Campaign monitor.
-  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
-  $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
   $campaign_id = NULL;
-  $result = $wrap->create($campaign->client_id, array(
-    'Subject' => $campaign->subject,
-    'Name' => entity_label('cm_campaign', $campaign),
-    'FromName' => $campaign->from_name,
-    'FromEmail' => $list->from_email,
-    'ReplyTo' => $campaign->reply_to,
-    'HtmlUrl' => $html_url,
-    'ListIDs' => array($campaign->list_id),
-  ));
-  if ($result->was_successful()) {
-    $campaign_id = $result->response;
-    $campaign->campaign_id = $result->response;
-    $campaign->campaign_status = 1;
+  $is_ready = campaign_monitor_campaigns_schedule_check_ready($list);
+  // Check for active subscribers so we don't create campaigns stuck in draft.
+  if ($is_ready) {
+    $campaign = entity_create('cm_campaign', [
+      'lid' => $list->id,
+      'uid' => $list->uid,
+      'list_id' => $list->list_id,
+      'client_id' => $list->client_id,
+      'subject' => $article->title,
+      'from_name' => $list->from_name,
+      'reply_to' => $list->reply_to,
+      'automated' => 1,
+      'background_color' => $list->background_color,
+      'logo_region_status' => $list->logo_region_status,
+      'logo_background_color' => $list->logo_background_color,
+      'logo_link' => $list->logo_link,
+      'banner_region_status' => $list->banner_region_status,
+      'banner_link' => $list->banner_link,
+      'profile_region_status' => $list->profile_region_status,
+      'disclaimer_text' => $list->disclaimer_text,
+      'promotional_text' => $list->promotional_text,
+      'article_title' => $article->title,
+      'article_body' => $article->body['und'][0]['value'],
+    ]);
     $campaign->save();
-  }
-  else {
-    $error = $result->response->Message;
-    $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
-    drupal_set_message($message, 'error');
-  }
-  // If we were able to create a draft campaign, lets schedule it.
-  if ($campaign_id) {
-    $send_wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
-    $result = $send_wrap->send(array(
-      'ConfirmationEmail' => 'confirmations@exitplanning.com',
-      'SendDate' => $schedule_date,
-    ));
+    // Set a unique campaign name to use on Campaign Monitor.
+    $campaign->name = 'Campaign ' . entity_id('cm_campaign', $campaign);
+    // Set values for field_api fields from list.
+    $list_logo = field_get_items('cm_list', $list, 'field_mc_logo');
+    $list_banner = field_get_items('cm_list', $list, 'field_mc_banner');
+    $list_profile_pic = field_get_items('cm_list', $list, 'field_mc_profile_pic');
+    if ($list_logo) {
+      $file = file_load($list_logo[0]['fid']);
+      $campaign->field_mc_logo[LANGUAGE_NONE][0] = (array) $file;
+    }
+    if ($list_banner) {
+      $file = file_load($list_banner[0]['fid']);
+      $campaign->field_mc_banner[LANGUAGE_NONE][0] = (array) $file;
+    }
+    if ($list_profile_pic) {
+      $file = file_load($list_profile_pic[0]['fid']);
+      $campaign->field_mc_profile_pic[LANGUAGE_NONE][0] = (array) $file;
+    }
+    $campaign->save();
+
+    // Now create a draft campaign on Campaign monitor.
+    $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', NULL);
+    $html_url = $GLOBALS['base_url'] . '/cm-campaign/' . entity_id('cm_campaign', $campaign) . '/raw';
+    $result = $wrap->create($campaign->client_id, [
+      'Subject' => $campaign->subject,
+      'Name' => entity_label('cm_campaign', $campaign),
+      'FromName' => $campaign->from_name,
+      'FromEmail' => $list->from_email,
+      'ReplyTo' => $campaign->reply_to,
+      'HtmlUrl' => $html_url,
+      'ListIDs' => [$campaign->list_id],
+    ]);
     if ($result->was_successful()) {
-      $campaign->campaign_status = 3;
-      $campaign->send_date = strtotime($schedule_date);
+      $campaign_id = $result->response;
+      $campaign->campaign_id = $result->response;
+      $campaign->campaign_status = 1;
       $campaign->save();
     }
     else {
-      // Check for list size approval error which is code 334.
-      // @see https://www.campaignmonitor.com/api/campaigns/#sending-draft-campaign
-      if ($result->http_status_code == 334) {
-        $campaign->campaign_status = 2;
-        $campaign->save();
-      }
       $error = $result->response->Message;
-      $message = t('Failed with code @code. %error', array('@code' => $result->http_status_code, '%error' => $error));
+      $message = t('Failed with code @code. %error', [
+        '@code' => $result->http_status_code,
+        '%error' => $error
+      ]);
       drupal_set_message($message, 'error');
     }
-    // Set the list to locked to remove it from queue.
-    $list->locked = 1;
-    $list->save();
+    // If we were able to create a draft campaign, lets schedule it.
+    if ($campaign_id) {
+      $send_wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign_id);
+      $result = $send_wrap->send([
+        'ConfirmationEmail' => 'confirmations@exitplanning.com',
+        'SendDate' => $schedule_date,
+      ]);
+      if ($result->was_successful()) {
+        $campaign->campaign_status = 3;
+        $campaign->send_date = strtotime($schedule_date);
+        $campaign->save();
+      }
+      else {
+        // Check for list size approval error which is code 334.
+        // @see https://www.campaignmonitor.com/api/campaigns/#sending-draft-campaign
+        if ($result->response->Code == 334) {
+          $campaign->campaign_status = 2;
+          $campaign->save();
+        }
+        $error = $result->response->Message;
+        $message = t('Failed with code @code. %error', [
+          '@code' => $result->http_status_code,
+          '%error' => $error
+        ]);
+        drupal_set_message($message, 'error');
+      }
+    }
   }
+  else {
+    $message = t('Campaign scheduling skipped for List %list. No active subscribers.', ['%list' => entity_label('cm_list', $list)]);
+    drupal_set_message($message, 'error');
+  }
+  // Set the list to locked to remove it from queue.
+  $list->locked = 1;
+  $list->save();
+}
+
+/**
+ * @param $list
+ *
+ * @return bool
+ */
+function campaign_monitor_campaigns_schedule_check_ready($list) {
+  $wrap = campaign_monitor_get_api_object('CS_REST_Lists', $list->list_id);
+  $result = $wrap->get_stats();
+  $ready = FALSE;
+  if ($result->was_successful()) {
+    $stats = $result->response;
+    if ($stats->TotalActiveSubscribers > 0) {
+      $ready = TRUE;
+    }
+  }
+  return $ready;
 }
 /**
  * Action submit function to unlock lists.
