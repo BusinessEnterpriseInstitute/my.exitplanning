@@ -6,47 +6,25 @@
  */
 
 /*
- * Subscriber entity form.
+ * Subscriber add form.
  */
-function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = NULL) {
+function cm_subscriber_form($form, &$form_state, $list = NULL) {
   $breadcrumb = array();
   drupal_set_breadcrumb($breadcrumb);
   global $user;
-  if (!isset($cm_subscriber->id)) {
-    $cm_subscriber = entity_create('cm_subscriber', array(
-      'lid' => $list->id,
-      'uid' => $user->uid
-    ));
-  }
-  $is_new = isset($cm_subscriber->is_new) ? TRUE : FALSE;
-  if (!$is_new) {
-    $title = entity_label('cm_subscriber', $cm_subscriber);
-    $list = cm_list_load($cm_subscriber->lid);
-  }
-  else {
-    $title = 'Create subscriber';
-  }
+  $title = 'Create subscriber';
   drupal_set_title($title);
   $form_state['cm_list'] = $list;
-  $form_state['cm_subscriber'] = $cm_subscriber;
   $form['email'] = array(
     '#type' => 'textfield',
     '#title' => t('E-mail Address'),
     '#required' => TRUE,
-    '#default_value' => isset($cm_subscriber->email) ? $cm_subscriber->email : '',
     '#element_validate' => array('campaign_monitor_subscribers_email_validate'),
   );
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
-    '#default_value' => isset($cm_subscriber->name) ? $cm_subscriber->name : '',
   );
-  if (!$is_new && $cm_subscriber->state == 'Deleted') {
-    $form['resubscribe'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Resubscribe'),
-    );
-  }
   $form['actions'] = array(
     '#type' => 'actions',
   );
@@ -69,7 +47,6 @@ function cm_subscriber_form($form, &$form_state, $cm_subscriber = NULL, $list = 
  * Errors should be signaled with form_set_error().
  */
 function campaign_monitor_subscribers_email_validate($element, &$form_state, $form) {
-  $list = $form_state['cm_list'];
   if (!valid_email_address($element['#value'])) {
     form_error($element, t($element['#title'] . ' is not a valid email address.'));
   }
@@ -178,6 +155,17 @@ function campaign_monitor_subscribers_update_form($form, &$form_state, $list, $s
     '#title' => t('Name'),
     '#default_value' => $subscriber->Name,
   );
+  /**
+   * @todo
+   * Tell api to resubscribe deleted subscriber.
+   */
+  /*
+  if ($subscriber->state == 'Deleted') {
+    $form['resubscribe'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Resubscribe'),
+    );
+  }*/
   $form['actions'] = array(
     '#type' => 'actions',
   );
