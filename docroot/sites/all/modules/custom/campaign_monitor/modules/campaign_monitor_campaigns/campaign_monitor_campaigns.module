@@ -211,6 +211,15 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
   );
+  $items['cm-campaign/%cm_campaign/unschedule'] = array(
+    'title' => 'Unschedule campaign',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_unschedule_form', 1),
+    'access callback' => 'campaign_monitor_unschedule_access',
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+  );
 
   return $items;
 }
@@ -226,6 +235,22 @@ function campaign_monitor_send_access($campaign) {
     return TRUE;
   }
   return;
+}
+
+/**
+ * @param $campaign
+ *
+ * @return bool
+ */
+function campaign_monitor_unschedule_access($campaign) {
+  global $user;
+  if (user_access('administer campaign monitor') || $user->uid === $campaign->uid) {
+    $now = strtotime('now');
+    if ($campaign->campaign_status === 3 && (empty($campaign->send_date) || $campaign->send_date > $now)) {
+      return TRUE;
+    }
+  }
+  return FALSE;
 }
 
 /**
