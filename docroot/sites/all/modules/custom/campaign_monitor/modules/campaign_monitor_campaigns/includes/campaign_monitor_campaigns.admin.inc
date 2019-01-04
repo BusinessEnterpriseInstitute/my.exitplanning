@@ -535,3 +535,44 @@ function cm_campaign_send_form_submit($form, &$form_state) {
   }
   $form_state['redirect'] = 'cm-list/' . entity_id('cm_list', $list) . '/campaigns';
 }
+
+/**
+ * Unschedule confirmation form.
+ */
+function cm_campaign_unschedule_form($form, &$form_state, $campaign) {
+  $form_state['cm_campaign'] = $campaign;
+  $campaign_uri = entity_uri('cm_campaign', $campaign);
+  return confirm_form($form,
+    t('Are you sure you want to unschedule campaign %title?', array('%title' => entity_label('cm_campaign', $campaign))),
+    $campaign_uri['path'],
+    t('This action will revert the status of the campaign back to draft.'),
+    t('Unschedule'),
+    t('Cancel')
+  );
+}
+/**
+ * Unschedule form submit handler.
+ */
+function cm_campaign_unschedule_form_submit($form, &$form_state) {
+  $campaign = $form_state['cm_campaign'];
+  $lid = $campaign->lid;
+  $redirect = 'cm-list/' . $lid . '/campaigns';
+  $wrap = campaign_monitor_get_api_object('CS_REST_Campaigns', $campaign->campaign_id);
+  if ($wrap) {
+    $result = $wrap->unschedule();
+    // Delete our entity if campaign could be deleted on CM or the campaign id couldn't be found.
+    if ($result->was_successful()) {
+      //cm_campaign_delete($campaign);
+      $campaign->campaign_status = 1;
+      $campaign->send_date = NULL;
+      $campaign->save();
+      drupal_set_message(t('Unscheduled campaign %title.', array('%title' => entity_label('cm_campaign', $campaign))));
+    }
+    else {
+      $error = $result->response->Message;
+      $message = t('Failed with code @code. %error', array('@code' => $result->response->Code, '%error' => $error));
+      drupal_set_message($message, 'error');
+    }
+  }
+  $form_state['redirect'] = $redirect;
+}
