@@ -6,7 +6,7 @@
 function campaign_monitor_campaigns_menu() {
   $items = array();
   $items['cm-list/%cm_list/campaigns'] = array(
-    'title' => 'Campaigns',
+    'title' => 'Draft Campaigns',
     'page callback' => 'campaign_monitor_campaigns_list',
     'page arguments' => array(1),
     'access callback' => 'entity_access',
@@ -20,8 +20,8 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['cm-list/%cm_list/campaigns/sent'] = array(
-    'title' => 'Scheduled/Sent',
+  $items['cm-list/%cm_list/campaigns/scheduled'] = array(
+    'title' => 'Scheduled',
     'page callback' => 'campaign_monitor_campaigns_list',
     'page arguments' => array(1, 3),
     'access callback' => 'entity_access',
@@ -29,6 +29,16 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
     'weight' => 2,
+  );
+  $items['cm-list/%cm_list/campaigns/sent'] = array(
+    'title' => 'Sent',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1, 3),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 3,
   );
   $items['cm-list/%cm_list/campaigns/add'] = array(
     'title' => 'Create campaign',
@@ -228,7 +238,7 @@ function campaign_monitor_campaigns_menu() {
  */
 function campaign_monitor_send_access($campaign) {
   global $user;
-  $can_update = user_access('administer campaign monitor') || $campaign->uid === $user->uid;
+  $can_update = user_access('administer campaign monitor') || $campaign->uid == $user->uid;
   $statuses = array(2, 3);
   // Don't allow campaign sending if status is one of "Pending" or "Sent"
   if ($can_update && !in_array($campaign->campaign_status, $statuses)) {
@@ -245,7 +255,9 @@ function campaign_monitor_send_access($campaign) {
  */
 function campaign_monitor_unschedule_access($campaign) {
   global $user;
-  $access = entity_access('update', 'cm_campaign', $campaign);
+  // Administrator can unschedule and Author can unschedule only for
+  // campaigns created by themselves.
+  $access = user_access('administer campaign monitor') ? ($campaign->uid == $user->uid) && empty($campaign->automated) : FALSE;
   $can_unschedule = FALSE;
   if ($access && $campaign->campaign_status == 3) {
     $now = strtotime('now');
@@ -420,6 +432,14 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'schema field' => 'automated',
     'setter callback' => 'entity_property_verbatim_set',
   );
+  $properties['send_status'] = array(
+    'label' => t('Send status'),
+    'description' => t('The sending status of the campaign: scheduled or sent based on send date.'),
+    'type' => 'text',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+  );
 }
 /**
  * Callback for getting campaign properties.
@@ -455,6 +475,18 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
       if (campaign_monitor_unschedule_access($campaign)) {
         $options = array('query' => drupal_get_destination());
         return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/unschedule', $options);
+      }
+      return;
+      break;
+    case 'send_status':
+      if ($campaign->campaign_status == 3 && !empty($campaign->send_date)) {
+        $now = strtotime('now');
+        if ($campaign->send_date > $now) {
+          return t('Scheduled');
+        }
+        else {
+          return t('Sent');
+        }
       }
       return;
       break;
