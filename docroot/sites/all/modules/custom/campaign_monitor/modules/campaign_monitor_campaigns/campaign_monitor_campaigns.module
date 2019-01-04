@@ -211,6 +211,15 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'includes/campaign_monitor_campaigns.admin.inc',
   );
+  $items['cm-campaign/%cm_campaign/unschedule'] = array(
+    'title' => 'Unschedule campaign',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('cm_campaign_unschedule_form', 1),
+    'access callback' => 'campaign_monitor_unschedule_access',
+    'access arguments' => array(1),
+    'type' => MENU_CALLBACK,
+    'file' => 'includes/campaign_monitor_campaigns.admin.inc',
+  );
 
   return $items;
 }
@@ -226,6 +235,25 @@ function campaign_monitor_send_access($campaign) {
     return TRUE;
   }
   return;
+}
+
+/**
+ * Access callback for unscheduling a campaign.
+ * @param $campaign
+ *
+ * @return bool
+ */
+function campaign_monitor_unschedule_access($campaign) {
+  global $user;
+  $access = entity_access('update', 'cm_campaign', $campaign);
+  $can_unschedule = FALSE;
+  if ($access && $campaign->campaign_status == 3) {
+    $now = strtotime('now');
+    if (empty($campaign->send_date) || $campaign->send_date > $now) {
+      $can_unschedule = TRUE;
+    }
+  }
+  return $can_unschedule;
 }
 
 /**
@@ -377,6 +405,14 @@ function campaign_monitor_campaigns_entity_property_info_alter(&$info) {
     'computed' => TRUE,
     'entity views field' => TRUE,
   );
+  $properties['unschedule_link'] = array(
+    'label' => t('Unschedule link'),
+    'description' => t('The URL to unschedule a campaign.'),
+    'getter callback' => 'campaign_monitor_campaigns_get_properties',
+    'type' => 'uri',
+    'computed' => TRUE,
+    'entity views field' => TRUE,
+  );
   $properties['automated'] = array(
     'label' => t('Automated flag'),
     'description' => t('A boolean value that determines if campaign was created through automation.'),
@@ -412,6 +448,13 @@ function campaign_monitor_campaigns_get_properties($campaign, array $options, $n
       if (campaign_monitor_send_access($campaign)) {
         $options = array('query' => drupal_get_destination());
         return url('cm-campaign/' . entity_id($entity_type, $campaign) . '/send', $options);
+      }
+      return;
+      break;
+    case 'unschedule_link':
+      if (campaign_monitor_unschedule_access($campaign)) {
+        $options = array('query' => drupal_get_destination());
+        return url('cm-campaign/' . $entity_id($entity_type, $campaign) . '/unschedule', $options);
       }
       return;
       break;
