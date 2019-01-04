@@ -20,8 +20,8 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => 1,
   );
-  $items['cm-list/%cm_list/campaigns/sent'] = array(
-    'title' => 'Scheduled/Sent',
+  $items['cm-list/%cm_list/campaigns/scheduled'] = array(
+    'title' => 'Scheduled',
     'page callback' => 'campaign_monitor_campaigns_list',
     'page arguments' => array(1, 3),
     'access callback' => 'entity_access',
@@ -29,6 +29,16 @@ function campaign_monitor_campaigns_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'includes/campaign_monitor_campaigns.pages.inc',
     'weight' => 2,
+  );
+  $items['cm-list/%cm_list/campaigns/sent'] = array(
+    'title' => 'Sent',
+    'page callback' => 'campaign_monitor_campaigns_list',
+    'page arguments' => array(1, 3),
+    'access callback' => 'entity_access',
+    'access arguments' => array('update', 'cm_list', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => 'includes/campaign_monitor_campaigns.pages.inc',
+    'weight' => 3,
   );
   $items['cm-list/%cm_list/campaigns/add'] = array(
     'title' => 'Create campaign',

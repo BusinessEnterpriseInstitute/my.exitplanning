@@ -12,19 +12,24 @@
 /*
  * Page callback to return view of campaigns referenced to list.
  */
-function campaign_monitor_campaigns_list($list, $status = 'all') {
+function campaign_monitor_campaigns_list($list, $status = 'draft') {
   $breadcrumb = array();
   $breadcrumb[] = l(t('Home'), '<front>');
   $breadcrumb[] = l(t('My Newsletter'), 'member/newsletter');
   $list_uri = entity_uri('cm_list', $list);
   $breadcrumb[] = l(t('Dashboard'), $list_uri['path']);
   drupal_set_breadcrumb($breadcrumb);
-  $exclude = NULL;
+  $display = 'system_1';
   $help_text = '<div class="panel callout">';
-  if ($status == 'sent') {
-    $status = 3;
-    drupal_set_title('Scheduled/Sent Campaigns');
-    $help_text .= 'These are campaigns that have been sent or are scheduled to be sent.';
+  if ($status == 'scheduled') {
+    drupal_set_title('Scheduled Campaigns');
+    $help_text .= 'These are campaigns that are scheduled to be sent.';
+    $display = 'system_2';
+  }
+  elseif ($status == 'sent') {
+    drupal_set_title('Sent Campaigns');
+    $help_text .= 'These are campaigns that have been sent.';
+    $display = 'system_3';
   }
   else {
     drupal_set_title('Draft Campaigns');
@@ -35,10 +40,10 @@ function campaign_monitor_campaigns_list($list, $status = 'all') {
       <li>Schedule or send your campaign.</li>
     </ol>
     ';
-    $exclude = 3;
+    $display = 'system_1';
   }
   $help_text .= '</div>';
-  $output = $help_text . views_embed_view('campaign_monitor_campaigns', 'default', $list->id, $status, $exclude);
+  $output = $help_text . views_embed_view('campaign_monitor_campaigns', $display, $list->id);
   return $output;
 }
 
