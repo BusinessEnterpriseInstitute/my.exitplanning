@@ -111,19 +111,7 @@
           width: 17.8125rem; /* 300px */
           overflow: hidden;
           text-align: left;
-          
-          .video-thumbnail {
-          position: relative;
-          display: block;
-          cursor: pointer;
-          margin: 0.3125rem;
-        
-          
-          &:hover:before {
-            color: #eee;
-          }
-        }
-      
+         
         .views-field .field-content {
             margin: 0 0.3125rem;
             display: block;
@@ -131,7 +119,7 @@
             overflow: hidden;
              max-width: 250px;
             font-family: inherit;
-            font-size: 0.8125rem;
+            font-size: inherit;
         }
     }
     }
