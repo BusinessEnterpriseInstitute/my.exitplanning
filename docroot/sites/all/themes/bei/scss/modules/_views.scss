@@ -107,10 +107,14 @@
           margin: 10px auto;
           display: inline-block;
           
-          height: rem-calc(240); /* With bottom descriptio: 216px - 24 extra pixels to catter for long titles */
-          width: 17.8125rem; /* 300px */
-          overflow: hidden;
+          //height: rem-calc(240); /* With bottom descriptio: 216px - 24 extra pixels to catter for long titles */
+          width: auto; /* 300px */
+          overflow: visible;
           text-align: left;
+          vertical-align: top;
+          overflow-wrap: break-word;
+          word-wrap: break-word;
+          hyphens: auto;
          
         .views-field .field-content {
             margin: 0 0.3125rem;
