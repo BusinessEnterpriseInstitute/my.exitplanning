@@ -257,8 +257,11 @@ function campaign_monitor_unschedule_access($campaign) {
   global $user;
   // Administrator can unschedule and Author can unschedule only for
   // campaigns created by themselves.
-  $access = user_access('administer campaign monitor') ? ($campaign->uid == $user->uid) && empty($campaign->automated) : FALSE;
+  $access = FALSE;
   $can_unschedule = FALSE;
+  if (user_access('administer campaign monitor') || ($campaign->uid == $user->uid) && empty($campaign->automated)) {
+    $access = TRUE;
+  }
   if ($access && $campaign->campaign_status == 3) {
     $now = strtotime('now');
     if (empty($campaign->send_date) || $campaign->send_date > $now) {
