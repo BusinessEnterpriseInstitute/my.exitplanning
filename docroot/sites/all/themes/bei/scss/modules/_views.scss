@@ -98,6 +98,43 @@
             }
         }
     }
+    &.view-content-library {
+          margin: 0 auto;
+          text-align: center;
+          max-width: 100%;
+          
+        .views-row  {
+          margin: 10px auto;
+          display: inline-block;
+          
+          height: rem-calc(240); /* With bottom descriptio: 216px - 24 extra pixels to catter for long titles */
+          width: 17.8125rem; /* 300px */
+          overflow: hidden;
+          text-align: left;
+          
+          .video-thumbnail {
+          position: relative;
+          display: block;
+          cursor: pointer;
+          margin: 0.3125rem;
+        
+          
+          &:hover:before {
+            color: #eee;
+          }
+        }
+      
+        .views-field .field-content {
+            margin: 0 0.3125rem;
+            display: block;
+            width: rem-calc(295); /* 300px */
+            overflow: hidden;
+             max-width: 250px;
+            font-family: inherit;
+            font-size: 0.8125rem;
+        }
+    }
+    }
     &.view-video-gallery {
           margin: 0 auto;
           text-align: center;
