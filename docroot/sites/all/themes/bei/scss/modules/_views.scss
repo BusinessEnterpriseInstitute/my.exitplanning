@@ -99,6 +99,17 @@
         }
     }
     &.view-content-library {
+        .view-filters {
+            width: 100%;
+            #edit-date-filter-min-wrapper,
+            #edit-date-filter-max-wrapper {
+                div.description {
+                    display: none;
+                }
+            }
+        }
+    }
+    &.view-content-library {
           margin: 0 auto;
           text-align: center;
           max-width: 100%;
@@ -262,6 +273,68 @@
                 .views-submit-button,
                 .views-reset-button {
                     padding-bottom: 0;
+                }
+            }
+        }
+    }
+        .view-content-library {
+        .view-filters {
+            background: #F5F6F7;
+            padding: rem-calc(20);
+            margin: rem-calc(30) 0;
+            display: table;
+            #edit-date-filter-min-wrapper,
+            #edit-date-filter-max-wrapper {
+                float: left;
+            }
+            .form-item {
+                margin-bottom: 0;
+            }
+            input, select {
+                width: auto !important;
+                margin-bottom: 0;
+                margin-right: rem-calc(10);
+            }
+            .views-exposed-widget {
+                display: table-cell;
+                vertical-align: bottom;
+                label {
+                    text-transform: uppercase;
+                }
+                input, button {
+                    margin-bottom: 0;
+                }
+                button {
+                    @include prefix-postfix-base;
+                }
+                .views-submit-button,
+                .views-reset-button {
+                    padding-bottom: 0;
+                }
+            }
+        }
+    }
+    .view.view-content-library {
+          margin: 0 inherit;
+          text-align: center;
+        .views-row {
+            a.video-thumbnail {
+                i {
+                    @include font-size(60);
+                    line-height: rem-calc(60);
+                }
+            }
+        }
+        .views-row:nth-of-type(even) {
+            > .row {
+                .columns:first-child {
+                    @include push-6;
+                    p.image {
+                        text-align: right;
+                    }
+                }
+                .columns:last-child {
+                    @include pull-6;
                 }
             }
         }
