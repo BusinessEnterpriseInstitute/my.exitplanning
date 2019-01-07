@@ -133,8 +133,9 @@
           overflow: visible;
           text-align: left;
           vertical-align: top;
-          overflow-wrap: inherit;
+          overflow-wrap: break-word;
           word-wrap: normal;
+          hyphens: none;
         
          
         .views-field .field-content {
@@ -146,7 +147,7 @@
             font-family: inherit;
             font-size: inherit;
         }
-        .view-content-library {
+        div.view-content {
           background: #F5F6F7;
           border-color: #2B3A51;
         }
