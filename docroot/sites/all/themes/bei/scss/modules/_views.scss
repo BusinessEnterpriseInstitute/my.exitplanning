@@ -134,7 +134,7 @@
           text-align: left;
           vertical-align: top;
           overflow-wrap: break-word;
-          word-wrap: normal;
+          word-wrap: break-word;
           hyphens: none;
         
          
@@ -147,10 +147,7 @@
             font-family: inherit;
             font-size: inherit;
         }
-        div.view-content {
-          background: #F5F6F7;
-          border-color: #2B3A51;
-        }
+
     }
     }
     &.view-video-gallery {
@@ -292,7 +289,7 @@
             }
         }
     }
-        .view-content-library {
+      .view-content-library {
         .view-filters {
             background: #F5F6F7;
             padding: rem-calc(20);
@@ -300,7 +297,7 @@
             display: table;
             #edit-date-filter-min-wrapper,
             #edit-date-filter-max-wrapper {
-                float: left;
+                float: right;
             }
             .form-item {
                 margin-bottom: 0;
@@ -327,6 +324,10 @@
                     padding-bottom: 0;
                 }
             }
+        }
+        .view-content {
+          background: #F5F6F7;
+          border-color: #2B3A51;
         }
     }
     .view.view-content-library {
