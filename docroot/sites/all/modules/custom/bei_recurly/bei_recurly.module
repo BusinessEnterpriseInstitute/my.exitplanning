@@ -825,7 +825,7 @@ function bei_recurly_checkout_thanks_form($form, &$form_state) {
   $form['thanks']['text'] = array(
     '#type' => 'item',
     '#markup' => "<div class='order-number'>".t("Order No: #").$form_state['multistep_values']['review']['invoice_number']."</div>".
-    "<div class='order-text'><p>".t('You will receive an email shortly with the details of your order. We encourage all of our new members to explore the Member Center and all of its benefits. Please contact us if you have any questions.')."</p></div>"
+    "<div class='order-text'><p>".t('You will receive an email shortly from account@exitplanning.com with the details of your order. Please check your junk mail to make sure you receive it. We encourage all of our new members to explore the Member Center and all of its benefits. Please contact us if you have any questions.')."</p></div>"
   );  
   if (isset($form_state['extra_info']['logged_in_uid'])) {
     $form['thanks']['link'] = array(
