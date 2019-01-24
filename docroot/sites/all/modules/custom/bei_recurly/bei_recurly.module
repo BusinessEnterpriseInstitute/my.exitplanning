@@ -187,7 +187,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
   $form['membership']['outro'] = array(
     '#type' => 'item',
     '#title' => t(''),
-    '#markup' => t("All memberships are automatically renewed at the end of a one-year period. For group pricing on multiple memberships, please call a Member Services Consultant at (888) 206-3009."),
+    '#markup' => t("All licenses and memberships require a one year minimum commitment, and after one year they renew automatically until you request a termination of your account.</ br>For group pricing on multiple licenses, please call us at (888) 206-3009."),
   );
   $form['next'] = array(
     '#type' => 'submit',
