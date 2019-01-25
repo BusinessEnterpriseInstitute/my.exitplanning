@@ -187,7 +187,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
   $form['membership']['outro'] = array(
     '#type' => 'item',
     '#title' => t(''),
-    '#markup' => t("All licenses and memberships require a one year minimum commitment, and after one year they renew automatically until you request a termination of your account.</ br>For group pricing on multiple licenses, please call us at (888) 206-3009."),
+    '#markup' => t("All licenses/memberships require a one year minimum commitment. After one year, they renew automatically until you request a termination of your account."). '<br>' .t("For group pricing on multiple licenses, please call us at (888) 206-3009."),
   );
   $form['next'] = array(
     '#type' => 'submit',
@@ -825,10 +825,7 @@ function bei_recurly_checkout_thanks_form($form, &$form_state) {
   $form['thanks']['text'] = array(
     '#type' => 'item',
     '#markup' => "<div class='order-number'>".t("Order No: #").$form_state['multistep_values']['review']['invoice_number']."</div>".
-    "<div class='order-text'><p>".t('You’ll receive an email confirming the details of your order. Check your junk mail to make sure you receive it. The Dashboard on your Home page in your new ExitPlanning.com account links you to resources and tools that will transform your business practice. Your user name is your email address and your password is the one you just selected. Let’s get started!</ br>
-The BEI Team</ br>
-support@exitplanning.com</ br>
-(303) 321-2242')."</p></div>"
+    "<div class='order-text'><p>".t('You’ll receive an email confirming the details of your order. Check your junk mail to make sure you receive it. The Dashboard on your homepage in your new ExitPlanning.com account links you to resources and tools that will transform your business practice. Your user name is your email address and your password is the one you just created. Let’s get started!').'<br>'.t('The BEI Team').'<br>' .t('support@exitplanning.com').'<br>' .t('(303) 321-2242')."</p></div>"
   );  
   if (isset($form_state['extra_info']['logged_in_uid'])) {
     $form['thanks']['link'] = array(
@@ -1023,7 +1020,7 @@ function bei_recurly_checkout_get_header($form, &$form_state) {
     2 => array('data' => '2. Contact Information', 'title' => 'Contact Information'),
     3 => array('data' => '3. Billing Information', 'title' => 'Billing Information'),
     4 => array('data' => '4. Review & Finish', 'title' => "You're almost done!"),
-    5 => array('data' => '', 'title' => "Thanks for becoming a BEI Exit Planning Member!"),
+    5 => array('data' => '', 'title' => "Thanks for Becoming a BEI Exit Planning User!"),
   );
   //this holds our data for linking the steps at the top
   $steps = array(
@@ -1031,7 +1028,7 @@ function bei_recurly_checkout_get_header($form, &$form_state) {
     2 => array('data' => '2. Contact Information', 'title' => 'Contact Information', 'link' => 'contact'),
     3 => array('data' => '3. Billing Information', 'title' => 'Billing Information', 'link' => 'billing'),
     4 => array('data' => '4. Review & Finish', 'title' => "You're almost done!", 'link' => 'review'),
-    5 => array('data' => '', 'title' => "Thanks for becoming a BEI Exit Planning Member!", 'link' => 'thanks'),
+    5 => array('data' => '', 'title' => "Thanks for Becoming a BEI Exit Planning User!", 'link' => 'thanks'),
   );
   //loop through steps to conditionally make links, etc.
   if ($current_step !== 5) {
