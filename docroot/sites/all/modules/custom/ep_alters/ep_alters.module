@@ -745,8 +745,8 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
       $logo_attributes = array(
         'style_name' => 'high_res_640x480',
         'path' => $logo[0]['uri'],
-        'width' => $logo[0]['width'],
-        'height' => $logo[0]['height'],
+        'width' => null,
+        'height' => null,
         'alt' => '',
       );
       $logo_output = theme_image_style($logo_attributes);
@@ -851,6 +851,23 @@ function ep_alters_node_view($node, $view_mode, $langcode) {
       );
     }
   }
+}
+
+/**
+ * @param stdClass $image
+ * @param $width
+ * @param $height
+ * @return bool
+ * Added image scale crop
+ */
+function ep_alters_image_scale_and_crop(stdClass $image, $width, $height) {
+    $scale = max($width / $image->info['width'], $height / $image->info['height']);
+    $x = ($image->info['width'] * $scale - $width) / 2;
+    $y = ($image->info['height'] * $scale - $height) / 2;
+    if (image_resize($image, $image->info['width'] * $scale, $image->info['height'] * $scale)) {
+        return image_crop($image, $x, $y, $width, $height);
+    }
+    return FALSE;
 }
 
 /**

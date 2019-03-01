@@ -1,0 +1,409 @@
+<?php
+
+/**
+ * Implements hook_schema().
+ */
+function recurly_entity_schema() {
+  $schema = array();
+  $uuid_spec = uuid_schema_field_definition();
+
+  $schema['recurly_subscription'] = array(
+    'description' => 'Stores Recurly Subscriptions.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique subscription item ID.',
+      ),
+      'title' => array(
+        'description' => 'The generated title of this subscription, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The entity type of the entity (typically user) associated with this subscription.',
+      ),
+      'entity_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The entity ID of the entity (typically user) associated with this subscription.',
+      ),
+      'plan_code' => array(
+        'description' => 'The code of the subscription plan associated with this subscription.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'state' => array(
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 50,
+        'description' => 'The state of the subscription.',
+      ),
+      'uuid' => $uuid_spec,
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'entity_type' => array('entity_type'),
+      'entity_id' => array('entity_id'),
+      'uuid' => array('uuid'),
+      'state' => array('state'),
+    ),
+  );
+
+  $schema['cache_entity_recurly_subscription'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_recurly_subscription']['description'] = 'Cached data for Recurly subscriptions.';
+
+  $schema['recurly_subscription_plan'] = array(
+    'description' => 'Stores Recurly Subscription Plans.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique subscription plan item ID.',
+      ),
+      'plan_code' => array(
+        'description' => 'The code of the subscription plan.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'title' => array(
+        'description' => 'The readable name of the subscription plan.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'unique keys' => array(
+      'plan_code' => array('plan_code'),
+    ),
+    'primary key' => array('id'),
+  );
+
+  $schema['cache_entity_recurly_subscription_plan'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_recurly_subscription_plan']['description'] = 'Cached data for Recurly subscription plans.';
+
+  $schema['recurly_adjustment'] = array(
+    'description' => 'Stores Recurly Adjustments.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique adjustment item ID.',
+      ),
+      'title' => array(
+        'description' => 'The generated title of this adjustment, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'currency' => array(
+        'type' => 'varchar',
+        'length' => 3,
+        'not null' => TRUE,
+        'description' => 'The currency of the adjustment.',
+      ),
+      'unit_amount_in_cents' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The amount of the adjustment in cents.',
+      ),
+      'quantity' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The quantity of the adjustment.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'description' => 'The description of the adjustment.',
+      ),
+      'accounting_code' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'description' => 'The accounting code of the adjustment.',
+      ),
+      'created_at' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The timestamp that the adjustment was created at, in UTC.',
+      ),
+      'invoice' => $uuid_spec + array('not null' => FALSE),
+      'invoice_number' => array(
+        'type' => 'int',
+        'description' => 'The number of the invoice this is associated with.',
+      ),
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The entity type of the entity (typically user) associated with this adjustment.',
+      ),
+      'entity_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The entity ID of the entity (typically user) associated with this adjustment.',
+      ),
+      'uuid' => $uuid_spec,
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'entity_type' => array('entity_type'),
+      'entity_id' => array('entity_id'),
+      'uuid' => array('uuid'),
+    ),
+  );
+
+  $schema['cache_entity_recurly_adjustment'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_recurly_adjustment']['description'] = 'Cached data for Recurly adjustments.';
+
+  return $schema;
+}
+
+/**
+ * Add the name column to the recurly_subscription_plan table.
+ */
+function recurly_entity_update_7100() {
+  $spec = array(
+    'description' => 'The readable name of the subscription plan.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => '',
+  );
+  db_add_field('recurly_subscription_plan', 'name', $spec);
+}
+
+/**
+ * Create Recurly Subscription entity tables.
+ */
+function recurly_entity_update_7101() {
+  $schema = array();
+  $uuid_spec = uuid_schema_field_definition();
+
+  $schema['recurly_subscription'] = array(
+    'description' => 'Stores Recurly Subscriptions.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique subscription item ID.',
+      ),
+      'title' => array(
+        'description' => 'The generated title of this subscription, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The entity type of the entity (typically user) associated with this subscription.',
+      ),
+      'entity_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The entity ID of the entity (typically user) associated with this subscription.',
+      ),
+      'plan_code' => array(
+        'description' => 'The code of the subscription plan associated with this subscription.',
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'uuid' => $uuid_spec,
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'entity_type' => array('entity_type'),
+      'entity_id' => array('entity_id'),
+      'uuid' => array('uuid'),
+    ),
+  );
+
+  $schema['cache_entity_recurly_subscription'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_recurly_subscription']['description'] = 'Cached data for Recurly subscriptions.';
+
+  foreach ($schema as $table => $spec) {
+    db_create_table($table, $spec);
+  }
+}
+
+/**
+ * Create tables for Recurly Adjustment entities.
+ */
+function recurly_entity_update_7102() {
+  $schema = array();
+  $uuid_spec = uuid_schema_field_definition();
+
+  $schema['recurly_adjustment'] = array(
+    'description' => 'Stores Recurly Adjustments.',
+    'fields' => array(
+      'id' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique adjustment item ID.',
+      ),
+      'title' => array(
+        'description' => 'The generated title of this adjustment, always treated as non-markup plain text.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'currency' => array(
+        'type' => 'varchar',
+        'length' => 3,
+        'not null' => TRUE,
+        'description' => 'The currency of the adjustment.',
+      ),
+      'unit_amount_in_cents' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The amount of the adjustment in cents.',
+      ),
+      'quantity' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The quantity of the adjustment.',
+      ),
+      'description' => array(
+        'type' => 'text',
+        'size' => 'normal',
+        'description' => 'The description of the adjustment.',
+      ),
+      'accounting_code' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'description' => 'The accounting code of the adjustment.',
+      ),
+      'created_at' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The timestamp that the adjustment was created at, in UTC.',
+      ),
+      'invoice' => $uuid_spec + array('not null' => FALSE),
+      'entity_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'description' => 'The entity type of the entity (typically user) associated with this adjustment.',
+      ),
+      'entity_id' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'description' => 'The entity ID of the entity (typically user) associated with this adjustment.',
+      ),
+      'uuid' => $uuid_spec,
+    ),
+    'primary key' => array('id'),
+    'indexes' => array(
+      'entity_type' => array('entity_type'),
+      'entity_id' => array('entity_id'),
+      'uuid' => array('uuid'),
+    ),
+  );
+
+  $schema['cache_entity_recurly_adjustment'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_entity_recurly_adjustment']['description'] = 'Cached data for Recurly adjustments.';
+
+  foreach ($schema as $table => $spec) {
+    db_create_table($table, $spec);
+  }
+}
+
+/**
+ * Change the created_at column to a timestamp.
+ */
+function recurly_entity_update_7103() {
+  db_drop_field('recurly_adjustment', 'created_at');
+  db_add_field('recurly_adjustment', 'created_at', array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'initial' => 0,
+    'description' => 'The timestamp that the adjustment was created at, in UTC.',
+  ));
+}
+
+/**
+ * Add an invoice number column for adjustments.
+ */
+function recurly_entity_update_7104() {
+  db_add_field('recurly_adjustment', 'invoice_number', array(
+    'type' => 'int',
+    'description' => 'The number of the invoice this is associated with.',
+  ));
+
+  // Force refreshing of all adjustments to update the invoice number column.
+  variable_del('recurly_entity_invoice_watermark');
+}
+
+/**
+ * Rename name to title on subscription plans.
+ *
+ * 'name' is a special key for machine names only.
+ */
+function recurly_entity_update_7105() {
+  $spec= array(
+    'description' => 'The readable name of the subscription plan.',
+    'type' => 'varchar',
+    'length' => 50,
+    'not null' => TRUE,
+    'default' => '',
+  );
+
+  db_change_field('recurly_subscription_plan', 'name', 'title', $spec);
+}
+
+/**
+ * Add status field to recurly_subscription table.
+ */
+function recurly_entity_update_7106() {
+  db_add_field('recurly_subscription', 'state', array(
+    'type' => 'varchar',
+    'not null' => TRUE,
+    'default' =>  '',
+    'length' => 50,
+    'description' => 'The status of the subscription.',
+  ));
+  db_add_index('recurly_subscription', 'state', array('state'));
+
+  // Reload all subscriptions to update state property.
+  $query = new EntityFieldQuery();
+  $query->entityCondition('entity_type', 'recurly_subscription')
+    ->propertyCondition('state', '', '=');
+  $result = $query->execute();
+
+  if (isset($result['recurly_subscription'])) {
+    $updated_count = 0;
+    $subscription_ids_to_update = array_keys($result['recurly_subscription']);
+    watchdog('recurly_entity', t('Updating !count Recurly subscriptions.', array('!count' => count($subscription_ids_to_update))));
+    foreach ($subscription_ids_to_update as $subscription_id) {
+      try {
+        $subscription = entity_load_single('recurly_subscription', $subscription_id);
+        $subscription->save();
+        $updated_count++;
+      }
+      catch (Recurly_NotFoundError $e) {
+        watchdog('recurly_entity', t('Subscription !id not found in Recurly while updating subscriptions.', array('!id' => $subscription_id)), NULL, 'WATCHDOG_WARNING');
+      }
+    }
+    if ($updated_count) {
+      watchdog('recurly_entity', t('Successfully updated !count Recurly subscriptions.', array('!count' => count($updated_count))));
+    }
+  }
+}
