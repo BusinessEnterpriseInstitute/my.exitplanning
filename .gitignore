@@ -8,3 +8,4 @@ docroot/sites/*/private
 /docroot/sites/all/themes/bei/package-lock.json
 /docroot/sites/all/modules/hierarchical_select/hierarchical_select-not_well_formed_numeric_value_error-2845621-1.patch
 *.codekit3
+/docroot/sites/all/modules/custom/beishop/cart.komodoproject
