@@ -14,7 +14,7 @@ function lockr_field_encrypt_entity_info_alter(&$entity_info) {
     return;
   }
 
-  $disable_caching = [];
+  $disable_caching = array();
 
   // Retrieve an array of field definitions, keyed by machine name.
   $fields = field_info_field_map();

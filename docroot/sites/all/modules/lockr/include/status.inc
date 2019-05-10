@@ -3,112 +3,128 @@
 /**
  * @file
  * Status callback for Lockr admin page.
+ *
  */
 
-function lockr_admin_status($info) {
+function lockr_admin_status($status) {
   include_once DRUPAL_ROOT . '/includes/install.inc';
 
-  $partner = lockr_get_partner();
-  $partner_cert = !is_null($partner) && $partner['cert'];
+  $cert_valid = $status['cert_valid'];
+  $exists = $status['exists'];
+  $created = isset($status['created']) ? $status['created'] : FALSE;
 
-  $reqs = [];
+  $cert_valid_text = <<<EOL
+You're a certified Lockr user!
+We've found your certificate and it validates with our system.
+EOL;
+  $cert_invalid_text = <<<EOL
+Oops!
+Looks like we need to know who you are before we give you the keys to the castle.
+Your certificate is not valid, please register for one.
+If you've already gotten a certificate, we are unable to find it.
+Please check the advanced settings to ensure your path is correct
+(or if you're on a hosting partner contact their support).
+EOL;
 
-  if (!is_null($info)) {
-    $reqs[] = [
-      'title' => t('Certificate Valid'),
-      'value' => t('Yes'),
-      'description' => "You're a certified Lockr user! We've found your certificate and it validates with our system.",
-      'severity' => REQUIREMENT_OK,
-    ];
+  $reqs[] = array(
+    'title' => 'Certificate Valid',
+    'value' => $cert_valid ? 'Yes' : 'No',
+    'description' => $cert_valid ? $cert_valid_text : $cert_invalid_text,
+    'severity' => $cert_valid ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+
+  if ($cert_valid) {
+    $reqs[] = array(
+      'title' => 'Environment',
+      'value' => $status['info']['env'],
+      'severity' => REQUIREMENT_INFO,
+    );
   }
   else {
-    $reqs[] = [
-      'title' => t('Certificate Valid'),
-      'value' => t('No'),
-      'description' => "Oops! Looks like we need to know who you are before we give you the keys to the castle. You have not connected this site to a KeyRing on Lockr, please follow the steps below to complete setup. If you've already created a certificate, we are unable to find it. Please check the advanced settings to ensure your path is correct (or if you're on a hosting partner contact their support).",
-      'severity' => REQUIREMENT_ERROR,
-    ];
-  }
-
-  if (!is_null($info)) {
-    $reqs[] = [
-      'title' => t('Environment'),
-      'value' => ucfirst($info['env']),
-      'severity' => REQUIREMENT_INFO,
-    ];
-
-    $reqs[] = [
-      'title' => t('Connected KeyRing'),
-      'value' => t('Yes'),
-      'description' => "You are currently connected to the {$info['keyring']['label']} KeyRing.",
-      'severity' => REQUIREMENT_INFO,
-    ];
-  }
-  elseif (!$partner_cert) {
     $private_path = variable_get('file_private_path');
-    if (is_dir($private_path)) {
-      $desc_suffix = t('Looks good!');
-      $sev = REQUIREMENT_OK;
-    }
-    else {
-      $link = url(
-          '/admin/config/media/file-system',
-          ['query' => ['destination' => '/admin/config/system/lockr']]
-      );
-      $desc_suffix = t('Please <a href="@link">set the private directory</a>. Make sure it is not available from the web.', ['@link' => $link]);
-      $sev = REQUIREMENT_ERROR;
-    }
-    $reqs[] = [
-      'title' => t('Private Directory'),
-      'value' => $private_path ?: t('Unknown'),
+    $is_dir = is_dir($private_path);
+    $req = array(
+      'title' => 'Private Directory',
+      'value' => $private_path ?: 'Unknown',
       'description' =>
-        t("Lockr stores certificates in Drupal's private directory. ") .
-        $desc_suffix,
-      'severity' => $sev,
-    ];
-  }
-
-  if (!is_null($info)) {
-    $has_cc = $info['keyring']['hasCreditCard'];
-    $trial_end = \DateTime::createFromFormat(
-      DateTime::RFC3339,
-      $info['keyring']['trialEnd']
+        "Lockr stores certificates in Drupal's private directory. " .
+        ($is_dir
+        ? 'Looks good!'
+        : format_string(
+          'Please <a href="@link">set the private directory</a>. '.
+          'Make sure it is not available from the web.',
+          array('@link' => '/admin/config/media/file-system')
+        )),
+      'severity' => $is_dir ? REQUIREMENT_OK : REQUIREMENT_ERROR,
     );
-    if ($trial_end > (new \DateTime())) {
-      $reqs[] = [
-        'title' => t('Trial Expiration Date'),
-        'value' => $trial_end->format('M jS, Y'),
-        'severity' => REQUIREMENT_INFO,
-      ];
-    }
-    elseif (!$has_cc) {
-      $reqs[] = [
-        'title' => t('Trial Expiration Date'),
-        'value' => $trial_end->format('M jS, Y'),
-        'severity' => REQUIREMENT_ERROR,
-      ];
-    }
-
-    if (isset($info['auth']['expires'])) {
-      $expires = DateTime::createFromFormat(DateTime::RFC3339, $info['auth']['expires']);
-      $reqs[] = [
-        'title' => t('Certificate Expiration Date'),
-        'value' => $expires->format('M jS, Y'),
-        'severity' => REQUIREMENT_INFO,
-      ];
-    }
-
-    $has_no_cc_text = t('Uh oh! Without a credit card we cannot issue a production certificate. Please add one before migrating to production.');
-    $has_cc_text = t("We've got your credit card safely on file and you'll be receiving regular invoice for your site.");
-
-    $reqs[] = [
-      'title' => t('Credit Card on File'),
-      'value' => $has_cc ? t('Yes') : t('No'),
-      'description' => $has_cc ? $has_cc_text : $has_no_cc_text,
-      'severity' => $has_cc ? REQUIREMENT_OK : REQUIREMENT_ERROR,
-    ];
+    array_unshift($reqs, $req);
   }
 
-  return theme('status_report', ['requirements' => $reqs]);
+  $exists_text = <<<EOL
+You're one of the family.
+We've got your site registered and you're all good to go!
+EOL;
+  $not_exists_text = <<<EOL
+Who are you again?
+We don't have your site registered with Lockr.
+Please use the form below to register your site.
+EOL;
+
+  $reqs[] = array(
+    'title' => 'Site Registered',
+    'value' => $exists ? 'Yes' : 'No',
+    'description' => $exists ? $exists_text : $not_exists_text,
+    'severity' => $exists ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+
+  if ($cert_valid) {
+    $has_cc = $status['has_cc'];
+
+    if ($created) {
+      $expires = (new \DateTime())
+        ->setTimestamp($created)
+        ->add(new \DateInterval('P14D'));
+      if ($expires > (new \DateTime())) {
+        $reqs[] = array(
+          'title' => 'Trial Expiration Date',
+          'value' => $expires->format('M jS, Y'),
+          'severity' => REQUIREMENT_INFO,
+        );
+      }
+      elseif (!$has_cc) {
+        $reqs[] = array(
+          'title' => 'Trial Expiration Date',
+          'value' => $expires->format('M jS, Y'),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+    }
+
+    $partner = $status['info']['partner'];
+    $is_custom = in_array($partner, array('custom', 'lockr'));
+    $default = $is_custom
+      ? REQUIREMENT_ERROR
+      : REQUIREMENT_WARNING;
+    $is_custom_text = <<<EOL
+Uh oh!
+Without a credit card we cannot issue a production certificate.
+Please add one before migrating to production.
+EOL;
+    $is_not_custom_text = "Since you're on a partnering host, a credit card is not necessary to move to production. However, please make sure you get a card on file ASAP. We will contact you if there is no card on file within 30 days of moving to production use.";
+    $default_description = $is_custom ? $is_custom_text : $is_not_custom_text;
+    $has_cc_text = <<<EOL
+We've got your credit card safely on file and you'll be receiving regular
+invoice for your key usage.
+EOL;
+
+    $reqs[] = array(
+      'title' => 'Credit Card on File',
+      'value' => $has_cc ? 'Yes' : 'No',
+      'description' => $has_cc ? $has_cc_text : $default_description,
+      'severity' => $has_cc ? REQUIREMENT_OK : $default,
+    );
+  }
+
+  return theme('status_report', array('requirements' => $reqs));
 }
 

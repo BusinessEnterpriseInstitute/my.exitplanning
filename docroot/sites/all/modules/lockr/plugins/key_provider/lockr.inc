@@ -5,51 +5,53 @@
  * Key provider plugin for lockr.
  */
 
-use Lockr\Exception\LockrApiException;
+use Lockr\Exception\LockrServerException;
 
-$plugin = [
+$plugin = array(
   'label' => t('Lockr'),
   'description' => t('Use Lockr: a secure off-site hosted key manager.'),
   'storage method' => 'lockr',
-  'key value' => [
+  'key value' => array(
     'accepted' => TRUE,
     'required' => FALSE,
-  ],
+  ),
   'default configuration' => 'key_provider_lockr_default_configuration',
   'build configuration form' => 'key_provider_lockr_build_configuration_form',
   'get key value' => 'key_provider_lockr_get_key_value',
   'set key value' => 'key_provider_lockr_set_key_value',
   'delete key value' => 'key_provider_lockr_delete_key_value',
   'obscure key value' => '_key_default_obscure_key_value',
-];
+);
 
 /**
  * The default plugin configuration.
  */
 function key_provider_lockr_default_configuration() {
-  return [];
+  return array('encoded' => '');
 }
 
 /**
  * The settings form.
  */
 function key_provider_lockr_build_configuration_form($form, &$form_state) {
-  $lc = lockr_client();
   try {
-    $info = $lc->getInfo();
+    $status = lockr_check_registration();
   }
-  catch (LockrApiException $e) {
-    $info = NULL;
+  catch (LockrServerException $e) {
+    watchdog_exception('lockr', $e);
+    drupal_set_message('The Lockr service has returned an error. Please try again.', 'error');
+    return $form;
   }
+  $exists = $status['exists'];
 
-  if (is_null($info)) {
-    $form['need_register'] = [
+  if (!$exists) {
+    $form['need_register'] = array(
       '#prefix' => '<p>',
       '#markup' => t('This site has not yet registered with Lockr, please <a href="@link">click here to register</a>.',
-        ['@link' => 'admin/config/system/lockr']
+        array('@link' => 'admin/config/system/lockr')
       ),
       '#suffix' => '</p>',
-    ];
+    );
   }
 
   return $form;
@@ -69,7 +71,11 @@ function key_provider_lockr_get_key_value($config) {
     return '';
   }
   $key_name = $config['id'];
-  return _lockr_get_key($key_name) ?: NULL;
+  $encoded = isset($config['key_provider_settings']['encoded'])
+    ? $config['key_provider_settings']['encoded']
+    : NULL;
+  $key_value = _lockr_get_key($key_name, $encoded);
+  return $key_value ?: NULL;
 }
 
 /**
@@ -78,11 +84,18 @@ function key_provider_lockr_get_key_value($config) {
 function key_provider_lockr_set_key_value($config, &$form_state, $key_value) {
   $name = $config['id'];
   $label = $config['label'];
-  $result = _lockr_set_key($name, $key_value, $label);
-  if (!$result) {
+  $old_encoded = NULL;
+  if (isset($form_state['storage']['original_key']['key_provider_settings']['encoded'])) {
+    $old_encoded = $form_state['storage']['original_key']['key_provider_settings']['encoded'];
+  }
+  $new_encoded = _lockr_set_key($name, $key_value, $label, $old_encoded);
+  if (!$new_encoded) {
     form_set_error('', t(
       'An error occurred in Lockr. Please try again in a moment.'
     ));
+  }
+  else {
+    $form_state['values']['encoded'] = $new_encoded;
   }
 }
 
