@@ -92,39 +92,47 @@ body.member-dashboard {
             }
             .pane-title {
                 text-transform: uppercase;
-                text-align: center;
-                font-size: rem-calc(28);
+                text-align: left;
+                margin-top: -50px;
+                font-size: rem-calc(18);
+                border-bottom: solid #6f6f6f;
                 > a {
                     display: block;
                     &:before {
                         content: "";
                         display: block;
                         text-align: center;
-                        height: 100px;
-                        margin-bottom: rem-calc(30);
+                        height: 50px;
+                        margin-bottom: rem-calc(10);
                         background-repeat: no-repeat;
-                        background-position: center top;
+                        background-position: right top;
                         background-size: contain;
                     }
                 }
             }
             &.training .pane-title > a:before {
                 background-image: url(../images/training_blue.png);
+                margin-bottom: -10px;
             }
             &.marketing .pane-title > a:before {
                 background-image: url(../images/marketing_blue.png);
+                margin-bottom: -10px;
             }
             &.planning .pane-title > a:before {
                 background-image: url(../images/planning_blue.png);
+                margin-bottom: -10px;
             }
             &.engagement .pane-title > a:before {
                 background-image: url(../images/engagement_blue.png);
+                margin-bottom: -10px;
             }
             &.community .pane-title > a:before {
                 background-image: url(../images/community_blue.png);
+                margin-bottom: -10px;
             }
             &.my_bei .pane-title > a:before {
                 background-image: url(../images/my_bei_blue.png);
+                margin-bottom: -10px;
             }
             ul {
                 margin-bottom: 0;
