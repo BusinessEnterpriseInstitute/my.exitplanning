@@ -10,7 +10,7 @@
  */
 function lockr_enable() {
   if (module_exists('lockr_pantheon')) {
-    module_disable(array('lockr_pantheon'));
+    module_disable(['lockr_pantheon']);
     drupal_set_message(t('We have disabled the previous version of Lockr. All existing keys and settings have been migrated successfully.'), 'warning');
   }
 }
@@ -22,7 +22,7 @@ function lockr_enable() {
  */
 function lockr_uninstall() {
   // Load the key configurations.
-  $configs = db_query("SELECT * FROM {key_config} WHERE key_provider = :provider", array(':provider' => 'lockr'))->fetchAllAssoc('id', PDO::FETCH_ASSOC);
+  $configs = db_query("SELECT * FROM {key_config} WHERE key_provider = :provider", [':provider' => 'lockr'])->fetchAllAssoc('id', PDO::FETCH_ASSOC);
 
   // If no keys use Lockr, don't bother to continue.
   if (empty($configs)) {
@@ -33,7 +33,7 @@ function lockr_uninstall() {
   drupal_load('module', 'lockr');
   require_once DRUPAL_ROOT . '/' . drupal_get_path('module', 'lockr') . "/plugins/key_provider/lockr.inc";
 
-  $deleted_keys = array();
+  $deleted_keys = [];
   // Delete each Lockr key and the key value.
   foreach ($configs as $id => $config) {
     db_delete('key_config')
@@ -44,7 +44,23 @@ function lockr_uninstall() {
     $deleted_keys[] = $config['label'];
   }
 
-  drupal_set_message(t('The following Lockr keys were deleted: %keys', array('%keys' => implode(', ', $deleted_keys))), 'warning');
+  drupal_set_message(t('The following Lockr keys were deleted: %keys', ['%keys' => implode(', ', $deleted_keys)]), 'warning');
+}
+
+/**
+ * Migrate wrapping keys to config.
+ */
+function lockr_update_7300() {
+  $keys = key_get_keys_by_provider('lockr');
+  $secret_info = [];
+  foreach ($keys as $id => $key) {
+    $secret_info[$id] = [
+      'wrapping_key' => $key['key_provider_settings']['encoded'],
+    ];
+  }
+  if ($secret_info) {
+    variable_set('lockr_secret_info', $secret_info);
+  }
 }
 
 // ex: se ft=php:

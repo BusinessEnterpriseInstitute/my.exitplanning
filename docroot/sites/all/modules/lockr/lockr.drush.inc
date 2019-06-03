@@ -5,32 +5,30 @@
  * Hooks and callbacks for drush.
  */
 
-use Lockr\Exception\LockrClientException;
-use Lockr\Exception\LockrServerException;
-
 /**
  * Implements hook_drush_command().
  */
 function lockr_drush_command() {
-  $info['lockdown'] = array(
+  $info['lockdown'] = [
     'description' => 'Patch modules to work with key.',
-    'aliases' => array('ld'),
-    'core' => array('7'),
+    'aliases' => ['ld'],
+    'core' => ['7'],
     'scope' => 'site',
-  );
+  ];
 
-  $info['lockr-register'] = array(
+  $info['lockr-register'] = [
     'description' => 'Register a site for Lockr.',
-    'aliases' => array('lr'),
-    'core' => array('7'),
+    'aliases' => ['lr'],
+    'core' => ['7'],
     'scope' => 'site',
-    'arguments' => array(
+    'arguments' => [
       'email' => 'The email to register with.',
-    ),
-    'options' => array(
+    ],
+    'options' => [
       'password' => 'The password to match given email (if applicable).',
-    ),
-  );
+      'keyring-id' => 'The KeyRing ID to register against an existing KeyRing.',
+    ],
+  ];
 
   return $info;
 }
@@ -39,27 +37,50 @@ function lockr_drush_command() {
  * Registers the site with lockr.
  */
 function drush_lockr_register($email) {
-  $name = variable_get('site_name');
-  $client = lockr_site_client();
+  $name = variable_get('site_name', '');
+  $lc = lockr_client();
   $password = drush_get_option('password');
-
-  try {
-    $client->register($email, $password, $name);
+  if (!$password) {
+    return drush_set_error('LOCKR_PASS_REQUIRED', '--password is required');
   }
-  catch (LockrClientException $e) {
-    if ($e->title === 'Site exists') {
-      drush_log('This site is already registered.', 'warning');
-      return;
-    }
-    elseif ($password) {
-      drush_log('Email and password did not match.', 'error');
+
+  $data = $lc->requestClientToken(
+    $email,
+    $password,
+    $name,
+    $name,
+    drush_get_option('keyring-id')
+  );
+  if (isset($data['error'])) {
+    return drush_set_error('LOCKR_CLIENT_TOKEN', $data['error']);
+  }
+  $client_token_id = $data['client_token'];
+  $partner = lockr_get_partner();
+  try {
+    if ($partner) {
+      if ($partner['name'] === 'pantheon') {
+        $lc->createPantheonClient($client_token_id);
+      }
+      else {
+        throw new \Exception('Unknown lockr partner');
+      }
     }
     else {
-      drush_log('Email is already registered, please provide a password', 'error');
+      $dn = [
+        'countryName' => 'US',
+        'stateOrProvinceName' => 'Washington',
+        'localityName' => 'Tacoma',
+        'organizationName' => 'Lockr',
+      ];
+      $result = $lc->createClientCert($client_token_id, $dn);
+      $dir = "private://lockr/dev";
+      _lockr_write_key_files($dir, $result);
+      variable_set('lockr_cert', "{$dir}/pair.pem");
+      variable_set('lockr_custom', TRUE);
     }
   }
-  catch (LockrServerException $e) {
-    drush_log('An unknown error occurred, please try again.', 'error');
+  catch (\Exception $e) {
+    return drush_set_error('LOCKR_CREATE_CLIENT', $e->getMessage());
   }
 
   drush_log('Site has been registered.', 'success');
@@ -132,7 +153,7 @@ function drush_lockr_lockdown() {
     copy($patch_remote, $patch_path);
 
     drush_log("Patching {$name}.");
-    $cmd = implode(' ', array(
+    $cmd = implode(' ', [
       'patch',
       // We do not need a backup because reverting the patch can be done
       // via the user's version control system.
@@ -141,7 +162,7 @@ function drush_lockr_lockdown() {
       '-p1',
       '-d', escapeshellarg($module_path),
       '<', escapeshellarg($patch_path),
-    ));
+    ]);
     drush_log("Running `{$cmd}`.");
     ob_start();
     passthru($cmd, $return_code);

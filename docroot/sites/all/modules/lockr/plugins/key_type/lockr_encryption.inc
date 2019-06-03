@@ -5,18 +5,18 @@
  * Plugin definition for the Lockr encryption key type.
  */
 
-$plugin = array(
+$plugin = [
   'label' => t('Lockr Encryption'),
   'description' => t('A key type that generates keys via Lockr.'),
   'group' => 'encryption',
-  'key value' => array(
+  'key value' => [
     'plugin' => 'generate'
-  ),
+  ],
   'default configuration' => 'key_type_lockr_encryption_default_configuration',
   'build configuration form' => 'key_type_lockr_encryption_build_configuration_form',
   'generate key value' => 'key_type_lockr_encryption_generate_key_value',
 	'validate key value' => 'key_type_lockr_encryption_validate_key_value',
-);
+];
 
 /**
  * The default plugin configuration.
@@ -25,9 +25,7 @@ $plugin = array(
  *   The default plugin configuration.
  */
 function key_type_lockr_encryption_default_configuration() {
-  return array(
-    'key_size' => '256',
-  );
+  return ['key_size' => '256'];
 }
 
 /**
@@ -43,18 +41,18 @@ function key_type_lockr_encryption_build_configuration_form($form, &$form_state)
   $config = $form_state['storage']['key_config'];
   $plugin_config = $config['key_type_settings'] + key_type_lockr_encryption_default_configuration();
 
-  $form['key_size'] = array(
+  $form['key_size'] = [
     '#type' => 'select',
     '#title' => t('Key size'),
     '#description' => t('The size of the key in bits.'),
-    '#options' => array(
+    '#options' => [
       '128' => 128,
       '192' => 192,
       '256' => 256,
-    ),
+    ],
     '#default_value' => $plugin_config['key_size'],
     '#required' => TRUE,
-  );
+  ];
 
   return $form;
 }
@@ -71,9 +69,9 @@ function key_type_lockr_encryption_generate_key_value(array $config) {
   $bits = isset($config['key_type_settings']['key_size'])
     ? $config['key_type_settings']['key_size']
     : 256;
-  $client = lockr_key_client();
+  $client = lockr_client();
 
-  return $client->create($bits);
+  return $client->generateKey($bits);
 }
 
 /**
