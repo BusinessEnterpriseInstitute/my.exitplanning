@@ -763,6 +763,7 @@ function bei_order_status_options($order) {
     4 => t('Proofs Approved'),
     5 => t('Sent for Printing'),
     6 => t('Shipped'),
+    7 => t('Inactive'),
   );
 }
 /**
