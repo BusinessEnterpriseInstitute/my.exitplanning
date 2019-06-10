@@ -1,0 +1,27 @@
+diff --git a/webform_registration.inc b/webform_registration.inc
+index 642f525..9622187 100644
+--- a/webform_registration.inc
++++ b/webform_registration.inc
+@@ -180,6 +180,8 @@ function webform_registration_submit($form, &$form_state) {
+ 
+   watchdog('webform_registration', 'Webform Registration: Registration Triggered');
+ 
++  $admin = user_access('administer users');
++
+   $user_register_info = array(
+     'values' => array(
+       'mail' => $fields['mail']['value'],
+@@ -188,10 +190,13 @@ function webform_registration_submit($form, &$form_state) {
+       'status' => $settings['status'],
+       'pass' => ($fields['pass']['key'] != '<auto>' ? $fields['pass']['value'] : user_password()),
+       'roles' => $settings['roles'],
++      'administer_users' => $admin,
+     ),
+     'buttons' => array(),
+   );
+ 
++
++
+   //Add use field instances
+   $user_field_info_instances = field_info_instances('user', 'user');
+   foreach ($user_field_info_instances as $field_name => $instance) {
