@@ -58,7 +58,7 @@ function webform_registration_inc_form_alter(&$form, &$form_state, $form_id) {
     if (is_array($settings['account_fields'])) {
       foreach ($settings['account_fields'] as $account_field => $field) {
         $fields[$account_field]['field']['#attributes'] = array('readonly' => 'readonly');
-        $fields[$account_field]['field']['#value'] = $user_data->{$account_field}[LANGUAGE_NONE][0]['safe_value'];
+        $fields[$account_field]['field']['#value'] = $user_data->{$account_field}[LANGUAGE_NONE][0]['value'];
       }
     }
 
@@ -180,8 +180,6 @@ function webform_registration_submit($form, &$form_state) {
 
   watchdog('webform_registration', 'Webform Registration: Registration Triggered');
 
-  $admin = user_access('administer users');
-
   $user_register_info = array(
     'values' => array(
       'mail' => $fields['mail']['value'],
@@ -190,18 +188,15 @@ function webform_registration_submit($form, &$form_state) {
       'status' => $settings['status'],
       'pass' => ($fields['pass']['key'] != '<auto>' ? $fields['pass']['value'] : user_password()),
       'roles' => $settings['roles'],
-      'administer_users' => $admin,
     ),
     'buttons' => array(),
   );
-
-
 
   //Add use field instances
   $user_field_info_instances = field_info_instances('user', 'user');
   foreach ($user_field_info_instances as $field_name => $instance) {
     if (!in_array($fields[$field_name]['value'], _webform_registration_get_special_needles())) {
-      $user_register_info['values'][$field_name][LANGUAGE_NONE][0]['value'] = $fields[$field_name]['save_value'];
+      $user_register_info['values'][$field_name][LANGUAGE_NONE][0]['value'] = $fields[$field_name]['value'];
     }
   }
 
