@@ -27,7 +27,7 @@ class Recurly_Client
   /**
    * API Version
    */
-  public static $apiVersion = '2.5';
+  public static $apiVersion = '2.19';
 
   /**
    * The path to your CA certs. Use only if needed (if you can't fix libcurl/php).
@@ -44,7 +44,12 @@ class Recurly_Client
    */
   private $_acceptLanguage = 'en-US';
 
-  const API_CLIENT_VERSION = '2.7.2';
+  /**
+   * Valid Recurly domains
+   */
+  private static $valid_domains = ["recurly.com"];
+
+  const API_CLIENT_VERSION = '2.12.1';
   const DEFAULT_ENCODING = 'UTF-8';
 
   const GET = 'GET';
@@ -62,6 +67,7 @@ class Recurly_Client
   const PATH_COUPON_REDEMPTION = '/redemption';
   const PATH_COUPON_REDEMPTIONS = '/redemptions';
   const PATH_COUPONS = '/coupons';
+  const PATH_CREDIT_PAYMENTS = '/credit_payments';
   const PATH_GIFT_CARDS = '/gift_cards';
   const PATH_UNIQUE_COUPONS = '/unique_coupon_codes';
   const PATH_INVOICES = '/invoices';
@@ -71,8 +77,6 @@ class Recurly_Client
   const PATH_TRANSACTIONS = '/transactions';
   const PATH_MEASURED_UNITS = '/measured_units';
   const PATH_USAGE = '/usage';
-
-  const PATH_RECURLY_JS_RESULT = '/recurly_js/result';
 
   /**
    * Create a new Recurly Client
@@ -84,6 +88,13 @@ class Recurly_Client
     $this->_acceptLanguage = $acceptLanguage;
   }
 
+  /**
+   * @param string $method The HTTP method
+   * @param string $uri The URI
+   * @param string $data XML string to post to the URI
+   * @return Recurly_ClientResponse
+   * @throws Recurly_Error
+   */
   public function request($method, $uri, $data = null)
   {
     return $this->_sendRequest($method, $uri, $data);
@@ -102,14 +113,16 @@ class Recurly_Client
   }
 
   /**
-  * Sends an HTTP request to the Recurly API
-  *
-  * @param string  $method Specifies the HTTP method to be used for this request
-  * @param string  $uri    Target URI for this request (relative to the API root)
-  * @param mixed   $data   x-www-form-urlencoded data (or array) to be sent in a POST request body
-  *
-  * @return $code, $response
-  */
+   * Sends an HTTP request to the Recurly API
+   *
+   * @param string  $method Specifies the HTTP method to be used for this request
+   * @param string  $uri    Target URI for this request (relative to the API root)
+   * @param mixed   $data   x-www-form-urlencoded data (or array) to be sent in a POST request body
+   *
+   * @return Recurly_ClientResponse
+   *
+   * @throws Recurly_Error
+   */
   private function _sendRequest($method, $uri, $data = '')
   {
     if(function_exists('mb_internal_encoding'))
@@ -117,6 +130,8 @@ class Recurly_Client
 
     if (substr($uri,0,4) != 'http')
       $uri = $this->baseUri() . $uri;
+
+    $this->_verifyUri($uri);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $uri);
@@ -150,6 +165,10 @@ class Recurly_Client
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
       curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     }
+    else if ('HEAD' == $method)
+    {
+      curl_setopt($ch, CURLOPT_NOBODY, TRUE);
+    }
     else if('GET' != $method)
     {
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
@@ -180,7 +199,7 @@ class Recurly_Client
   }
 
   private static function __userAgent() {
-    return "User-Agent: Recurly/" . self::API_CLIENT_VERSION . '; PHP ' . phpversion() . ' [' . php_uname('s') . ']';
+    return "User-Agent: Recurly/" . self::API_CLIENT_VERSION . '; PHP ' . phpversion() . ' [' . php_uname('s') . ']; ' . OPENSSL_VERSION_TEXT;
   }
 
   private function _getHeaders($headerText)
@@ -189,12 +208,31 @@ class Recurly_Client
     $returnHeaders = array();
     foreach ($headers as &$header) {
       preg_match('/([^:]+): (.*)/', $header, $matches);
-      if (sizeof($matches) > 2)
-        $returnHeaders[$matches[1]] = $matches[2];
+      if (sizeof($matches) > 2) {
+        $headerKey = strtolower($matches[1]);
+        $returnHeaders[$headerKey] = $matches[2];
+      }
     }
     return $returnHeaders;
   }
 
+  private function _verifyUri($uri) {
+    $host = parse_url($uri, PHP_URL_HOST);
+
+    // remove the subdomain from $host
+    if (count(explode('.', $host)) > 2) {
+      $host = substr($host, strpos($host, ".") + 1);
+    }
+
+    if (!in_array($host, Recurly_Client::$valid_domains))
+      throw new Recurly_Error("$host is not a valid Recurly domain!");
+  }
+
+  /**
+   * @param int $errorNumber The curl error number
+   * @param string $message The error message
+   * @throws Recurly_Error
+   */
   private function _raiseCurlError($errorNumber, $message)
   {
     switch ($errorNumber) {
@@ -215,8 +253,11 @@ class Recurly_Client
    *
    * @param string    $uri          Target URI for the request (complete URL)
    * @param resource  $file_pointer Resourced returned from fopen() with write mode.
+   * @throws Recurly_Error
    */
   public function getFile($uri, $file_pointer) {
+    $this->_verifyUri($uri);
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $uri);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, TRUE);
@@ -228,6 +269,7 @@ class Recurly_Client
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       Recurly_Client::__userAgent(),
+      'X-Api-Version: ' . Recurly_Client::$apiVersion
     ));
     curl_setopt($ch, CURLOPT_FILE, $file_pointer);
 
@@ -249,11 +291,14 @@ class Recurly_Client
   * @param  string $uri      Target URI for this request (relative to the API root)
   * @param  string $locale   Locale for the PDF invoice (e.g. "en-GB", "en-US", "fr")
   * @return string $response PDF document
+  * @throws Recurly_Error
   */
   public function getPdf($uri, $locale = null)
   {
     if (substr($uri,0,4) != 'http')
       $uri = $this->baseUri() . $uri;
+
+    $this->_verifyUri($uri);
 
     if (is_null($locale))
       $locale = $this->_acceptLanguage;
@@ -271,7 +316,8 @@ class Recurly_Client
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
       'Accept: application/pdf',
       Recurly_Client::__userAgent(),
-      'Accept-Language: ' . $locale
+      'Accept-Language: ' . $locale,
+      'X-Api-Version: ' . Recurly_Client::$apiVersion
     ));
     curl_setopt($ch, CURLOPT_USERPWD, $this->apiKey());
 

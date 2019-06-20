@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Class Recurly_Account
  * @property Recurly_Stub $adjustments The URL of adjustments for the specified account.
@@ -18,12 +19,21 @@
  * @property string $company_name The company name of the account.
  * @property string $vat_number The VAT number of the account (to avoid having the VAT applied).
  * @property boolean $tax_exempt The tax status of the account. true exempts tax on the account, false applies tax on the account.
+ * @property string $exemption_certificate Optional field for merchants taxing through Vertex. A string representing the exemption certificate. 1-30 characters in length.
  * @property Recurly_Address $address The nested address information of the account: address1, address2, city, state, zip, country, phone.
  * @property string $accept_language The ISO 639-1 language code from the user's browser, indicating their preferred language and locale.
  * @property string $hosted_login_token The unique token for automatically logging the account in to the hosted management pages. You may automatically log the user into their hosted management pages by directing the user to: https://:subdomain.recurly.com/account/:hosted_login_token.
+ * @property string $preferred_locale The locale for the emails
+ * @property string $has_live_subscription True if the account has at least one live subscription.
+ * @property string $has_active_subscription True if the account has at least one active subscription.
+ * @property string $has_future_subscription True if the account has at least one future subscription.
+ * @property string $has_canceled_subscription True if the account has at least one canceled subscription.
+ * @property string $has_paused_subscription True if the account has at least one paised subscription.
+ * @property string $has_past_due_invoice True if the account has at least one past due invoice.
  * @property DateTime $created_at The date and time the account was created in Recurly.
  * @property DateTime $updated_at The date and time the account or its billing info was last updated.
  * @property DateTime $closed_at For closed accounts, the date and time it was closed.
+ * @property Recurly_AccountAcquisition $account_acquisition The nested account acquisition information: cost_in_cents, currency, channel, subchannel, campaign.
  */
 class Recurly_Account extends Recurly_Resource
 {
@@ -32,6 +42,7 @@ class Recurly_Account extends Recurly_Resource
     if (!is_null($accountCode))
       $this->account_code = $accountCode;
     $this->address = new Recurly_Address();
+    $this->custom_fields = new Recurly_CustomFieldList();
   }
 
   public function &__get($key)
@@ -52,6 +63,8 @@ class Recurly_Account extends Recurly_Resource
     $this->_save(Recurly_Client::POST, Recurly_Client::PATH_ACCOUNTS);
   }
   public function update() {
+    # Manually clear the `parent_account` because the attribute name is `parent_account_code`
+    $this->parent_account = null;
     $this->_save(Recurly_Client::PUT, $this->uri());
   }
 
@@ -94,7 +107,9 @@ class Recurly_Account extends Recurly_Resource
     return array(
       'account_code', 'username', 'first_name', 'last_name', 'vat_number',
       'email', 'company_name', 'accept_language', 'billing_info', 'address',
-      'tax_exempt', 'entity_use_code', 'cc_emails', 'shipping_addresses'
+      'tax_exempt', 'entity_use_code', 'cc_emails', 'shipping_addresses',
+      'preferred_locale', 'custom_fields', 'account_acquisition', 'exemption_certificate',
+      'parent_account_code'
     );
   }
   protected function getRequiredAttributes() {

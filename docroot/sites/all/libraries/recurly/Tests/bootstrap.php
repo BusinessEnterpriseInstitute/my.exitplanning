@@ -10,6 +10,8 @@ date_default_timezone_set('America/Los_Angeles');
 
 /**
  * Base class for our tests that sets up a mock client.
+ *
+ * @property Recurly_MockClient $client
  */
 abstract class Recurly_TestCase extends PHPUnit_Framework_TestCase {
   function setUp() {
@@ -75,8 +77,10 @@ class Recurly_MockClient {
         break;
       }
       preg_match('/([^:]+): (.*)/', $fixture[$i], $matches);
-      if (sizeof($matches) > 2)
-        $headers[$matches[1]] = $matches[2];
+      if (sizeof($matches) > 2) {
+        $headerKey = strtolower($matches[1]);
+        $headers[$headerKey] = $matches[2];
+      }
     }
 
     if ($bodyLineNumber < sizeof($fixture))

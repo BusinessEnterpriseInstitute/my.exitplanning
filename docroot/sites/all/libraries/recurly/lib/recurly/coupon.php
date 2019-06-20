@@ -1,5 +1,35 @@
 <?php
 
+/**
+ * Class Recurly_Coupon
+ * @property Recurly_Stub $redemptions The URL of Recurly_CouponRedemptions for this coupon.
+ * @property int $id The unique integer identifier of the coupon.
+ * @property string $coupon_code Unique code to identify and redeem the coupon. This code may only contain the following characters: [a-z A-Z 0-9 + - _ ]. Max of 50 characters.
+ * @property string $name Coupon name.
+ * @property string $description Description of the coupon shown on the hosted payment pages.
+ * @property string $discount_type The type of discount. Allowed values: [percent, dollars, free_trial].
+ * @property int $discount_in_cents Mapping of discount amounts by currency if discount_type is dollars. Max 10000000.
+ * @property int $discount_percent Discount percentage if discount_type is percent. Example `coupon->discount_percent = 10; // 10%`
+ * @property string $invoice_description Description of the coupon on the invoice.
+ * @property int $max_redemptions Maximum number of accounts that may use the coupon before it can no longer be redeemed.
+ * @property boolean $applies_to_all_plans The coupon is valid for all plans if true, defaults to true.
+ * @property string $duration Allowed values: [forever, single_use, temporal].  If single_use, the coupon applies to the first invoice only. If temporal the coupon will apply to invoices for the duration determined by the temporal_unit and temporal_amount attributes.
+ * @property string $temporal_unit Allowed values: [day, week, month, year]. If duration is temporal then temporal_unit is multiplied by temporal_amount to define the duration that the coupon will be applied to invoices for.
+ * @property integer $temporal_amount If duration is temporal then temporal_amount is an integer which is multiplied by temporal_unit to define the duration that the coupon will be applied to invoices for.
+ * @property boolean $applies_to_non_plan_charges The coupon is valid for one-time, non-plan charges if true, defaults to false.
+ * @property string $redemption_resource Whether the discount is for all eligible charges on the account, or only a specific subscription. Allowed values: [account, subscription].
+ * @property int $max_redemptions_per_account The number of times the coupon can be redeemed on a specific account. null is the default and means unlimited.
+ * @property string $coupon_type Allowed values: [single_code, bulk]. Bulk coupons will require a unique_code_template and will generate unique codes through the generate endpoint.
+ * @property string $unique_code_template The template for generating unique codes. See rules in the coupon docs: https://dev.recurly.com/docs/create-coupon
+ * @property string[] $plan_codes Array of plan_codes the coupon applies to, if applies_to_all_plans is false.
+ * @property int $free_trial_amount Only relevant when the coupon type is free_trial. The free_trial_amount is used together with free_trial_unit to define the length of a free trial coupon. For example, a 2 week free trial would be defined as free_trial_amount = 2 and free_trial_unit = Week.
+ * @property string $free_trial_unit Only relevant when the coupon type is free_trial. Allowed values are day or week or month. free_trial_unit is used together with free_trial_unit to define the length of a free trial coupon. For example, a 2 week free trial would be defined as free_trial_amount = 2 and free_trial_unit = Week.
+ * @property DateTime $redeem_by_date Last date to redeem the coupon, defaults to no date.
+ * @property DateTime $created_at The date and time the coupon was created.
+ * @property DateTime $updated_at The date and time the coupon was last updated.
+ * @property DateTime $deleted_at The date and time the coupon was deleted.
+ * @property string $state The state of coupons to return: redeemable, expired, maxed_out, or inactive.
+ */
 class Recurly_Coupon extends Recurly_Resource
 {
   protected $_redeemUrl;
@@ -9,6 +39,12 @@ class Recurly_Coupon extends Recurly_Resource
     $this->discount_in_cents = new Recurly_CurrencyList('discount_in_cents');
   }
 
+  /**
+   * @param string $couponCode The coupon code
+   * @param Recurly_Client $client Optional client for the request, useful for mocking the client
+   * @return object Recurly_Resource or null
+   * @throws Recurly_Error
+   */
   public static function get($couponCode, $client = null) {
     return Recurly_Base::_get(Recurly_Coupon::uriForCoupon($couponCode), $client);
   }
@@ -17,6 +53,13 @@ class Recurly_Coupon extends Recurly_Resource
     $this->_save(Recurly_Client::POST, Recurly_Client::PATH_COUPONS);
   }
 
+  /**
+   * @param string $accountCode The account code
+   * @param string $currency The currency of
+   * @param string $subscriptionUUID The UUID of the subscription
+   * @return Recurly_CouponRedemption
+   * @throws Recurly_Error
+   */
   public function redeemCoupon($accountCode, $currency, $subscriptionUUID = null) {
     if ($this->state != 'redeemable') {
       throw new Recurly_Error('Coupon is not redeemable.');
@@ -33,6 +76,8 @@ class Recurly_Coupon extends Recurly_Resource
         return $redemption;
       }
     }
+
+    return null;
   }
 
   public function update() {
@@ -43,9 +88,20 @@ class Recurly_Coupon extends Recurly_Resource
     $this->_save(Recurly_Client::PUT, $this->uri() . '/restore', $this->createUpdateXML());
   }
 
+  /**
+   * @return object
+   * @throws Recurly_Error
+   */
   public function delete() {
     return Recurly_Base::_delete($this->uri(), $this->_client);
   }
+
+  /**
+   * @param string $couponCode The coupon code
+   * @param Recurly_Client $client Optional client for the request, useful for mocking the client
+   * @return object Recurly_Resource or null
+   * @throws Recurly_Error
+   */
   public static function deleteCoupon($couponCode, $client = null) {
     return Recurly_Base::_delete(Recurly_Coupon::uriForCoupon($couponCode), $client);
   }
@@ -70,6 +126,11 @@ class Recurly_Coupon extends Recurly_Resource
     return $this->renderXML($doc);
   }
 
+  /**
+   * @param int $number Number of unique codes to generate
+   * @return array
+   * @throws Recurly_Error
+   */
   public function generate($number) {
     $doc = $this->createDocument();
 
@@ -80,7 +141,7 @@ class Recurly_Coupon extends Recurly_Resource
     $response->assertValidResponse();
 
     $coupons = array();
-    foreach (new Recurly_UniqueCouponCodeList($response->headers['Location'], $this->_client) as $coupon) {
+    foreach (new Recurly_UniqueCouponCodeList($response->headers['location'], $this->_client) as $coupon) {
       $coupons[] = $coupon;
       if (count($coupons) == $number) break;
     }
