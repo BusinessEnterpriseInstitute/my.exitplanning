@@ -49,10 +49,7 @@ Allow: /themes/*.jpg
 Allow: /themes/*.jpeg
 Allow: /themes/*.png
 # Directories
-Disallow: /includes
 Disallow: /includes/
-Disallow: /file/
-Disallow: /flag/
 Disallow: /misc/
 Disallow: /modules/
 Disallow: /profiles/
