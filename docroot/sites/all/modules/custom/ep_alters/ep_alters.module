@@ -11,7 +11,7 @@ function ep_alters_permission() {
   );
 }
 function ep_alters_menu_alter(&$items) {
-  $items['user/login']['title'] = 'Member Login';
+  $items['user/login']['title'] = 'User Login';
   if (module_exists('forum')) {
     $items['forum']['access arguments'] = array('access forum pages');
     $items['forum/%forum_forum']['access arguments'] = array('access forum pages');
@@ -35,7 +35,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
   }
   if (arg(0) == 'user') {
     if (!arg(1)) {
-      drupal_set_title(t('Member Login'));
+      drupal_set_title(t('User Login'));
     }
     elseif (arg(1) == 'password') {
       drupal_set_title(t('Request new password'));
