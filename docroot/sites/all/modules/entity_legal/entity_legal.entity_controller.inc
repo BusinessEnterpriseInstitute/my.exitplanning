@@ -11,7 +11,7 @@ class EntityLegalDocumentController extends EntityAPIControllerExportable {
   /**
    * {@inheritdoc}
    */
-  public function save($entity) {
+  public function save($entity, DatabaseTransaction $transaction = NULL) {
     // When creating a new legal document, add the document text to the bundle.
     if (!empty($entity->is_new)) {
       $instance = array(
@@ -38,7 +38,7 @@ class EntityLegalDocumentController extends EntityAPIControllerExportable {
       field_create_instance($instance);
     }
 
-    $success = parent::save($entity);
+    $success = parent::save($entity, $transaction);
 
     // Flush the entity info cache to allow the new bundle to be registered.
     entity_info_cache_clear();
