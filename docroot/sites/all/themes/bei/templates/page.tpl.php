@@ -275,7 +275,11 @@
           </script>
       
       <!-- End of Drift Script-->
-      
+      <!--Hubspot Script-->
+        <!-- Start of HubSpot Embed Code -->
+        <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/6036342.js"></script>
+        <!-- End of HubSpot Embed Code -->
+      <!--End of Hubspot Script-->
     <?php endif;?>
   </footer>
   <!--/.l-footer -->
