@@ -70,23 +70,23 @@ function lockr_admin_status($info) {
 
   if (!is_null($info)) {
     $has_cc = $info['keyring']['hasCreditCard'];
-    $trial_end = \DateTime::createFromFormat(
-      DateTime::RFC3339,
-      $info['keyring']['trialEnd']
-    );
-    if ($trial_end > (new \DateTime())) {
-      $reqs[] = [
-        'title' => t('Trial Expiration Date'),
-        'value' => $trial_end->format('M jS, Y'),
-        'severity' => REQUIREMENT_INFO,
-      ];
-    }
-    elseif (!$has_cc) {
-      $reqs[] = [
-        'title' => t('Trial Expiration Date'),
-        'value' => $trial_end->format('M jS, Y'),
-        'severity' => REQUIREMENT_ERROR,
-      ];
+    $trial_end = $info['keyring']['trialEnd'];
+    if (!is_null($trial_end)) {
+      $trial_end = \DateTime::createFromFormat(DateTime::RFC3339, $trial_end);
+      if ($trial_end > (new \DateTime())) {
+        $reqs[] = [
+          'title' => t('Trial Expiration Date'),
+          'value' => $trial_end->format('M jS, Y'),
+          'severity' => REQUIREMENT_INFO,
+        ];
+      }
+      elseif (!$has_cc) {
+        $reqs[] = [
+          'title' => t('Trial Expiration Date'),
+          'value' => $trial_end->format('M jS, Y'),
+          'severity' => REQUIREMENT_ERROR,
+        ];
+      }
     }
 
     if (isset($info['auth']['expires'])) {

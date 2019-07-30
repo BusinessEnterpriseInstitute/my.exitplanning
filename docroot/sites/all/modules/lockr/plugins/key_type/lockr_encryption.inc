@@ -71,7 +71,7 @@ function key_type_lockr_encryption_generate_key_value(array $config) {
     : 256;
   $client = lockr_client();
 
-  return $client->generateKey($bits);
+  return $client->generateKey((int) $bits);
 }
 
 /**

@@ -18,14 +18,15 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
   function summary_title() {
     $time = $this->get_time();
     $role = $this->options['per_role'] ? 'Yes' : 'No';
+    $entities = isset($this->options['entities']) ? $this->options['entities'] : 'none';
     if ($this->options['cache_time'] == '-1') {
       return t('Never cache');
     }
     elseif ($this->options['cache_time'] == '0') {
-      return t('Cache permanent' . '/' . t('Per role') . ': ' . $role);
+      return t('Cache permanent' . ' / ' . t('Per role') . ': ' . $role . ' / ' . t('Updates awareness') . ': ' . $entities);
     }
     else {
-      return t('Time') . ': ' . format_interval($time, 1) . '/' . t('Per role') . ': ' . $role;
+      return t('Time') . ': ' . format_interval($time, 1) . ' / ' . t('Per role') . ': ' . $role . ' / ' . t('Updates awareness') . ': ' . $entities;
     }
   }
 
@@ -37,6 +38,8 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
     $options['cache_time'] = array('default' => 3600);
     $options['cache_time_custom'] = array('default' => 0);
     $options['per_role'] = array('default' => 1);
+    $options['entities'] = array('default' => 'none');
+    $options['bundles'] = array('default' => 'all');
     return $options;
   }
 
@@ -47,6 +50,8 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
     $options['cache_time'] = 3600;
     $options['cache_time_custom'] = 0;
     $options['per_role'] = 1;
+    $options['entities'] = 'none';
+    $options['bundles'] = 'all';
   }
 
   /**
@@ -59,6 +64,8 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
     $options = drupal_map_assoc($options, 'format_interval');
     $options = array(-1 => t('Never cache')) + array(0 => t('Permanent cache')) + $options + array('custom' => t('Custom'));
     $options_per_user = array(1 => t('Yes'), 0 => t('No'));
+    $options_entities = array('none' => t('Unaware'), 'node' => t('Node aware'));
+    $options_bundles = $this->get_node_bundles();
 
     $form['cache_time'] = array(
       '#type' => 'select',
@@ -83,6 +90,23 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
       '#title' => t('Cache per role?'),
       '#options' => $options_per_user,
       '#default_value' => $this->options['per_role'],
+    );
+    $form['entities'] = array(
+      '#type' => 'select',
+      '#title' => t('Updates awareness'),
+      '#options' => $options_entities,
+      '#default_value' => $this->options['entities'],
+    );
+    $form['bundles'] = array(
+      '#type' => 'select',
+      '#multiple' => TRUE,
+      '#title' => t('Be aware of following bundles'),
+      '#options' => $options_bundles,
+      '#description' => t('Empty selection means to be aware of all bundles.'),
+      '#default_value' => $this->options['bundles'],
+      '#dependency' => array(
+        'edit-cache-options-entities' => array('node'),
+      ),
     );
   }
 
@@ -115,10 +139,16 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
    */
   function get_results_key() {
     $per_role = isset($this->options['per_role']) ? $this->options['per_role'] : 1;
+    $entities = isset($this->options['entities']) ? $this->options['entities'] : 'none';
+    $bundles = isset($this->options['bundles']) ? $this->options['bundles'] : array();
     if (!isset($this->_results_key)) {
       $this->_results_key = $this->view->name . ':' . $this->display->id . ':results:' . $this->get_all_arg();
       if ($per_role) {
         $this->_results_key .= ':' . $this->get_cache_key();
+      }
+      if (!empty($entities) && $entities == 'node') {
+        $last_changed = $this->node_get_last_changed_date($bundles);
+        $this->_results_key .= ':' . $last_changed;
       }
     }
     return $this->_results_key;
@@ -129,6 +159,8 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
    */
   function get_output_key() {
     $per_role = isset($this->options['per_role']) ? $this->options['per_role'] : 1;
+    $entities = isset($this->options['entities']) ? $this->options['entities'] : 'none';
+    $bundles = isset($this->options['bundles']) ? $this->options['bundles'] : array();
     if (!isset($this->_output_key)) {
       $key_data = array(
         'theme' => $GLOBALS['theme'],
@@ -136,6 +168,10 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
       $this->_output_key = $this->view->name . ':' . $this->display->id . ':output:' . $this->get_all_arg();
       if ($per_role) {
         $this->_output_key .= ':' . $this->get_cache_key($key_data);
+      }
+      if (!empty($entities) && $entities == 'node') {
+        $last_changed = $this->node_get_last_changed_date($bundles);
+        $this->_output_key .= ':' . $last_changed;
       }
     }
 
@@ -187,7 +223,6 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
     global $language;
 
     $key = '';
-    $key .= $language->language;
 
     if (!empty($_GET['page'])) {
       $key .= $_GET['page'];
@@ -216,7 +251,56 @@ class views_custom_cache_plugin_multi_cache extends views_plugin_cache {
       $key = md5($key);
     }
 
+    $key .= ':' . $language->language;
+
     return $key;
   }
 
+  /**
+   * Returns the change date of most recent node.
+   *
+   * @param array $bundles
+   *   Bundles to check out.
+   *
+   * @return int
+   *   Change date in unixtime.
+   */
+  function node_get_last_changed_date($bundles) {
+    $query = db_select('node', 'n');
+
+    if (empty($bundles)) {
+      $result = $query->fields('n', array('changed'))
+        ->orderBy('n.changed', 'DESC')
+        ->range(0, 1)
+        ->execute()
+        ->fetchAssoc();
+    }
+    else {
+      $result = $query->fields('n', array('changed'))
+        ->orderBy('n.changed', 'DESC')
+        ->condition('n.type', array_keys($bundles), 'IN')
+        ->range(0, 1)
+        ->execute()
+        ->fetchAssoc();
+    }
+
+    return $result['changed'];
+  }
+
+  /**
+   * Returns the list of available node bundles.
+   *
+   * @return array
+   *   List of bundles.
+   */
+  function get_node_bundles() {
+    $bundles = array();
+
+    $ctypes = node_type_get_types();
+    foreach ($ctypes as $key => $ct) {
+      $bundles[$key] = $ct->name;
+    }
+
+    return $bundles;
+  }
 }

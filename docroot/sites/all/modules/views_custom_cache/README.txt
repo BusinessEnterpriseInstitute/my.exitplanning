@@ -13,7 +13,7 @@ This module provides two new simple caches for views which takes view's
 arguments into account:
 
 * Custom cache: view's all arguments: All view's arguments, including
-  contextual and exposed filters, will be taken into account.
+  contextual and exposed filters, will be taken into account (recommended).
 * Custom cache: view's first argument: Only first view argument, even if it
   is a contextual or exposed filter, will be taken into account.
 
@@ -65,7 +65,7 @@ CONFIGURATION
 
     - Custom cache: view's all arguments:
 
-      Takes into account all views arguments.
+      Takes into account all views arguments (recommended).
 
     - Custom cache: view's first argument:
 
@@ -85,3 +85,10 @@ CONFIGURATION
     - Cache per role?
 
       Enable or disable cache per each role.
+
+    - Updates awareness
+
+      * Unaware: cache will NOT be refreshed when content is updated.
+
+      * Node aware: cache will be refreshed when a node is updated. You can
+      select which bundles have to be monitored to detect changes.

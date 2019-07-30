@@ -243,17 +243,17 @@
     },
     {
         "name": "lockr/lockr",
-        "version": "v1.0.4",
-        "version_normalized": "1.0.4.0",
+        "version": "v1.0.7",
+        "version_normalized": "1.0.7.0",
         "source": {
             "type": "git",
             "url": "https://github.com/lockr/lockr-php.git",
-            "reference": "42c8d21fb8d45f3932708b1c4cfbf697bf90f3ca"
+            "reference": "e5bae20859d07f12e664675ea5f22a89cda40350"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/lockr/lockr-php/zipball/42c8d21fb8d45f3932708b1c4cfbf697bf90f3ca",
-            "reference": "42c8d21fb8d45f3932708b1c4cfbf697bf90f3ca",
+            "url": "https://api.github.com/repos/lockr/lockr-php/zipball/e5bae20859d07f12e664675ea5f22a89cda40350",
+            "reference": "e5bae20859d07f12e664675ea5f22a89cda40350",
             "shasum": ""
         },
         "require": {
@@ -269,7 +269,7 @@
             "phpunit/phpunit": "^7.3.5",
             "squizlabs/php_codesniffer": "^3.3.1"
         },
-        "time": "2019-05-01T20:47:56+00:00",
+        "time": "2019-05-06T20:38:27+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -541,8 +541,8 @@
     },
     {
         "name": "symfony/yaml",
-        "version": "v3.4.27",
-        "version_normalized": "3.4.27.0",
+        "version": "v3.4.28",
+        "version_normalized": "3.4.28.0",
         "source": {
             "type": "git",
             "url": "https://github.com/symfony/yaml.git",
