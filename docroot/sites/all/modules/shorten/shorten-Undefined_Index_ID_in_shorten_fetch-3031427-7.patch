@@ -1,0 +1,32 @@
+From b61697aad5782f0cf4d30cd282b0b408636e6d9a Mon Sep 17 00:00:00 2001
+From: Mike Lewis <mlewis@duoconsulting.com>
+Date: Thu, 7 Feb 2019 14:49:45 -0500
+Subject: [PATCH] Wrapping $contents[$tag] in an isset so there isn't a fatal
+ error when a 403 or other error occurs from Google. Perhaps some logging
+ should be done instead?
+
+---
+ shorten.module | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/shorten.module b/shorten.module
+index 70dc3d4..e575bb2 100644
+--- a/shorten.module
++++ b/shorten.module
+@@ -364,7 +364,12 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
+     }
+     elseif ($special == 'json') {
+       $contents = json_decode($contents, TRUE);
+-      $contents = $contents[$tag];
++      if (isset($contents[$tag])) {
++        $contents = $contents[$tag];
++      }
++      else {
++        return FALSE;
++      }
+     }
+   }
+   if (!$contents || $contents == $url) {
+-- 
+2.20.0
+

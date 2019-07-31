@@ -443,12 +443,7 @@ function shorten_fetch($url, $tag = '', $special = '', $options = array()) {
     }
     elseif ($special == 'json') {
       $contents = json_decode($contents, TRUE);
-      if (isset($contents[$tag])) {
-        $contents = $contents[$tag];
-      }
-      else {
-        return FALSE;
-      }
+      $contents = $contents[$tag];
     }
   }
   if (!$contents || $contents == $url) {
