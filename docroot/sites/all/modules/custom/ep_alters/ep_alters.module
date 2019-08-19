@@ -26,6 +26,12 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
   }
   // User login form.
   if ($form_id == 'user_login' || $form_id == 'user_login_block') {
+    $form['name'] = array('#type' => 'textfield',
+    '#title' => t('Username'),
+    '#size' => 60,
+    '#maxlength' => USERNAME_MAX_LENGTH,
+    '#required' => TRUE,
+    '#attributes' => ['autofocus' => 'autofocus',]);
     $form['#attributes']['autocomplete'] = 'off';
     $form['forgot_password'] = array(
       '#type' => 'markup',
