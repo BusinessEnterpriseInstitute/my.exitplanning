@@ -33,6 +33,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
     '#required' => TRUE,
     '#attributes' => ['autofocus' => 'autofocus',]);
     $form['#attributes']['autocomplete'] = 'off';
+    $form['name']['#description'] = t('Enter your @s username.', array('@s' => variable_get('site_name', 'Drupal')));
     $form['forgot_password'] = array(
       '#type' => 'markup',
       '#markup' => '<p>' . l(t('Did you forget your password?'), 'user/password', array('attributes' => array('rel' => 'nofollow'))) . '</p>',
