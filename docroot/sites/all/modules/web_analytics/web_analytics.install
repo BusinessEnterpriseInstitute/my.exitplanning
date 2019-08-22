@@ -1,0 +1,80 @@
+<?php
+
+/**
+ * @file
+ * Uninstall functions for hfs module.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function web_analytics_schema() {
+  $schema['web_analytics'] = array(
+    'description' => 'The base table for Web Analytics.',
+    'fields' => array(
+      'aid' => array(
+        'description' => 'The primary identifier for Web Analytic.',
+        'type'        => 'serial',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+      ),
+      'id' => array(
+        'description' => 'It should be nid for node and tid for taxonomy.',
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+      'type' => array(
+        'description' => 'It should be node or taxonomy.',
+        'type'        => 'varchar',
+        'length'      => 16,
+        'not null'    => TRUE,
+        'default'     => 'node',
+      ),
+      'name' => array(
+        'description' => 'It should be node_type for node and machine_name for taxonomy.',
+        'type'        => 'varchar',
+        'length'      => 32,
+        'not null'    => TRUE,
+        'default'     => '',
+      ),
+      'total_views' => array(
+        'description' => 'Number of times page has been viewed.',
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+      'first_view' => array(
+        'description' => 'The unix timestamp of when the page viewed first time.',
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+      'last_view' => array(
+        'description' => 'The unix timestamp of when the page viewed last time. ',
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+        'default'     => 0,
+      ),
+    ),
+    'unique keys' => array(
+      'aid_id' => array('aid', 'id'),
+      'aid'    => array('aid'),
+    ),
+    'primary key' => array('aid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function web_analytics_uninstall() {
+  variable_del('web_analytics_settings');
+  db_drop_table('web_analytics');
+}

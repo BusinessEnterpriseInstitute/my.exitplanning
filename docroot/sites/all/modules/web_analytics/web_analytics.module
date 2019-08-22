@@ -1,0 +1,546 @@
+<?php
+
+/**
+ * @file
+ * Enables Drupal to make Statistical Report using Page Views.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function web_analytics_menu() {
+
+  $items = array();
+
+  $items['admin/config/system/web-analytics'] = array(
+    'title'            => t('Web Analytics'),
+    'description'      => t('Control details about which and
+                           how your site logs access web analytics.'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('web_analytics_settings_form'),
+    'access arguments' => array('web_analytics_configuration'),
+    'file'             => 'admin/web_analytics.settings.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+  );
+
+  $items['admin/config/system/web-analytics/web_analytics'] = array(
+    'title'            => t('Settings'),
+    'description'      => t('Control details about which and
+                           how your site logs access web analytics.'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('web_analytics_settings_form'),
+    'access arguments' => array('web_analytics_configuration'),
+    'file'             => 'admin/web_analytics.settings.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_DEFAULT_LOCAL_TASK,
+  );
+
+  $items['admin/config/system/web-analytics/view'] = array(
+    'title'            => t('View'),
+    'description'      => t('View the logs of the web analytics.'),
+    'page callback'    => 'web_analytics_view',
+    'access arguments' => array('web_analytics_view'),
+    'file'             => 'admin/web_analytics.view.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_LOCAL_TASK,
+  );
+
+  $items['admin/config/system/web-analytics/update-node'] = array(
+    'title'            => t('Web Analytics Update Node'),
+    'description'      => t('Update Stats of Node if Multi Domain Functionality
+                          is enabled.'),
+    'page callback'    => 'web_analytics_update_node_stats',
+    'access arguments' => array('access content'),
+    'file'             => 'include/web_analytics.node.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['admin/config/system/web-analytics/update-term'] = array(
+    'title'            => t('Web Analytics Update Term'),
+    'description'      => t('Update Stats of Term if Multi Domain Functionality
+                           is enabled.'),
+    'page callback'    => 'web_analytics_update_term_stats',
+    'access arguments' => array('access content'),
+    'file'             => 'include/web_analytics.term.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['admin/config/system/web-analytics/update-view'] = array(
+    'title'            => t('Web Analytics Update View'),
+    'description'      => t('Update Stats of View if Multi Domain Functionality
+                           is enabled.'),
+    'page callback'    => 'web_analytics_update_view_stats',
+    'access arguments' => array('access content'),
+    'file'             => 'include/web_analytics.view.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $items['admin/web-analytics/stats/using-ajax'] = array(
+    'title'            => t('Web Analytics Using Ajax'),
+    'description'      => t('Update Stats using Ajax.'),
+    'page callback'    => 'web_analytics_stats_using_ajax',
+    'access arguments' => array('access content'),
+    'file'             => 'include/web_analytics.ajax.inc',
+    'file path'        => drupal_get_path('module', 'web_analytics'),
+    'type'             => MENU_CALLBACK,
+  );
+
+  $get_settings = variable_get('web_analytics_settings', '');
+  if (!empty($get_settings)) {
+    $get_settings = unserialize($get_settings);
+    if (isset($get_settings['settings']['proxy_enable'])
+      && $get_settings['settings']['proxy_enable'] == 1 ) {
+      if (isset($get_settings['settings']['proxy_path'])) {
+        $items[$get_settings['settings']['proxy_path']] = array(
+          'title'            => t('Web Analytics Using Ajax'),
+          'description'      => t('Update Stats using Ajax.'),
+          'page callback'    => 'web_analytics_stats_using_ajax',
+          'access arguments' => array('access content'),
+          'file'             => 'include/web_analytics.ajax.inc',
+          'file path'        => drupal_get_path('module', 'web_analytics'),
+          'type'             => MENU_CALLBACK,
+        );
+      }
+    }
+  }
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function web_analytics_permission() {
+  $permissions = array();
+
+  $permissions['web_analytics_view'] = array(
+    'title'       => t('Web Analytics View'),
+    'description' => t('Allow user to see the view of the Web Analytics.'),
+  );
+
+  $permissions['web_analytics_configuration'] = array(
+    'title'           => t('Web Analytics Settings'),
+    'description'     => t('Allow user to change the settings of the
+                          Web Analytics.'),
+    'restrict access' => TRUE,
+  );
+
+  return $permissions;
+}
+
+/**
+ * Implements hook_node_view().
+ *
+ * Create Statistical Report for the Page Views (Content Types).
+ */
+function web_analytics_node_view($node, $view_mode, $langcode) {
+  $get_settings = variable_get('web_analytics_settings', '');
+  if (!empty($get_settings)) {
+    $get_settings = unserialize($get_settings);
+  }
+  else {
+    return;
+  }
+
+  if (isset($get_settings['node_types'][$node->type])
+    && $get_settings['node_types'][$node->type] == 1) {
+
+    if (isset($get_settings['settings']['use_ajax'])
+    && $get_settings['settings']['use_ajax'] == 1) {
+      $settings = array(
+        'id'   => $node->nid,
+        'type' => 'node',
+        'name' => $node->type,
+      );
+
+      if (isset($get_settings['settings']['proxy_enable'])
+        && $get_settings['settings']['proxy_enable'] == 1 ) {
+        if (isset($get_settings['settings']['proxy_path'])) {
+          $settings['path'] = '/' . $get_settings['settings']['proxy_path'];
+        }
+      }
+
+      drupal_add_js(drupal_get_path('module', 'web_analytics') .'/js/web_analytics.min.js', 'file');
+      drupal_add_js(array('web_analytics' => $settings), 'setting');
+      return;
+    }
+
+    $check_view = db_select('web_analytics', 'w')
+      ->fields('w', array('total_views'))
+      ->condition('id', $node->nid, '=')
+      ->condition('type', 'node', '=')
+      ->execute()
+      ->fetchObject();
+    if (empty($check_view)) {
+      db_insert('web_analytics')
+        ->fields(array(
+          'id'          => $node->nid,
+          'type'        => 'node',
+          'name'        => $node->type,
+          'total_views' => 1,
+          'first_view'  => time(),
+          'last_view'   => time(),
+        ))
+        ->execute();
+    }
+    else {
+      $update_node_views = $check_view->total_views + 1;
+      db_update('web_analytics')
+        ->fields(array(
+          'total_views' => $update_node_views,
+          'last_view'   => time(),
+        ))
+        ->condition('id', $node->nid, '=')
+        ->condition('type', 'node', '=')
+        ->execute();
+    }
+
+    if (isset($get_settings['settings']['enable'])
+      && $get_settings['settings']['enable'] == 1) {
+
+      if (isset($get_settings['settings']['domain'])
+        && !empty($get_settings['settings']['domain'])) {
+
+        global $base_url;
+        if ($base_url != $get_settings['settings']['accessible']) {
+          return;
+        }
+
+        $url = $get_settings['settings']['domain'] . '/admin/config/system/web-analytics/update-node';
+
+        $data = array(
+          'nid'         => $node->nid,
+          'node_type'   => $node->type,
+          'access_from' => $base_url,
+        );
+
+        $ch = curl_init($url);
+
+        if (isset($get_settings['settings']['username'])
+          && isset($get_settings['settings']['password'])) {
+
+          if (!empty($get_settings['settings']['username'])
+            && !empty($get_settings['settings']['password'])) {
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD,
+              $get_settings['settings']['username'] . ":" . $get_settings['settings']['password']);
+          }
+        }
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_exec($ch);
+        curl_close($ch);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy_term_view().
+ *
+ * Create Statistical Report for the Page Views (Taxonomy).
+ */
+function web_analytics_taxonomy_term_view($term, $view_mode, $langcode) {
+  $get_settings = variable_get('web_analytics_settings', '');
+  if (!empty($get_settings)) {
+    $get_settings = unserialize($get_settings);
+  }
+  else {
+    return;
+  }
+
+  if (isset($get_settings['taxonomy_types'][$term->machine_name])
+    && $get_settings['taxonomy_types'][$term->machine_name] == 1) {
+
+    if (isset($get_settings['settings']['use_ajax'])
+      && $get_settings['settings']['use_ajax'] == 1) {
+      $settings = array(
+        'id'   => $term->tid,
+        'type' => 'term',
+        'name' => $term->machine_name,
+      );
+
+      if (isset($get_settings['settings']['proxy_enable'])
+        && $get_settings['settings']['proxy_enable'] == 1 ) {
+        if (isset($get_settings['settings']['proxy_path'])) {
+          $settings['path'] = '/' . $get_settings['settings']['proxy_path'];
+        }
+      }
+
+      drupal_add_js(drupal_get_path('module', 'web_analytics') .'/js/web_analytics.min.js', 'file');
+      drupal_add_js(array('web_analytics' => $settings), 'setting');
+      return;
+    }
+
+    $check_view = db_select('web_analytics', 'w')
+      ->fields('w', array('total_views'))
+      ->condition('id', $term->tid, '=')
+      ->condition('type', 'term', '=')
+      ->execute()
+      ->fetchObject();
+    if (empty($check_view)) {
+      db_insert('web_analytics')
+        ->fields(array(
+          'id'          => $term->tid,
+          'type'        => 'term',
+          'name'        => $term->machine_name,
+          'total_views' => 1,
+          'first_view'  => time(),
+          'last_view'   => time(),
+        ))
+        ->execute();
+    }
+    else {
+      $update_term_views = $check_view->total_views + 1;
+      db_update('web_analytics')
+        ->fields(array(
+          'total_views' => $update_term_views,
+          'last_view'   => time(),
+        ))
+        ->condition('id', $term->tid, '=')
+        ->condition('type', 'term', '=')
+        ->execute();
+    }
+
+    if (isset($get_settings['settings']['enable'])
+      && $get_settings['settings']['enable'] == 1) {
+
+      if (isset($get_settings['settings']['domain'])
+        && !empty($get_settings['settings']['domain'])) {
+
+        global $base_url;
+        if ($base_url != $get_settings['settings']['accessible']) {
+          return;
+        }
+
+        $url = $get_settings['settings']['domain'] . '/admin/config/system/web-analytics/update-term';
+
+        $data = array(
+          'tid'         => $term->tid,
+          'term_type'   => $term->machine_name,
+          'access_from' => $base_url,
+        );
+
+        $ch = curl_init($url);
+
+        if (isset($get_settings['settings']['username'])
+          && isset($get_settings['settings']['password'])) {
+
+          if (!empty($get_settings['settings']['username'])
+            && !empty($get_settings['settings']['password'])) {
+            curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+            curl_setopt($ch, CURLOPT_USERPWD,
+              $get_settings['settings']['username'] . ":" . $get_settings['settings']['password']);
+          }
+        }
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_exec($ch);
+        curl_close($ch);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_views_post_execute().
+ *
+ * Create Statistical Report for the Page Views (View Module).
+ */
+function web_analytics_views_post_execute(&$view) {
+  $get_settings = variable_get('web_analytics_settings', '');
+  if (!empty($get_settings)) {
+    $get_settings = unserialize($get_settings);
+  }
+  else {
+    return;
+  }
+
+  if (!isset($view->current_display) || $view->current_display != 'page') {
+    return;
+  }
+
+  if (isset($get_settings['views'][$view->name])
+    && $get_settings['views'][$view->name] == 1) {
+
+    if (isset($get_settings['settings']['use_ajax'])
+      && $get_settings['settings']['use_ajax'] == 1) {
+      $settings = array(
+        'id'   => $view->vid,
+        'type' => 'view',
+        'name' => $view->name,
+      );
+
+      if (isset($get_settings['settings']['proxy_enable'])
+        && $get_settings['settings']['proxy_enable'] == 1 ) {
+        if (isset($get_settings['settings']['proxy_path'])) {
+          $settings['path'] = '/' . $get_settings['settings']['proxy_path'];
+        }
+      }
+
+      drupal_add_js(drupal_get_path('module', 'web_analytics') .'/js/web_analytics.min.js', 'file');
+      drupal_add_js(array('web_analytics' => $settings), 'setting');
+      return;
+    }
+
+    $check_view = db_select('web_analytics', 'w')
+      ->fields('w', array('total_views'))
+      ->condition('id', $view->vid, '=')
+      ->condition('type', 'view', '=')
+      ->execute()
+      ->fetchObject();
+    if (empty($check_view)) {
+      db_insert('web_analytics')
+        ->fields(array(
+          'id'          => $view->vid,
+          'type'        => 'view',
+          'name'        => $view->name,
+          'total_views' => 1,
+          'first_view'  => time(),
+          'last_view'   => time(),
+        ))
+        ->execute();
+    }
+    else {
+      $update_views = $check_view->total_views + 1;
+      db_update('web_analytics')
+        ->fields(array(
+          'total_views' => $update_views,
+          'last_view'   => time(),
+        ))
+        ->condition('id', $view->vid, '=')
+        ->condition('type', 'view', '=')
+        ->execute();
+    }
+
+    if (isset($get_settings['settings']['enable'])
+      && $get_settings['settings']['enable'] == 1) {
+
+      if (isset($get_settings['settings']['domain'])
+        && !empty($get_settings['settings']['domain'])) {
+
+        global $base_url;
+        if ($base_url != $get_settings['settings']['accessible']) {
+          return;
+        }
+
+        $url = $get_settings['settings']['domain'] . '/admin/config/system/web-analytics/update-view';
+
+        $data = array(
+          'vid'         => $view->vid,
+          'type'        => $view->name,
+          'access_from' => $base_url,
+        );
+
+        $ch = curl_init($url);
+
+        if (isset($get_settings['settings']['username']) && !empty($get_settings['settings']['username'])
+          && isset($get_settings['settings']['password']) && !empty($get_settings['settings']['password'])) {
+          curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+          curl_setopt($ch, CURLOPT_USERPWD,
+            $get_settings['settings']['username'] . ":" . $get_settings['settings']['password']);
+        }
+
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_exec($ch);
+        curl_close($ch);
+      }
+    }
+  }
+}
+
+/**
+ * Implements Custom Function `Node Type Callback()`.
+ *
+ * @params:
+ *   $node_type: Name of the node type for which result needs to be fetched.
+ *   $limit: Defines how many Nodes to be returned. Default `all`.
+ *   $order: Defines order of `total views` in which nids needs to be returned.
+ *           Default `desc`
+ *
+ * @Return: Return the NIDs for which the statistical report exist
+ *          in descending order. If nodetype is not defined so, it
+ *          returns the empty string.
+ */
+function web_analytics_get_nodetype_result($node_type = '', $limit = 'all', $order = 'desc') {
+  if ($node_type == '') {
+    return '';
+  }
+
+  $get_analytics = db_select('web_analytics', 'w')
+    ->fields('w', array('id'))
+    ->condition('type', 'node', '=')
+    ->condition('name', $node_type, '=')
+    ->orderBy('total_views', $order);
+
+  if (is_numeric($limit) && $limit > 0) {
+    $get_analytics->limit($limit);
+  }
+
+  $results = $get_analytics->execute();
+
+  $nids = array();
+  foreach ($results as $row) {
+    $nids[] = $row->id;
+  }
+
+  if (empty($nids)) {
+    $nids = '';
+  }
+
+  return $nids;
+}
+
+/**
+ * Implements Custom Function `Taxonomy Type Callback()`.
+ *
+ * @params:
+ *   $taxonomy: Name of the taxonomy for which result needs to be fetched.
+ *   $limit: Defines how many Nodes to be returned. Default `all`.
+ *   $order: Defines order of `total views` in which tids needs to be returned.
+ *           Default `desc`
+ *
+ * @Return: Return the TIDs for which the statistical report exist
+ *          in descending order. If taxonomy type is not defined so, it
+ *          returns the empty string.
+ */
+function web_analytics_get_taxonomy_result($taxonomy = '', $limit = 'all', $order = 'desc') {
+  if ($taxonomy == '') {
+    return '';
+  }
+
+  $get_analytics = db_select('web_analytics', 'w')
+    ->fields('w', array('id'))
+    ->condition('type', 'term', '=')
+    ->condition('name', $taxonomy, '=')
+    ->orderBy('total_views', $order);
+
+  if (is_numeric($limit) && $limit > 0) {
+    $get_analytics->limit($limit);
+  }
+
+  $results = $get_analytics->execute();
+
+  $tids = array();
+  foreach ($results as $row) {
+    $tids[] = $row->id;
+  }
+
+  if (empty($tids)) {
+    $tids = '';
+  }
+
+  return $tids;
+}
