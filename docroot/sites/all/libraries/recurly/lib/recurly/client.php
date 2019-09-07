@@ -20,14 +20,9 @@ class Recurly_Client
   public static $apiKey;
 
   /**
-   * Base API URL
-   */
-  public static $apiUrl = 'https://%s.recurly.com/v2';
-
-  /**
    * API Version
    */
-  public static $apiVersion = '2.19';
+  public static $apiVersion = '2.22';
 
   /**
    * The path to your CA certs. Use only if needed (if you can't fix libcurl/php).
@@ -49,7 +44,13 @@ class Recurly_Client
    */
   private static $valid_domains = ["recurly.com"];
 
-  const API_CLIENT_VERSION = '2.12.1';
+  /**
+   * Base API URL
+   */
+  private static $apiUrl = 'https://%s.recurly.com/v2';
+
+
+  const API_CLIENT_VERSION = '2.12.5';
   const DEFAULT_ENCODING = 'UTF-8';
 
   const GET = 'GET';
@@ -73,6 +74,7 @@ class Recurly_Client
   const PATH_INVOICES = '/invoices';
   const PATH_NOTES = '/notes';
   const PATH_PLANS = '/plans';
+  const PATH_SHIPPING_METHOD = '/shipping_methods';
   const PATH_SUBSCRIPTIONS = '/subscriptions';
   const PATH_TRANSACTIONS = '/transactions';
   const PATH_MEASURED_UNITS = '/measured_units';
@@ -102,6 +104,14 @@ class Recurly_Client
 
   public function baseUri() {
     return sprintf(Recurly_Client::$apiUrl, Recurly_Client::$subdomain);
+  }
+
+  /**
+   * Current API Url
+   * @return string API url
+   */
+  public static function apiUrl() {
+    return Recurly_Client::$apiUrl;
   }
 
   /**
