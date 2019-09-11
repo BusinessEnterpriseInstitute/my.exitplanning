@@ -329,8 +329,8 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
     }
     elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
       $suggestion = 1;
-      $membership_markup = '<h3>The Network Membership is perfect for you!</h3>
-      <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Network Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Network Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
+      $membership_markup = '<h3>The Associate Membership is perfect for you!</h3>
+      <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Associate Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Associate Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
       $marketing = $form_state['storage']['marketing'];
       $planning = $form_state['storage']['planning'];
       if ($marketing && !$planning) {
