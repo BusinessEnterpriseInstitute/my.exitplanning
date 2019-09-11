@@ -156,7 +156,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
     }
     else {
       $plan_interval_unit = 'month';
-      //$total_billing_cycles = '<span class="plan-duration">m</span>';
+      $total_billing_cycles = '<span class="plan-duration"></span>';
     }
     $plan_description = !empty($plan_values['description']) ? '<span class="plan-description">' . $plan_values['description'] . '</span>' : '';
     $plan_options[$plan_code] = '<span class="plan-cost">' . $total_cost . '</span><span class="plan-interval">/' . $plan_interval_unit . '</span>' . $total_billing_cycles . $plan_description;
