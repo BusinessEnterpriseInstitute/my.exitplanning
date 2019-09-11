@@ -156,7 +156,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
     }
     else {
       $plan_interval_unit = 'month';
-      $total_billing_cycles = '<span class="plan-duration">for 12 months</span>';
+      $total_billing_cycles = '<span class="plan-duration">months</span>';
     }
     $plan_description = !empty($plan_values['description']) ? '<span class="plan-description">' . $plan_values['description'] . '</span>' : '';
     $plan_options[$plan_code] = '<span class="plan-cost">' . $total_cost . '</span><span class="plan-interval">/' . $plan_interval_unit . '</span>' . $total_billing_cycles . $plan_description;
@@ -187,7 +187,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
   $form['membership']['outro'] = array(
     '#type' => 'item',
     '#title' => t(''),
-    '#markup' => t("All licenses/memberships require a one year minimum commitment. After one year, they renew automatically until you request a termination of your account."). '<br>' .t("For group pricing on multiple licenses, please call us at (888) 206-3009."),
+    '#markup' => t("All Marketing, Planning, and Full-Service licenses require a one year minimum commitment. After one year, they renew automatically until you request a termination of your account."). '<br>' .t("For group pricing on multiple licenses, please call us at (888) 206-3009."),
   );
   $form['next'] = array(
     '#type' => 'submit',
