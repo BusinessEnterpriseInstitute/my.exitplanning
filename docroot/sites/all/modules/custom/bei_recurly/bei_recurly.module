@@ -328,6 +328,14 @@ function bei_recurly_checkout_contact_validate($form, &$form_state) {
   $company = check_plain($form_state['values']['company']);
   $email = check_plain($form_state['values']['email']);
   $password = !empty($form_state['values']['pass']) ? $form_state['values']['pass'] : user_password(8);
+   //Including password.inc file
+  require_once DRUPAL_ROOT . '/' . variable_get('password_inc', 'includes/password.inc');
+  
+  //Using user_check_password function
+  $check = user_check_password($form_state['values']['pass'], $account);
+  
+  //Your code of validation
+  //...
   
   //check for existing drupal account
   $account = user_load_by_mail($email);
