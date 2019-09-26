@@ -38,7 +38,7 @@ Both keys You can create on <a href="@google-recaptcha-official-site" target="_b
 Be careful if You have several sites - check that this pair of keys exactly for THIS site.', array('@google-recaptcha-official-site' => 'https://www.google.com/recaptcha'));
 
   $form['public_key'] = array(
-    '#title' => t('Google reCAPTCHA public key'),
+    '#title' => t('Google reCAPTCHA site key'),
     '#type' => 'textfield',
     '#default_value' => empty($tune['public_key']) ? '' : $tune['public_key'],
     // may be without additional check?
