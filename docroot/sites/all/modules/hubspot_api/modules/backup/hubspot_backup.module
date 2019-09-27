@@ -1,0 +1,589 @@
+<?php
+
+/**
+ * @file
+ * Hubspot Backup Module.
+ */
+
+define('HUBSPOT_BACKUP_BASE_TABLE', 'hubspot_backup');
+define('HUBSPOT_BACKUP_CONTACTS_TABLE', '_contacts');
+define('HUBSPOT_BACKUP_CONTACT_PROPS_TABLE', '_contact_properties');
+define('HUBSPOT_BACKUP_DEALS_TABLE', '_deals');
+define('HUBSPOT_BACKUP_DEAL_PROPS_TABLE', '_deal_properties');
+define('HUBSPOT_BACKUP_DEAL_PIPELINES_TABLE', '_deal_pipelines');
+define('HUBSPOT_BACKUP_COMPANIES_TABLE', '_companies');
+define('HUBSPOT_BACKUP_COMPANY_PROPS_TABLE', '_company_properties');
+define('HUBSPOT_BACKUP_ENGAGEMENTS_TABLE', '_engagements');
+define('HUBSPOT_BACKUP_TIME_OFFSET', 129600);
+
+/**
+ * Implements hook_menu().
+ */
+function hubspot_backup_menu() {
+  $items = array();
+  $items['admin/config/services/hubspot/backup'] = array(
+    'title' => 'Hubspot Backup',
+    'description' => 'Configure the Hubspot Backup integration.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('hubspot_backup_admin_settings'),
+    'access arguments' => array('administer hubspot backup'),
+    'file' => 'includes/hubspot_backup.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function hubspot_backup_permission() {
+  $perms = array();
+  $perms['administer hubspot backup'] = array(
+    'title' => t('Administer Hubspot Backup'),
+    'restrict access' => TRUE,
+  );
+  return $perms;
+}
+
+/**
+ * Builds the queue for contacts.
+ */
+function hubspot_backup_build_queue_contacts() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Contacts.
+  $queue = DrupalQueue::get('hubspot_backup_contacts');
+  $vidOffset = variable_get('hubspot_backup_contacts_vidOffset', NULL);
+  $properties = hubspot_backup_build_queue_contact_properties();
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->contacts()->all(
+        [
+          'count' => 100,
+          'vidOffset' => $vidOffset,
+          'property' => $properties,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40,000 daily or 10 secondly call limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->contacts);
+      $vidOffset = $response->data->{'vid-offset'};
+      variable_set('hubspot_backup_contacts_vidOffset', $vidOffset);
+    } while ($response->data->{'has-more'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_contacts_vidOffset');
+}
+
+/**
+ * Builds the queue for contact properties.
+ */
+function hubspot_backup_build_queue_contact_properties() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+  $properties = array();
+  if (!$_hubspot_backup_limit_reached) {
+    // Queue Contact Properties.
+    $queue = DrupalQueue::get('hubspot_backup_contact_properties');
+    $response = $hubspot->contactProperties()->all();
+    foreach ($response->data as $property) {
+      $properties[] = $property->name;
+      $queue->createItem($property);
+    }
+  }
+  return $properties;
+}
+
+/**
+ * Builds the queue for recently created/updated contacts.
+ */
+function hubspot_backup_build_queue_recent_contacts() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Contacts.
+  $queue = DrupalQueue::get('hubspot_backup_contacts');
+  $offset = variable_get('hubspot_backup_recent_contacts_offset', NULL);
+  $time_offset = variable_get('hubspot_backup_recent_contacts_time_offset', NULL);
+  $properties = hubspot_backup_build_queue_contact_properties();
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->contacts()->recent(
+        [
+          'count' => 100,
+          'vidOffset' => $offset,
+          'timeOffset' => $time_offset,
+          'property' => $properties,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->contacts);
+      // This is in milliseconds for some reason.
+      $max_lookback_time = (time() - HUBSPOT_BACKUP_TIME_OFFSET) * 1000;
+      $offset = $response->data->{'vid-offset'};
+      $time_offset = $response->data->{'time-offset'};
+      variable_set('hubspot_backup_recent_contacts_offset', $offset);
+      variable_set('hubspot_backup_recent_contacts_time_offset', $time_offset);
+    } while ($response->data->{'has-more'} && $response->data->{'time-offset'} > $max_lookback_time);
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_recent_contacts_offset');
+  hubspot_backup_reset_variable('hubspot_backup_recent_contacts_time_offset');
+}
+
+/**
+ * Process the queue for contacts.
+ *
+ * @param array|object $item
+ *   Item to process.
+ */
+function hubspot_backup_process_queue_contacts($item) {
+  if (!is_array($item)) {
+    $item = array($item);
+  }
+
+  foreach ($item as $contact) {
+    $json = json_encode($contact);
+    db_merge(HUBSPOT_BACKUP_BASE_TABLE . HUBSPOT_BACKUP_CONTACTS_TABLE)
+      ->key(array('vid' => $contact->vid))
+      ->fields(array('data' => $json))
+      ->execute();
+  }
+}
+
+/**
+ * Builds the queue for deals.
+ */
+function hubspot_backup_build_queue_deals() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Deals.
+  $queue = DrupalQueue::get('hubspot_backup_deals');
+  $offset = variable_get('hubspot_backup_deals_offset', NULL);
+  $properties = hubspot_backup_build_queue_deal_properties();
+  hubspot_backup_build_queue_deal_pipelines();
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->deals()->getAll(
+        [
+          'limit' => 250,
+          'offset' => $offset,
+          'property' => $properties,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->deals);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_deals_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_deals_offset');
+}
+
+/**
+ * Builds the queue for deal pipelines.
+ */
+function hubspot_backup_build_queue_deal_pipelines() {
+  $hubspot = hubspot_api_get_factory();
+
+  $response = $hubspot->dealPipelines()->getAllPipelines();
+
+  foreach ($response->data as $pipeline) {
+    $json = json_encode($pipeline);
+
+    db_merge('hubspot_backup_deal_pipelines')
+      ->key(array('pipelineId' => $pipeline->pipelineId))
+      ->fields(array('data' => $json))
+      ->execute();
+  }
+}
+
+/**
+ * Builds the queue for deal properties.
+ */
+function hubspot_backup_build_queue_deal_properties() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+  $properties = array();
+  if (!$_hubspot_backup_limit_reached) {
+    // Queue Deal Properties.
+    $queue = DrupalQueue::get('hubspot_backup_deal_properties');
+    $response = $hubspot->dealProperties()->all();
+    foreach ($response->data as $property) {
+      $properties[] = $property->name;
+      $queue->createItem($property);
+    }
+  }
+  return $properties;
+}
+
+/**
+ * Builds the queue for recently created deals.
+ */
+function hubspot_backup_build_queue_recently_created_deals() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Deals.
+  $queue = DrupalQueue::get('hubspot_backup_deals');
+  $offset = variable_get('hubspot_backup_recently_created_deals_offset', NULL);
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->deals()->getRecentlyCreated(
+        [
+          'limit' => 100,
+          'offset' => $offset,
+          'since' => time() - HUBSPOT_BACKUP_TIME_OFFSET,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->results);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_recently_created_deals_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_recently_created_deals_offset');
+}
+
+/**
+ * Builds the queue for recently modified deals.
+ */
+function hubspot_backup_build_queue_recently_modified_deals() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Deals.
+  $queue = DrupalQueue::get('hubspot_backup_deals');
+  $offset = variable_get('hubspot_backup_recently_modified_deals_offset', NULL);
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->deals()->getRecentlyModified(
+        [
+          'limit' => 100,
+          'offset' => $offset,
+          'since' => time() - HUBSPOT_BACKUP_TIME_OFFSET,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->results);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_recently_modified_deals_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_recently_modified_deals_offset');
+}
+
+/**
+ * Process the queue for deals.
+ *
+ * @param array|object $item
+ *   Item to process.
+ */
+function hubspot_backup_process_queue_deals($item) {
+  if (!is_array($item)) {
+    $item = array($item);
+  }
+
+  foreach ($item as $deal) {
+    $json = json_encode($deal);
+    db_merge(HUBSPOT_BACKUP_BASE_TABLE . HUBSPOT_BACKUP_DEALS_TABLE)
+      ->key(array('dealId' => $deal->dealId))
+      ->fields(array('data' => $json))
+      ->execute();
+  }
+}
+
+/**
+ * Builds the queue for companies.
+ */
+function hubspot_backup_build_queue_companies() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Companies.
+  $queue = DrupalQueue::get('hubspot_backup_companies');
+  $offset = variable_get('hubspot_backup_companies_offset', NULL);
+  $properties = hubspot_backup_build_queue_company_properties();
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->companies()->all(
+        [
+          'limit' => 250,
+          'offset' => $offset,
+          'property' => $properties,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->companies);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_companies_offset', $offset);
+    } while ($response->data->{'has-more'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_companies_offset');
+}
+
+/**
+ * Builds the queue for company properties.
+ */
+function hubspot_backup_build_queue_company_properties() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+  $properties = array();
+  if (!$_hubspot_backup_limit_reached) {
+    // Queue Deal Properties.
+    $queue = DrupalQueue::get('hubspot_backup_company_properties');
+    $response = $hubspot->companyProperties()->all();
+    foreach ($response->data as $property) {
+      $properties[] = $property->name;
+      $queue->createItem($property);
+    }
+  }
+  return $properties;
+}
+
+/**
+ * Process the queue for companies.
+ *
+ * @param array|object $item
+ *   Item to process.
+ */
+function hubspot_backup_process_queue_companies($item) {
+  if (!is_array($item)) {
+    $item = array($item);
+  }
+
+  foreach ($item as $company) {
+    $json = json_encode($company);
+    db_merge(HUBSPOT_BACKUP_BASE_TABLE . HUBSPOT_BACKUP_COMPANIES_TABLE)
+      ->key(array('companyId' => $company->companyId))
+      ->fields(array('data' => $json))
+      ->execute();
+  }
+}
+
+/**
+ * Builds the queue for recently created companies.
+ */
+function hubspot_backup_build_queue_recently_created_companies() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Companies.
+  $queue = DrupalQueue::get('hubspot_backup_companies');
+  $offset = variable_get('hubspot_backup_recently_created_companies_offset', NULL);
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->companies()->getRecentlyCreated(
+        [
+          'count' => 100,
+          'offset' => $offset,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->results);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_recently_created_companies_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_recently_created_companies_offset');
+}
+
+/**
+ * Builds the queue for recently modified companies.
+ */
+function hubspot_backup_build_queue_recently_modified_companies() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Companies.
+  $queue = DrupalQueue::get('hubspot_backup_companies');
+  $offset = variable_get('hubspot_backup_recently_modified_companies_offset', NULL);
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->companies()->getRecentlyModified(
+        [
+          'count' => 100,
+          'offset' => $offset,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40000 request  or 10 calls per second limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->results);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_recently_modified_companies_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_recently_modified_companies_offset');
+}
+
+/**
+ * Builds the queue for engagements.
+ */
+function hubspot_backup_build_queue_engagements() {
+  global $_hubspot_backup_limit_reached;
+  $hubspot = hubspot_api_get_factory();
+
+  // Queue Contacts.
+  $queue = DrupalQueue::get('hubspot_backup_engagements');
+  $offset = variable_get('hubspot_backup_engagements_offset', NULL);
+  if (!$_hubspot_backup_limit_reached) {
+    do {
+      $response = $hubspot->engagements()->all(
+        [
+          'limit' => 250,
+          'offset' => $offset,
+        ]
+      );
+      if ($response->getStatusCode() === 429) {
+        // 40,000 daily or 10 secondly call limit will get 429 status code.
+        $_hubspot_backup_limit_reached = TRUE;
+        break;
+      }
+      $queue->createItem($response->results);
+      $offset = $response->data->{'offset'};
+      variable_set('hubspot_backup_engagements_offset', $offset);
+    } while ($response->data->{'hasMore'});
+  }
+
+  hubspot_backup_reset_variable('hubspot_backup_engagements_offset');
+}
+
+/**
+ * Process the queue for engagements.
+ *
+ * @param array|object $item
+ *   Item to process.
+ */
+function hubspot_backup_process_queue_engagements($item) {
+  if (!is_array($item)) {
+    $item = array($item);
+  }
+
+  foreach ($item as $engagement) {
+    $json = json_encode($engagement);
+    db_merge(HUBSPOT_BACKUP_BASE_TABLE . HUBSPOT_BACKUP_ENGAGEMENTS_TABLE)
+      ->key(array('engagementId' => $engagement->engagement->id))
+      ->fields(array('data' => $json))
+      ->execute();
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function hubspot_backup_cron() {
+  $backup_entities = variable_get('hubspot_backup_entities');
+
+  if ($backup_entities['contacts']) {
+    hubspot_backup_build_queue_recent_contacts();
+  }
+  if ($backup_entities['deals']) {
+    hubspot_backup_build_queue_recently_modified_deals();
+    hubspot_backup_build_queue_recently_created_deals();
+  }
+  if ($backup_entities['companies']) {
+    hubspot_backup_build_queue_recently_created_companies();
+    hubspot_backup_build_queue_recently_modified_deals();
+  }
+
+  $month = date('M');
+  $last_run = variable_get('hubspot_backup_last_run', date('M'));
+  if ($month !== $last_run) {
+    variable_set('hubspot_backup_last_run', $month);
+    foreach ($backup_entities as $backup_entity) {
+      if ($backup_entity) {
+        $fn = "hubspot_backup_build_queue_" . $backup_entity;
+        $fn();
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_cron_queue_info().
+ */
+function hubspot_backup_cron_queue_info() {
+  $queues = array();
+  $queues['hubspot_backup_contacts'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_contacts',
+    'time' => 600,
+  );
+  $queues['hubspot_backup_contact_properties'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_contact_properties',
+    'time' => 30,
+  );
+  $queues['hubspot_backup_deals'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_deals',
+    'time' => 300,
+  );
+  $queues['hubspot_backup_deal_properties'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_deal_properties',
+    'time' => 30,
+  );
+  $queues['hubspot_backup_companies'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_companies',
+    'time' => 300,
+  );
+  $queues['hubspot_backup_company_properties'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_company_properties',
+    'time' => 30,
+  );
+  $queues['hubspot_backup_engagements'] = array(
+    'worker callback' => 'hubspot_backup_process_queue_engagements',
+    'time' => 300,
+  );
+  return $queues;
+}
+
+/**
+ * Sets the variable to NULL if the Hubspot API limit has been reached.
+ *
+ * @param string $variable_name
+ *   The Drupal database variable to reset.
+ */
+function hubspot_backup_reset_variable($variable_name) {
+  global $_hubspot_backup_limit_reached;
+  if (!$_hubspot_backup_limit_reached) {
+    // If we hit the API limit, then we need to keep the offset so we know where
+    // to start from next day.
+    variable_set($variable_name, NULL);
+  }
+}

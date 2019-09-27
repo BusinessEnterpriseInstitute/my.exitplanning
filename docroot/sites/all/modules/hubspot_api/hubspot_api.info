@@ -1,0 +1,13 @@
+name = Hubspot API
+description = Provides a library to easily integrate with the Hubspot API.
+package = Hubspot
+core = 7.x
+
+dependencies[] = composer_manager
+
+; Information added by Drupal.org packaging script on 2017-09-27
+version = "7.x-1.0-alpha3"
+core = "7.x"
+project = "hubspot_api"
+datestamp = "1506528545"
+

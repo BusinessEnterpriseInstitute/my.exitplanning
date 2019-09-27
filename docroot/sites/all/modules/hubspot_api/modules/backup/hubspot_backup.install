@@ -1,0 +1,150 @@
+<?php
+
+/**
+ * @file
+ * Hubspot Backup Install.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function hubspot_backup_schema() {
+  $schema = array();
+  $schema['hubspot_backup_contacts'] = array(
+    'description' => 'Table of contacts from Hubspot.',
+    'fields' => array(
+      'vid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for contact",
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('vid'),
+  );
+  $schema['hubspot_backup_deals'] = array(
+    'description' => 'Table of deals from Hubspot.',
+    'fields' => array(
+      'dealId' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for deals",
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('dealId'),
+  );
+  $schema['hubspot_backup_contact_properties'] = array(
+    'description' => 'Table of contact properties from Hubspot.',
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for contact properties",
+        'type' => 'blob',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  $schema['hubspot_backup_deal_properties'] = array(
+    'description' => 'Table of deal properties from Hubspot.',
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for deal properties",
+        'type' => 'blob',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+  $schema['hubspot_backup_deal_pipelines'] = array(
+    'description' => 'Table of deal pipelines from Hubspot.',
+    'fields' => array(
+      'pipelineId' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for deal pipelines",
+        'type' => 'blob',
+      ),
+    ),
+    'primary key' => array('pipelineId'),
+  );
+  $schema['hubspot_backup_company_properties'] = array(
+    'description' => 'Table of company properties from Hubspot.',
+    'fields' => array(
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for company properties",
+        'type' => 'blob',
+      ),
+    ),
+    'primary key' => array('name'),
+  );
+
+  $schema['hubspot_backup_companies'] = array(
+    'description' => 'Table of companies from Hubspot.',
+    'fields' => array(
+      'companyId' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for companies",
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('companyId'),
+  );
+
+  $schema['hubspot_backup_engagements'] = array(
+    'description' => 'Table of engagements from Hubspot.',
+    'fields' => array(
+      'engagementId' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'data' => array(
+        'description' => "Data for engagements",
+        'type' => 'blob',
+        'size' => 'big',
+      ),
+    ),
+    'primary key' => array('engagementId'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function hubspot_backup_uninstall() {
+  db_delete('variable')
+    ->condition('name', 'hubspot_backup%', 'LIKE')
+    ->execute();
+}
