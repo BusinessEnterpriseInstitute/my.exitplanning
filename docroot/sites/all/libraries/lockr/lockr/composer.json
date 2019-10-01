@@ -1,0 +1,20 @@
+{
+    "name": "lockr/lockr-client",
+    "description": "Client for use with Lockr off-site key management service.",
+    "type": "library",
+    "authors": [
+        {
+            "name": "Tynor Fujimoto",
+            "email": "tynor@lockr.io"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "paragonie/random_compat": ">=2"
+    },
+    "autoload": {
+      "psr-4": {
+        "Lockr\\": "src/"
+      }
+    }
+}
