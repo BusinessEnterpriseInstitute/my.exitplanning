@@ -4,9 +4,6 @@
  * Sends Webform results to HubSpot's Forms API.
  */
 
-define('HUBSPOT_CLIENT_ID', '734f89bf-1b88-11e1-829a-3b413536dd4c');
-define('HUBSPOT_SCOPE', 'leads-rw contacts-rw offline');
-
 /**
  * Implements hook_menu().
  */
@@ -37,10 +34,19 @@ function hubspot_menu() {
  * Refreshes HubSpot OAuth Access Token when expired.
  */
 function hubspot_oauth_refresh() {
+  $client_id = variable_get('hubspot_client_id', '');
+  $client_secret = variable_get('hubspot_client_secret', '');
+  $redirect_uri = url('hubspot/oauth', array('query' => drupal_get_destination(), 'absolute' => TRUE));
+  $refresh_token = variable_get('hubspot_refresh_token');
+
+  $url = 'https://api.hubapi.com/oauth/v1/token';
+
   $data = array(
-    'refresh_token' => variable_get('hubspot_refresh_token'),
-    'client_id' => HUBSPOT_CLIENT_ID,
     'grant_type' => 'refresh_token',
+    'client_id' => $client_id,
+    'client_secret' => $client_secret,
+    'redirect_uri' => $redirect_uri,
+    'refresh_token' => $refresh_token,
   );
 
   $data = drupal_http_build_query($data);
@@ -53,29 +59,29 @@ function hubspot_oauth_refresh() {
     'data' => $data,
   );
 
-  $return = drupal_http_request('https://api.hubapi.com/auth/v1/refresh', $options);
+  $response = drupal_http_request($url, $options);
 
-  if ($return->code == '200') {
-    $return_data = json_decode($return->data, TRUE);
+  if ($response->code == '200') {
+    $response_data = drupal_json_decode($response->data);
 
-    $hubspot_access_token = $return_data['access_token'];
-    variable_set('hubspot_access_token', $hubspot_access_token);
+    $access_token = $response_data['access_token'];
+    variable_set('hubspot_access_token', $access_token);
 
-    $hubspot_refresh_token = $return_data['refresh_token'];
-    variable_set('hubspot_refresh_token', $hubspot_refresh_token);
+    $refresh_token = $response_data['refresh_token'];
+    variable_set('hubspot_refresh_token', $refresh_token);
 
-    $hubspot_expires_in = $return_data['expires_in'];
-    variable_set('hubspot_expires_in', $hubspot_expires_in);
+    $expires_in = $response_data['expires_in'];
+    variable_set('hubspot_expires_in', $expires_in);
 
     return TRUE;
   }
   else {
-    drupal_set_message(t('Refresh token failed with Error Code "%code: %status_message". Reconnect to your Hubspot
+    drupal_set_message(t('Failed to refresh access token. Error Code "%code: %status_message". Reconnect to your Hubspot
       account.'), 'error', FALSE);
-    watchdog('hubspot', 'Refresh token failed with Error Code "%code: %status_message". Visit the Hubspot module
+    watchdog('hubspot', 'Failed to refresh access token. Error Code "%code: %status_message". Visit the Hubspot module
       settings page and reconnect to your Hubspot account.', array(
-      '%code' => $return->code,
-      '%status_message' => $return->status_message,
+      '%code' => $response->code,
+      '%status_message' => $response->status_message,
     ), WATCHDOG_INFO);
 
     return FALSE;
