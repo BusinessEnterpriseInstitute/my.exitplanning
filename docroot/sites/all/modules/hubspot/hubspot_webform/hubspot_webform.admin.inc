@@ -255,23 +255,13 @@ function _hubspot_webform_get_forms() {
     return array('error' => t('This site is not connected to a HubSpot Account.'));
   }
 
-  // @todo: Use '/forms/v2/forms' instead of '/contacts/v1/forms'.
-  $url = 'https://api.hubapi.com/contacts/v1/forms';
-  $options = array(
-      'headers' => array(
-          'Authorization' => 'Bearer ' . $access_token,
-          'Content-Type' => 'application/json',
-        ),
-    );
-
-  $request = drupal_http_request($url, $options);
+  $request = drupal_http_request("https://api.hubapi.com/contacts/v1/forms?access_token={$access_token}");
 
   if ($request->code == 401) {
     $refresh = hubspot_oauth_refresh();
     if ($refresh) {
       $access_token = variable_get('hubspot_access_token', '');
-      $options['headers']['Authorization'] = 'Bearer ' . $access_token;
-      $request = drupal_http_request($url, $options);
+      $request = drupal_http_request("https://api.hubapi.com/contacts/v1/forms?access_token={$access_token}");
     }
   }
 

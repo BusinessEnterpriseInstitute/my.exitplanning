@@ -25,9 +25,6 @@ function hubspot_uninstall() {
   variable_del('hubspot_refresh_token');
   variable_del('hubspot_expires_in');
   variable_del('hubspot_portalid');
-  variable_del('hubspot_client_id');
-  variable_del('hubspot_client_secret');
-  variable_del('hubspot_scope');
 }
 
 /**
