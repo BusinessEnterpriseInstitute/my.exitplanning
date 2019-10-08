@@ -4,3 +4,9 @@ core = 7.x
 dependencies[] = automate
 configure = admin/config/services/hubspot
 package = HubSpot
+
+; Information added by Drupal.org packaging script on 2018-05-29
+version = "7.x-2.0-rc6+9-dev"
+core = "7.x"
+project = "hubspot"
+datestamp = "1527595697"
