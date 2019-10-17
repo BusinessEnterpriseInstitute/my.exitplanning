@@ -344,7 +344,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         <p>Thank you for your submission! BEI\'s Planning License is a great fit for advisors who are looking to provide a consistent client experience, from the collection of data to turning those data points into actionable steps. Whether you are looking to lead a team of advisors or simply manage your core service offerings as a part of the process, BEI\'s planning tools provide a consistent methodology to collect data, present solutions, and manage the implementation process. </p>';
       }
       elseif ($marketing && $planning) {
-        $suggestion = 'Full Service';
+        $suggestion = 'Full';
         $membership_markup = '<h3>The Full Service License is perfect for you!</h3>
         <p>Thank you for your submission! BEI\'s Full Service License is best for advisors who are looking to implement new or enhance existing Exit Planning services. Whether you are an experienced Exit Planner or an advisor looking to differentiate yourself in a crowded market, BEI\'s Full Membership will give you the tools to set your firm apart through proven marketing resources, a process to simplify the complex for your owners, and the implementation of actionable steps to help those owners accomplish their unique objectives without recreating the wheel.</p>';
       }
@@ -436,7 +436,7 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
     elseif ($membership == 'Planning') {
       $redirect = 'membership/planning';
     }
-    elseif ($membership == 'Full Service') {
+    elseif ($membership == 'Full') {
       $redirect = 'membership/full';
     }
     $form_state['redirect'] = $redirect;
