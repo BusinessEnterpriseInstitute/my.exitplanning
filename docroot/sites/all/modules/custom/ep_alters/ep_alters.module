@@ -87,8 +87,8 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
     $form['date_filter']['min']['#title'] = t('From');
     $form['date_filter']['max']['#title'] = t('To');
   }
-  if ($form_id == 'webform_client_form_156896' || $form_id == 'webform_client_form_156906') {
-    $wizard1 = 'webform_client_form_156896';
+  if ($form_id == 'webform_client_form_156906') {
+    //$wizard1 = 'webform_client_form_156896';
     $wizard2 = 'webform_client_form_156906';
     $form['#submit'][] = 'ep_alters_webform_wizard_submit';
     $storage = isset($form_state['storage']) ? $form_state['storage'] : NULL;
@@ -97,7 +97,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       <p>You’ll answer straightforward questions about your goals, client base and business profile.
       We’ll recommend a membership based on your responses.
       From there it’s easy to sign up, manage your account and use our resources.</p>';
-    if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
+    if (($form_id == $wizard2 && $current_page == 1)) {
       $form['submitted']['q6']['#states'] = array(
         'visible' => array(
           ':input[name="submitted[q5]"]' => array('value' => '1'),
@@ -245,7 +245,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
       );
     }
     // Planning questions.
-    elseif (($form_id == $wizard1 && $current_page == 3) || ($form_id == $wizard2 && $current_page == 2)) {
+    elseif (($form_id == $wizard2 && $current_page == 2)) {
       $form['submitted']['q11']['#states'] = array(
         'visible' => array(
           ':input[name="submitted[q10]"]' => array(
@@ -327,10 +327,10 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         ),
       );
     }
-    elseif (($form_id == $wizard1 && $current_page == 4) || ($form_id == $wizard2 && $current_page == 3)) {
+    elseif (($form_id == $wizard2 && $current_page == 3)) {
       $suggestion = 'Associate';
       $membership_markup = '<h3>The Associate Membership is perfect for you!</h3>
-      <p>Thank you for your submission! We encourage you to consider networking opportunities through BEI\'s Associate Membership, and learn how Exit Planning can impact your business with our Education & Training Programs. The Associate Membership is great for those who are happy with their current client base and want to connect with the leading Exit Planning community.</p>';        
+      <p>Thank you for your submission! Based on your answers, BEI\'s Associate Membership is a great fit for you. Associate Membership is best for advisors who want to learn the foundational aspects of Exit Planning and who want to take the first steps toward broadening the scope of their work with their clients.</p>';        
       $marketing = $form_state['storage']['marketing'];
       $planning = $form_state['storage']['planning'];
       if ($marketing && !$planning) {
@@ -368,12 +368,12 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
   $marketing = FALSE;
   $planning = TRUE;
   $form_id = $form['#form_id'];
-  $wizard1 = 'webform_client_form_156896';
+  //$wizard1 = 'webform_client_form_156896';
   $wizard2 = 'webform_client_form_156906';
   if ($op == 'next') {
     $skip_to_last = FALSE;
     // Marketing
-    if (($form_id == $wizard1 && $current_page == 2) || ($form_id == $wizard2 && $current_page == 1)) {
+    if (($form_id == $wizard2 && $current_page == 1)) {
       // Determine skip to Last
       if ($submitted['q4'] == 1 && $submitted['q5'] == 1 && $submitted['q6'] == 2) {
         $skip_to_last = TRUE;
@@ -405,7 +405,7 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
       }
     }
     // Planning
-    elseif (($form_id == $wizard1 && $current_page == 3) || ($form_id == $wizard2 && $current_page == 2)) {
+    elseif (($form_id == $wizard2 && $current_page == 2)) {
       if ($submitted['q10'] == 3) {
         $planning = FALSE;
       }
