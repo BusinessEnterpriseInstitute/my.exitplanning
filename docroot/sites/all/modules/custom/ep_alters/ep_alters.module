@@ -424,7 +424,10 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
       $form_state['storage']['planning'] = $planning;
     }
   }
-  if (isset($form_state['webform_completed']) && $op === 'submit') {
+  if (!$form_state['webform_completed']) {
+    return;
+  }
+  if (isset($form_state['webform_completed']) && $op == 'submit') {
     $redirect = 'membership';
     $membership = $submitted['suggested_membership'];
     if ($membership == 'Associate') {
