@@ -370,9 +370,6 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
   $form_id = $form['#form_id'];
   //$wizard1 = 'webform_client_form_156896';
   $wizard2 = 'webform_client_form_156906';
-    if (!$form_state['webform_completed']) {
-    return;
-  }
   if ($op == 'next') {
     $skip_to_last = FALSE;
     // Marketing
