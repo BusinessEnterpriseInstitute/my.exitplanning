@@ -370,6 +370,9 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
   $form_id = $form['#form_id'];
   //$wizard1 = 'webform_client_form_156896';
   $wizard2 = 'webform_client_form_156906';
+    if (!$form_state['webform_completed']) {
+    return;
+  }
   if ($op == 'next') {
     $skip_to_last = FALSE;
     // Marketing
@@ -424,7 +427,7 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
       $form_state['storage']['planning'] = $planning;
     }
   }
-  if (isset($form_state['webform_completed']) && $op == 'submit') {
+  if (isset($form_state['webform_completed']) && $op === 'submit') {
     $redirect = 'membership';
     $membership = $submitted['suggested_membership'];
     if ($membership == 'Associate') {
@@ -440,6 +443,7 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
       $redirect = 'membership/full';
     }
     $form_state['redirect'] = $redirect;
+    
   }
 }
 /**
