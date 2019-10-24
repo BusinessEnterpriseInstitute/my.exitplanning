@@ -1,0 +1,30 @@
+--- webform_rules.module?revision=1.1.2.10	2011-02-04 10:25:51.000000000 -0500
++++ webform_rules.module	2011-02-04 09:46:38.000000000 -0500
+@@ -20,15 +20,27 @@ function webform_rules_form_alter(&$form
+  * Custom submit handler for webform submissions.
+  */
+ function webform_rules_client_form_submit($form, &$form_state) {
++  // If the webform is NOT completed, don't run the submit handler!
++  // This is relevant for multistep forms
++  if (!$form_state['webform_completed']) {
++    return;
++  }
++
++  // If we've got to this point, then we are not mid-way through a form submission.
+   $values = $form_state['values'];
++
+   // Check if user is submitting as a draft.
+   $is_draft = $values['op'] == t('Save Draft');
++
+   // Get webform node.
+   $node = $form['#node'];
++
+   // Save submission id.
+   $node->webform['sid'] = $is_draft ? '' : $values['details']['sid'];
++
+   // Get submitted data from webform.
+   $submission_data = webform_submission_data($node, $values['submitted']);
++
+   // Invoke event.
+   webform_rules_rules_invoke_event($submission_data, $node, $is_draft);
+ }
