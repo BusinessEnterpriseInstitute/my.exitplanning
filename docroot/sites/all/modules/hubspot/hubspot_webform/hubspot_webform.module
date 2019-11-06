@@ -34,6 +34,9 @@ function hubspot_webform_submit($form, &$form_state) {
   if (empty($node)) {
     return;
   }
+  if (!$form_state['webform_completed']) {
+    return;
+  }
 
   $hubspot_portalid = variable_get('hubspot_portalid', '');
   $hubspot_form_guid = db_query_range("SELECT hubspot_guid FROM {hubspot} h WHERE h.nid = :nid", 0, 1, array(

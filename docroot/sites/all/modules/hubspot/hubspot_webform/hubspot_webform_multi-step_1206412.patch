@@ -1,0 +1,29 @@
+Index: docroot/sites/all/modules/hubspot/hubspot_webform/hubspot_webform.module
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- docroot/sites/all/modules/hubspot/hubspot_webform/hubspot_webform.module	(revision 04d8fc136ff979838d3b13ff1dd6d4249d0f7516)
++++ docroot/sites/all/modules/hubspot/hubspot_webform/hubspot_webform.module	(date 1573063183034)
+@@ -34,6 +34,9 @@
+   if (empty($node)) {
+     return;
+   }
++  if (!$form_state['webform_completed']) {
++    return;
++  }
+ 
+   $hubspot_portalid = variable_get('hubspot_portalid', '');
+   $hubspot_form_guid = db_query_range("SELECT hubspot_guid FROM {hubspot} h WHERE h.nid = :nid", 0, 1, array(
+Index: .gitignore
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- .gitignore	(revision 04d8fc136ff979838d3b13ff1dd6d4249d0f7516)
++++ .gitignore	(date 1573062780368)
+@@ -9,3 +9,5 @@
+ /docroot/sites/all/modules/hierarchical_select/hierarchical_select-not_well_formed_numeric_value_error-2845621-1.patch
+ *.codekit3
+ /docroot/sites/all/modules/custom/beishop/cart.komodoproject
+
