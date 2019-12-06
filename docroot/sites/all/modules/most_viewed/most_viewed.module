@@ -1,0 +1,187 @@
+<?php
+/**
+ * @file
+ */
+
+define('MOST_VIEWED_MODULE_PATH', drupal_get_path('module', 'most_viewed'));
+
+include_once(MOST_VIEWED_MODULE_PATH . '/views/most_viewed.default_views.inc');
+
+/**
+ * Implements hook_page_alter().
+ */
+function most_viewed_page_alter(&$page) {
+  // Get the loaded object from the router item. It will only return a node.
+  $send_data = array();
+
+  if ($node = menu_get_object('node')) {
+    $node_types = variable_get('most_viewed_node_types', array());
+    $node_types = array_filter($node_types);
+    if (empty($node_types)) {
+      return;
+    }
+
+    if (in_array($node->type, $node_types) && (!arg(2) || arg(2) == 'view')) {
+      $send_data = array(
+        'entity_type' => 'node',
+        'bundle' => $node->type,
+        'entity_id' => $node->nid,
+      );
+    }
+  }
+  elseif ($term = menu_get_object('taxonomy_term', 2)) {
+    $term_types = variable_get('most_viewed_taxonomy_term_types', array());
+    $term_types = array_filter($term_types);
+    if (empty($term_types)) {
+      return;
+    }
+
+    if (in_array($term->vocabulary_machine_name, $term_types) && (!arg(3))) {
+      $send_data = array(
+        'entity_type' => 'taxonomy_term',
+        'bundle' => $term->vocabulary_machine_name,
+        'entity_id' => $term->tid,
+      );
+    }
+  }
+  elseif ($user = menu_get_object('user', 1)) {
+    $user_types = variable_get('most_viewed_user_types', array());
+    $user_types = array_filter($user_types);
+    if (empty($user_types)) {
+      return;
+    }
+
+    if (in_array('user', $user_types) && (!arg(2) || arg(2) == 'view')) {
+      $send_data = array(
+        'entity_type' => 'user',
+        'bundle' => 'user',
+        'entity_id' => $user->uid,
+      );
+    }
+  }
+  else {
+    return;
+  }
+
+  if (!empty($send_data)) {
+    $page['page_bottom']['most_viewed']['#markup'] = '<img style="position: fixed;" src="'
+      . url(MOST_VIEWED_MODULE_PATH . '/stat.php', array('query' => $send_data)) . '" width="1" height="1" />';
+  }
+}
+
+/**
+ * Implements hook_cron().
+ */
+function most_viewed_cron() {
+  $hits_max_life_time = variable_get('most_viewed_hits_max_life_time', 30) * 86400;
+  if (!empty($hits_max_life_time) && !is_numeric($hits_max_life_time)) {
+    $hits_max_life_time = 30;
+  }
+
+  // Clean up expired hits.
+  db_delete('most_viewed_hits')
+    ->condition('created', REQUEST_TIME - $hits_max_life_time, '<')
+    ->execute();
+}
+
+/**
+ * Implements hook_views_api().
+ */
+function most_viewed_views_api() {
+  return array(
+    'api' => '3.0-alpha1',
+    'path' => MOST_VIEWED_MODULE_PATH . '/views',
+  );
+}
+
+/**
+ * Settings form for most viewed module.
+ */
+function most_viewed_admin_settings($form = array()) {
+  // Prepare a list of node bundles.
+  $node_types = array();
+  $bundles = field_info_bundles('node');
+  foreach ($bundles as $key => $bundle_info) {
+    $node_types[$key] = $bundle_info['label'];
+  }
+
+  $form['most_viewed_node_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Node types'),
+    '#description' => t('The node bundles that should be watched.'),
+    '#options' => $node_types,
+    '#default_value' => variable_get('most_viewed_node_types', array()),
+    '#required' => TRUE,
+  );
+
+  $term_types = array();
+  $bundles = field_info_bundles('taxonomy_term');
+  foreach ($bundles as $key => $bundle_info) {
+    $term_types[$key] = $bundle_info['label'];
+  }
+  $form['most_viewed_taxonomy_term_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Term types'),
+    '#description' => t('The taxonomy term bundles that should be watched.'),
+    '#options' => $term_types,
+    '#default_value' => variable_get('most_viewed_taxonomy_term_types', array()),
+    '#required' => TRUE,
+  );
+
+  $user_types = array();
+  $bundles = field_info_bundles('user');
+  foreach ($bundles as $key => $bundle_info) {
+    $user_types[$key] = $bundle_info['label'];
+  }
+  $form['most_viewed_user_types'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('User types'),
+    '#description' => t('The user bundles that should be watched.'),
+    '#options' => $user_types,
+    '#default_value' => variable_get('most_viewed_user_types', array()),
+    '#required' => TRUE,
+  );
+
+  $form['most_viewed_hits_max_life_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Hits stored time (days)'),
+    '#description' => t('How long we store hits in database (in days), 30 days by default'),
+    '#default_value' => variable_get('most_viewed_hits_max_life_time', 30),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validation callback for most_viewed_admin_settings form.
+ */
+function most_viewed_admin_settings_validate($form, &$form_state) {
+  // Save only selected bundles.
+  $form_state['values']['most_viewed_node_types'] = array_filter($form_state['values']['most_viewed_node_types']);
+}
+
+/**
+ * Implements hook_menu().
+ */
+function most_viewed_menu() {
+  return array(
+    'admin/config/most-viewed' => array(
+      'access arguments' => array('access most viewed settings'),
+      'title' => 'Most viewed settings',
+      'description' => 'Configure most viewed settings.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('most_viewed_admin_settings'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function most_viewed_permission() {
+  return array(
+    'access most viewed settings' => array(
+      'title' => t('Administration most viewed'),
+    ),
+  );
+}
