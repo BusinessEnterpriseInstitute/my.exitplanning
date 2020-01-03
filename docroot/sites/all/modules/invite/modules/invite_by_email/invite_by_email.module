@@ -321,8 +321,10 @@ function invite_by_email_form_invite_form_alter(&$form, &$form_state, $form_id) 
 
     // Hide if message is not editable.
     if (!$message_editable) {
-      $form['field_invitation_email_subject']['#type'] = 'hidden';
-      $form['field_invitation_email_body']['#type'] = 'hidden';
+      //$form['field_invitation_email_subject']['#type'] = 'hidden';
+      //$form['field_invitation_email_body']['#type'] = 'hidden';
+      $form['field_invitation_email_subject']['#access'] = FALSE;
+      $form['field_invitation_email_body']['#access'] = FALSE;
     }
     else {
       // Add token help if enabled.
