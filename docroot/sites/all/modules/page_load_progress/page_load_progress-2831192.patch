@@ -1,0 +1,26 @@
+diff --git a/css/page_load_progress.css b/css/page_load_progress.css
+index 0d6dd90..23e0c52 100644
+--- a/css/page_load_progress.css
++++ b/css/page_load_progress.css
+@@ -9,7 +9,7 @@
+   z-index: 9998;
+ }
+ 
+-.page-load-progress-lock-screen.hidden {
++.page-load-progress-lock-screen.page-load-progress-hidden {
+   display: none;
+ }
+ 
+diff --git a/js/page_load_progress.js b/js/page_load_progress.js
+index e923acb..05d2531 100644
+--- a/js/page_load_progress.js
++++ b/js/page_load_progress.js
+@@ -9,7 +9,7 @@
+     attach: function(context, settings) {
+       var delay = Number(Drupal.settings.page_load_progress.delay);
+       var exit_elements = String(Drupal.settings.page_load_progress.elements).split(',');
+-      var screen_lock = '<div class="page-load-progress-lock-screen hidden">\n\
++      var screen_lock = '<div class="page-load-progress-lock-screen page-load-progress-hidden">\n\
+                           <div class="page-load-progress-spinner"></div>\n\
+                          </div>';
+       var body = $('body', context);
