@@ -6,9 +6,6 @@ abstract class Recurly_Base
   protected $_type;
   protected $_client;
   protected $_links;
-  protected $_values;
-  protected $_errors;
-  protected $_headers;
 
   public function __construct($href = null, $client = null)
   {
@@ -19,10 +16,8 @@ abstract class Recurly_Base
 
   /**
    * Request the URI, validate the response and return the object.
-   * @param string Resource URI, if not fully qualified, the base URL will be prepended
+   * @param string Resource URI, if not fully qualified, the base URL will be appended
    * @param string Optional client for the request, useful for mocking the client
-   * @return object Recurly_Resource or null
-   * @throws Recurly_Error
    */
   public static function _get($uri, $client = null)
   {
@@ -35,28 +30,10 @@ abstract class Recurly_Base
   }
 
   /**
-   * Send a HEAD request to the URI, validate the response and return the headers.
-   * @param string Resource URI, if not fully qualified, the base URL will be prepended
-   * @param string Optional client for the request, useful for mocking the client
-   * @throws Recurly_Error
-   */
-  public static function _head($uri, $client = null)
-  {
-    if (is_null($client)) {
-      $client = new Recurly_Client();
-    }
-    $response = $client->request(Recurly_Client::HEAD, $uri);
-    $response->assertValidResponse();
-    return $response->headers;
-  }
-
-  /**
    * Post to the URI, validate the response and return the object.
-   * @param string Resource URI, if not fully qualified, the base URL will be prepended
+   * @param string Resource URI, if not fully qualified, the base URL will be appended
    * @param string Data to post to the URI
    * @param string Optional client for the request, useful for mocking the client
-   * @return object Recurly_Resource or null
-   * @throws Recurly_Error
    */
   protected static function _post($uri, $data = null, $client = null)
   {
@@ -72,10 +49,8 @@ abstract class Recurly_Base
 
   /**
    * Put to the URI, validate the response and return the object.
-   * @param string Resource URI, if not fully qualified, the base URL will be prepended
+   * @param string Resource URI, if not fully qualified, the base URL will be appended
    * @param string Optional client for the request, useful for mocking the client
-   * @return object Recurly_Resource or null
-   * @throws Recurly_Error
    */
   protected static function _put($uri, $client = null)
   {
@@ -84,7 +59,6 @@ abstract class Recurly_Base
     }
     $response = $client->request(Recurly_Client::PUT, $uri);
     $response->assertValidResponse();
-    $object = null;
     if ($response->body) {
       $object = Recurly_Base::__parseResponseToNewObject($response, $uri, $client);
     }
@@ -96,8 +70,6 @@ abstract class Recurly_Base
    * Delete the URI, validate the response and return the object.
    * @param string Resource URI, if not fully qualified, the base URL will be appended
    * @param string Optional client for the request, useful for mocking the client
-   * @return object Recurly_Resource or null
-   * @throws Recurly_Error
    */
   protected static function _delete($uri, $client = null)
   {
@@ -174,23 +146,8 @@ abstract class Recurly_Base
   public function getHref() {
     return $this->_href;
   }
-  protected function setHref($href) {
+  public function setHref($href) {
     $this->_href = $href;
-  }
-
-
-  /**
-   * @param array $headers
-   */
-  private function setHeaders($headers){
-        $this->_headers = $headers;
-  }
-
-  /**
-   * @return array|null
-   */
-  public function getHeaders(){
-      return $this->_headers;
   }
 
   /** Refers to the `type` root xml attribute **/
@@ -226,14 +183,7 @@ abstract class Recurly_Base
     'billing_info' => 'Recurly_BillingInfo',
     'coupon' => 'Recurly_Coupon',
     'unique_coupon_codes' => 'Recurly_UniqueCouponCodeList',
-    'charge_invoice' => 'Recurly_Invoice',
-    'credit_invoice' => 'Recurly_Invoice',
     'currency' => 'Recurly_Currency',
-    'custom_fields' => 'Recurly_CustomFieldList',
-    'custom_field' => 'Recurly_CustomField',
-    'credit_invoices' => 'array',
-    'credit_payment' => 'Recurly_CreditPayment',
-    'credit_payments' => 'Recurly_CreditPaymentList',
     'details' => 'array',
     'discount_in_cents' => 'Recurly_CurrencyList',
     'delivery' => 'Recurly_Delivery',
@@ -249,7 +199,6 @@ abstract class Recurly_Base
     'gifter_account' => 'Recurly_Account',
     'invoice' => 'Recurly_Invoice',
     'invoices' => 'Recurly_InvoiceList',
-    'invoice_collection' => 'Recurly_InvoiceCollection',
     'line_items' => 'array',
     'measured_unit' => 'Recurly_MeasuredUnit',
     'measured_units' => 'Recurly_MeasuredUnitList',
@@ -265,9 +214,6 @@ abstract class Recurly_Base
     'setup_fee_in_cents' => 'Recurly_CurrencyList',
     'shipping_address' => 'Recurly_ShippingAddress',
     'shipping_addresses' => 'Recurly_ShippingAddressList',
-    'shipping_fee' => 'Recurly_ShippingFee',
-    'shipping_method' => 'Recurly_ShippingMethod',
-    'shipping_methods' => 'Recurly_ShippingMethodList',
     'subscription' => 'Recurly_Subscription',
     'subscriptions' => 'Recurly_SubscriptionList',
     'subscription_add_ons' => 'array',
@@ -285,21 +231,17 @@ abstract class Recurly_Base
   // Use a valid Recurly_Response to populate a new object.
   protected static function __parseResponseToNewObject($response, $uri, $client) {
     $dom = new DOMDocument();
-
-    // Attempt to prevent XXE that could be exploited through loadXML()
-    libxml_disable_entity_loader(true);
-
     if (empty($response->body) || !$dom->loadXML($response->body, LIBXML_NOBLANKS)) {
       return null;
     }
 
     $rootNode = $dom->documentElement;
 
-    $obj = Recurly_Resource::__createNodeObject($rootNode, $client);
-    Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $obj, $client);
+    $obj = Recurly_Resource::__createNodeObject($rootNode);
+    $obj->_client = $client;
+    Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $obj);
     if ($obj instanceof self) {
       $obj->_afterParseResponse($response, $uri);
-      $obj->setHeaders($response->headers);
     }
     return $obj;
   }
@@ -311,25 +253,21 @@ abstract class Recurly_Base
   protected function __parseXmlToUpdateObject($xml)
   {
     $dom = new DOMDocument();
-
-    // Attempt to prevent XXE that could be exploited through loadXML()
-    libxml_disable_entity_loader(true);
-
     if (empty($xml) || !$dom->loadXML($xml, LIBXML_NOBLANKS)) return null;
 
     $rootNode = $dom->documentElement;
 
     if ($rootNode->nodeName == $this->getNodeName()) {
       // update the current object
-      Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $this, $this->_client);
+      Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $this);
     } else if ($rootNode->nodeName == 'errors') {
       // add element to existing object
-      Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $this->_errors, $this->_client);
+      Recurly_Resource::__parseXmlToObject($rootNode->firstChild, $this->_errors);
     }
     $this->updateErrorAttributes();
   }
 
-  protected static function __parseXmlToObject($node, &$object, $client)
+  protected static function __parseXmlToObject($node, &$object)
   {
     while ($node) {
       //print "Node: {$node->nodeType} -- {$node->nodeName}\n";
@@ -345,9 +283,10 @@ abstract class Recurly_Base
         $nodeName = str_replace("-", "_", $node->nodeName);
 
         if ($object instanceof Recurly_Pager) {
-          $new_obj = Recurly_Resource::__createNodeObject($node, $object->_client);
+          $new_obj = Recurly_Resource::__createNodeObject($node);
+          $new_obj->_client = $object->_client;
           if (!is_null($new_obj)) {
-            Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj, $object->_client);
+            Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj);
             $object->_objects[] = $new_obj;
           }
           $node = $node->nextSibling;
@@ -358,19 +297,17 @@ abstract class Recurly_Base
             $node = $node->nextSibling;
             continue;
           }
-        // Would prefer to do `$object instanceof ArrayAccess` but Recurly_CurrencyList
-        // implements that and expects to have its children assigned like `$list->USD = 123`.
-        } else if (is_array($object) || $object instanceof Recurly_CustomFieldList) {
+        } else if (is_array($object)) {
           if ($nodeName == 'error') {
             $object[] = Recurly_Resource::parseErrorNode($node);
             $node = $node->nextSibling;
             continue;
           }
 
-          $new_obj = Recurly_Resource::__createNodeObject($node, $client);
+          $new_obj = Recurly_Resource::__createNodeObject($node);
           if (!is_null($new_obj)) {
             if (is_object($new_obj) || is_array($new_obj)) {
-              Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj, $client);
+              Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj);
             }
             $object[] = $new_obj;
           }
@@ -398,9 +335,9 @@ abstract class Recurly_Base
           }
         } else if ($node->firstChild->nodeType == XML_ELEMENT_NODE) {
           // has element children, drop in and continue parsing
-          $new_obj = Recurly_Resource::__createNodeObject($node, $object->_client);
+          $new_obj = Recurly_Resource::__createNodeObject($node);
           if (!is_null($new_obj)) {
-            $object->$nodeName = Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj, $object->_client);
+            $object->$nodeName = Recurly_Resource::__parseXmlToObject($node->firstChild, $new_obj);
           }
         } else {
           // we have a single text child
@@ -450,7 +387,7 @@ abstract class Recurly_Base
     return $error;
   }
 
-  private static function __createNodeObject($node, $client)
+  private static function __createNodeObject($node)
   {
     $nodeName = str_replace("-", "_", $node->nodeName);
 
@@ -469,9 +406,8 @@ abstract class Recurly_Base
     else {
       if ($node_class == 'Recurly_CurrencyList') {
         $new_obj = new $node_class($nodeName);
-      } else {
+      } else
         $new_obj = new $node_class();
-      }
 
       // It may have a type attribute we wish to capture
       $typeAttribute = $node->getAttribute('type');
@@ -479,7 +415,6 @@ abstract class Recurly_Base
         $new_obj->_type = $typeAttribute;
       }
 
-      $new_obj->_client = $client;
       $href = $node->getAttribute('href');
       if (!empty($href)) {
         $new_obj->setHref($href);

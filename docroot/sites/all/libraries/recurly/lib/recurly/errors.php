@@ -72,16 +72,13 @@ class Recurly_FieldError
   var $field;
   var $symbol;
   var $description;
-  var $details;
   
   public function __toString() {
     if (!empty($this->field) && ($this->__readableField() != 'base')) {
-      $details = $this->details ? ' Details: ' . $this->details : '';
-      return $this->__readableField() . ' ' . $this->description . $details;
+      return $this->__readableField() . ' ' . $this->description;
     }
     else {
-      $details = $this->details ? ' Details: ' . $this->details : '';
-      return $this->description . $details;
+      return $this->description;
     }
   }
   

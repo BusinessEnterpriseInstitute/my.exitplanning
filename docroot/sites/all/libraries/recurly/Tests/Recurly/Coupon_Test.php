@@ -42,7 +42,7 @@ class Recurly_CouponTest extends Recurly_TestCase
     $redemptions = $coupon->redemptions->get();
 
     $this->assertInstanceOf('Recurly_CouponRedemptionList', $redemptions);
-    $this->assertEquals('https://api.recurly.com/v2/coupons/special/redemptions', $redemptions->getHref());
+    $this->assertEquals(2, $redemptions->count());
   }
 
   public function testRedeemCouponExpired() {
