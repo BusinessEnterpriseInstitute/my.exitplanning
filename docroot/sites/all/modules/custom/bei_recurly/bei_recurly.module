@@ -156,7 +156,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
     }
     else {
       $plan_interval_unit = 'month';
-      $total_billing_cycles = '<span class="plan-duration">for 12 months</span>';
+      $total_billing_cycles = '<span class="plan-duration"></span>';
     }
     $plan_description = !empty($plan_values['description']) ? '<span class="plan-description">' . $plan_values['description'] . '</span>' : '';
     $plan_options[$plan_code] = '<span class="plan-cost">' . $total_cost . '</span><span class="plan-interval">/' . $plan_interval_unit . '</span>' . $total_billing_cycles . $plan_description;
@@ -187,7 +187,7 @@ function bei_recurly_checkout_membership_form($form, &$form_state, $active_plans
   $form['membership']['outro'] = array(
     '#type' => 'item',
     '#title' => t(''),
-    '#markup' => t("All memberships are automatically renewed at the end of a one-year period. For group pricing on multiple memberships, please call a Member Services Consultant at (888) 206-3009."),
+    '#markup' => t("All Marketing, Planning, and Full-Service licenses require a one year minimum commitment. After one year, they renew automatically until you request a termination of your account."). '<br>' .t("For group pricing on multiple licenses, please call us at (888) 206-3009."),
   );
   $form['next'] = array(
     '#type' => 'submit',
@@ -217,6 +217,7 @@ function bei_recurly_checkout_membership_validate($form, &$form_state) {
 
 //contact information page
 function bei_recurly_checkout_contact_form($form, &$form_state) {
+  $form['#attributes']['autocomplete'] = 'off';
   spambot_add_form_protection($form,
     array(
       'mail' => 'email',
@@ -262,7 +263,7 @@ function bei_recurly_checkout_contact_form($form, &$form_state) {
       '#type' => 'item',
       '#title' => t(''),
       '#markup' =>  t('Enter the information below to set up your account. <br />Already have an account? ').
-              l('Login here','/user/login',array('query' => array('r-destination'=>	current_path()))),
+              l('Login here','/user/login',array('query' => array('r-destination' => current_path()))),
       '#prefix' => '<div class="checkout-main-content">',
     );
   }
@@ -824,7 +825,7 @@ function bei_recurly_checkout_thanks_form($form, &$form_state) {
   $form['thanks']['text'] = array(
     '#type' => 'item',
     '#markup' => "<div class='order-number'>".t("Order No: #").$form_state['multistep_values']['review']['invoice_number']."</div>".
-    "<div class='order-text'><p>".t('You will receive an email shortly with the details of your order. We encourage all of our new members to explore the Member Center and all of its benefits. Please contact us if you have any questions.')."</p></div>"
+    "<div class='order-text'><p>".t('You’ll receive an email confirming the details of your order. Check your junk mail to make sure you receive it. The Dashboard on your homepage in your new ExitPlanning.com account links you to resources and tools that will transform your business practice. Your user name is your email address and your password is the one you just created. Let’s get started!').'<br>'.t('The BEI Team').'<br>' .t('support@exitplanning.com').'<br>' .t('(303) 321-2242')."</p></div>"
   );  
   if (isset($form_state['extra_info']['logged_in_uid'])) {
     $form['thanks']['link'] = array(
@@ -1019,7 +1020,7 @@ function bei_recurly_checkout_get_header($form, &$form_state) {
     2 => array('data' => '2. Contact Information', 'title' => 'Contact Information'),
     3 => array('data' => '3. Billing Information', 'title' => 'Billing Information'),
     4 => array('data' => '4. Review & Finish', 'title' => "You're almost done!"),
-    5 => array('data' => '', 'title' => "Thanks for becoming a BEI Exit Planning Member!"),
+    5 => array('data' => '', 'title' => "Thanks for Becoming a BEI Exit Planning User!"),
   );
   //this holds our data for linking the steps at the top
   $steps = array(
@@ -1027,7 +1028,7 @@ function bei_recurly_checkout_get_header($form, &$form_state) {
     2 => array('data' => '2. Contact Information', 'title' => 'Contact Information', 'link' => 'contact'),
     3 => array('data' => '3. Billing Information', 'title' => 'Billing Information', 'link' => 'billing'),
     4 => array('data' => '4. Review & Finish', 'title' => "You're almost done!", 'link' => 'review'),
-    5 => array('data' => '', 'title' => "Thanks for becoming a BEI Exit Planning Member!", 'link' => 'thanks'),
+    5 => array('data' => '', 'title' => "Thanks for Becoming a BEI Exit Planning User!", 'link' => 'thanks'),
   );
   //loop through steps to conditionally make links, etc.
   if ($current_step !== 5) {
@@ -1128,7 +1129,7 @@ function bei_recurly_checkout_move_to_previous_stage($form, &$form_state) {
   }
 }
 
-function ajax_apply_coupon($form,&$form_state) {
+function ajax_apply_coupon($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 
   $commands = array();
