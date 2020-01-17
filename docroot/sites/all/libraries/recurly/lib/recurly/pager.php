@@ -9,29 +9,32 @@
 abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
 {
   private $_position = 0;    // position within the current page
-  protected $_count = null;  // total number of records
   protected $_objects;       // current page of records
 
   /**
-   * Number of records in this list.
+   * If the pager has a URL this will send a HEAD request to get the count of
+   * all records. Otherwise it'll return the count of the cached _objects.
+   *
    * @return integer number of records in list
+   * @throws Recurly_Error
    */
   public function count() {
-    if (!isset($this->_count)) {
-      if (isset($this->_objects)) {
-        $this->_count = count($this->_objects);
-      } elseif (isset($this->_href)) {
-        // Don't bother with the HEAD request the server takes the same amount
-        // of time to generate them so, might as well just get the results at
-        // the same time.
-        $this->_loadFrom($this->_href);
+    if (isset($this->_href)) {
+      $headers = Recurly_Base::_head($this->_href, $this->_client);
+      if (isset($headers['x-records'])) {
+        return intval($headers['x-records']);
       }
+    } elseif (isset($this->_objects) && is_array($this->_objects)) {
+      return count($this->_objects);
     }
-    return $this->_count;
+
+    return null;
   }
 
   /**
    * Rewind to the beginning
+   *
+   * @throws Recurly_Error
    */
   public function rewind() {
     $this->_loadFrom($this->_href);
@@ -40,19 +43,24 @@ abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
 
   /**
    * The current object
+   *
    * @return Recurly_Resource the current object
+   * @throws Recurly_Error
    */
   public function current()
   {
     // Work around pre-PHP 5.5 issue that prevents `empty($this->count())`:
-    if ($this->count() == 0) {
-      return null;
+    if (!isset($this->_objects)) {
+      $this->_loadFrom($this->_href);
     }
 
     if ($this->_position >= sizeof($this->_objects)) {
       if (isset($this->_links['next'])) {
         $this->_loadFrom($this->_links['next']);
         $this->_position = 0;
+      }
+      else if (empty($this->_objects) && ($this->_position == 0)) {
+        return null;
       }
       else {
         throw new Recurly_Error("Pager is not in a valid state");
@@ -85,6 +93,9 @@ abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
 
   /**
    * Load another page of results into this pager.
+   *
+   * @param $uri
+   * @throws Recurly_Error
    */
   protected function _loadFrom($uri) {
     if (empty($uri)) {
@@ -100,7 +111,6 @@ abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
   }
 
   protected function _afterParseResponse($response, $uri) {
-    $this->_loadRecordCount($response);
     $this->_loadLinks($response);
     $this->_href = isset($this->_links['start']) ? $this->_links['start'] : $uri;
   }
@@ -116,12 +126,14 @@ abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
   /**
    * The 'Links' header contains links to the next, previous, and starting pages.
    * This parses the links header into an array of links if the header is present.
+   *
+   * @param $response
    */
   private function _loadLinks($response) {
     $this->_links = array();
 
-    if (isset($response->headers['Link'])) {
-      $links = $response->headers['Link'];
+    if (isset($response->headers['link'])) {
+      $links = $response->headers['link'];
       preg_match_all('/\<([^>]+)\>; rel=\"([^"]+)\"/', $links, $matches);
       if (sizeof($matches) > 2) {
         for ($i = 0; $i < sizeof($matches[1]); $i++) {
@@ -131,24 +143,11 @@ abstract class Recurly_Pager extends Recurly_Base implements Iterator, Countable
     }
   }
 
-  /**
-   * Find the total number of results in the collection from the 'X-Records' header.
-   */
-  private function _loadRecordCount($response)
-  {
-    if (isset($response->headers['X-Records'])) {
-      $this->_count = intval($response->headers['X-Records']);
-    }
-  }
-
   protected function updateErrorAttributes() {}
-
 
   public function __toString()
   {
     $class = get_class($this);
-    $count = (!empty($this->_count) ? "count={$this->_count}" : '');
-
-    return "<{$class}[href={$this->getHref()}] $count>";
+    return "<{$class}[href={$this->getHref()}]>";
   }
 }

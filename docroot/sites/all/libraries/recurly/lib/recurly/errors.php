@@ -42,7 +42,7 @@ class Recurly_ValidationError extends Recurly_Error
 {
   var $object;
   var $errors;
-  
+
   function __construct($message, $object, $errors) {
     $this->object = $object;
     $this->errors = $errors;
@@ -58,7 +58,7 @@ class Recurly_ValidationError extends Recurly_Error
       else
         $errs[] = strval($err);
     }
-    $message = ucfirst(implode($errs, ', '));
+    $message = ucfirst(implode(', ', $errs));
     if (substr($message, -1) != '.')
       $message .= '.';
     parent::__construct($message);
@@ -72,16 +72,19 @@ class Recurly_FieldError
   var $field;
   var $symbol;
   var $description;
-  
+  var $details;
+
   public function __toString() {
     if (!empty($this->field) && ($this->__readableField() != 'base')) {
-      return $this->__readableField() . ' ' . $this->description;
+      $details = $this->details ? ' Details: ' . $this->details : '';
+      return $this->__readableField() . ' ' . $this->description . $details;
     }
     else {
-      return $this->description;
+      $details = $this->details ? ' Details: ' . $this->details : '';
+      return $this->description . $details;
     }
   }
-  
+
   private function __readableField() {
     if (empty($this->field))
       return null;
