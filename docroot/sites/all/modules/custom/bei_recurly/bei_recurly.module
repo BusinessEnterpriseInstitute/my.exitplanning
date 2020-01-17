@@ -607,7 +607,7 @@ function bei_recurly_checkout_billing_form($form, &$form_state) {
   );
   $form['billing']['bank']['graphic'] = array(
     '#type' => 'item',
-    '#markup' => "<img src='/".drupal_get_path('module', 'bei_recurly')."/images/Check.png' alt='' />",
+    '#markup' => "<img src='/".drupal_get_path('module', 'bei_recurly')."/images/check.png' alt='' />",
   );
   $form['billing']['bank']['account_type'] = array(
     '#type' => 'select',
