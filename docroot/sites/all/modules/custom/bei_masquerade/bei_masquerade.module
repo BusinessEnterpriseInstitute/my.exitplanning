@@ -59,7 +59,7 @@ function bei_masquerade_block_view($delta = '') {
             else {
                 $menu_items[] = $quick_switch_links;
             }
-            $block['content'] = bei_forms_item_list(array('items' => $menu_items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'menu')));
+            $block['content'] = ep_alters_item_list(array('items' => $menu_items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'menu')));
         }
         break;
   }
