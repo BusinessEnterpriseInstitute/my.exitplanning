@@ -1079,3 +1079,17 @@ function ep_alters_location_after_build(&$form_element, &$form_state) {
   }
   return $form_element;
 }
+/**
+ * Alter the ignored forms form_alter provided by Zurb Foundation.
+ */
+function ep_alters_zurb_foundation_ignored_forms_alter(&$form_ids) {
+  $form_ids = array(
+    'node_form',
+    'system_site_information_settings',
+    'user_profile_form',
+    'node_delete_confirm',
+    'views_ui_edit_form',
+    'field_collection_item_form',
+    'masquerade_block_1'
+  );
+}
