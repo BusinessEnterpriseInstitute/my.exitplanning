@@ -1,0 +1,67 @@
+<?php
+/**
+ * Implements hook_block_info().
+ */
+function bei_masquerade_block_info() {
+  $blocks = array();
+  $blocks['bei_masquerade'] = array(
+    'info' => t('BEI Masquerade'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function bei_masquerade_block_view($delta = '') {
+  $block = array();
+  switch ($delta) {
+    case 'bei_masquerade':
+        global $user;
+        $menu_items = array();
+        $quick_switch_links = array();
+        $markup_value = '';
+        if (isset($_SESSION['masquerading'])) {
+            $quick_switch_links = l(t('Switch back'), 'masquerade/unswitch', array('attributes' => array('class' => 'icon-arrow-left3'), 'query' => array('token' => drupal_get_token('masquerade/unswitch'))));
+            if ($user->uid > 0) {
+                $markup_value = t('You are logged in as <a href="@user-url">%masq_as</a>.', array('@user-url' => url('user/' . $user->uid), '%masq_as' => $user->name));
+            }
+            else {
+              $markup_value = t('You are logged in as %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous'))));
+            }
+        }
+        else {
+            $quick_switches = variable_get('masquerade_quick_switches', array());
+            // Add in user-specific switches, and prevent duplicates.
+            $user_switches = db_query("SELECT uid_to FROM {masquerade_users} WHERE uid_from = :uid_from", array(':uid_from' => $user->uid))->fetchCol();
+            $masquerade_switches = array_unique(array_merge($quick_switches, $user_switches));
+            if (!empty($masquerade_switches)) {
+                foreach ($masquerade_switches as $switch_user) {
+                    if (!isset($_SESSION['user']->uid) || $switch_user != $_SESSION['user']->uid) {
+                        $account = user_load($switch_user);
+                        if (isset($account->uid)) {
+                            $switch_link = 'masquerade/switch/' . $account->uid;
+                            if ($account->uid) {
+                                $quick_switch_links[] = l($account->name, $switch_link, array('query' => array('token' => drupal_get_token($switch_link), 'destination' => 'node')));
+                            }
+                        }
+                    }
+                }
+                $markup_value = t('Select a user to masquerade as.');
+            }
+        }
+        $block['subject'] = t('Masquerade');
+        if (!empty($quick_switch_links)) {
+            if (is_array($quick_switch_links)) {
+                $menu_items[] = l(t('Masquerade'), '#', array('fragment' => '', 'external' => TRUE,'attributes' => array('class' => 'toggle icon-user3'))) . theme_item_list(array('items' => $quick_switch_links, 'title' => '', 'type' => 'ul', 'attributes' => array('class' => 'level-1')));
+            }
+            else {
+                $menu_items[] = $quick_switch_links;
+            }
+            $block['content'] = bei_forms_item_list(array('items' => $menu_items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'menu')));
+        }
+        break;
+  }
+  return $block;
+}

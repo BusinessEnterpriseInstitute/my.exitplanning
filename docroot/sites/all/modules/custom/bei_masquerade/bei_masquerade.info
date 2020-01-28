@@ -1,0 +1,7 @@
+name = BEI Masquerade
+description = Generates simple quick switch links for masquerade module.
+package = Custom
+core = 7.x
+
+dependencies[] = masquerade
+dependencies[] = bei_forms
