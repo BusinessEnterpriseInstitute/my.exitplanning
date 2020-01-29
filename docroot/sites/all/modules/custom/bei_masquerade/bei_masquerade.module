@@ -23,7 +23,7 @@ function bei_masquerade_block_view($delta = '') {
         $quick_switch_links = array();
         $markup_value = '';
         if (isset($_SESSION['masquerading'])) {
-            $quick_switch_links = l(t('Switch back'), 'masquerade/unswitch', array('attributes' => array('class' => 'block-masquerade-masquerade'), 'query' => array('token' => drupal_get_token('masquerade/unswitch'))));
+            $quick_switch_links = l(t('Switch back'), 'masquerade/unswitch', array('attributes' => array('class' => 'icon-arrow-left3'), 'query' => array('token' => drupal_get_token('masquerade/unswitch'))));
             if ($user->uid > 0) {
                 $markup_value = t('You are logged in as <a href="@user-url">%masq_as</a>.', array('@user-url' => url('user/' . $user->uid), '%masq_as' => $user->name));
             }
@@ -54,12 +54,12 @@ function bei_masquerade_block_view($delta = '') {
         $block['subject'] = t('Masquerade');
         if (!empty($quick_switch_links)) {
             if (is_array($quick_switch_links)) {
-                $menu_items[] = l(t('Masquerade'), '#', array('fragment' => '', 'external' => TRUE,'attributes' => array('class' => ''))) . theme_item_list(array('items' => $quick_switch_links, 'title' => '', 'type' => 'ul', 'attributes' => array('class' => '')));
+                $menu_items[] = l(t('Masquerade'), '#', array('fragment' => '', 'external' => TRUE,'attributes' => array('class' => 'toggle icon-user3'))) . theme_item_list(array('items' => $quick_switch_links, 'title' => '', 'type' => 'ul', 'attributes' => array('class' => 'level-1')));
             }
             else {
                 $menu_items[] = $quick_switch_links;
             }
-            $block['content'] = ep_alters_item_list(array('items' => $menu_items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'item-list')));
+            $block['content'] = ep_alters_item_list(array('items' => $menu_items, 'type' => 'ul', 'title' => '', 'attributes' => array('class' => 'form-item')));
         }
         break;
   }
