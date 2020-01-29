@@ -23,7 +23,7 @@ function bei_masquerade_block_view($delta = '') {
         $quick_switch_links = array();
         $markup_value = '';
         if (isset($_SESSION['masquerading'])) {
-            $quick_switch_links = l(t('Switch back'), 'masquerade/unswitch', array('attributes' => array('class' => 'icon-arrow-left3'), 'query' => array('token' => drupal_get_token('masquerade/unswitch'))));
+            $quick_switch_links = l(t(' Switch back'), 'masquerade/unswitch', array('attributes' => array('class' => 'icon-arrow-left3'), 'query' => array('token' => drupal_get_token('masquerade/unswitch'))));
             if ($user->uid > 0) {
                 $markup_value = t('You are logged in as <a href="@user-url">%masq_as</a>.', array('@user-url' => url('user/' . $user->uid), '%masq_as' => $user->name));
             }
