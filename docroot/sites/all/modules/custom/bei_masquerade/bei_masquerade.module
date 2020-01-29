@@ -54,7 +54,7 @@ function bei_masquerade_block_view($delta = '') {
         $block['subject'] = t('Masquerade');
         if (!empty($quick_switch_links)) {
             if (is_array($quick_switch_links)) {
-                $menu_items[] = l(t('Masquerade'), '#', array('fragment' => '', 'external' => TRUE,'attributes' => array('class' => 'toggle icon-user3 block-title'))) . theme_item_list(array('items' => $quick_switch_links, 'title' => '', 'type' => 'ul', 'attributes' => array('class' => 'level-3')));
+                $menu_items[] = l(t('Masquerade'), '#', array('fragment' => '', 'external' => TRUE,'attributes' => array('class' => 'block-title toggle icon-user3'))) . theme_item_list(array('items' => $quick_switch_links, 'title' => '', 'type' => 'ul', 'attributes' => array('class' => 'item-list')));
             }
             else {
                 $menu_items[] = $quick_switch_links;
