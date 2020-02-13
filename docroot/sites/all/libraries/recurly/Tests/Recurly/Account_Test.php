@@ -27,20 +27,9 @@ class Recurly_AccountTest extends Recurly_TestCase
     $this->assertEquals($account->created_at->getTimestamp(), 1304164800);
     $this->assertEquals($account->getHref(),'https://api.recurly.com/v2/accounts/abcdef1234567890');
     $this->assertTrue($account->tax_exempt);
-    $this->assertEquals($account->exemption_certificate, 'Some Certificate');
     $this->assertEquals($account->entity_use_code, 'I');
     $this->assertEquals($account->vat_location_valid, true);
     $this->assertEquals($account->cc_emails, 'cheryl.hines@example.com,richard.lewis@example.com');
-    $this->assertEquals($account->has_paused_subscription, false);
-    $this->assertEquals($account->preferred_locale, 'en-US');
-
-    $this->assertInstanceOf('Recurly_CustomFieldList', $account->custom_fields);
-    $this->assertCount(2, $account->custom_fields);
-    $this->assertEquals(array('cat_name', 'shasta'), array_keys((array)$account->custom_fields));
-    $this->assertInstanceOf('Recurly_CustomField', $account->custom_fields['cat_name']);
-    $this->assertEquals($account->custom_fields['cat_name']->value, 'mittens');
-    $this->assertInstanceOf('Recurly_CustomField', $account->custom_fields['shasta']);
-    $this->assertEquals($account->custom_fields['shasta']->value, 'ate my hamburger');
   }
 
   public function testCloseAccount() {
@@ -100,18 +89,7 @@ class Recurly_AccountTest extends Recurly_TestCase
     $account->first_name = 'Verena';
     $account->address->address1 = "123 Main St.";
     $account->tax_exempt = false;
-    $account->exemption_certificate = 'Some Certificate';
     $account->entity_use_code = 'I';
-    $account->preferred_locale = 'en-US';
-
-    $account_acquisition = new Recurly_AccountAcquisition();
-    $account_acquisition->cost_in_cents = 599;
-    $account_acquisition->currency = 'USD';
-    $account_acquisition->channel = 'marketing_content';
-    $account_acquisition->subchannel = 'pickle sticks blog post';
-    $account_acquisition->campaign = 'mailchimp67a904de95.0914d8f4b4';
-
-    $account->account_acquisition = $account_acquisition;
 
     // work shipping address
     $shad1 = new Recurly_ShippingAddress();
@@ -142,50 +120,21 @@ class Recurly_AccountTest extends Recurly_TestCase
 
     $account->shipping_addresses = array($shad1, $shad2);
 
-    $account->custom_fields[] = new Recurly_CustomField("serial_number", "4567-8900-1234");
-
     $this->assertEquals(
-      "<?xml version=\"1.0\"?>\n<account><account_code>act123</account_code><first_name>Verena</first_name><address><address1>123 Main St.</address1></address><tax_exempt>false</tax_exempt><entity_use_code>I</entity_use_code><shipping_addresses><shipping_address><address1>123 Main St.</address1><city>San Francisco</city><state>CA</state><zip>94110</zip><country>US</country><phone>555-555-5555</phone><email>verena@example.com</email><nickname>Work</nickname><first_name>Verena</first_name><last_name>Example</last_name><company>Recurly Inc.</company></shipping_address><shipping_address><address1>123 Dolores St.</address1><city>San Francisco</city><state>CA</state><zip>94110</zip><country>US</country><phone>555-555-5555</phone><email>verena@example.com</email><nickname>Home</nickname><first_name>Verena</first_name><last_name>Example</last_name></shipping_address></shipping_addresses><preferred_locale>en-US</preferred_locale><custom_fields><custom_field><name>serial_number</name><value>4567-8900-1234</value></custom_field></custom_fields><account_acquisition><cost_in_cents>599</cost_in_cents><currency>USD</currency><channel>marketing_content</channel><subchannel>pickle sticks blog post</subchannel><campaign>mailchimp67a904de95.0914d8f4b4</campaign></account_acquisition><exemption_certificate>Some Certificate</exemption_certificate></account>\n",
+      "<?xml version=\"1.0\"?>\n<account><account_code>act123</account_code><first_name>Verena</first_name><address><address1>123 Main St.</address1></address><tax_exempt>false</tax_exempt><entity_use_code>I</entity_use_code><shipping_addresses><shipping_address><address1>123 Main St.</address1><city>San Francisco</city><state>CA</state><zip>94110</zip><country>US</country><phone>555-555-5555</phone><email>verena@example.com</email><nickname>Work</nickname><first_name>Verena</first_name><last_name>Example</last_name><company>Recurly Inc.</company></shipping_address><shipping_address><address1>123 Dolores St.</address1><city>San Francisco</city><state>CA</state><zip>94110</zip><country>US</country><phone>555-555-5555</phone><email>verena@example.com</email><nickname>Home</nickname><first_name>Verena</first_name><last_name>Example</last_name></shipping_address></shipping_addresses></account>\n",
       $account->xml()
     );
   }
 
   /**
-   * Test that transaction_type is rendered
-   */
-  public function testTransactionType() {
-    $account = Recurly_Account::get('abcdef1234567890', $this->client);
-    $account->transaction_type = 'moto';
-    $this->assertEquals(
-      "<?xml version=\"1.0\"?>\n<account><transaction_type>moto</transaction_type></account>\n",
-      $account->xml()
-    );
-  }
-
-  /**
-   * Test that updates to nested account addresses are detected when generating
-   * XML to send.
+   * Test that updates to nested objects like account addresses are detected
+   * when generating XML to send.
    */
   public function testNestedAddress() {
     $account = Recurly_Account::get('abcdef1234567890', $this->client);
     $account->address->address1 = '987 Alternate St.';
     $this->assertEquals(
       "<?xml version=\"1.0\"?>\n<account><address><address1>987 Alternate St.</address1></address></account>\n",
-      $account->xml()
-    );
-  }
-
-  /**
-   * Test that updates to nested custom fields are detected when generating
-   * XML to send.
-   */
-  public function testNestedCustomFields() {
-    $account = Recurly_Account::get('abcdef1234567890', $this->client);
-    $account->custom_fields[] = new Recurly_CustomField('new_field', 'something');
-    $account->custom_fields[] = new Recurly_CustomField('shasta', '');
-
-    $this->assertEquals(
-      "<?xml version=\"1.0\"?>\n<account><custom_fields><custom_field><name>shasta</name><value></value></custom_field><custom_field><name>new_field</name><value>something</value></custom_field></custom_fields></account>\n",
       $account->xml()
     );
   }
@@ -212,43 +161,5 @@ class Recurly_AccountTest extends Recurly_TestCase
     $account->create();
 
     $this->assertInstanceOf('Recurly_Account', $account);
-  }
-
-  /**
-   * Tests regarding account hierarchy.
-   */
-  public function testAccountHierarchy() {
-    $this->client->addResponse('POST', '/accounts', 'accounts/hierarchy/create-201.xml');
-    $this->client->addResponse('GET', '/accounts/1234567890', 'accounts/hierarchy/show-parent-200.xml');
-    $this->client->addResponse('GET', '/accounts/abcdef1234567890', 'accounts/hierarchy/show-child-200.xml');
-    $this->client->addResponse('PUT', 'https://api.recurly.com/v2/accounts/abcdef1234567890', 'accounts/hierarchy/update-no-parent-200.xml');
-
-    # Create an account with a parent
-    $account = new Recurly_Account(null, $this->client);
-    $account->account_code = 'abcdef1234567890';
-    $account->parent_account_code = '1234567890';
-    $account->create();
-
-    $this->assertInstanceOf('Recurly_Stub', $account->parent_account);
-
-    # Get the parent account and verify it has child_accounts
-    $parent = Recurly_Account::get('1234567890', $this->client);
-
-    $this->assertInstanceOf('Recurly_Stub', $parent->child_accounts);
-
-    # Get an account that already has a parent and remove the parent
-    $orphan = Recurly_Account::get('abcdef1234567890', $this->client);
-    $orphan->parent_account_code = '';
-    $orphan->update();
-
-    $this->assertEquals($orphan->parent_account, null);
-
-    # Give it back its parent
-    $this->client->addResponse('PUT', 'https://api.recurly.com/v2/accounts/abcdef1234567890', 'accounts/hierarchy/update-200.xml');
-
-    $orphan->parent_account_code = '1234567890';
-    $orphan->update();
-
-    $this->assertInstanceOf('Recurly_Stub', $orphan->parent_account);
   }
 }
