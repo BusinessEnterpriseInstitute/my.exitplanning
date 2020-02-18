@@ -1,0 +1,13 @@
+diff --git a/replace/ui/ui/jquery.ui.datepicker.js b/replace/ui/ui/jquery.ui.datepicker.js
+index 513d3e5..d6c3c20 100644
+--- a/replace/ui/ui/jquery.ui.datepicker.js
++++ b/replace/ui/ui/jquery.ui.datepicker.js
+@@ -744,7 +744,7 @@ $.extend(Datepicker.prototype, {
+ 		if (!inst.inline) {
+ 			showAnim = $.datepicker._get(inst, "showAnim");
+ 			duration = $.datepicker._get(inst, "duration");
+-			inst.dpDiv.zIndex($(input).zIndex()+1);
++			inst.dpDiv.css('z-index', $(input).css('z-index')+1);
+ 			$.datepicker._datepickerShowing = true;
+ 
+ 			if ( $.effects && $.effects.effect[ showAnim ] ) {
