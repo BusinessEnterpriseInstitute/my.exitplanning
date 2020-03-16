@@ -623,7 +623,7 @@ table {
   }
   &.bootcamp {
     > .contain {
-      .live, .online, .live-stream {
+      .live, .online, .live-stream, {
         padding-top: rem-calc(30);
         padding-bottom: rem-calc(30);
         h2, h3 {
