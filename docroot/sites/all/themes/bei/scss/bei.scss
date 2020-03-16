@@ -623,7 +623,7 @@ table {
   }
   &.bootcamp {
     > .contain {
-      .live, .online {
+      .live, .online, .live-stream {
         padding-top: rem-calc(30);
         padding-bottom: rem-calc(30);
         h2, h3 {
@@ -646,6 +646,10 @@ table {
       .online h2:before,
       .online h3:before {
         background-image: url(../images/bootcamp_online.png);
+      }
+      .live-stream h2:before,
+      .live-stream h3:before {
+        background-image: url(../images/bootcamp_live_stream.png);
       }
     }
   }
