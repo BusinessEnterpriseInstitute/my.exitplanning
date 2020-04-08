@@ -1,0 +1,70 @@
+diff --git a/autosave.module b/autosave.module
+index 976246f..3853337 100644
+--- a/autosave.module
++++ b/autosave.module
+@@ -183,6 +183,11 @@ function autosave_form_alter(&$form, &$form_state, $form_id) {
+   if (($autosave_node_form || in_array($form_id, $form_ids))) {
+     // Remove the autosaved form when submitting it.
+     array_unshift($form['#submit'], 'autosave_remove_autosaved_form_submit');
++
++    // Autosaved forms need to be cached so that $form_state can be retrieved
++    // with ajax_get_form() during save.
++    $form_state['cache'] = TRUE;
++
+     if (empty($_POST['autosave_form_path'])) {
+       $request_path = request_path();
+       // We store the drupal system paths, not the aliases.
+@@ -281,21 +286,22 @@ function autosave_restore($form_id, $timestamp) {
+   $commands = array();
+ 
+   if ($record) {
+-    $form_state = array();
+-    // We need to extract and reuse any additional page arguments that the
+-    // original form may have.  That's especially true for, say, a node form,
+-    // which needs the node object passed in as well.
+-    $menu_item = autosave_menu_get_item($record->path);
+-    if ($menu_item['include_file']) {
+-      require_once DRUPAL_ROOT . '/' . $menu_item['include_file'];
+-      $form_state['build_info']['files'][] = $menu_item['include_file'];
+-    }
+-    $form_state['input'] = unserialize($record->serialized);
+-
+-    // Restore form arguments.
+-    if (!empty($record->args)) {
+-      $args = unserialize($record->args);
+-      $form_state['build_info']['args'] = $args;
++    $form_state = unserialize($record->serialized);
++
++    // Manually load include files that the form depends on. Normally this will
++    // be handled automatically by form_get_cache() (which this code is copied
++    // from) but if the autosaved data is old enough that the cache_form entry
++    // is no longer present, it needs to be done manually.
++    if (!empty($form_state['build_info']['files'])) {
++      foreach ($form_state['build_info']['files'] as $file) {
++        if (is_array($file)) {
++          $file += array('type' => 'inc', 'name' => $file['module']);
++          module_load_include($file['type'], $file['module'], $file['name']);
++        }
++        elseif (file_exists($file)) {
++          require_once DRUPAL_ROOT . '/' . $file;
++       }
++      }
+     }
+ 
+     // Disable the "this form has already been submitted" nonsense by making
+@@ -390,11 +396,10 @@ function autosave_save() {
+   $prevent_autosave = FALSE;
+   drupal_alter('autosave_prevent', $prevent_autosave);
+ 
+-  $path = $_POST['autosave_form_path'];
+-  $form_id = $_POST['form_id'];
+-  // Not all variables need to be serialized.
+-  unset($_POST['autosave_form_path'], $_POST['op'], $_POST['form_build_id']);
+-  $serialized = serialize($_POST);
++  list($form, $form_state) = ajax_get_form();
++  $path = $form_state['input']['autosave_form_path'];
++  $form_id = $form_state['input']['form_id'];
++  $serialized = serialize($form_state);
+ 
+   if (!$prevent_autosave) {
+     // Currently, each user can have only one autosave form at a particular path.
