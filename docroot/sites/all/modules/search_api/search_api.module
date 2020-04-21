@@ -940,6 +940,24 @@ function search_api_entity_delete($entity, $type) {
 }
 
 /**
+ * Implements hook_field_reference_delete_update_parent_entities().
+ *
+ * Marks as "changed" any entities that referenced a just-deleted entity.
+ *
+ * @param array $entities
+ *   The deleted entities.
+ */
+function search_api_field_reference_delete_update_parent_entities($entities) {
+  if (is_array($entities)) {
+    foreach ($entities as $entity) {
+      search_api_track_item_change($entity->entity_type, array($entity->entity_id));
+      $combined_id = $entity->entity_type . '/' . $entity->entity_id;
+      search_api_track_item_change('multiple', array($combined_id));
+    }
+  }
+}
+
+/**
  * Implements hook_node_access_records_alter().
  *
  * Marks the node as "changed" in indexes that use the "Node access" data
