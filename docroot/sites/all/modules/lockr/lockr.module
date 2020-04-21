@@ -47,11 +47,19 @@ The Pantheor is strong with this one.
 We're detecting you're on Pantheon and a friend of theirs is a friend of ours.
 Welcome to Lockr.
 EOL;
+    $cert_path = '/srv/bindings/' . PANTHEON_BINDING . '/certs/binding.pem';
+    if (!is_file($cert_path)) {
+      // Pantheon is rolling out a new file system layout for their
+      // containers.
+      // This is the new path where certs will live.
+      // XXX: When rollout is complete, the old path can be phased out.
+      $cert_path = '/certs/binding.pem';
+    }
     return [
       'name' => 'pantheon',
       'title' => t('Pantheon'),
       'description' => $desc,
-      'cert' => '/srv/bindings/' . PANTHEON_BINDING . '/certs/binding.pem',
+      'cert' => $cert_path,
     ];
   }
 

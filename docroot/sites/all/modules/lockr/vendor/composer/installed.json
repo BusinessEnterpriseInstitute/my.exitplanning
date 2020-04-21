@@ -243,17 +243,17 @@
     },
     {
         "name": "lockr/lockr",
-        "version": "v1.0.7",
-        "version_normalized": "1.0.7.0",
+        "version": "v1.0.8",
+        "version_normalized": "1.0.8.0",
         "source": {
             "type": "git",
             "url": "https://github.com/lockr/lockr-php.git",
-            "reference": "e5bae20859d07f12e664675ea5f22a89cda40350"
+            "reference": "e6fa9340188ac5ee422770da07b3614e8d224fcb"
         },
         "dist": {
             "type": "zip",
-            "url": "https://api.github.com/repos/lockr/lockr-php/zipball/e5bae20859d07f12e664675ea5f22a89cda40350",
-            "reference": "e5bae20859d07f12e664675ea5f22a89cda40350",
+            "url": "https://api.github.com/repos/lockr/lockr-php/zipball/e6fa9340188ac5ee422770da07b3614e8d224fcb",
+            "reference": "e6fa9340188ac5ee422770da07b3614e8d224fcb",
             "shasum": ""
         },
         "require": {
@@ -269,7 +269,7 @@
             "phpunit/phpunit": "^7.3.5",
             "squizlabs/php_codesniffer": "^3.3.1"
         },
-        "time": "2019-05-06T20:38:27+00:00",
+        "time": "2019-10-07T17:28:56+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

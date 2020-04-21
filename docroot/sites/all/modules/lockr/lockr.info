@@ -7,8 +7,8 @@ dependencies[] = key (>= 7.x-3.4)
 
 files[] = lockr.secret_info.inc
 
-; Information added by Drupal.org packaging script on 2019-06-21
-version = "7.x-3.1"
+; Information added by Drupal.org packaging script on 2020-04-15
+version = "7.x-3.2"
 core = "7.x"
 project = "lockr"
-datestamp = "1561125805"
+datestamp = "1586925730"
