@@ -1,0 +1,10 @@
+name = Endpoint framework
+description = Framework which allows Drupal acts as a light endpoint.
+package = Performance
+
+; Information added by Drupal.org packaging script on 2017-07-31
+version = "7.x-1.5"
+core = "7.x"
+project = "endpoint"
+datestamp = "1501506250"
+
