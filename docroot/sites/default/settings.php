@@ -729,3 +729,23 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
     newrelic_disable_autorum();
   }
 }
+
+//JS Callback settings
+//- `js_endpoint`: Configures the expected URL endpoint:
+//  ```php
+  $conf['js_endpoint'] = 'js';
+/**  ```
+- `js_silence_php_errors`: Prevents custom JS module PHP error and exception
+  handlers from being invoked. By default, this variable is not set and the
+  JS module will automatically handle any PHP error or exception and display
+  them (respecting the site's PHP error display configuration) as an error
+  type status message via `drupal_set_message()`. To disable this, use:
+  ```php**/
+  $conf['js_silence_php_errors'] = TRUE;
+ /** ```
+- `js_excluded_cache_classes`: This allows to configure a list of cache backend
+  classes that should not trigger a full bootstrap on cache misses. By default
+  it only includes the `DrupalFakeCache` class. To change this:
+  ```php**/
+  $conf['js_excluded_cache_classes'] = array('MyCustomCache');
+
