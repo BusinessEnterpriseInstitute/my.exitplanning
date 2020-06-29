@@ -1,0 +1,177 @@
+<?php
+
+/**
+ * @file
+ * List out the custom and cotrib modules in the site.
+ */
+
+/**
+ * The defining basic variables.
+ */
+define('MODULE_LIST_REPORT', 'admin/reports/module-list');
+
+/**
+ * Implements hook_help().
+ */
+function module_list_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#module_list':
+      return '<p>' . t('Developers can easliy list out the custom and contrib module list without surfing the Drupal.org in the following !path page.', array('!path' => l(t('Module Report'), MODULE_LIST_REPORT))) . '</p>';
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function module_list_menu() {
+  $items = array();
+  $items['admin/reports/module-list'] = array(
+    'title' => 'Module list',
+    'description' => 'Get a module report about your modules in the site.',
+    'page callback' => 'module_list_reports',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+  );
+  return $items;
+}
+
+/**
+ * List out custom and contrib modules in the site.
+ *
+ * @return table
+ *   Module list table. Return the details of custom and contRibuted project available in the
+ *   site.
+ */
+function module_list_reports() {
+  module_load_include('inc', 'update', 'update.fetch');
+  $module_list = system_rebuild_module_data();
+  $contrib_list = $custom_list = array();
+  foreach ($module_list as $machine_name => $data) {
+    $info = $data->info;
+    $pack = array_key_exists('project', $info) ? $info['project'] : '';
+    if ($pack != 'drupal' && $pack != 'libraries') {
+      // To exclude Core modules and librariers.
+      if ($pack == '' || $pack == $machine_name) {
+        // To filter submodules.
+        $xml_value = module_list_drupal_org_check($machine_name);
+        if (isset($xml_value) && $xml_value['mod_avl'] == 1) {
+          $contrib_list[$machine_name]['data']['name'] = $data->info['name'];
+          $contrib_list[$machine_name]['data']['machine_name'] = $machine_name;
+          // Enabled or disabled?
+          $contrib_list[$machine_name]['data']['status'] = $data->status == 1 ? 'Enabled' : 'Disabled';
+          // Support Available?
+          $contrib_list[$machine_name]['data']['support'] = $xml_value['project_status'] == 'published' ? 'Available' : 'Not Available';
+          $contrib_list[$machine_name]['style'] = $xml_value['project_status'] == 'published' ? '' : 'background-color: #FD4242';
+        }
+        elseif (isset($xml_value) && $xml_value['mod_avl'] == 2) {
+          $custom_list[$machine_name]['data']['name'] = $data->info['name'];
+          $custom_list[$machine_name]['data']['machine_name'] = $machine_name;
+          // Enabled or disabled?
+          $custom_list[$machine_name]['data']['status'] = $data->status == 1 ? 'Enabled' : 'Disabled';
+          // Support Available?
+          $custom_list[$machine_name]['data']['support'] = 'Not Available';
+        }
+      }
+    }
+  }
+
+  $style = array('width: 300px;', 'text-align: center;');
+  $count_header = array(
+    array(
+      'data' => '<h3>Module count</h3>',
+      'style' => array('text-align: center;'),
+      'colspan' => 2,
+    ),
+  );
+  $count_row = array(
+    array('Custom Module Count', count($custom_list)),
+    array('Contributed Module Count', count($contrib_list)),
+  );
+  $list_header = array(
+    array('data' => '<b>Module Name</b>', 'style' => $style),
+    array('data' => '<b>Machine Name</b>', 'style' => $style),
+    array('data' => '<b>Status</b>', 'style' => $style),
+    array('data' => '<b>Support</b>', 'style' => $style),
+  );
+  $custom_header = array(
+    array(
+      'data' => '<h3>list of Custom Modules<h3>',
+      'style' => array('text-align:center;'),
+    ),
+  );
+  $contrib_header = array(
+    array(
+      'data' => '<h3>list of Contributed Modules<h3>',
+      'style' => array('text-align:center;'),
+    ),
+  );
+
+  $output = theme('table', array(
+    'header' => $count_header,
+    'rows' => $count_row,
+    'sticky' => TRUE,
+  ));
+  $output .= theme('table', array(
+    'header' => $custom_header,
+    'sticky' => TRUE,
+  ));
+  $output .= theme('table', array(
+    'header' => $list_header,
+    'rows' => $custom_list,
+    'sticky' => TRUE,
+  ));
+  $output .= theme('table', array(
+    'header' => $contrib_header,
+    'sticky' => TRUE,
+  ));
+  $output .= theme('table', array(
+    'header' => $list_header,
+    'rows' => $contrib_list,
+    'sticky' => TRUE,
+  ));
+  return $output;
+}
+
+/**
+ * Generates the drupal.org URL to fetch information for a single project.
+ *
+ * @param string $machine_name
+ *   Machine name of the project to fetch data for.
+ *
+ * @return array
+ *   Return project details.
+ */
+function module_list_drupal_org_check($machine_name) {
+  $available = '';
+  $url = UPDATE_DEFAULT_URL . '/' . $machine_name . '/' . DRUPAL_CORE_COMPATIBILITY;
+  $xml = drupal_http_request($url);
+  if (!isset($xml->error) && isset($xml->data)) {
+    $data = $xml->data;
+  }
+  if (!empty($data)) {
+    $details = array();
+    // Parses the XML of the Drupal release history info files.
+    // Retruns array of parsed data about releases for a given project.
+    $available = update_parse_xml($data);
+    if (is_array($available['releases'])) {
+      // Module Available in Drupal.org.
+      $details['mod_avl'] = 1;
+      // Project Status Supported or unsuppoted.
+      $details['project_status'] = $available['project_status'];
+    }
+    else {
+      // Module not available in Drupal.org i.e custom module.
+      $details['mod_avl'] = 2;
+      // Marking it as custom module.
+      $details['project_status'] = 'custom';
+    }
+    $details['machine_name'] = $machine_name;
+    drupal_set_message(t('Module report has been executed successfully'), 'status', FALSE);
+  }
+  else {
+    $details = NULL;
+    drupal_set_message(t('Your internet connection appears to be offline. Please check your internet connection'), 'warning', FALSE);
+  }
+  return $details;
+}
