@@ -1,0 +1,19 @@
+{
+    "name": "drupal/single_sign_on",
+    "description": "Professionally developed and free Drupal extension that automatically creates accounts and signs users in as they browse between multiple and independent Drupal websites.",
+    "type": "drupal-module",
+    "homepage": "https://www.oneall.com/",
+    "license": "GPL-2.0+",
+    "authors": [
+        {
+            "name": "OneAll",
+            "email": "plugins@oneall.com"
+        }
+    ],
+    "support": {
+        "issues": "https://support.oneall.com/"
+    },
+    "require": {
+        "php" : "~5.4|~7.0"
+    }
+}

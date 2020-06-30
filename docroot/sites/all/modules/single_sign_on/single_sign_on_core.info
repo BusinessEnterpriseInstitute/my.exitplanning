@@ -1,0 +1,10 @@
+name = "OneAll Single Sign-On, Core"
+description = Contains the core functions used by the OneAll Single Sign-On Module.
+package = "OneAll Single Sign-On" 
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2019-09-13
+version = "7.x-1.0"
+core = "7.x"
+project = "single_sign_on"
+datestamp = "1568379188"
