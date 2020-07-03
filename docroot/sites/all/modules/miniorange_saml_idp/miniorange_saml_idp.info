@@ -1,0 +1,21 @@
+name = Drupal SAML IDP - miniOrange
+description = Single Sign-on into any SAML 2.0 compliant Service Provider using your Drupal site as an IDP.
+package = SAML
+core = 7.x
+configure = admin/config/people/miniorange_saml_idp
+files[] = includes/Assertion.php
+files[] = includes/AuthnRequest.php
+files[] = includes/GenerateResponse.php
+files[] = includes/ReadResponse.php
+files[] = includes/Utilities.php
+files[] = includes/customer_setup.php
+files[] = includes/constants.php
+files[] = includes/miniorange_saml_idp_support.php
+files[] = includes/XMLSecurityKey.php
+scripts[] = js/testidpconfig.js
+
+; Information added by Drupal.org packaging script on 2020-06-07
+version = "7.x-1.38"
+core = "7.x"
+project = "miniorange_saml_idp"
+datestamp = "1591552819"
