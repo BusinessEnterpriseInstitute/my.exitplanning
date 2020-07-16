@@ -185,7 +185,7 @@ function miniorange_saml_idp_licensing() {
     $form['markup_6'] = array(
         '#markup' => '<br><div class="mo_saml_space"><h3>Steps to Upgrade to Premium Module</h3>'
             . '<ol>
-                <li>You will be redirected to miniOrange Login Console. Enter your password with which you created an account with us. After that you will be redirected to payment page.</li>'
+                <li>Click on the <strong>Upgrade Now</strong> button. You will be redirected to miniOrange Login Console. Enter your password with which you created an account with us. After that you will be redirected to payment page.</li>'
             . '<li>Enter your card details and complete the payment. On successful payment completion, you will see the link to download the premium module.</li>'
             . '<li>Once you download the premium module, just unzip it and replace the folder with existing module. Clear Drupal Cache.</li></ol>'
     );
@@ -194,13 +194,13 @@ function miniorange_saml_idp_licensing() {
           . 'Additional charges will be applicable based on the number of Service Providers you wish to configure.<br>'
   );
   $form['markup_9']=array(
-    '#markup'=>"<br><b>10 Days Return Policy -</b><br><br>
-    At miniOrange, we want to ensure you are 100% happy with your purchase. If the premium plugin you purchased is not working as advertised and you've attempted to resolve any issues with our support<br> team, which couldn't get resolved. We will refund the whole amount within 10 days of the purchase. Please email us at <a href='mailto:drupalsupport@xecurify.com' >drupalsupport@xecurify.com</a> for any queries regarding the return policy."
+    '#markup'=>"<br><h3>10 Days Return Policy -</h3>
+At miniOrange, we want to ensure you are 100% happy with your purchase. If the module you purchased is not working as advertised and you've attempted to resolve any issues with our support team, which couldn't get resolved, we will refund the whole amount given that you have a raised a refund request within the first 10 days of the purchase. Please email us at info@xecurify.com for any queries regarding the return policy.
+    "
   );
 
-
   $form['markup_7'] = array(
-    '#markup' => '<br><h3>** End to End Identity Provider Integration (additional charges applicable)</h3>'
+    '#markup' => '<br><br><h3>** End to End Identity Provider Integration (additional charges applicable)</h3>'
       . ' We will setup a Conference Call / Goto meeting and do end to end configuration for you to setup drupal as IDP.'
       . ' We provide services to do the configuration on your behalf. (Extra charges applicable at $60/hr)<br />'
       . ' If you have any doubts regarding the licensing plans, you can mail us at <a href="mailto:drupalsupport@xecurify.com"><i>drupalsupport@xecurify.com</i></a> or submit a query using the support form <b>(support form available on each tab)</b>.<br><br></div></div>'

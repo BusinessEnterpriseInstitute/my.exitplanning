@@ -111,9 +111,9 @@ function getTourData($pageID,$Tour_Taken)
     $tourData = array();
     if($Tour_Taken == FALSE)
         $tab_index = 'miniorange_saml_idp';
-    else 
+    else
         $tab_index = 'idp_tab';
-    
+
     $tourData['miniorange_saml_idp'] = array(
         0 =>    array(
             'targetE'       =>  'mo_saml_idp_vt_metadata',
@@ -282,7 +282,7 @@ function getTourData($pageID,$Tour_Taken)
             'targetE'       =>  'edit-miniorange-saml-idp-sp-name',
             'pointToSide'   =>  'left',
             'titleHTML'     =>  '<h1>Service Provider name</h1>',
-            'contentHTML'   =>  'Enter your service provider name.(you can enter any name)',
+            'contentHTML'   =>  'Enter your service provider name.',
             'ifNext'        =>  true,
             'buttonText'    =>  'Next',
             'img'           =>  array(),
@@ -304,7 +304,7 @@ function getTourData($pageID,$Tour_Taken)
             'targetE'       =>  'edit-miniorange-saml-idp-acs-url',
             'pointToSide'   =>  'left',
             'titleHTML'     =>  '<h1>ACS URL</h1>',
-            'contentHTML'   =>  'You can find the SAML Login URL in Your SP-Metadata XML file enclosed in AssertionConsumerService tag having attribute as Location.',
+            'contentHTML'   =>  'You can find the ACS URL in Your SP-Metadata XML file enclosed in AssertionConsumerService tag having attribute as Location.',
             'ifNext'        =>  true,
             'buttonText'    =>  'Next',
             'img'           =>  array(),

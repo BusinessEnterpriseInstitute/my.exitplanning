@@ -126,7 +126,7 @@ include "mo_saml_visualTour.php";
      $form['miniorange_saml_idp_acs_url'] = array(
         '#type' => 'textfield',
         '#title' => t('ACS URL<span class="miniorange_class_color_red">*</span>'),
-        '#description' => t('<b>Note:</b> You can find the SAML Login URL in Your SP-Metadata XML file enclosed in <code>AssertionConsumerService </code> tag <br/>having attribute as <code>Location</code>.'),
+        '#description' => t('<b>Note:</b> You can find the ACS URL in Your SP-Metadata XML file enclosed in <code>AssertionConsumerService </code> tag <br/>having attribute as <code>Location</code>.'),
         '#default_value' => variable_get('miniorange_saml_idp_acs_url', ''),
         '#attributes' => array('style' => 'width:85%','placeholder' => 'ACS URL'),
      );
@@ -235,7 +235,7 @@ include "mo_saml_visualTour.php";
 function miniorange_saml_upload_file($form, &$form_state) {
     $file_name = $_FILES['files']['tmp_name']['metadata_file'];
     if( !isset( $file_name ) || empty( $file_name ) || $_FILES['files']['type']['metadata_file'] != 'text/xml' ) {
-        drupal_set_message(t('Invalid file. Please provide valid file.'), 'error');
+        drupal_set_message(t('Invalid file. Please provide valid metadata file.'), 'error');
         return;
     }
     $file      = file_get_contents( $file_name );
@@ -244,7 +244,7 @@ function miniorange_saml_upload_file($form, &$form_state) {
 
 function miniorange_saml_fetch_metadata($form, &$form_state) {
     if( !isset( $form['metadata_URL']['#value'] ) || empty( $form['metadata_URL']['#value'] ) ) {
-        drupal_set_message(t('Invalid file. Please provide valid file.'), 'error');
+        drupal_set_message(t('Invalid file. Please provide valid metadata file.'), 'error');
         return;
     }
     $url = filter_var( $form['metadata_URL']['#value'],FILTER_VALIDATE_URL );

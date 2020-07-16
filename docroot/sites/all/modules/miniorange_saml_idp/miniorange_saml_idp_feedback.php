@@ -4,10 +4,10 @@ function miniorange_idp_feedback()
 
     if ((isset($_POST['mo_idp_check'])) && ($_POST['mo_idp_check'] == "True")) {
         //code to send email alert
-        $reason = $_POST['deactivate_plugin'];
-        $q_feedback = $_POST['query_feedback'];
+        $reason      = $_POST['deactivate_plugin'];
+        $q_feedback  = $_POST['query_feedback'];
         $admin_email = variable_get('miniorange_saml_idp_customer_admin_email', '');
-        if (empty($admin_email))
+        if ( empty( $admin_email ) )
             $email = $_POST['miniorange_feedback_email'];
         else
             $email = $admin_email;
@@ -19,7 +19,7 @@ function miniorange_idp_feedback()
         $phone = variable_get('miniorange_saml_idp_customer_admin_phone', '');
         $customerKey = variable_get('miniorange_saml_idp_customer_id', '');
         $apikey = variable_get('miniorange_saml_idp_customer_api_key', '');
-
+        $drupalCoreVersion = VERSION;
 
 
         if (valid_email_address($email)) {
@@ -36,7 +36,7 @@ function miniorange_idp_feedback()
             $timestampHeader = "Timestamp: " . $currentTimeInMillis;
             $authorizationHeader = "Authorization: " . $hashValue;
             $fromEmail = $email;
-            $query = '[Drupal-7 SAML IDP Free] ' . $message;
+            $query = '[Drupal-'. $drupalCoreVersion .' SAML IDP Free] ' . $message;
 
             $content = '<div >Hello, <br><br>Company :<a href="' . $_SERVER['SERVER_NAME'] . '" target="_blank" >' . $_SERVER['SERVER_NAME'] . '</a>
                                    <br><br>Phone Number :' . $phone . '<br><br>Email :<a href="mailto:' . $fromEmail . '" target="_blank">' . $fromEmail . '</a>
@@ -51,7 +51,7 @@ function miniorange_idp_feedback()
                     'fromName' => 'miniOrange',
                     'toEmail' => 'drupalsupport@xecurify.com',
                     'toName' => 'drupalsupport@xecurify.com',
-                    'subject' => 'Drupal-7 SAML IDP Module Feedback',
+                    'subject' => 'Drupal-'. $drupalCoreVersion .' SAML IDP Module Feedback',
                     'content' => $content
                 ),
             );

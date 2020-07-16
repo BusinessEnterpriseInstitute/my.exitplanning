@@ -18,7 +18,7 @@ class MiniorangeSAMLIdpSupport {
 	/**
      * Constructor.
      */
-	public function __construct($email, $phone, $query,$plan='') {
+	public function __construct($email, $phone, $query, $plan = '' ) {
       $this->email = $email;
       $this->phone = $phone;
       $this->query = $query;
@@ -30,13 +30,15 @@ class MiniorangeSAMLIdpSupport {
 	 */
 	public function sendSupportQuery() {
 	  $version = system_get_info('module','miniorange_saml_idp')['version'];
+	  $drupalCoreVersion = VERSION;
+
 		if ($this->plan == 'demo') {
-            $subject = "Demo request for Drupal-7 IdP premimum Module";
+            $subject = "Demo request for Drupal-". $drupalCoreVersion ." IdP premimum Module";
             $this->query = 'Use case description - ' . $this->query;
 
             $customerKey = variable_get('miniorange_saml_idp_customer_id');
             $apikey = variable_get('miniorange_saml_idp_customer_api_key');
-            $content = '<div > [Drupal-7 IdP premium demo ('.$version.'):]' . $this->query . '</div>';
+            $content = '<div > [Drupal-'. $drupalCoreVersion .' IdP premium demo ' . $version . ']' . $this->query . '</div>';
 			$fields = array (
 				'company' => $_SERVER ['SERVER_NAME'],
 				'email' => $this->email,
@@ -47,14 +49,14 @@ class MiniorangeSAMLIdpSupport {
 			);
         }
 		else{
-			$this->query = '[Drupal-7 SAML IDP Free ('.$version.') ] ' . $this->query;
+			$this->query = '[Drupal-'. $drupalCoreVersion .' SAML IDP Free ' . $version . '] ' . $this->query;
 			$fields = array (
 				'company' => $_SERVER ['SERVER_NAME'],
 				'email' => $this->email,
 				'ccEmail' => 'drupalsupport@xecurify.com',
 				'phone' => $this->phone,
 				'query' => $this->query,
-				'subject' => 'Drupal-7 SAML IDP Free Query',
+				'subject' => 'Drupal-'. $drupalCoreVersion .' SAML IDP Free Query',
 			);
 	    }
 		$url = MiniorangeSAMLIdpConstants::BASE_URL . '/moas/rest/customer/contact-us';
@@ -72,8 +74,6 @@ class MiniorangeSAMLIdpSupport {
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
 		curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
 
-
-
 		curl_setopt($ch, CURLOPT_POST, TRUE);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $field_string);
 		$content = curl_exec($ch);
@@ -86,7 +86,6 @@ class MiniorangeSAMLIdpSupport {
         watchdog('miniorange_saml_idp', 'cURL Error at %method of %file: %error', $error);
         return FALSE;
       }
-
       curl_close ($ch);
       return TRUE;
 	}

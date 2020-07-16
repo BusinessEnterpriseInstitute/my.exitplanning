@@ -207,7 +207,6 @@ function miniorange_saml_remove_account(&$form, $form_state)
             $username = variable_get('miniorange_saml_idp_customer_admin_email', NULL);
             $phone = variable_get('miniorange_saml_idp_customer_admin_phone', NULL);
 
-
             $current_status = 'MOIDP_CUSTOMER_SETUP';
             variable_del('miniorange_saml_idp_customer_admin_email');
             variable_del('miniorange_saml_idp_customer_admin_phone');
