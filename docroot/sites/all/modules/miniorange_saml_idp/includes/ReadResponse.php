@@ -1,116 +1,64 @@
 <?php
-/**
- * @package    miniOrange
- * @subpackage Plugins
- * @license    GNU/GPLv3
- * @copyright  Copyright 2015 miniOrange. All Rights Reserved.
- *
- *
- * This file is part of miniOrange Joomla SAML IDP plugin.
- *
- * miniOrange Joomla SAML IDP plugin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * miniOrange Joomla IDP plugin is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with miniOrange SAML plugin.  If not, see <http://www.gnu.org/licenses/>.
- */
-include 'Assertion.php';
 
-/**
- * Class for SAML2 Response messages.
- *
- */
+
+include "\x41\163\163\x65\x72\164\151\157\156\x2e\160\150\x70";
 class SAML2_Response
 {
-    /**
-     * The assertions in this response.
-     */
     private $assertions;
-	
-	/**
-     * The destination URL in this response.
-     */
-	private $destination;
-
-    /**
-     * Constructor for SAML 2 response messages.
-     *
-     * @param DOMElement|NULL $xml The input message.
-     */
-    public function __construct(DOMElement $xml = NULL)
+    private $destination;
+    public function __construct(DOMElement $RH = NULL)
     {
-
         $this->assertions = array();
-
-        if ($xml === NULL) {
-            return;
+        if (!($RH === NULL)) {
+            goto tE;
         }
-		
-		/* set the destination from saml response */
-		if ($xml->hasAttribute('Destination')) {
-            $this->destination = $xml->getAttribute('Destination');
+        return;
+        tE:
+        if (!$RH->hasAttribute("\104\x65\x73\164\151\x6e\x61\x74\x69\157\156")) {
+            goto WH;
         }
-		
-		for ($node = $xml->firstChild; $node !== NULL; $node = $node->nextSibling) {
-			if ($node->namespaceURI !== 'urn:oasis:names:tc:SAML:2.0:assertion') {
-				continue;
-			}
-			
-			if ($node->localName === 'Assertion' || $node->localName === 'EncryptedAssertion') {
-				$this->assertions[] = new SAML2_Assertion($node);
-			}
-			
-		}
+        $this->destination = $RH->getAttribute("\x44\x65\x73\164\151\156\x61\164\x69\157\156");
+        WH:
+        $Bu = $RH->firstChild;
+        aj:
+        if (!($Bu !== NULL)) {
+            goto vs;
+        }
+        if (!($Bu->namespaceURI !== "\165\162\156\x3a\157\141\x73\x69\x73\72\x6e\x61\155\x65\163\72\x74\143\72\x53\x41\x4d\x4c\72\62\56\x30\x3a\x61\x73\163\x65\162\x74\x69\157\156")) {
+            goto Qt;
+        }
+        goto I0;
+        Qt:
+        if (!($Bu->localName === "\101\x73\x73\145\x72\164\151\x6f\156" || $Bu->localName === "\105\156\143\162\x79\x70\x74\145\x64\x41\x73\x73\145\162\164\x69\x6f\x6e")) {
+            goto Bo;
+        }
+        $this->assertions[] = new SAML2_Assertion($Bu);
+        Bo:
+        I0:
+        $Bu = $Bu->nextSibling;
+        goto aj;
+        vs:
     }
-
-    /**
-     * Retrieve the assertions in this response.
-     *
-     * @return SAML2_Assertion[]|SAML2_EncryptedAssertion[]
-     */
     public function getAssertions()
-    {	
+    {
         return $this->assertions;
     }
-
-    /**
-     * Set the assertions that should be included in this response.
-     *
-     * @param SAML2_Assertion[]|SAML2_EncryptedAssertion[] The assertions.
-     */
-    public function setAssertions(array $assertions)
+    public function setAssertions(array $Ql)
     {
-        $this->assertions = $assertions;
+        $this->assertions = $Ql;
     }
-	
-	public function getDestination()
+    public function getDestination()
     {
         return $this->destination;
     }
-
-    /**
-     * Convert the response message to an XML element.
-     *
-     * @return DOMElement This response.
-     */
     public function toUnsignedXML()
     {
-        $root = parent::toUnsignedXML();
-
-        /** @var SAML2_Assertion|SAML2_EncryptedAssertion $assertion */
-        foreach ($this->assertions as $assertion) {
-
-            $assertion->toXML($root);
+        $e0 = parent::toUnsignedXML();
+        foreach ($this->assertions as $bg) {
+            $bg->toXML($e0);
+            QP:
         }
-
-        return $root;
+        xw:
+        return $e0;
     }
-
 }

@@ -1,311 +1,213 @@
 <?php
-/**
- * @file
- * Set up Identity Provide for miniOrange SAML IDP Module.
- */
-
- /**
- * Showing IdP Setup form info.
- */
-include "mo_saml_visualTour.php";
- function miniorange_saml_idp_setup($form, &$form_state)
- {
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml_idp'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => FALSE));
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml_idp'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => FALSE));
-
-     global $base_url;
-
-     $disable = Utilities::isModuleConfigured();
-
-     $form['miniorange_saml_IDP_tab'] = array(
-         '#markup' => '<div class="mo_saml_table_layout_1"><div class="mo_saml_table_layout mo_saml_container">
-                    <div id="tabhead"><h5> Enter the information gathered from your Service Provider &nbsp; OR &nbsp;<a class="mo_saml_btn mo_saml_btn-primary mo_saml_btn-large"
-                  id="mosaml_upload" style="padding:5px 10px;margin-left: 0px;box-shadow: 0 1px 0 #006799;" onclick="show_metadata_form()">Upload SP Metadata</a>
-                 <a class="mo_saml_btn mo_saml_btn-primary mo_saml_btn-large mo_saml_restart_button" id="mo_saml_restart_tour_button" style="margin-right: 0px;" >Take a Tour</a></h5></div><hr>',
-     );
-
-     $form['metadata_1'] = array(
-         '#markup' =>'<div border="1" id="upload_metadata_form" style="background-color:#FFFFFF; border:2px solid #CCCCCC; padding:1px 1px 1px 10px; display:none;" >'
-             . '		<table style="width:100%; border: none">'
-             .'		        <tr> <td colspan="3">'
-             .'				<h3>UPLOAD SP METADATA'
-             .'					<span style="float:right;margin-right:25px;">'
-             .'						<input type="button" class="mo_saml_btn mo_saml_btn-sm mo_saml_btn-danger" value="Cancel" onclick = "hide_metadata_form()"/></a><br>'
-             .'					</span>',
-     );
-     $form['metadata_2'] = array(
-         '#markup' => '</span><br><br></h1></td></tr><tr>
-                        <td><h4>Upload Metadata  :</h4><td colspan="2">',
-     );
-
-     $form['metadata_file'] = array(
-         '#type' => 'file',
-     );
-
-     $form['metadata_upload'] = array(
-         '#type' => 'submit',
-         '#value' => t('Upload'),
-         '#submit' => array('miniorange_saml_upload_file'),
-         //'#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;border-radius: 4px;'),
-     );
-
-     $form['metadata_3'] = array(
-         '#markup' =>'</td></td></tr><tr><td colspan="3" ><p style="font-size:13pt;text-align:center;"><b>OR</b></p></td></tr><tr>
-                        <td width="20%"><h4>Enter metadata URL:</h4></td><td width="10%">',
-     );
-
-     $form['metadata_URL'] = array(
-         '#type' => 'textfield',
-         '#attributes' => array('placeholder' => 'Enter metadata URL of your SP.'),
-     );
-
-     $form['metadata_4'] = array(
-         '#markup' =>'</td><td>',
-     );
-
-     $form['metadata_fetch'] = array(
-         '#type' => 'submit',
-         '#value' => t('Fetch Metadata'),
-         '#submit' => array('miniorange_saml_fetch_metadata'),
-         //'#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;border-radius: 4px;'),
-     );
-
-     $form['metadata_4'] = array(
-         '#markup' =>'</td></tr><tr><td></td><td>',
-     );
 
 
-     $form['metadata_5'] = array(
-         '#markup' => '</td></tr></table></div>',
-     );
-
-     $form['markup_idp_note'] = array(
-        '#markup' => '<div id="idpdata"><br><div>Please note down the following information from your Service Provider'
-	    . ' and keep it handy to configure your Identity Provider.</div>',
-     );
-
-     $form['markup_idp_list'] = array(
-        '#markup' => '<b><ol><li>SP Entity ID / Issuer</li>'
-	    . ' <li>ACS URL</li>'
-	    . ' <li>X.509 Certificate for Signing if you are using HTTP-POST Binding. [This is a'
-	    . ' <a href="' . Utilities::getLicensingPageURL() . '">premium</a> feature]</li>'
-	    . ' <li>X.509 Certificate for Encryption. [This is a'
-	    . ' <a href="' . Utilities::getLicensingPageURL() . '">premium</a> feature]</li>'
-	    . ' <li>NameID Format</li></ol></b><br />',
-     );
-
-     $form['miniorange_saml_idp_sp_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Service Provider Name<span class="miniorange_class_color_red">*</span>'),
-        '#default_value' => variable_get('miniorange_saml_idp_sp_name', ''),
-        '#attributes' => array('style' => 'width:85%', 'placeholder' => 'Service Provider Name'),
-     );
-
-     $form['miniorange_saml_idp_sp_entity_id'] = array(
-        '#type' => 'textfield',
-        '#title' => t('SP Entity ID or Issuer<span class="miniorange_class_color_red">*</span>'),
-        '#description' => t('<b>Note:</b> You can find the EntityID in Your SP-Metadata XML file enclosed in <code>EntityDescriptor</code> tag having attribute as <code>entityID</code>.'),
-        '#default_value' => variable_get('miniorange_saml_idp_sp_entity_id', ''),
-        '#attributes' => array('style' => 'width:85%', 'placeholder' => 'SP Entity ID or Issuer'),
-     );
-
-     $form['miniorange_saml_idp_nameid_format'] = array(
-         '#type' => 'select',
-         '#title' => t('NameID Format:'),
-         '#options' => array(
-             '1.1:nameid-format:emailAddress' => t('urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'),
-             '1.1:nameid-format:unspecified' => t('urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified'),
-             '2.0:nameid-format:transient' => t('urn:oasis:names:tc:SAML:1.1:nameid-format:transient'),
-             '2.0:nameid-format:persistent' => t('urn:oasis:names:tc:SAML:1.1:nameid-format:persistent'),
-         ),
-        '#attributes' => array('style' => 'width:85%'),
-        '#default_value' => variable_get('miniorange_saml_idp_nameid_format', ''),
-        '#description' => t('<b>Note:</b> <code>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</code> is selected by default'),
-     );
-
-     $form['miniorange_saml_idp_acs_url'] = array(
-        '#type' => 'textfield',
-        '#title' => t('ACS URL<span class="miniorange_class_color_red">*</span>'),
-        '#description' => t('<b>Note:</b> You can find the ACS URL in Your SP-Metadata XML file enclosed in <code>AssertionConsumerService </code> tag <br/>having attribute as <code>Location</code>.'),
-        '#default_value' => variable_get('miniorange_saml_idp_acs_url', ''),
-        '#attributes' => array('style' => 'width:85%','placeholder' => 'ACS URL'),
-     );
-
-     $form['miniorange_saml_idp_relay_state'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Relay State'),
-        '#description' => t('<b>Note:</b>It specifes the landing page at the service provider once SSO completes.'),
-        '#attributes' => array('style' => 'width:85%','placeholder' => 'Relay State (optional)'),
-        '#default_value' => variable_get('miniorange_saml_idp_relay_state', ''),
-     );
-
-     $form['miniorange_saml_idp_single_logout_url'] = array(
-         '#type' => 'textfield',
-         '#title' => t('Single Logout URL (optional):<a href="' . Utilities::getLicensingPageURL() . '"> [Premium]</a>'),
-         '#attributes' => array('style' => 'width:85%;background-color: hsla(0,0%,0%,0.08) !important;','placeholder' => 'Single Logout URL'),
-         '#disabled' => TRUE,
-     );
-
-    $form['miniorange_saml_idp_x509_certificate_request'] = array(
-         '#type' => 'textarea',
-         '#title' => t('x.509 Certificate Value  <b>[Note: For Signed Request] </b><a href="' . Utilities::getLicensingPageURL() . '"> [Premium]</a>'),
-         '#cols' => '10',
-         '#rows' => '5',
-         '#attributes' => array('style' => 'width:85%;background-color: hsla(0,0%,0%,0.08) !important;','placeholder' => 'Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=signing) in SP-Metadata XML file)'),
-         '#disabled' => TRUE,
-         '#resizable' => False,
-        '#description' =>'<b>NOTE:</b> Format of the certificate:<br><b>-----BEGIN CERTIFICATE-----<br>'
-            .'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br>-----END CERTIFICATE-----</b><br><br>'
-    );
-
-
-    $form['miniorange_saml_idp_x509_certificate_assertion'] = array(
-         '#type' => 'textarea',
-        '#title' => t('x.509 Certificate Value <b>[Note: For Encrypted Assertion]</b> <a href="' . Utilities::getLicensingPageURL() . '"> [Premium]</a>'),
-        '#cols' => '10',
-        '#rows' => '5',
-        '#attributes' => array('style' => 'width:85%;background-color: hsla(0,0%,0%,0.08) !important;','placeholder' => 'Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=encryption)'),
-        '#disabled' => TRUE,
-        '#resizable' => False,
-        '#description' =>'<b>NOTE:</b> Format of the certificate:<br><b>-----BEGIN CERTIFICATE-----<br>'
-            .'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br>-----END CERTIFICATE-----</b><br><br><br>'
-    );
-
-     $form['miniorange_saml_idp_assertion_signed'] = array(
-         '#type' => 'checkbox',
-         '#title' => t('Assertion Signed (Check If you want to sign SAML Assertion)'),
-         '#required'=>FALSE,
-         '#default_value' => variable_get('miniorange_saml_idp_assertion_signed', FALSE),
-         '#prefix' => '<div id="mo_saml_idps_vt_checkbox">',
-         '#suffix' => '</div>',
-     );
-
-    $form['miniorange_saml_idp_response_signed'] = array(
-        '#markup' => '<br>',
-        '#type' => 'checkbox',
-        '#title' => t('Response Signed'),
-        '#disabled' => TRUE,
-        '#description' => t('<b>Note: </b>This feature is available in the<a href="' . Utilities::getLicensingPageURL() . '"> Premium</a> version.'),
-        '#prefix' => '<div class="mo_saml_highlight_background_note">',
-    );
-
-    $form['miniorange_saml_idp_encrypt_signed'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Encrypted Assertion'),
-        '#disabled' => TRUE,
-        '#description' => t('<b>Note: </b>This feature is available in the<a href="' . Utilities::getLicensingPageURL() . '"> Premium</a> version.'),
-        '#suffix' => '</div><br><br><br>',
-    );
-
-     $form['miniorange_saml_idp_config_submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Save Configuration'),
-        '#submit' => array('miniorange_saml_idp_save_idp_config'),
-        //'#attributes' => array('style' => 'background: #337ab7;border-radius: 4px;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
-     );
-
-
-     $form['miniorange_saml_idp_test_config_button'] = array(
-        '#markup' => '<a class="mo_saml_btn mo_saml_btn-success mo_saml_btn-large" onclick="testIdpConfig(\'' . getTestUrl() . '\');">'
-        . 'Test Configuration</a>'
-     );
-
-     $form['miniorange_saml_idp_config_delete'] = array(
-        '#type' => 'submit',
-        '#value' => t('Delete Configuration'),
-        '#submit' => array('miniorange_saml_idp_delete_idp_config'),
-        '#disabled' => $disable,
-        //'#attributes' => array('style' => 'background: #be4e34;border-radius: 4px;color: #ffffff;text-shadow: 0 -1px 1px #be4e34, 1px 0 1px #be4e34, 0 1px 1px #be4e34, -1px 0 1px #be4e34;box-shadow: 0 1px 0 #be4e34;border-color: #be4e34 #be4e34 #be4e34;'),
-        '#suffix' => '</div></div>'
-     );
-
-     Utilities::spConfigGuide($form, $form_state,'GUIDE');
-     $form['spConfigGuideEnd']=array(
-        '#markup'=>'</div>',
-     );
-     //Utilities::advertiseNetworkSecurity($form, $form_state);
-    // $form['tfaAdEnd']=array(
-    //     '#markup'=>'</div></div>',
-    //  );
-     Utilities::AddSupportButton($form, $form_state);
-
-     return $form;
- }
-
-function miniorange_saml_upload_file($form, &$form_state) {
-    $file_name = $_FILES['files']['tmp_name']['metadata_file'];
-    if( !isset( $file_name ) || empty( $file_name ) || $_FILES['files']['type']['metadata_file'] != 'text/xml' ) {
-        drupal_set_message(t('Invalid file. Please provide valid metadata file.'), 'error');
-        return;
+function miniorange_saml_idp_setup($NO, &$ZX)
+{
+    $xt = variable_get("\155\151\156\151\x6f\162\x61\x6e\147\x65\x5f\163\141\155\x6c\137\x69\144\x70\137\143\165\x73\x74\157\x6d\145\162\137\141\x64\155\x69\156\x5f\145\x6d\x61\151\154", NULL);
+    $cL = variable_get("\155\151\156\x69\157\162\x61\x6e\147\145\x5f\x73\x61\x6d\x6c\137\151\x64\160\x5f\x73\155\154\137\154\x6b", NULL);
+    $NO["\150\145\x61\x64\145\x72\137\x74\x6f\160\x5f\163\x74\x79\x6c\x65\x5f\x31"] = array("\43\155\x61\162\153\165\160" => "\x3c\x64\151\166\40\x63\154\x61\x73\x73\75\42\155\x6f\137\163\x61\155\154\x5f\x74\141\142\x6c\145\137\154\141\171\x6f\x75\x74\x5f\61\42\x3e\x3c\144\151\166\40\143\x6c\x61\163\163\x3d\x22\x6d\157\137\163\x61\x6d\154\x5f\164\x61\142\154\145\x5f\x6c\x61\x79\x6f\x75\x74\x20\x6d\x6f\x5f\163\x61\x6d\154\137\143\157\156\x74\x61\151\156\145\x72\x22\x3e");
+    $NO["\x6d\x61\x72\x6b\165\x70\x5f\151\x64\160\x5f\x68\x65\x61\144\145\x72"] = array("\43\x6d\x61\x72\153\x75\160" => "\74\x68\x33\76\101\104\104\x20\116\x45\x57\40\x53\x41\x4d\x4c\x20\123\105\122\126\111\103\x45\x20\120\122\117\126\111\x44\105\x52\74\57\150\63\x3e\74\x68\162\x3e");
+    $Gy = Utilities::isCustomer_registered($NO, $ZX);
+    $NO["\x6d\x69\x6e\x69\x6f\162\141\156\147\x65\x5f\x73\141\x6d\x6c\x5f\x49\104\120\137\164\x61\142"] = array("\43\155\141\162\x6b\165\160" => "\74\x64\x69\x76\x20\x69\144\75\x22\164\141\x62\150\145\x61\144\x22\x3e\x3c\150\65\76\40\x45\x6e\x74\145\x72\40\x74\150\x65\x20\151\x6e\146\157\162\155\141\164\x69\x6f\156\40\147\141\x74\x68\145\x72\145\x64\40\146\162\x6f\x6d\x20\x79\x6f\165\162\x20\x49\x64\x65\x6e\x74\x69\x74\x79\x20\120\162\x6f\166\x69\144\x65\x72\x20\46\x6e\142\x73\160\x3b\40\x4f\x52\x20\46\156\x62\163\160\x3b\xa\40\x20\x20\x20\x20\40\40\40\40\40\40\40\40\x20\40\40\x20\40\40\40\40\40\40\40\74\x61\x20\143\154\141\163\163\75\42\142\164\x6e\40\142\164\x6e\x2d\160\162\x69\x6d\141\162\171\40\x62\164\x6e\x2d\x6c\x61\x72\x67\145\x22\x20\x69\x64\x3d\x22\x6d\157\163\141\x6d\x6c\137\165\x70\x6c\157\141\144\42\40\x73\164\171\154\145\x3d\42\160\141\x64\x64\151\x6e\x67\72\x35\x70\170\40\61\x30\160\170\73\x22\x20\157\x6e\143\x6c\x69\x63\x6b\75\x22\163\150\157\167\x5f\x6d\x65\x74\x61\x64\x61\164\x61\137\x66\x6f\162\155\50\51\42\76" . "\125\x70\154\x6f\x61\x64\40\111\104\120\x20\115\x65\164\141\144\141\164\x61\74\57\x61\x3e\x3c\142\x72\x3e\74\142\162\76\40\x3c\x2f\150\x35\76\74\57\x64\x69\166\x3e");
+    $NO["\x6d\145\x74\141\x64\x61\164\x61\137\x31"] = array("\43\155\x61\162\153\165\x70" => "\74\x64\x69\x76\x20\x62\157\x72\144\x65\x72\75\x22\x31\x22\40\x69\144\75\42\165\160\154\157\x61\144\137\x6d\145\x74\141\x64\x61\x74\x61\x5f\x66\x6f\x72\x6d\x22\40\x73\164\x79\x6c\x65\x3d\42\142\x61\143\153\x67\x72\157\x75\x6e\144\x2d\x63\x6f\x6c\157\x72\x3a\43\106\106\x46\106\106\106\x3b\40\142\157\x72\144\145\x72\x3a\62\x70\x78\x20\163\157\154\x69\144\40\43\x43\103\103\x43\x43\103\73\40\160\x61\x64\144\x69\156\147\x3a\61\160\170\x20\x31\x70\x78\x20\x31\x70\x78\40\61\60\x70\x78\73\x20\x64\x69\163\160\154\x61\171\72\156\157\x6e\145\x3b\42\x20\x3e" . "\x9\11\74\164\141\x62\154\x65\40\163\x74\171\x6c\145\x3d\x22\x77\x69\144\164\150\72\61\x30\60\45\x3b\42\x3e" . "\x9\11\40\x20\x20\40\x20\40\40\x20\74\x74\162\x3e\x20\74\164\x64\40\143\x6f\154\163\160\x61\x6e\x3d\x22\x33\42\76" . "\11\x9\11\x9\74\150\x31\x3e\x55\x70\x6c\x6f\141\x64\40\111\x44\120\40\115\145\164\x61\x64\x61\x74\141" . "\11\11\11\x9\11\74\x73\x70\x61\x6e\x20\163\x74\171\x6c\x65\75\42\x66\x6c\157\x61\164\x3a\162\x69\x67\150\x74\x3b\x6d\141\x72\x67\151\x6e\55\x72\x69\147\150\164\72\x32\x35\x70\x78\73\x22\76" . "\11\11\x9\x9\x9\x9\x3c\151\x6e\160\165\x74\40\164\171\x70\145\75\42\142\x75\164\164\x6f\156\x22\x20\143\x6c\141\x73\x73\75\x22\x62\x74\x6e\40\142\x74\x6e\55\163\155\x20\142\x74\x6e\x2d\144\x61\156\x67\145\x72\x22\x20\x76\141\154\x75\x65\x3d\x22\x43\x61\156\143\145\154\42\40\x6f\x6e\143\x6c\x69\x63\x6b\40\75\40\x22\150\151\144\x65\137\155\145\164\x61\x64\141\x74\x61\x5f\x66\x6f\x72\155\50\x29\42\57\76\74\x2f\141\x3e\74\x62\162\76" . "\x9\x9\11\x9\x9\74\57\163\x70\141\x6e\76");
+    $NO["\155\x65\x74\x61\144\x61\164\x61\x5f\x69\x64\x70\x5f\x6e\141\x6d\x65"] = array("\x23\155\x61\162\x6b\x75\160" => "\74\164\x72\x3e\74\x74\144\40\x63\x6f\x6c\163\160\x61\x6e\x3d\x22\x33\42\x20\x3e\74\x2f\x74\x64\76\x3c\57\x74\x72\76" . "\11\x9\x20\40\40\x20\74\164\x72\x3e" . "\x9\x9\11\74\x74\144\40\167\x69\x64\164\150\75\x22\62\x30\x25\x22\76\x3c\150\x34\x3e\x53\x65\x72\166\x69\x63\x65\x20\x50\x72\x6f\166\x69\144\145\162\40\156\141\x6d\x65\x3a\74\57\x68\64\76\x3c\57\164\144\76\74\x74\144\x20\167\151\x64\164\x68\75\42\61\x30\x25\42\76");
+    $NO["\155\151\156\x69\x6f\162\141\x6e\x67\145\x5f\163\141\x6d\x6c\137\151\x64\160\137\x6e\141\155\x65\137\x33"] = array("\43\164\171\x70\x65" => "\x74\145\x78\164\x66\x69\x65\x6c\144", "\x23\x61\x74\164\162\x69\142\x75\x74\145\163" => array("\163\164\171\154\145" => "\167\x69\x64\x74\150\72\x36\x35\45", "\x70\x6c\x61\143\x65\x68\157\154\144\145\162" => "\x45\x6e\164\145\162\40\x53\145\162\166\151\x63\x65\40\x50\x72\157\166\x69\x64\x65\x72\x20\156\x61\x6d\145"));
+    $NO["\155\x65\x74\141\144\x61\x74\141\x5f\150\x72"] = array("\43\155\141\162\153\x75\160" => "\x3c\164\162\76\x3c\164\x64\x20\x63\157\x6c\x73\x70\141\156\75\42\63\42\40\x3e\x3c\x70\40\x73\x74\x79\154\x65\x3d\42\146\157\x6e\164\55\163\x69\172\x65\72\x31\x33\x70\164\73\164\145\x78\x74\x2d\x61\154\151\x67\156\x3a\143\145\156\164\x65\x72\73\x22\x3e\74\x62\76\74\x68\x72\x3e\74\150\x72\76\x3c\x2f\x62\x3e\74\57\x70\76\x3c\57\164\144\x3e\x3c\x2f\164\162\x3e");
+    $NO["\x6d\x65\x74\x61\x64\141\x74\141\x5f\x32"] = array("\x23\155\x61\162\153\165\x70" => "\74\x2f\150\61\x3e\74\x2f\x74\144\76\74\57\x74\162\x3e\x3c\164\x72\76\12\x20\40\40\40\40\x20\x20\40\x20\40\x20\40\40\x20\40\40\40\x20\x20\x20\40\40\40\40\x3c\164\x64\76\74\150\x34\x3e\x55\160\154\x6f\141\144\x20\x4d\x65\x74\141\144\x61\x74\141\40\x20\x3a\x3c\x2f\x68\64\x3e\x3c\x74\144\40\x63\157\154\x73\x70\141\156\x3d\42\62\x22\x3e");
+    $NO["\x6d\x65\164\x61\x64\141\x74\x61\x5f\146\151\154\145"] = array("\43\x74\x79\x70\x65" => "\146\151\x6c\145", "\43\x64\x69\x73\141\x62\x6c\x65\x64" => $Gy);
+    $NO["\x6d\145\x74\141\144\141\x74\x61\x5f\x75\160\154\157\141\144"] = array("\x23\164\x79\x70\145" => "\163\x75\142\x6d\x69\164", "\43\x76\x61\154\165\145" => t("\125\160\154\157\x61\144"), "\x23\x73\165\x62\155\x69\x74" => array("\155\151\156\151\157\162\x61\x6e\147\145\x5f\163\x61\x6d\154\x5f\x75\x70\x6c\x6f\141\144\137\146\151\154\x65"), "\x23\144\x69\x73\x61\x62\x6c\x65\144" => $Gy, "\x23\x61\x74\x74\x72\x69\142\x75\164\145\x73" => array("\x73\x74\x79\x6c\145" => "\x62\x6f\x72\x64\145\162\x2d\x72\141\144\x69\x75\x73\72\40\64\x70\x78\x3b\x62\141\x63\153\147\x72\x6f\x75\156\x64\x3a\x20\x23\63\x33\x37\141\142\x37\x3b\143\x6f\x6c\157\x72\x3a\40\43\146\146\x66\146\x66\x66\73\164\145\x78\x74\55\x73\150\x61\x64\157\167\72\40\60\x20\55\x31\x70\x78\40\x31\160\170\40\43\x33\x33\x37\141\142\67\54\x20\61\160\170\40\60\x20\61\160\170\40\x23\63\x33\67\141\142\x37\54\40\x30\x20\61\160\170\40\61\x70\x78\40\x23\x33\x33\67\x61\x62\67\x2c\x20\x2d\x31\x70\x78\40\60\x20\x31\x70\170\x20\43\x33\x33\x37\x61\142\x37\x3b\142\x6f\x78\x2d\x73\x68\141\x64\x6f\167\x3a\x20\60\x20\61\160\170\x20\60\40\43\x33\x33\67\x61\x62\67\x3b\142\x6f\162\144\x65\x72\55\x63\x6f\154\x6f\x72\x3a\40\x23\63\x33\67\x61\142\67\x20\43\63\x33\67\x61\142\67\x20\x23\63\x33\x37\141\142\67\73"));
+    $NO["\x6d\145\164\141\144\141\164\x61\x5f\x33"] = array("\x23\155\141\162\x6b\x75\x70" => "\74\57\164\x64\x3e\x3c\57\x74\144\76\x3c\x2f\x74\162\76\74\x74\x72\x3e\x3c\x74\144\40\143\x6f\154\x73\x70\x61\x6e\x3d\42\63\x22\40\76\x3c\160\40\x73\x74\x79\154\145\x3d\x22\x66\x6f\156\x74\55\163\151\x7a\145\72\x31\x33\x70\164\x3b\164\145\x78\x74\x2d\141\x6c\x69\x67\156\x3a\143\145\156\164\145\162\x3b\42\x3e\x3c\142\x3e\x4f\x52\x3c\150\x72\76\74\150\x72\x3e\74\57\x62\x3e\74\57\x70\76\74\57\x74\x64\x3e\74\x2f\164\162\76\74\x74\x72\x3e\xa\x20\x20\x20\40\40\x20\40\40\x20\x20\x20\40\40\x20\x20\40\40\40\x20\40\40\x20\40\x20\x3c\164\144\40\167\x69\144\x74\x68\x3d\x22\x32\60\x25\42\76\x3c\150\64\x3e\105\x6e\164\145\x72\x20\155\x65\164\x61\x64\x61\x74\141\40\125\x52\x4c\x3a\74\57\x68\x34\76\x3c\x2f\164\144\76\x3c\x74\x64\x20\x77\151\144\x74\150\x3d\42\x31\x30\x25\x22\76");
+    $NO["\155\x65\x74\x61\144\x61\x74\x61\137\x55\x52\x4c"] = array("\43\164\x79\160\145" => "\164\145\170\x74\x66\151\145\x6c\144", "\x23\141\164\164\162\x69\x62\165\164\145\x73" => array("\x70\x6c\141\x63\x65\x68\157\x6c\144\x65\x72" => "\105\x6e\164\x65\x72\x20\155\x65\164\141\x64\141\164\141\x20\125\x52\x4c\40\157\x66\x20\x79\x6f\x75\x72\x20\x49\144\x50\x2e"), "\43\144\151\163\x61\x62\x6c\145\x64" => $Gy);
+    $NO["\155\145\x74\141\x64\x61\164\x61\137\x34"] = array("\x23\x6d\141\162\x6b\x75\160" => "\x3c\x2f\x74\x64\76\x3c\164\144\76");
+    $NO["\x6d\145\x74\141\144\141\164\x61\x5f\x66\145\x74\143\x68"] = array("\43\164\x79\x70\x65" => "\x73\x75\142\x6d\x69\x74", "\43\x76\x61\x6c\165\145" => t("\x46\x65\164\x63\x68\x20\x4d\145\x74\x61\144\x61\164\x61"), "\x23\x73\x75\142\x6d\151\164" => array("\155\151\156\x69\x6f\x72\x61\156\147\x65\137\163\141\x6d\x6c\x5f\146\145\x74\x63\x68\137\155\145\164\141\144\141\x74\141"), "\43\144\x69\x73\x61\x62\x6c\x65\144" => $Gy, "\x23\141\x74\164\x72\151\x62\165\x74\x65\x73" => array("\163\164\x79\154\145" => "\142\157\x72\144\145\162\x2d\x72\141\144\151\165\163\72\40\x34\160\170\x3b\x62\x61\x63\x6b\147\x72\157\x75\156\144\72\40\x23\x33\63\67\x61\x62\x37\73\143\x6f\154\157\x72\x3a\40\43\146\x66\x66\x66\x66\x66\x3b\164\145\x78\164\x2d\163\x68\141\x64\157\x77\72\40\60\x20\x2d\61\x70\170\40\x31\x70\x78\40\x23\x33\63\67\141\142\67\x2c\x20\61\x70\x78\40\x30\40\x31\x70\170\40\43\63\x33\67\141\x62\67\54\x20\x30\x20\x31\160\x78\x20\x31\160\170\40\x23\63\63\x37\x61\x62\67\x2c\x20\55\61\160\170\x20\60\x20\x31\x70\170\x20\x23\63\63\67\x61\x62\67\x3b\x62\x6f\170\55\163\x68\x61\x64\157\x77\72\x20\60\x20\61\x70\170\x20\x30\40\43\x33\x33\67\141\142\67\73\142\x6f\162\x64\x65\162\x2d\143\157\x6c\157\162\72\x20\x23\x33\x33\67\x61\142\x37\40\43\x33\63\x37\x61\142\67\40\x23\x33\63\x37\141\142\67\x3b"));
+    $NO["\x6d\145\164\x61\144\x61\x74\141\x5f\x34"] = array("\x23\x6d\141\162\x6b\165\160" => "\x3c\57\x74\x64\x3e\x3c\57\164\x72\x3e\x3c\x74\x72\76\74\164\144\x3e\x3c\x2f\x74\144\76\74\x74\x64\76");
+    $NO["\x6d\145\x74\x61\144\x61\x74\141\137\65"] = array("\x23\x6d\141\x72\153\x75\160" => "\x3c\x2f\164\x64\76\74\57\x74\x72\x3e\x3c\x2f\x74\x61\142\154\x65\x3e\74\57\x64\x69\x76\76\x3c\144\151\x76\40\151\x64\x3d\x22\x69\x64\160\x64\141\164\x61\42\x3e");
+    $NO["\x6d\141\x72\153\x75\x70\x5f\151\144\160\137\156\157\x74\x65"] = array("\43\x6d\141\x72\x6b\165\160" => "\x3c\x64\151\x76\76\120\x6c\x65\x61\163\x65\x20\x6e\157\x74\x65\40\x64\x6f\167\156\x20\x74\150\145\40\x66\x6f\x6c\x6c\157\x77\x69\x6e\x67\x20\x69\x6e\146\x6f\x72\x6d\141\164\151\x6f\x6e\40\146\162\x6f\x6d\40\171\x6f\165\x72\40\x53\145\162\x76\x69\143\x65\x20\120\162\x6f\166\151\144\145\x72\40\x61\x6e\144\x20\153\x65\x65\x70\x20\x69\164\x20\x68\141\x6e\x64\171\x20\x74\157\40\143\x6f\156\146\x69\147\165\x72\145\x20\171\x6f\165\162\40\111\x64\145\x6e\164\151\x74\x79\x20\120\162\x6f\x76\151\144\x65\162\x2e\74\x2f\144\151\x76\x3e");
+    $NO["\155\141\x72\x6b\x75\160\x5f\x69\144\160\x5f\154\x69\163\x74"] = array("\x23\155\x61\x72\x6b\x75\160" => "\x3c\x62\76\74\x6f\x6c\x3e\x3c\154\151\76\123\x50\40\105\156\164\151\x74\171\x20\111\104\x20\57\40\x49\x73\x73\x75\145\162\74\57\154\151\76" . "\40\x3c\154\151\76\x41\103\123\40\125\122\x4c\x3c\x2f\154\151\76" . "\40\x3c\154\x69\x3e\x4e\x61\x6d\x65\111\104\x20\x46\157\x72\x6d\x61\164\74\x2f\154\151\x3e" . "\40\74\x6c\x69\x3e\x52\145\x6c\x61\x79\40\123\164\x61\x74\x65\74\57\154\151\x3e" . "\40\74\154\x69\76\x58\56\x35\x30\x39\x20\103\145\162\164\151\146\x69\143\x61\164\145\40\146\157\x72\40\x53\151\x67\x6e\x69\156\147\40\151\146\40\x79\157\165\x20\141\162\x65\x20\165\x73\151\x6e\147\x20\x48\x54\x54\120\55\120\x4f\123\x54\40\102\151\156\144\151\156\147\56\x20\50\117\x70\164\x69\x6f\x6e\x61\x6c\51\x3c\57\x6c\151\76" . "\40\x3c\x6c\151\76\x58\56\x35\x30\x39\x20\103\145\x72\164\151\x66\x69\x63\141\x74\145\x20\146\157\162\x20\105\x6e\x63\x72\171\160\x74\x69\x6f\x6e\x2e\40\x28\117\x70\x74\x69\157\x6e\x61\154\51\x3c\x2f\x6c\x69\76" . "\40\74\57\x6f\x6c\76\x3c\x2f\x62\76\74\x62\162\x20\57\76");
+    if (!(!isset($xt) || !isset($cL))) {
+        goto IU;
     }
-    $file      = file_get_contents( $file_name );
-    Utilities::upload_metadata( $file );
+    $NO["\x6d\141\x72\x6b\165\x70\x5f\x73\141\155\x6c\137\x69\x64\160\x5f\144\x69\163\x61\142\154\145\144"] = array("\x23\155\141\162\x6b\x75\x70" => "\74\x64\151\166\40\x73\x74\x79\154\x65\75\42\160\x6f\163\151\164\x69\x6f\156\72\40\141\142\x73\157\x6c\165\x74\x65\73\155\141\x72\x67\151\156\x3a\40\67\45\x20\x33\63\x25\x3b\x66\x6f\x6e\164\x2d\167\145\151\x67\150\164\x3a\40\142\x6f\154\144\x3b\x7a\x2d\151\x6e\x64\x65\x78\72\40\61\x3b\x22\x3e" . "\x20\74\57\x64\x69\166\76\74\x64\151\166\x20\x73\164\x79\x6c\145\75\42\142\141\143\153\147\162\x6f\165\x6e\144\x2d\x63\157\x6c\157\x72\72\40\x72\147\x62\x61\x28\x32\x31\70\54\x20\62\x31\70\x2c\x20\x32\61\70\x2c\x20\60\x29\x3b\x70\141\144\144\151\x6e\x67\72\x20\x32\45\73\157\160\141\x63\x69\x74\x79\72\x20\x30\56\63\73\42\x3e\74\x2f\144\151\166\x3e");
+    IU:
+    $NO["\155\x69\x6e\x69\x6f\x72\141\156\147\145\x5f\163\141\155\x6c\x5f\151\x64\x70\137\x73\x70\x5f\156\141\x6d\x65"] = array("\x23\x74\171\160\x65" => "\164\145\170\164\146\151\145\154\x64", "\x23\164\151\x74\x6c\x65" => t("\x53\x65\x72\x76\x69\x63\x65\40\x50\162\157\166\151\144\x65\x72\x20\116\x61\x6d\x65\x2a"), "\43\x64\x65\x66\x61\165\154\164\x5f\166\141\x6c\x75\x65" => variable_get("\155\x69\156\x69\157\162\141\x6e\x67\x65\x5f\163\141\155\x6c\137\x69\144\x70\137\163\x70\137\156\x61\x6d\145", ''), "\x23\144\x69\163\x61\142\154\x65\144" => $Gy, "\x23\x61\164\x74\162\151\142\165\x74\x65\163" => array("\163\164\x79\154\x65" => "\x77\x69\144\164\x68\72\70\x30\45", "\x70\x6c\x61\143\x65\150\157\x6c\144\145\x72" => "\123\x65\162\x76\x69\143\145\x20\x50\x72\x6f\x76\x69\144\145\162\x20\116\141\155\145"));
+    $NO["\155\x69\x6e\151\157\x72\x61\x6e\x67\x65\137\x73\141\x6d\154\137\151\x64\x70\137\163\160\137\x65\x6e\x74\x69\x74\171\137\151\144"] = array("\43\x74\x79\x70\145" => "\x74\145\x78\x74\x66\x69\x65\154\144", "\x23\164\x69\164\x6c\145" => t("\123\120\40\x45\156\x74\x69\164\171\x20\x49\104\40\157\162\40\111\x73\x73\165\145\162\52"), "\x23\x64\x65\146\141\x75\x6c\164\x5f\166\141\154\165\145" => variable_get("\x6d\x69\x6e\x69\157\162\x61\156\147\145\x5f\x73\141\x6d\154\x5f\x69\x64\160\137\x73\x70\x5f\x65\156\164\x69\x74\171\x5f\151\144", ''), "\x23\x64\x69\x73\x61\x62\x6c\145\x64" => $Gy, "\43\144\x65\163\x63\x72\x69\x70\164\x69\157\x6e" => t("\74\x62\x3e\x4e\x6f\164\x65\x3a\x3c\57\x62\x3e\x20\x59\x6f\x75\40\143\141\x6e\x20\146\x69\156\144\40\x74\x68\x65\x20\105\156\x74\151\164\x79\x49\x44\40\151\x6e\40\131\157\x75\162\x20\x53\x50\55\x4d\145\164\x61\x64\141\x74\x61\40\130\115\x4c\x20\146\151\x6c\x65\40\145\156\143\x6c\x6f\163\145\144\x20\151\x6e\x20\74\143\157\x64\145\x3e\x45\x6e\164\x69\164\x79\x44\x65\x73\143\x72\x69\160\164\157\162\74\x2f\143\x6f\144\145\76\40\x74\x61\x67\40\150\141\x76\151\x6e\147\40\x61\164\x74\x72\x69\x62\165\x74\145\40\141\x73\40\x3c\x63\157\144\145\x3e\145\x6e\x74\151\164\171\111\x44\74\57\x63\x6f\144\145\76\x2e"), "\43\141\x74\x74\162\x69\x62\165\164\x65\x73" => array("\x73\x74\171\x6c\145" => "\x77\x69\x64\164\x68\72\x38\60\x25", "\x70\x6c\x61\143\145\x68\x6f\154\x64\145\162" => "\x53\x50\40\x45\x6e\164\151\164\171\x20\111\x44\40\157\x72\x20\x49\163\163\165\145\x72"));
+    $NO["\155\x69\x6e\151\157\162\141\156\x67\145\x5f\x73\x61\x6d\x6c\x5f\x69\x64\x70\x5f\141\143\163\x5f\165\x72\x6c"] = array("\43\164\171\x70\145" => "\x74\145\170\164\x66\x69\x65\x6c\144", "\x23\x74\151\x74\x6c\145" => t("\x41\103\x53\x20\x55\122\114\52"), "\43\x64\x65\x66\x61\165\154\x74\x5f\x76\141\154\165\x65" => variable_get("\155\x69\156\151\157\162\x61\x6e\x67\x65\137\163\141\155\x6c\x5f\x69\144\x70\x5f\x61\143\x73\137\165\162\x6c", ''), "\43\x64\x65\163\143\162\151\x70\164\151\157\x6e" => t("\x3c\142\76\116\157\164\x65\72\x3c\57\x62\76\x20\x59\157\165\40\143\141\x6e\x20\146\x69\156\x64\40\164\150\x65\x20\123\101\115\x4c\x20\x4c\157\147\x69\156\x20\125\122\114\x20\151\156\40\131\157\165\x72\40\123\120\x2d\115\x65\164\x61\144\x61\164\x61\40\x58\115\114\x20\x66\x69\x6c\x65\40\145\x6e\x63\154\157\163\145\x64\x20\151\156\x20\x3c\x63\157\144\x65\76\x41\163\x73\x65\162\x74\151\157\156\x43\157\156\163\165\x6d\145\162\x53\x65\x72\x76\151\143\145\x20\74\57\143\157\144\145\76\x20\x74\141\147\x20\x3c\x62\x72\57\x3e\x68\141\x76\x69\x6e\x67\40\141\x74\x74\x72\x69\142\x75\x74\x65\40\x61\163\40\74\x63\157\x64\145\x3e\x4c\x6f\143\x61\x74\151\157\x6e\x3c\57\143\157\144\145\x3e\56"), "\x23\x64\x69\x73\x61\x62\x6c\145\x64" => $Gy, "\x23\141\164\164\x72\151\142\x75\x74\x65\x73" => array("\x73\x74\x79\154\145" => "\167\151\144\x74\x68\x3a\70\60\45", "\160\x6c\141\x63\x65\x68\157\154\x64\145\162" => "\x41\x43\123\40\125\x52\x4c"));
+    $NO["\155\151\x6e\151\157\x72\141\156\147\145\x5f\163\x61\155\x6c\137\151\x64\160\137\156\141\155\145\x69\144\137\146\x6f\162\x6d\141\164"] = array("\x23\x74\x79\x70\x65" => "\x73\x65\x6c\145\143\x74", "\43\x74\151\x74\154\x65" => t("\x4e\141\x6d\x65\x49\104\40\x46\x6f\162\155\x61\x74\x3a"), "\x23\157\x70\164\151\157\156\x73" => array("\61\x2e\61\72\156\141\x6d\x65\151\144\x2d\x66\157\162\x6d\141\164\x3a\145\155\141\x69\154\x41\x64\x64\x72\145\x73\x73" => t("\x75\x72\x6e\72\x6f\141\163\151\163\72\156\x61\155\x65\x73\x3a\164\x63\72\x53\101\115\x4c\72\61\x2e\61\72\156\x61\x6d\x65\151\x64\55\x66\157\162\x6d\141\x74\72\x65\155\x61\151\154\x41\x64\144\162\145\163\163"), "\61\x2e\x31\72\x6e\141\155\145\x69\144\x2d\x66\x6f\162\x6d\141\164\72\165\x6e\x73\x70\145\143\151\x66\151\x65\144" => t("\x75\162\156\x3a\x6f\141\163\x69\x73\x3a\156\141\x6d\x65\163\x3a\x74\143\72\123\x41\115\x4c\72\61\x2e\x31\72\156\x61\155\145\x69\x64\55\146\x6f\x72\155\141\x74\72\x75\x6e\x73\160\145\x63\x69\x66\x69\145\x64"), "\x32\x2e\x30\x3a\x6e\141\155\145\151\144\x2d\146\x6f\x72\155\x61\164\x3a\164\162\x61\x6e\x73\151\145\156\x74" => t("\x75\162\156\72\x6f\141\x73\x69\163\x3a\156\x61\x6d\145\163\x3a\164\143\x3a\123\x41\115\114\x3a\61\56\61\x3a\156\141\x6d\x65\151\x64\x2d\146\157\x72\x6d\x61\x74\72\x74\162\x61\156\x73\x69\145\x6e\x74"), "\62\56\x30\72\156\141\x6d\x65\x69\x64\55\x66\x6f\x72\x6d\x61\x74\x3a\160\x65\162\163\151\x73\x74\145\x6e\164" => t("\x75\162\x6e\x3a\x6f\x61\163\151\x73\72\156\141\155\x65\x73\x3a\164\143\x3a\123\101\x4d\114\72\61\56\x31\72\x6e\x61\155\x65\151\144\55\146\157\162\x6d\141\164\x3a\160\145\x72\x73\151\x73\164\x65\156\x74")), "\43\141\164\x74\162\x69\142\x75\164\x65\163" => array("\x73\164\x79\x6c\x65" => "\x77\x69\x64\x74\150\72\x38\60\x25"), "\43\x64\145\x66\x61\165\x6c\164\x5f\x76\141\154\x75\145" => variable_get("\x6d\151\156\151\157\162\141\156\147\x65\137\163\x61\155\154\137\x69\144\160\137\x6e\x61\155\x65\x69\144\x5f\146\157\x72\x6d\x61\164", ''), "\43\144\x69\163\141\x62\154\x65\x64" => $Gy, "\x23\x64\145\x73\143\162\x69\x70\164\x69\157\x6e" => t("\x28\x3c\x62\x3e\116\117\124\105\72\74\x2f\x62\76\x20\165\x72\x6e\x3a\157\141\163\151\x73\72\x6e\141\x6d\x65\163\72\x74\143\x3a\x53\101\x4d\114\x3a\x31\56\x31\x3a\156\x61\x6d\145\151\x64\55\146\157\162\155\141\164\72\x65\155\x61\x69\154\101\144\144\x72\x65\163\x73\x20\151\x73\40\x73\x65\x6c\x65\143\x74\145\x64\x20\142\171\40\144\x65\146\141\165\x6c\164\51"));
+    $NO["\x6d\151\x6e\151\157\x72\x61\156\147\x65\137\163\141\155\154\x5f\151\144\x70\x5f\163\154\x6f\137\x75\162\154"] = array("\43\164\171\160\x65" => "\x74\x65\170\164\146\151\145\154\x64", "\43\164\x69\164\154\145" => t("\123\151\156\x67\x6c\145\x20\x4c\x6f\x67\157\165\x74\x20\x55\x52\114"), "\x23\x64\145\146\141\165\x6c\164\137\166\141\x6c\165\145" => variable_get("\155\x69\156\x69\x6f\162\141\x6e\147\145\x5f\163\x61\x6d\154\137\x69\144\x70\137\163\x6c\157\137\x75\162\154", ''), "\x23\144\x65\163\x63\162\151\x70\x74\x69\x6f\x6e" => t("\74\142\x3e\116\157\164\145\x3a\74\57\142\76\40\x59\157\165\x20\x63\x61\x6e\40\x66\151\156\x64\40\164\150\145\40\123\x41\115\114\x20\114\157\x67\157\165\x74\40\125\x52\x4c\40\x69\x6e\x20\x59\x6f\x75\162\x20\x53\x50\x2d\115\145\164\141\x64\141\x74\141\40\x58\x4d\x4c\x20\x66\151\154\145\x20\x65\x6e\143\154\x6f\x73\x65\x64\40\x69\156\40\74\x63\x6f\x64\145\x3e\123\x69\x6e\147\x6c\x65\114\157\147\x6f\x75\164\123\x65\x72\166\x69\143\145\x20\x3c\57\143\x6f\144\x65\x3e\x20\164\141\147\40\x3c\x62\162\x2f\76\150\x61\x76\x69\x6e\147\40\x61\x74\164\162\x69\x62\165\164\145\x20\x61\x73\40\74\143\157\144\145\x3e\x4c\x6f\x63\x61\x74\151\x6f\156\x3c\57\x63\x6f\x64\x65\76\x2e"), "\x23\144\151\163\141\142\x6c\x65\144" => $Gy, "\x23\x61\x74\164\162\x69\x62\x75\164\x65\163" => array("\x73\x74\x79\x6c\145" => "\167\x69\144\164\x68\72\70\x30\x25", "\x70\x6c\141\143\x65\x68\x6f\154\x64\x65\x72" => "\x53\151\x6e\147\x6c\x65\40\114\157\147\x6f\x75\x74\40\x55\x52\x4c"));
+    $NO["\155\x69\156\x69\157\162\x61\156\147\145\x5f\x73\141\155\154\x5f\x69\x64\160\137\x72\145\154\x61\171\137\x73\164\x61\x74\145"] = array("\x23\164\x79\x70\x65" => "\164\x65\x78\x74\146\x69\x65\x6c\x64", "\x23\x74\x69\164\154\x65" => t("\122\x65\154\x61\x79\x20\x53\164\x61\164\145"), "\43\144\145\146\141\x75\154\x74\137\x76\x61\154\x75\x65" => variable_get("\155\151\x6e\151\x6f\x72\141\156\x67\145\137\x73\x61\x6d\x6c\x5f\151\144\x70\x5f\x72\x65\154\141\x79\137\x73\164\x61\x74\145", ''), "\x23\x64\x65\163\143\x72\151\x70\x74\151\x6f\x6e" => t("\124\x6f\40\x69\144\x65\x6e\x74\x69\x66\171\x20\x74\150\x65\40\x73\160\145\143\x69\x66\151\x63\40\162\145\x73\157\165\162\x63\145\x20\x61\164\x20\x74\150\x65\40\x72\145\x73\x6f\x75\x72\143\x65\x20\160\162\157\166\x69\144\x65\162\40\x69\156\40\164\150\x65\40\111\104\120\x20\x69\156\x69\x74\151\141\x74\x65\144\40\123\123\117\x2e\x20\x49\164\40\163\x70\x65\143\x69\x66\145\163\x20\164\x68\x65\40\154\x61\x6e\144\x69\x6e\147\40\x70\141\147\x65\x20\x20\x61\x74\40\x74\x68\x65\x20\x3c\x62\x72\57\76\40\x73\x65\162\166\151\143\145\40\160\162\x6f\166\x69\x64\x65\x72\x20\157\156\x63\x65\x20\x53\x53\117\x20\143\157\155\x70\154\x65\x74\x65\x73\x2e"), "\43\x64\151\x73\141\x62\154\x65\144" => $Gy, "\x23\x61\164\164\162\x69\x62\165\x74\x65\x73" => array("\163\x74\x79\154\145" => "\x77\151\x64\164\x68\x3a\x38\60\x25", "\x70\x6c\x61\143\x65\150\157\154\144\x65\162" => "\122\145\x61\x6c\x79\x20\123\x74\141\x74\145\40\50\x6f\160\x74\151\157\x6e\141\x6c\x29"), "\43\162\x65\161\165\x69\162\145\144" => FALSE);
+    $NO["\x6d\x69\x6e\151\x6f\162\141\156\x67\x65\137\x73\x61\x6d\x6c\x5f\x69\144\160\137\143\x65\x72\x74\151\x66\151\x63\x61\164\145\137\x73\151\147\x6e\x65\x64"] = array("\x23\164\171\x70\145" => "\x74\145\170\164\x61\162\x65\141", "\43\x74\151\164\x6c\145" => t("\130\x2e\x35\x30\x39\40\x43\x65\162\x74\151\x66\x69\x63\141\164\x65\40\133\106\157\x72\40\123\x69\x67\x6e\x65\144\40\x52\145\161\x75\145\163\164\x5d"), "\43\144\145\x66\141\x75\154\x74\137\166\141\154\x75\145" => variable_get("\155\x69\x6e\x69\x6f\162\x61\156\147\x65\x5f\163\141\155\154\137\x69\x64\x70\x5f\143\x65\162\164\151\146\151\x63\141\x74\145\137\163\x69\147\156\145\144", ''), "\x23\x64\151\163\141\142\154\x65\x64" => $Gy, "\43\x61\x74\x74\x72\151\142\x75\164\145\x73" => array("\x73\x74\x79\154\145" => "\x77\151\x64\x74\x68\72\70\60\45", "\x70\x6c\141\x63\x65\x68\157\154\144\x65\x72" => "\x43\x6f\x70\171\x20\x61\x6e\x64\40\x50\x61\163\164\145\40\x74\150\145\40\143\x6f\156\164\x65\156\164\40\146\x72\157\x6d\x20\164\x68\x65\40\144\x6f\x77\156\x6c\157\141\x64\x65\144\x20\143\145\x72\164\151\146\x69\143\x61\x74\x65\x20\157\x72\40\x63\157\160\x79\x20\x74\x68\145\40\x63\x6f\156\x74\145\x6e\164\x20\145\x6e\x63\x6c\x6f\163\145\144\x20\151\156\x20\130\x35\60\x39\103\x65\x72\x74\151\146\151\x63\x61\164\145\x20\164\x61\x67\40\x28\x68\141\x73\40\160\x61\x72\145\x6e\x74\40\164\141\147\x20\113\x65\171\x44\x65\163\143\162\151\160\x74\x6f\x72\x20\x75\163\x65\x3d\x73\151\x67\156\151\156\147\51\40\151\156\x20\123\120\55\115\145\164\x61\x64\x61\x74\x61\x20\x58\115\114\40\146\151\x6c\145\x29"), "\x23\162\x65\x71\x75\151\x72\x65\x64" => FALSE, "\x23\x72\145\163\151\x7a\x61\x62\x6c\145" => False);
+    $NO["\x6d\x69\x6e\x69\x6f\162\141\x6e\147\145\137\163\x61\155\x6c\137\x69\144\x70\x5f\143\145\162\x74\137\x66\x6f\162\x6d\141\164"] = array("\x23\x6d\141\162\x6b\165\x70" => "\x3c\142\162\x20\57\76\x3c\x73\x74\162\x6f\156\147\76\x4e\117\x54\105\40\x3a\74\x2f\x73\x74\x72\157\x6e\147\76\x20\x46\x6f\x72\155\x61\164\40\x6f\146\x20\x74\150\145\40\143\x65\x72\x74\x69\x66\x69\x63\141\x74\x65\72\74\142\162\x20\57\76\74\x73\164\x72\157\x6e\x67\x3e\55\55\55\x2d\x2d\102\105\107\x49\x4e\x20\103\105\x52\x54\111\106\x49\103\x41\124\x45\55\55\x2d\x2d\x2d\74\x62\x72\x20\57\x3e" . "\x58\130\x58\130\130\130\x58\x58\x58\x58\130\130\130\130\130\x58\x58\x58\130\x58\x58\x58\130\x58\x58\130\x58\x3c\142\x72\40\57\x3e\55\55\x2d\55\55\x45\116\x44\40\103\x45\122\124\111\106\x49\103\101\x54\x45\x2d\x2d\x2d\55\x2d\x3c\57\x73\164\x72\157\156\147\76\74\142\x72\40\x2f\76\x3c\142\162\40\57\x3e");
+    $NO["\155\x69\x6e\x69\157\x72\141\156\147\145\x5f\x73\141\x6d\154\137\151\x64\160\137\143\x65\x72\164\x69\146\x69\x63\x61\164\145\137\x65\156\x63\x72\x79\160\164\145\144"] = array("\43\x74\x79\160\x65" => "\x74\145\x78\164\141\162\145\x61", "\x23\164\151\164\x6c\x65" => t("\130\56\x35\x30\x39\x20\103\145\162\164\x69\146\x69\x63\141\x74\145\40\x5b\106\157\162\x20\x45\156\143\x72\x79\x70\164\145\x64\x20\101\163\163\145\x72\164\151\x6f\x6e\x5d"), "\43\x64\145\146\x61\165\154\x74\137\x76\x61\x6c\165\x65" => variable_get("\155\151\x6e\x69\x6f\162\141\156\147\145\x5f\x73\141\155\x6c\137\151\144\x70\137\143\145\x72\164\151\146\x69\143\x61\x74\x65\x5f\x65\156\143\162\x79\160\164\145\144", ''), "\x23\144\151\163\x61\x62\154\145\x64" => $Gy, "\x23\141\164\164\x72\x69\142\x75\x74\145\163" => array("\x73\x74\171\x6c\x65" => "\x77\x69\x64\164\x68\72\70\x30\x25", "\160\x6c\141\143\145\x68\157\x6c\144\x65\162" => "\103\x6f\160\x79\x20\x61\156\144\40\x50\x61\163\x74\x65\x20\164\150\145\x20\x63\x6f\156\164\x65\x6e\164\40\146\x72\157\155\x20\164\x68\145\x20\144\x6f\167\x6e\x6c\x6f\x61\x64\145\144\40\143\145\x72\164\x69\146\x69\143\x61\x74\x65\40\x6f\x72\40\x63\x6f\x70\171\40\x74\150\145\40\143\x6f\156\164\145\156\164\x20\x65\156\143\x6c\x6f\x73\145\144\x20\151\x6e\40\130\x35\x30\x39\103\145\x72\x74\x69\x66\151\143\141\164\145\x20\x74\141\x67\40\x28\x68\141\163\x20\160\x61\x72\x65\x6e\164\x20\x74\x61\x67\40\113\x65\x79\x44\145\163\x63\x72\151\x70\x74\157\162\40\165\163\x65\75\145\x6e\x63\x72\x79\160\164\151\x6f\x6e\x29"), "\43\162\145\161\165\x69\x72\145\x64" => FALSE, "\43\x72\x65\163\151\172\141\x62\154\x65" => False);
+    $NO["\155\151\156\x69\x6f\162\141\x6e\x67\145\137\163\141\155\x6c\x5f\151\x64\160\x5f\162\x65\x73\160\157\156\163\x65\137\x73\151\x67\x6e\x65\x64"] = array("\43\x74\x79\x70\145" => "\x63\x68\145\143\153\142\157\170", "\43\164\x69\x74\154\145" => t("\122\x65\x73\160\157\156\163\145\40\x53\151\x67\x6e\145\144\40\50\103\x68\145\143\x6b\40\x49\146\40\x79\x6f\165\40\x77\141\x6e\x74\40\164\157\x20\163\x69\x67\156\40\x53\101\x4d\114\40\122\x65\x73\x70\x6f\x6e\x73\x65\x2e\51"), "\43\162\145\161\165\x69\162\x65\144" => FALSE, "\43\144\x69\x73\x61\x62\x6c\145\x64" => $Gy, "\x23\144\145\146\141\165\154\164\137\166\141\x6c\165\x65" => variable_get("\155\x69\x6e\x69\157\x72\141\x6e\x67\145\x5f\163\141\155\154\x5f\151\x64\160\x5f\x72\145\163\x70\157\x6e\163\x65\x5f\163\x69\147\156\x65\x64", FALSE));
+    $NO["\x6d\151\156\151\157\x72\x61\156\x67\145\137\163\x61\x6d\x6c\137\151\144\160\x5f\x61\x73\x73\145\162\x74\x69\157\x6e\137\x73\151\147\156\x65\144"] = array("\43\164\x79\x70\145" => "\143\150\x65\x63\x6b\142\x6f\x78", "\43\164\151\x74\x6c\145" => t("\x41\x73\x73\x65\162\x74\151\x6f\x6e\40\x53\x69\147\x6e\145\144\x20\50\x43\x68\145\x63\x6b\x20\x49\146\x20\x79\x6f\x75\x20\167\x61\x6e\164\40\164\x6f\40\163\x69\147\x6e\x20\123\101\115\114\x20\x41\163\163\x65\x72\164\x69\157\156\56\51"), "\x23\162\x65\161\165\151\x72\x65\144" => FALSE, "\43\x64\x69\x73\141\142\x6c\x65\x64" => $Gy, "\x23\144\145\146\141\x75\154\x74\137\166\141\x6c\x75\145" => variable_get("\155\x69\156\151\157\162\141\x6e\147\x65\137\x73\x61\x6d\x6c\137\151\x64\x70\137\x61\x73\x73\145\162\164\151\157\156\x5f\163\151\x67\x6e\x65\x64", FALSE));
+    $NO["\155\x69\156\151\x6f\162\x61\x6e\x67\x65\x5f\163\141\155\154\137\151\x64\160\x5f\145\x6e\x63\x72\171\160\x74\145\144\x5f\141\x73\x73\x65\x72\164\x69\157\x6e"] = array("\x23\164\171\x70\145" => "\x63\x68\x65\x63\x6b\x62\x6f\x78", "\x23\x74\151\x74\154\145" => t("\105\156\x63\162\x79\160\x74\145\x64\x20\101\x73\163\145\x72\x74\151\x6f\156\40\50\103\x68\145\143\x6b\40\x49\x66\x20\x79\x6f\x75\40\x77\x61\x6e\164\x20\x74\157\x20\145\x6e\143\x72\171\x70\164\x20\123\x41\x4d\114\x20\x41\163\163\145\162\164\151\x6f\156\x2e\51\74\142\x72\40\x2f\76"), "\x23\162\145\161\165\151\162\x65\x64" => FALSE, "\x23\144\x69\163\141\142\x6c\145\144" => $Gy, "\x23\x64\145\146\141\165\154\164\x5f\166\x61\x6c\x75\145" => variable_get("\155\x69\156\151\x6f\162\x61\x6e\x67\x65\137\163\141\x6d\x6c\137\x69\x64\160\x5f\145\x6e\143\x72\171\x70\x74\145\x64\x5f\141\163\x73\145\162\x74\x69\x6f\x6e", FALSE), "\43\x64\145\163\x63\162\151\160\x74\x69\x6f\156" => t("\74\144\x69\166\40\143\x6c\141\x73\163\75\x22\155\x6f\137\x73\x61\155\x6c\x5f\150\x69\x67\150\x6c\x69\x67\150\164\137\142\x61\x63\153\x67\x72\x6f\165\x6e\144\137\156\157\x74\x65\42\76\x3c\x73\160\141\156\x20\163\164\171\154\x65\75\x22\x63\x6f\154\157\x72\72\x72\x65\144\x22\x3e\x20\74\x62\76\116\x6f\164\x65\x3a\74\x2f\142\x3e\x3c\57\163\x70\141\156\76\x20\111\x66\x20\x79\x6f\x75\x20\x61\162\145\40\x63\150\145\143\153\x69\156\147\40\x74\150\151\163\40\x6f\160\x74\151\157\x6e\40\x74\150\x65\x6e\x20\171\157\165\40\150\x61\166\145\xa\x20\40\40\x20\40\x20\40\x20\40\x20\40\40\40\40\x20\40\40\x20\40\40\40\40\40\40\40\x20\x20\x20\164\157\x20\x65\156\164\145\x72\x20\x74\150\x65\40\x63\145\x72\x74\151\x66\151\x63\x61\164\x65\x20\146\157\x72\x20\x3c\x62\76\130\x2e\65\x30\x39\x20\x43\145\162\164\151\x66\x69\143\141\164\x65\x20\x5b\106\157\x72\40\105\156\143\x72\x79\160\x74\x65\144\x20\101\x73\x73\145\x72\164\151\157\156\x5d\56\x3c\x2f\x62\x3e\74\57\144\x69\166\x3e"), "\43\x73\x75\146\x66\x69\x78" => "\x3c\x62\162\40\57\76");
+    $NO["\x6d\151\x6e\x69\x6f\x72\141\156\147\x65\137\x73\141\155\x6c\x5f\x69\x64\x70\137\143\157\156\x66\x69\147\x5f\x73\x75\142\155\151\164"] = array("\43\x74\171\160\145" => "\x73\165\x62\155\151\x74", "\x23\x76\141\154\x75\145" => t("\123\x61\x76\145\40\103\x6f\x6e\x66\x69\147\x75\162\141\164\151\x6f\156"), "\x23\144\151\163\141\142\x6c\145\144" => $Gy, "\43\163\165\x62\155\151\164" => array("\155\151\156\x69\157\162\x61\156\147\145\137\x73\x61\x6d\x6c\x5f\x69\x64\160\x5f\163\x61\x76\x65\137\x69\144\160\x5f\x63\157\x6e\x66\151\x67"), "\x23\141\x74\x74\x72\151\142\165\x74\x65\x73" => array("\163\x74\x79\x6c\145" => "\142\x61\143\153\x67\162\157\165\156\x64\x3a\x20\x23\x33\63\x37\x61\142\x37\73\143\x6f\x6c\157\162\x3a\40\43\146\x66\x66\x66\146\x66\73\164\x65\x78\164\55\163\x68\141\x64\x6f\167\x3a\x20\60\x20\x2d\61\160\x78\x20\x31\160\170\40\43\63\63\67\141\x62\x37\x2c\x20\61\160\x78\x20\60\40\x31\x70\x78\40\x23\x33\63\67\x61\x62\x37\x2c\40\x30\x20\61\160\170\x20\x31\160\170\40\x23\63\63\67\141\x62\67\x2c\x20\55\61\x70\x78\40\x30\x20\x31\x70\x78\x20\x23\x33\63\67\x61\142\67\73\x62\x6f\170\x2d\163\x68\x61\144\157\167\72\x20\60\x20\x31\x70\x78\x20\x30\x20\43\63\x33\x37\x61\142\x37\73\142\x6f\x72\x64\x65\162\x2d\143\x6f\154\x6f\x72\72\x20\43\x33\x33\x37\141\x62\x37\x20\x23\x33\63\67\x61\x62\x37\x20\x23\63\x33\67\141\x62\67\x3b\x62\x6f\162\x64\x65\x72\x2d\162\x61\144\151\x75\x73\x3a\40\64\160\x78\x3b"));
+    $NO["\155\151\156\x69\157\x72\141\x6e\x67\x65\x5f\163\141\x6d\154\x5f\x69\144\160\137\164\x65\163\x74\x5f\143\157\156\x66\x69\x67\137\x62\x75\x74\164\157\156"] = array("\43\x6d\141\x72\153\165\x70" => "\74\141\x20\x63\154\x61\x73\x73\x3d\x22\142\164\x6e\40\142\164\x6e\x2d\160\x72\x69\155\x61\162\171\x20\142\x74\156\x2d\x6c\x61\x72\147\x65\42\x20\163\x74\171\154\145\75\42\160\x61\x64\144\x69\x6e\147\72\x33\x70\x78\x20\67\x70\x78\73\x20\x20\x6d\x61\162\x67\x69\x6e\55\162\x69\147\150\164\x3a\40\61\x34\x70\x78\x3b\x22\x20\157\156\x63\x6c\x69\143\x6b\75\42\164\145\x73\x74\111\144\160\103\157\x6e\x66\151\x67\50\47" . getTestUrl() . "\47\51\x3b\x22\76\124\x65\x73\164\40\x43\157\x6e\x66\x69\x67\165\162\141\164\151\157\156\x3c\x2f\141\x3e");
+    $NO["\155\x69\x6e\151\157\162\x61\x6e\x67\145\137\163\x61\x6d\x6c\x5f\151\144\x70\x5f\143\157\156\146\151\147\x5f\144\145\154\145\x74\145"] = array("\43\x74\x79\x70\145" => "\163\x75\x62\155\151\164", "\43\166\141\x6c\x75\x65" => t("\104\145\154\x65\x74\145\x20\103\157\156\x66\x69\x67\x75\162\x61\x74\x69\157\156"), "\43\x73\165\142\155\x69\164" => array("\155\151\156\151\157\x72\141\x6e\147\x65\x5f\x73\x61\x6d\154\x5f\x69\144\x70\x5f\x64\145\154\x65\164\x65\137\x69\x64\x70\137\143\157\x6e\x66\x69\x67"), "\x23\144\x69\163\x61\142\154\145\x64" => $Gy, "\43\x61\x74\x74\162\151\x62\x75\x74\145\x73" => array("\x73\x74\171\x6c\x65" => "\142\x61\143\153\x67\x72\x6f\165\156\x64\72\x20\x23\63\63\x37\141\x62\67\x3b\x63\x6f\x6c\x6f\x72\72\40\x23\146\x66\146\146\x66\146\73\x74\x65\170\164\55\163\x68\141\144\x6f\167\x3a\x20\60\40\x2d\x31\x70\x78\40\61\x70\170\x20\x23\x33\x33\67\x61\x62\x37\54\40\61\160\170\x20\x30\x20\61\x70\170\x20\43\63\x33\x37\141\x62\x37\x2c\x20\60\x20\x31\160\x78\40\x31\x70\170\40\43\x33\x33\67\x61\142\67\54\40\55\x31\160\x78\x20\60\x20\x31\160\170\x20\x23\x33\63\67\141\142\x37\x3b\x62\x6f\170\x2d\x73\x68\141\x64\x6f\167\72\x20\x30\x20\x31\160\x78\40\60\40\x23\63\x33\67\141\x62\x37\x3b\142\157\x72\x64\145\162\x2d\x63\157\154\157\x72\72\40\x23\x33\63\x37\x61\x62\x37\40\x23\63\63\x37\141\x62\67\x20\x23\63\63\x37\141\142\x37\73\142\x6f\x72\144\x65\162\x2d\162\x61\144\151\165\163\72\x20\x34\x70\x78\73"));
+    $NO["\155\x6f\137\x6d\141\x72\153\165\160\137\x69\x64\x70\x5f\141\164\x74\x72\x5f\x68\145\x61\144\145\162\137\x74\157\160\x5f\144\x69\x76\137\143\x6c\x6f\163\x65"] = array("\x23\155\141\162\153\x75\160" => "\x3c\x2f\144\151\x76\76\x3c\x2f\x64\x69\x76\76");
+    Utilities::AddsupportTab($NO, $ZX);
+    Utilities::faq($NO, $ZX);
+    $NO["\155\x6f\137\155\141\162\x6b\165\x70\137\151\x64\160\137\143\x6c\157\163\163\145\x5f\144\x69\x76"] = array("\x23\155\x61\162\153\165\x70" => "\74\x2f\144\151\166\76");
+    return $NO;
 }
-
-function miniorange_saml_fetch_metadata($form, &$form_state) {
-    if( !isset( $form['metadata_URL']['#value'] ) || empty( $form['metadata_URL']['#value'] ) ) {
-        drupal_set_message(t('Invalid file. Please provide valid metadata file.'), 'error');
-        return;
+function miniorange_saml_upload_file($NO, &$ZX)
+{
+    $xu = $NO["\x6d\151\156\151\x6f\162\141\x6e\x67\145\x5f\x73\x61\155\x6c\137\151\x64\160\x5f\x6e\141\x6d\x65\137\63"]["\43\166\141\154\165\145"];
+    if (!(empty($xu) && empty(variable_get("\155\151\x6e\151\157\162\141\156\147\x65\137\163\141\x6d\154\137\x69\144\x70\137\x73\160\x5f\156\141\x6d\145")))) {
+        goto sE;
     }
-    $url = filter_var( $form['metadata_URL']['#value'],FILTER_VALIDATE_URL );
-    $arrContextOptions=array(
-        "ssl"=>array(
-            "verify_peer"=>false,
-            "verify_peer_name"=>false,
-        ),
-    );
-
-    $file = file_get_contents( $url, false, stream_context_create( $arrContextOptions ) );
-    if( !isset( $file ) || empty( $file ) ) {
-        drupal_set_message(t('Invalid file/URL. Please provide valid file/URL'), 'error');
-        return;
-    }
-    Utilities::upload_metadata( $file );
+    drupal_set_message(t("\x53\x65\x72\x76\x69\x63\x65\x20\x50\162\157\x76\151\144\x65\x72\x20\116\x61\155\x65\40\151\163\x20\162\145\x71\165\151\162\x65\x64\x2e"), "\145\x72\162\x6f\162");
+    return;
+    sE:
+    $hN = $_FILES["\x66\x69\x6c\145\163"]["\x74\155\x70\137\x6e\x61\x6d\145"]["\x6d\x65\164\141\x64\141\x74\141\x5f\146\151\154\x65"];
+    $vi = file_get_contents($hN);
+    upload_metadata($vi, $xu);
 }
-
- function getTestUrl() {
-  global $base_url;
-  $testUrl = $base_url . '/?q=mo_testIdpConfig';
-  return $testUrl;
- }
-
- /**
- * Configure IdP.
- */
- function miniorange_saml_idp_save_idp_config($form, &$form_state) {
-  global $base_url;
-  $sp_name = $form['miniorange_saml_idp_sp_name']['#value'];
-  $issuer = $form['miniorange_saml_idp_sp_entity_id']['#value'];
-  $acs_url = $form['miniorange_saml_idp_acs_url']['#value'];
-  $relay_state = $form['miniorange_saml_idp_relay_state']['#value'];
-  $nameid_format = $form['miniorange_saml_idp_nameid_format']['#value'];
-  $is_assertion_signed = $form['miniorange_saml_idp_assertion_signed']['#value'] == 1 ? TRUE : FALSE;
-
-  if( empty( $sp_name ) || empty( $issuer ) || empty( $acs_url ) ){
-     drupal_set_message(t('The <b>Service Provider Name, SP Entity ID or Issuer, ACS URL</b> fields are required.'), 'error');
-     return;
-  }
-
-  $idp_name = $base_url;
-  variable_set('miniorange_saml_idp_issuer', $idp_name);
-  variable_set('miniorange_saml_idp_sp_name', $sp_name);
-  variable_set('miniorange_saml_idp_sp_entity_id', $issuer);
-  variable_set('miniorange_saml_idp_acs_url', $acs_url);
-  variable_set('miniorange_saml_idp_relay_state', $relay_state);
-  variable_set('miniorange_saml_idp_nameid_format', $nameid_format);
-  variable_set('miniorange_saml_idp_assertion_signed', $is_assertion_signed);
-
-  drupal_set_message(t('Your Service Provider Configuration are successfully saved. You can click on Test Configuration button below to test these configurations.'));
-
- }
-
- function miniorange_saml_idp_delete_idp_config($form, &$form_state){
-     variable_del('miniorange_saml_idp_sp_name');
-     variable_del('miniorange_saml_idp_sp_entity_id');
-     variable_del('miniorange_saml_idp_acs_url');
-     variable_del('miniorange_saml_idp_relay_state');
-     variable_del('miniorange_saml_idp_nameid_format');
-     variable_del('miniorange_saml_idp_assertion_signed');
-
-     drupal_set_message(t('Your Service Provider Configuration is successfully deleted.'));
- }
+function upload_metadata($vi, $xu)
+{
+    global $base_url;
+    require_once drupal_get_path("\x6d\157\x64\x75\x6c\x65", "\155\x69\156\151\157\x72\x61\156\x67\x65\x5f\x73\x61\155\154\137\151\x64\x70") . DIRECTORY_SEPARATOR . "\x69\156\x63\x6c\165\144\145\163" . DIRECTORY_SEPARATOR . "\115\x65\x74\x61\x64\x61\x74\x61\122\x65\x61\144\145\x72\x2e\160\150\x70";
+    $sV = new DOMDocument();
+    $sV->loadXML($vi);
+    restore_error_handler();
+    $VY = $sV->firstChild;
+    if (!empty($VY)) {
+        goto m_;
+    }
+    drupal_set_message(t("\74\x62\76\x50\154\145\141\163\145\x20\160\162\157\x76\x69\144\x65\40\x61\40\166\141\154\x69\144\40\155\x65\164\141\144\x61\x74\x61\x20\146\151\154\145\x2e\x3c\x2f\x62\x3e"), "\x65\162\x72\157\x72");
+    return;
+    goto eJ;
+    m_:
+    $YD = new MetadataReader($sV);
+    $UY = $YD->getServiceProviders();
+    if (!empty($UY)) {
+        goto Pm;
+    }
+    drupal_set_message(t("\x3c\142\x3e\x50\x6c\x65\141\x73\x65\40\160\162\157\166\x69\144\145\x20\x61\40\x76\141\x6c\x69\144\x20\155\145\x74\x61\144\141\164\x61\40\146\x69\x6c\x65\x2e\74\57\142\76"), error);
+    return;
+    Pm:
+    foreach ($UY as $z6 => $G2) {
+        $zM = $G2->getEntityID();
+        $E5 = $G2->getAcsURL();
+        $L4 = $G2->getLogoutURL("\x48\124\124\x50\55\122\145\144\151\x72\x65\143\164");
+        if (!empty($L4)) {
+            goto HM;
+        }
+        $L4 = $G2->getLogoutURL("\110\x54\124\x50\x2d\x50\117\x53\124");
+        HM:
+        $oM = $G2->getAssertionsSigned() == "\x74\x72\x75\145" ? TRUE : FALSE;
+        $iU = $G2->getSigningCertificate();
+        if (!empty(variable_get("\155\x69\156\151\157\162\x61\156\147\145\137\x73\141\x6d\x6c\137\151\x64\x70\x5f\x73\x70\137\156\x61\155\145")) && empty($xu)) {
+            goto dk;
+        }
+        variable_set("\155\151\156\x69\x6f\162\x61\x6e\x67\145\137\163\x61\x6d\154\x5f\151\144\x70\x5f\x73\x70\137\156\141\155\145", $xu);
+        goto Ra;
+        dk:
+        $xu = variable_get("\155\151\156\x69\157\162\141\156\147\x65\137\x73\141\x6d\x6c\137\x69\144\x70\137\x73\160\137\156\141\155\x65");
+        variable_set("\155\151\x6e\151\x6f\162\141\x6e\147\x65\x5f\x73\x61\x6d\x6c\x5f\151\x64\x70\x5f\x73\160\137\x6e\x61\x6d\145", $xu);
+        Ra:
+        variable_set("\x6d\151\156\x69\157\162\x61\156\x67\145\137\163\x61\155\x6c\x5f\151\144\160\x5f\163\160\x5f\x65\156\164\x69\x74\171\137\x69\x64", $zM);
+        variable_set("\155\x69\x6e\151\x6f\x72\x61\x6e\147\x65\x5f\x73\x61\155\154\137\x69\x64\160\137\x61\x63\163\x5f\x75\x72\x6c", $E5);
+        variable_set("\155\151\156\x69\x6f\162\x61\156\147\145\137\x73\141\x6d\x6c\137\x69\144\160\137\x73\x6c\157\x5f\x75\x72\154", $L4);
+        variable_set("\x6d\151\156\x69\x6f\162\141\156\147\x65\137\x73\x61\155\x6c\x5f\x69\x64\x70\137\141\x73\x73\x65\162\164\151\157\x6e\137\163\151\147\156\145\144", $oM);
+        variable_set("\x6d\151\x6e\151\157\x72\x61\x6e\x67\145\137\163\141\x6d\x6c\137\x69\144\x70\137\143\145\162\164\x69\x66\x69\x63\x61\164\145\x5f\x73\x69\x67\156\145\144", $iU);
+        variable_set("\x6d\151\x6e\151\x6f\162\141\156\x67\145\x5f\163\141\155\154\x5f\151\x64\x70\137\143\x65\162\164\151\x66\x69\143\141\x74\x65\137\145\156\143\162\x79\160\164\x65\x64", $iU);
+        QB:
+    }
+    p9:
+    drupal_set_message(t("\111\144\145\156\x74\151\164\x79\40\120\x72\157\x76\151\x64\x65\162\x20\103\157\156\146\x69\147\x75\162\x61\x74\151\x6f\156\40\163\x75\143\143\x65\x73\x73\146\165\154\x6c\171\x20\163\141\166\x65\x64\56"));
+    return;
+    eJ:
+}
+function miniorange_saml_fetch_metadata($NO, &$ZX)
+{
+    $xu = $NO["\155\x69\156\x69\157\162\x61\156\x67\x65\137\163\x61\x6d\154\x5f\151\x64\x70\137\x6e\141\155\x65\137\63"]["\x23\166\x61\154\x75\145"];
+    if (!(empty($xu) && empty(variable_get("\155\x69\x6e\x69\x6f\x72\x61\x6e\x67\145\137\x73\x61\155\x6c\x5f\151\144\x70\x5f\x73\160\x5f\x6e\x61\x6d\x65")))) {
+        goto mk;
+    }
+    drupal_set_message(t("\x53\145\162\x76\151\x63\145\x20\120\x72\157\x76\151\x64\145\162\40\x4e\x61\x6d\145\x20\x69\x73\40\x72\145\161\165\x69\162\x65\144\x2e"), "\145\x72\162\x6f\162");
+    return;
+    mk:
+    $nk = filter_var($NO["\x6d\x65\164\x61\x64\141\x74\x61\137\125\x52\x4c"]["\43\166\141\154\x75\145"], FILTER_SANITIZE_URL);
+    $xH = array("\163\163\154" => array("\x76\145\162\x69\x66\x79\137\160\x65\145\162" => false, "\x76\145\162\x69\146\171\137\160\x65\145\162\x5f\156\x61\155\145" => false));
+    $vi = file_get_contents($nk, false, stream_context_create($xH));
+    upload_metadata($vi, $xu);
+}
+function getTestUrl()
+{
+    global $base_url;
+    $aZ = $base_url . "\x2f\77\x71\x3d\155\157\x5f\x74\x65\163\x74\111\x64\x70\103\x6f\x6e\x66\x69\147";
+    return $aZ;
+}
+function miniorange_saml_idp_save_idp_config($NO, &$ZX)
+{
+    global $base_url;
+    $xt = variable_get("\155\x69\x6e\x69\157\x72\141\x6e\147\145\x5f\163\x61\x6d\154\137\151\144\160\137\x63\x75\x73\164\157\155\145\162\137\x61\x64\x6d\151\x6e\x5f\x65\155\x61\x69\154", NULL);
+    if (isset($xt)) {
+        goto ei;
+    }
+    drupal_set_message(t("\x50\154\145\141\x73\145\x20\x72\x65\x67\151\163\164\145\162\40\x77\x69\x74\150\x20\x6d\151\156\151\x4f\162\141\x6e\147\145\40\164\157\40\x65\x6e\x61\x62\x6c\x65\40\104\162\x75\160\x61\x6c\x20\x61\x73\x20\x49\104\120\56"));
+    drupal_goto($base_url . "\x2f\77\161\75\x61\x64\x6d\x69\x6e\x2f\143\x6f\x6e\x66\x69\x67\x2f\x70\x65\x6f\x70\154\145\x2f\x6d\x69\156\151\157\x72\x61\x6e\x67\145\137\163\x61\x6d\x6c\137\151\144\160");
+    ei:
+    $xu = $NO["\155\151\156\x69\157\x72\141\156\147\x65\137\x73\141\155\x6c\x5f\x69\x64\160\137\163\160\137\156\x61\x6d\x65"]["\43\166\x61\154\x75\145"];
+    $L1 = $NO["\x6d\x69\x6e\151\x6f\x72\141\156\147\x65\x5f\163\141\x6d\x6c\137\x69\144\x70\137\163\x70\137\145\156\164\151\164\x79\137\x69\144"]["\x23\x76\x61\154\165\x65"];
+    $E5 = $NO["\155\151\x6e\151\157\162\141\156\x67\145\137\163\x61\155\x6c\x5f\x69\144\160\137\x61\143\163\x5f\x75\162\x6c"]["\43\x76\141\x6c\165\145"];
+    $Ce = $NO["\155\x69\x6e\151\x6f\162\x61\x6e\x67\x65\137\163\x61\x6d\154\x5f\x69\x64\x70\x5f\163\154\157\x5f\165\x72\154"]["\43\166\141\154\x75\x65"];
+    $bS = $NO["\x6d\x69\156\x69\x6f\x72\141\156\147\145\x5f\x73\x61\x6d\x6c\x5f\x69\x64\x70\137\162\x65\x6c\x61\x79\137\163\x74\141\164\145"]["\43\166\141\x6c\165\145"];
+    if (!(empty($xu) || empty($L1) || empty($E5))) {
+        goto GS;
+    }
+    drupal_set_message(t("\x54\x68\145\x20\74\x62\x3e\123\145\162\166\x69\x63\145\x20\120\162\157\x76\151\x64\x65\162\40\x4e\x61\x6d\x65\x2c\40\123\120\x20\105\156\x74\151\x74\171\x20\111\x44\40\x6f\162\40\x49\163\x73\165\145\x72\x2c\x20\x41\x43\123\x20\125\x52\x4c\74\x2f\x62\x3e\40\146\x69\145\154\144\x73\x20\141\x72\145\x20\x72\145\161\x75\151\x72\x65\x64\56"), "\x65\x72\x72\x6f\162");
+    return;
+    GS:
+    $wz = $NO["\155\151\x6e\151\x6f\x72\141\156\x67\145\137\163\x61\x6d\154\x5f\x69\144\x70\x5f\143\145\162\x74\x69\x66\x69\x63\141\164\x65\137\x73\151\147\156\x65\144"]["\43\166\x61\x6c\165\145"];
+    if (empty($wz)) {
+        goto pc;
+    }
+    $wz = Utilities::sanitize_certificate($NO["\155\151\x6e\x69\157\x72\141\x6e\147\x65\137\x73\x61\x6d\154\x5f\151\144\160\x5f\x63\145\162\x74\151\x66\x69\x63\x61\164\x65\137\x73\x69\147\156\145\144"]["\x23\166\141\x6c\165\x65"]);
+    pc:
+    $fO = $NO["\155\x69\x6e\151\x6f\x72\x61\x6e\147\x65\x5f\x73\141\155\154\x5f\x69\x64\x70\x5f\143\x65\162\x74\x69\x66\x69\143\x61\x74\x65\x5f\145\156\x63\x72\171\160\164\x65\144"]["\43\x76\141\154\x75\145"];
+    if (empty($fO)) {
+        goto oO;
+    }
+    $fO = Utilities::sanitize_certificate($NO["\155\151\x6e\x69\157\162\141\x6e\147\145\137\163\141\x6d\154\x5f\151\144\x70\137\x63\145\x72\164\x69\146\x69\x63\141\x74\145\x5f\x65\156\x63\x72\171\x70\x74\x65\x64"]["\43\x76\x61\x6c\x75\145"]);
+    oO:
+    $v7 = $NO["\x6d\x69\156\151\157\162\141\156\x67\145\x5f\x73\x61\155\x6c\x5f\x69\x64\160\137\x6e\x61\x6d\x65\x69\144\x5f\146\157\162\x6d\x61\164"]["\43\166\x61\154\165\145"];
+    $n2 = $NO["\155\x69\x6e\151\x6f\162\141\x6e\147\x65\137\163\x61\155\x6c\137\x69\144\x70\x5f\162\145\163\160\x6f\156\163\x65\x5f\163\x69\x67\156\x65\x64"]["\x23\x76\141\154\165\145"] == 1 ? TRUE : FALSE;
+    $oM = $NO["\x6d\151\x6e\151\157\x72\x61\x6e\147\145\x5f\x73\x61\x6d\x6c\137\151\x64\160\137\x61\x73\163\145\x72\x74\151\x6f\156\x5f\x73\x69\147\156\x65\x64"]["\43\166\141\154\165\x65"] == 1 ? TRUE : FALSE;
+    $H4 = $NO["\155\151\156\151\x6f\x72\x61\156\x67\145\x5f\x73\141\155\x6c\137\x69\x64\160\137\x65\156\x63\x72\171\x70\164\145\x64\x5f\x61\163\x73\145\x72\x74\151\x6f\156"]["\x23\x76\x61\154\x75\145"] == 1 ? TRUE : FALSE;
+    variable_set("\155\151\x6e\x69\157\x72\141\x6e\x67\x65\137\163\141\x6d\154\x5f\x69\x64\x70\137\163\160\x5f\x6e\141\155\x65", $xu);
+    variable_set("\x6d\151\x6e\x69\x6f\x72\141\156\147\x65\137\x73\141\155\154\x5f\x69\144\160\137\163\160\x5f\145\156\x74\151\164\171\137\x69\x64", $L1);
+    variable_set("\x6d\x69\x6e\151\x6f\x72\141\x6e\x67\145\x5f\163\141\x6d\x6c\x5f\x69\144\160\x5f\x61\143\163\137\x75\162\154", $E5);
+    variable_set("\x6d\151\156\x69\157\x72\141\156\147\145\137\x73\141\155\x6c\137\x69\x64\x70\137\163\x6c\x6f\x5f\165\162\x6c", $Ce);
+    variable_set("\155\x69\156\151\x6f\162\x61\156\147\145\x5f\x73\141\x6d\154\137\151\144\160\137\x72\145\154\x61\171\x5f\x73\x74\x61\164\x65", $bS);
+    variable_set("\155\151\156\151\157\162\141\156\147\145\x5f\x73\141\x6d\154\x5f\x69\144\160\137\x63\x65\162\x74\x69\x66\151\143\141\164\x65\x5f\x73\151\x67\x6e\145\144", $wz);
+    variable_set("\155\x69\156\151\x6f\162\x61\x6e\147\145\x5f\x73\141\x6d\x6c\137\x69\144\x70\137\x63\x65\162\x74\x69\x66\x69\x63\141\164\x65\x5f\x65\x6e\143\162\x79\x70\164\x65\x64", $fO);
+    variable_set("\x6d\x69\156\x69\x6f\162\141\x6e\x67\145\x5f\163\141\155\x6c\137\x69\x64\160\137\156\x61\x6d\145\x69\144\x5f\x66\157\x72\x6d\141\x74", $v7);
+    variable_set("\x6d\x69\x6e\x69\x6f\162\x61\x6e\147\145\137\x73\141\x6d\154\137\151\x64\160\x5f\x72\x65\x73\x70\x6f\x6e\x73\145\x5f\x73\151\147\156\x65\x64", $n2);
+    variable_set("\x6d\x69\156\x69\157\x72\x61\x6e\x67\x65\137\x73\x61\x6d\154\x5f\151\x64\160\x5f\x61\x73\163\145\162\x74\x69\157\156\x5f\x73\x69\147\x6e\145\x64", $oM);
+    variable_set("\155\151\x6e\151\157\162\141\156\x67\145\x5f\x73\x61\155\154\137\x69\x64\160\x5f\145\x6e\x63\x72\x79\x70\x74\145\x64\137\x61\x73\x73\x65\162\x74\x69\x6f\156", $H4);
+    drupal_set_message(t("\x59\157\x75\162\x20\123\145\162\x76\x69\x63\145\x20\120\162\157\166\x69\x64\x65\162\x20\103\157\x6e\x66\x69\147\165\x72\141\x74\151\157\x6e\40\x61\162\x65\x20\163\165\x63\143\145\163\x73\x66\165\x6c\154\x79\x20\x73\141\x76\x65\x64\x2e\40\131\157\165\40\x63\x61\156\x20\143\154\x69\x63\x6b\x20\x6f\x6e\40\124\145\x73\164\40\103\x6f\156\x66\x69\147\x75\162\141\164\151\157\156\40\142\165\x74\x74\157\x6e\x20\142\145\154\157\x77\40\164\x6f\40\164\x65\163\164\x20\164\150\x65\x73\x65\x20\143\157\156\x66\151\147\x75\162\x61\x74\x69\157\x6e\163\56"));
+}
+function miniorange_saml_idp_delete_idp_config($NO, &$ZX)
+{
+    variable_set("\x6d\151\x6e\151\157\162\141\x6e\147\x65\x5f\163\x61\155\154\x5f\151\144\x70\x5f\163\160\x5f\x6e\141\155\145", '');
+    variable_set("\155\151\156\x69\157\x72\141\x6e\147\145\137\x73\141\x6d\x6c\137\x69\x64\160\x5f\163\x70\x5f\x65\x6e\x74\151\x74\171\x5f\x69\144", '');
+    variable_set("\155\x69\156\x69\157\162\141\156\x67\x65\137\163\x61\x6d\x6c\137\x69\144\160\137\141\143\x73\137\165\162\154", '');
+    variable_set("\155\x69\156\151\x6f\162\141\156\147\145\137\163\141\x6d\x6c\137\151\144\160\x5f\x73\x6c\x6f\x5f\x75\x72\154", '');
+    variable_set("\155\x69\156\151\x6f\162\x61\156\x67\x65\137\x73\141\x6d\x6c\x5f\x69\x64\x70\137\162\145\154\141\171\x5f\x73\x74\141\164\145", '');
+    variable_set("\x6d\x69\x6e\151\157\x72\141\156\x67\145\x5f\x73\x61\x6d\x6c\137\x69\x64\x70\x5f\x6e\x61\155\145\x69\x64\137\x66\157\x72\155\141\164", '');
+    variable_set("\x6d\151\156\x69\x6f\162\x61\156\x67\145\x5f\163\x61\x6d\x6c\137\x69\x64\160\x5f\141\x73\x73\145\x72\x74\x69\x6f\x6e\137\x73\151\147\x6e\145\144", '');
+    variable_set("\x6d\x69\156\151\157\162\141\156\x67\145\x5f\163\141\x6d\x6c\x5f\151\144\160\137\x63\145\162\164\x69\146\x69\x63\x61\164\145\x5f\163\151\147\156\x65\x64", '');
+    variable_set("\155\151\x6e\151\157\162\x61\156\147\145\x5f\163\141\x6d\x6c\x5f\151\x64\160\x5f\143\145\x72\164\151\146\x69\x63\x61\164\145\137\145\x6e\x63\162\171\160\x74\x65\x64", '');
+    variable_set("\x6d\151\x6e\151\x6f\x72\x61\x6e\x67\x65\x5f\163\141\155\154\x5f\x69\144\160\137\145\156\x63\x72\x79\160\x74\145\x64\137\x61\x73\163\145\x72\x74\151\x6f\156", '');
+    variable_set("\x6d\151\x6e\x69\x6f\x72\x61\156\x67\x65\x5f\x73\x61\155\154\x5f\151\144\x70\137\162\145\163\160\157\156\163\145\x5f\163\151\147\156\145\144", '');
+    drupal_set_message(t("\x59\157\x75\x72\40\x53\145\162\166\x69\x63\x65\x20\x50\x72\x6f\x76\x69\x64\145\162\40\103\x6f\x6e\146\x69\147\165\162\141\x74\151\157\x6e\x20\151\163\40\163\165\143\x63\145\163\x73\x66\165\x6c\154\x79\40\144\x65\154\145\164\x65\x64\x2e"));
+}
+function miniorange_saml_idp_send_query($NO, &$ZX)
+{
+    $Wp = $NO["\x6d\151\x6e\151\x6f\162\x61\x6e\147\x65\x5f\x73\x61\155\x6c\137\x65\x6d\141\x69\x6c\x5f\x61\144\x64\x72\145\x73\x73\x5f\163\x75\160\160\157\x72\164"]["\x23\166\x61\x6c\165\x65"];
+    $xK = $NO["\155\x69\x6e\151\x6f\x72\141\156\147\145\x5f\x73\x61\x6d\154\x5f\160\150\157\156\145\137\156\x75\x6d\142\145\x72\137\x73\x75\x70\x70\x6f\x72\x74"]["\43\x76\141\x6c\165\x65"];
+    $bn = $NO["\155\151\x6e\x69\x6f\162\141\x6e\147\145\137\163\141\x6d\x6c\x5f\163\165\160\x70\157\162\x74\137\x71\x75\145\162\171\x5f\163\x75\160\160\157\162\x74"]["\x23\166\141\x6c\x75\x65"];
+    Utilities::send_support_query($Wp, $xK, $bn);
+}

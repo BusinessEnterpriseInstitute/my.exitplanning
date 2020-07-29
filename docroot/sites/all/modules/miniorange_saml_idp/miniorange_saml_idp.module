@@ -1,407 +1,475 @@
 <?php
-/**
- * @file
- * Module file for miniOrange SAML IDP Module.
- */
 
-/**
-* Implements hook_menu().
-*/
 
-include 'miniorange_saml_registration.php';
-
-function miniorange_saml_idp_menu() {
-    $items['admin/config/people/miniorange_saml_idp'] = array(
-        'title' => 'Drupal SAML IDP Configuration',
-        'description' => 'Convert your Drupal into an IDP',
-        'page callback' => 'drupal_get_form',
-        'page arguments' => array('miniorange_sp_information'),
-        'access arguments' => array('administer site configuration'),
-        'file' => 'miniorange_sp_information.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/customer_setup'] = array(
-        'title' => 'Register/Login',
-        'weight' => -1,
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_saml_idp_customer_setup'),
-        'file' => 'miniorange_saml_idp_customer_setup.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/idp_setup'] = array(
-        'title' => 'Service Provider Setup',
-        'weight' => -6,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_saml_idp_setup'),
-        'file' => 'miniorange_saml_idp_setup.inc',
-        'type' => MENU_LOCAL_TASK,
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/sp_setup'] = array(
-        'title' => 'IDP METADATA',
-        'weight' => -7,
-        'type' => MENU_DEFAULT_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_sp_information'),
-        'file' => 'miniorange_sp_information.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/attr_mapping'] = array(
-        'title' => 'Mapping',
-        'weight' => -5,
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_saml_idp_attribute_mapping'),
-        'file' => 'miniorange_saml_idp_attribute_mapping.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/export_config'] = array(
-        'title' => 'Import/Export',
-        'weight' => -4,
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_saml_idp_export_config'),
-        'file' => 'miniorange_saml_idp_export_config.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/custom_certificate'] = array(
-        'title' => 'Certificate',
-        'weight' => -3,
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('mo_saml_idp_add_custom_certificate'),
-        'file' => 'mo_saml_idp_add_custom_certificate.inc',
-    );
-
-    $items['admin/config/people/miniorange_saml_idp/licensing'] = array(
-        'title' => 'Upgrade Plans',
-        'weight' => -2,
-        'type' => MENU_LOCAL_TASK,
-        'access arguments' => array('administer site configuration'),
-        'page arguments' => array('miniorange_saml_idp_licensing'),
-        'file' => 'miniorange_saml_idp_licensing.inc',
-    );
-
-    $items['initiatelogon'] = array(
-        'access callback' => TRUE,
-        'page callback' => 'miniorange_saml_idp_login_request',
-        'type' => MENU_CALLBACK
-    );
-
-    $items['mo_testIdpConfig'] = array(
-        'page callback' => 'miniorange_saml_idp_test_configurations',
-        'access arguments' => array('administer site configuration'),
-        'type' => MENU_CALLBACK
-    );
-
-    $items['moidp_metadata'] = array(
-        'access callback' => TRUE,
-        'page callback' => 'miniorange_saml_idp_metadata',
-        'type' => MENU_CALLBACK
-    );
-
-    $items['moidp_download_metadata'] = array(
-        'access arguments' => array('administer site configuration'),
-        'page callback' => 'miniorange_saml_idp_download_metadata',
-        'type' => MENU_CALLBACK
-    );
-
-    $items['register_user'] = array(
-        'access callback' => TRUE,
-        'page callback' => 'register_user',
-        'type' => MENU_CALLBACK,
-    );
-
-    $items['close_registration'] = array(
-        'access callback' => TRUE,
-        'page callback' => 'close_registration',
-        'type' => MENU_CALLBACK,
-    );
-
-    return $items;
-
+function miniorange_saml_idp_menu()
+{
+    $D6["\x61\144\x6d\x69\156\57\143\157\156\146\151\x67\57\160\145\157\x70\x6c\x65\57\x6d\x69\156\x69\x6f\162\141\156\147\x65\x5f\x73\141\x6d\154\137\151\x64\x70"] = array("\x74\151\164\x6c\x65" => "\104\x72\x75\160\x61\154\x20\123\x41\115\114\40\111\x44\120\40\x43\157\x6e\146\x69\x67\165\x72\x61\x74\151\157\x6e", "\x64\145\163\x63\162\151\160\164\151\157\x6e" => "\103\x6f\156\166\x65\x72\x74\x20\x79\157\x75\162\x20\104\162\x75\160\141\x6c\40\151\x6e\x74\157\x20\x61\156\40\x49\104\120", "\x70\141\x67\x65\x20\143\141\154\154\142\141\x63\x6b" => "\144\x72\x75\x70\x61\154\x5f\147\145\x74\137\x66\x6f\x72\155", "\160\x61\147\145\40\x61\x72\x67\x75\x6d\145\x6e\164\x73" => array("\x6d\151\156\x69\157\162\x61\156\x67\145\x5f\163\x61\x6d\154\137\x69\x64\x70\x5f\143\165\163\x74\157\155\x65\x72\137\x73\x65\164\x75\160"), "\x61\x63\143\145\163\x73\40\141\x72\147\165\155\145\x6e\164\163" => array("\x61\x64\x6d\151\156\151\163\164\x65\162\x20\x73\x69\164\x65\x20\x63\157\x6e\146\151\x67\165\162\141\x74\151\x6f\156"), "\x66\151\x6c\145" => "\155\151\x6e\x69\157\x72\x61\x6e\x67\x65\x5f\163\141\155\154\x5f\151\144\160\137\x63\165\163\x74\157\x6d\x65\x72\137\163\x65\x74\x75\160\56\151\156\143");
+    $D6["\x61\x64\155\151\156\x2f\x63\157\156\146\151\147\x2f\x70\x65\157\x70\154\x65\x2f\x6d\x69\156\x69\x6f\162\x61\x6e\147\x65\137\163\x61\x6d\154\137\x69\x64\160\57\143\x75\163\164\x6f\155\x65\162\137\x73\x65\164\x75\160"] = array("\164\x69\164\154\145" => "\x52\145\147\x69\163\164\145\x72\x2f\114\x6f\147\x69\x6e", "\167\145\x69\x67\150\x74" => -9, "\x74\x79\x70\145" => MENU_DEFAULT_LOCAL_TASK, "\141\x63\143\145\x73\163\x20\141\162\147\x75\x6d\x65\x6e\164\163" => array("\141\x64\155\151\x6e\x69\x73\164\145\x72\x20\x73\x69\164\145\x20\143\157\156\x66\151\x67\x75\x72\141\x74\151\x6f\156"), "\x70\x61\147\x65\x20\x61\162\147\165\x6d\145\x6e\164\x73" => array("\155\151\x6e\151\157\162\x61\156\147\145\x5f\163\141\155\x6c\x5f\x69\144\x70\137\143\x75\163\x74\x6f\155\145\x72\137\163\145\164\x75\x70"), "\146\x69\x6c\145" => "\x6d\151\x6e\x69\x6f\x72\x61\156\x67\145\x5f\163\141\155\x6c\137\x69\144\x70\137\143\165\x73\x74\157\x6d\145\162\137\163\145\x74\165\160\56\151\x6e\x63");
+    $D6["\x61\x64\x6d\x69\156\x2f\x63\157\x6e\x66\151\147\x2f\x70\x65\x6f\160\x6c\x65\57\155\x69\156\x69\x6f\162\x61\x6e\147\x65\137\163\x61\x6d\x6c\137\x69\x64\x70\57\151\x64\160\x5f\x73\x65\x74\165\160"] = array("\x74\151\x74\154\145" => "\123\145\x72\166\x69\143\145\40\120\x72\x6f\166\151\x64\145\162", "\x77\145\x69\147\x68\164" => -8, "\141\143\143\145\163\x73\x20\141\162\x67\165\155\145\x6e\x74\x73" => array("\x61\x64\x6d\x69\x6e\151\163\164\x65\x72\x20\x73\x69\x74\x65\x20\x63\157\x6e\x66\x69\x67\165\x72\x61\164\x69\157\156"), "\160\141\147\145\x20\141\x72\147\165\155\145\x6e\x74\x73" => array("\x6d\151\156\x69\157\x72\x61\x6e\147\145\137\x73\141\x6d\154\137\x69\144\160\x5f\163\145\164\x75\160"), "\x66\x69\154\145" => "\155\x69\x6e\151\157\x72\141\x6e\147\x65\137\163\141\x6d\154\x5f\151\144\160\x5f\163\145\x74\x75\160\56\151\x6e\143", "\x74\x79\x70\x65" => MENU_LOCAL_TASK);
+    $D6["\x61\x64\x6d\151\x6e\57\x63\157\156\x66\x69\147\x2f\x70\145\x6f\x70\154\x65\57\x6d\151\x6e\x69\157\x72\141\156\147\x65\x5f\x73\141\x6d\x6c\x5f\151\144\x70\x2f\x73\160\137\163\145\164\165\160"] = array("\x74\x69\164\154\x65" => "\111\x64\x70\40\115\x65\x74\x61\144\141\164\141", "\167\x65\x69\x67\150\164" => -7, "\x74\x79\x70\x65" => MENU_LOCAL_TASK, "\141\143\143\145\x73\x73\40\x61\x72\147\165\x6d\x65\156\164\163" => array("\141\144\155\x69\x6e\151\x73\x74\x65\x72\40\x73\151\x74\145\40\143\157\156\146\151\147\165\x72\141\164\x69\x6f\x6e"), "\160\141\147\145\x20\x61\162\147\x75\155\x65\156\164\163" => array("\155\151\156\x69\x6f\x72\141\x6e\147\145\x5f\x73\x70\137\151\x6e\146\157\x72\x6d\141\164\151\157\x6e"), "\146\x69\x6c\145" => "\155\x69\156\x69\x6f\x72\141\156\147\145\x5f\x73\160\137\151\156\146\157\162\x6d\141\164\x69\157\x6e\x2e\151\x6e\143");
+    $D6["\141\144\155\151\156\x2f\143\157\156\146\x69\x67\57\160\x65\x6f\x70\154\x65\57\155\151\x6e\x69\x6f\162\141\x6e\147\145\x5f\163\x61\155\154\137\151\144\160\x2f\x61\x74\x74\162\x5f\155\x61\160\x70\x69\x6e\x67"] = array("\x74\151\164\154\145" => "\x41\164\x74\x72\x69\x62\165\x74\145\57\x52\x6f\154\145\x20\115\141\160\160\x69\x6e\147", "\x77\x65\x69\147\x68\x74" => -6, "\x74\x79\160\145" => MENU_LOCAL_TASK, "\x61\143\x63\x65\x73\163\x20\141\162\x67\x75\155\x65\x6e\164\163" => array("\141\x64\155\151\156\x69\x73\164\145\162\40\163\x69\x74\x65\40\143\x6f\156\x66\151\147\x75\162\x61\164\151\x6f\156"), "\160\x61\x67\x65\40\141\x72\x67\x75\155\x65\x6e\164\163" => array("\x6d\x69\156\x69\157\x72\141\156\x67\x65\137\163\141\x6d\154\137\151\144\160\137\141\x74\164\x72\151\142\x75\164\145\x5f\x6d\x61\160\x70\x69\x6e\x67"), "\146\151\x6c\145" => "\155\151\x6e\x69\157\162\141\156\x67\145\x5f\x73\141\x6d\x6c\137\x69\x64\x70\x5f\x61\164\164\x72\x69\x62\165\164\145\x5f\155\x61\160\160\151\x6e\147\x2e\151\x6e\x63");
+    $D6["\141\x64\155\x69\x6e\x2f\143\157\156\x66\x69\x67\57\x70\x65\x6f\x70\x6c\x65\x2f\x6d\151\156\x69\157\162\141\x6e\x67\145\x5f\x73\141\155\x6c\137\151\144\x70\x2f\163\x69\147\x6e\151\x6e\x5f\x73\x65\164\x74\151\x6e\x67\x73"] = array("\x74\x69\164\154\145" => "\x53\x69\x67\156\40\x69\156\40\123\145\164\164\151\156\147\163", "\167\145\151\x67\150\164" => -5, "\x74\x79\x70\x65" => MENU_LOCAL_TASK, "\141\x63\143\x65\163\163\x20\141\162\147\x75\x6d\145\x6e\x74\x73" => array("\141\144\155\151\x6e\151\x73\164\x65\162\x20\x73\x69\x74\145\40\143\x6f\156\x66\x69\x67\165\x72\x61\x74\151\x6f\x6e"), "\x70\x61\147\x65\x20\141\x72\x67\x75\155\x65\x6e\x74\x73" => array("\x6d\x69\x6e\151\x6f\162\x61\156\x67\145\137\163\141\155\154\137\151\144\160\137\x73\x69\x67\x6e\151\156\137\163\145\164\x74\151\156\147\x73"), "\146\x69\154\145" => "\155\x69\156\151\157\162\x61\x6e\147\145\x5f\163\x61\x6d\x6c\x5f\151\144\160\x5f\163\151\x67\x6e\151\x6e\x5f\x73\145\x74\164\x69\156\x67\163\x2e\151\x6e\143");
+    $D6["\141\x64\155\x69\x6e\x2f\143\x6f\x6e\x66\x69\147\57\160\x65\157\160\154\x65\57\x6d\151\x6e\x69\157\162\141\156\x67\x65\x5f\x73\141\155\x6c\137\151\144\x70\57\x65\x78\x70\x6f\x72\x74\x5f\x63\x6f\x6e\x66\151\147"] = array("\164\151\x74\x6c\145" => "\111\x6d\160\157\x72\164\x2f\x45\x78\x70\157\162\164", "\x77\x65\x69\147\150\x74" => -4, "\x74\x79\x70\x65" => MENU_LOCAL_TASK, "\x61\x63\143\x65\x73\x73\40\141\x72\x67\165\x6d\x65\x6e\164\x73" => array("\141\x64\155\151\156\x69\x73\164\145\x72\40\163\x69\x74\145\x20\x63\157\x6e\146\151\x67\165\162\x61\x74\151\x6f\x6e"), "\x70\141\147\x65\40\141\162\147\165\x6d\x65\156\x74\x73" => array("\155\x69\x6e\x69\157\162\141\x6e\x67\x65\x5f\163\141\155\x6c\x5f\x69\144\x70\137\145\170\x70\157\162\164\x5f\143\157\x6e\146\x69\x67"), "\146\x69\x6c\x65" => "\x6d\x69\x6e\x69\157\x72\x61\x6e\147\145\x5f\163\x61\155\x6c\x5f\x69\x64\160\137\x65\170\x70\x6f\162\x74\137\x63\157\x6e\x66\x69\147\56\151\156\x63");
+    $D6["\x61\x64\155\x69\156\x2f\x63\x6f\x6e\146\x69\x67\x2f\160\145\157\x70\154\145\x2f\x6d\151\156\151\157\x72\141\x6e\147\145\137\163\x61\x6d\154\x5f\x69\144\x70\57\x63\165\x73\x74\157\x6d\137\143\x65\x72\x74\x69\146\151\143\141\164\145"] = array("\x74\151\x74\x6c\x65" => "\103\x75\163\164\157\x6d\40\103\x65\162\x74\x69\146\151\x63\141\x74\x65", "\x77\x65\151\x67\150\164" => -3, "\x74\171\x70\x65" => MENU_LOCAL_TASK, "\x61\143\143\x65\x73\x73\40\141\x72\147\165\x6d\145\x6e\x74\163" => array("\141\x64\155\x69\x6e\x69\163\x74\145\x72\40\163\151\164\145\x20\x63\x6f\156\146\151\147\x75\162\x61\x74\x69\x6f\156"), "\160\x61\x67\145\x20\141\162\147\165\x6d\145\156\x74\163" => array("\x6d\x6f\x5f\x73\141\x6d\x6c\137\151\x64\x70\x5f\x61\x64\x64\137\143\165\x73\x74\157\x6d\137\143\x65\162\164\151\x66\x69\x63\141\x74\x65"), "\146\x69\154\145" => "\x6d\x6f\137\x73\141\x6d\154\137\151\x64\x70\137\141\x64\144\137\x63\165\x73\x74\x6f\x6d\137\143\145\162\x74\151\146\151\x63\141\x74\145\56\x69\x6e\143");
+    $D6["\141\144\155\151\x6e\x2f\x63\x6f\x6e\x66\x69\147\57\160\145\x6f\x70\154\145\57\x6d\151\156\x69\x6f\x72\x61\x6e\x67\x65\137\163\141\x6d\x6c\x5f\x69\x64\160\x2f\154\x69\x63\145\156\163\151\156\147"] = array("\x74\x69\164\x6c\145" => "\125\160\x67\162\141\144\x65\40\x50\x6c\x61\x6e\163", "\x77\x65\x69\147\150\x74" => -2, "\164\x79\x70\x65" => MENU_LOCAL_TASK, "\x61\143\143\145\163\163\40\x61\x72\147\x75\x6d\x65\156\x74\163" => array("\141\144\x6d\x69\x6e\151\163\164\x65\162\x20\163\151\164\x65\x20\x63\x6f\x6e\146\151\x67\165\162\141\164\151\157\156"), "\x70\141\x67\x65\x20\141\x72\147\165\155\145\x6e\164\163" => array("\x6d\x69\x6e\151\x6f\x72\141\x6e\147\145\137\x73\x61\x6d\x6c\137\151\x64\x70\137\x6c\151\x63\145\156\163\x69\156\x67"), "\146\x69\154\145" => "\155\x69\x6e\151\x6f\x72\141\x6e\147\x65\137\163\x61\155\x6c\137\151\x64\x70\x5f\154\x69\x63\145\x6e\x73\x69\156\x67\56\151\x6e\143");
+    $D6["\x69\x6e\151\x74\151\141\164\145\x6c\x6f\x67\x6f\x6e"] = array("\x61\143\x63\145\x73\163\40\x63\x61\154\154\142\141\143\153" => TRUE, "\x70\x61\x67\x65\40\143\141\154\154\142\141\x63\153" => "\155\x69\x6e\x69\157\162\x61\156\147\145\137\x73\x61\x6d\x6c\137\x69\x64\x70\137\154\157\x67\151\156\137\x72\145\161\165\145\x73\x74", "\164\x79\x70\x65" => MENU_CALLBACK);
+    $D6["\x6d\157\x5f\x74\x65\x73\164\x49\144\160\103\157\x6e\x66\151\x67"] = array("\x61\143\x63\145\163\x73\40\x63\141\154\154\x62\141\143\153" => TRUE, "\160\141\x67\145\40\x63\141\154\154\x62\x61\143\153" => "\x6d\151\156\x69\x6f\162\x61\156\x67\145\x5f\163\x61\x6d\154\x5f\151\144\x70\x5f\x74\x65\163\164\x5f\143\157\x6e\x66\x69\x67\x75\x72\141\164\x69\157\x6e\163", "\x74\171\x70\145" => MENU_CALLBACK);
+    $D6["\x73\141\x6d\x6c\x5f\x75\163\x65\x72\137\x6c\x6f\147\151\x6e"] = array("\141\143\143\145\x73\163\x20\x63\141\x6c\154\x62\x61\143\153" => TRUE, "\x70\141\x67\x65\40\x63\x61\154\x6c\142\141\143\153" => "\155\x69\156\151\157\162\x61\x6e\147\145\137\163\141\155\x6c\137\151\144\160\137\151\156\151\164\151\141\x74\x65\x64\137\x6c\157\147\x69\156", "\164\171\160\145" => MENU_CALLBACK);
+    $D6["\x6d\157\151\x64\x70\x5f\155\145\164\x61\144\141\164\141"] = array("\141\143\x63\x65\x73\163\x20\x63\141\154\x6c\x62\x61\143\153" => TRUE, "\x70\x61\x67\145\40\143\x61\154\154\x62\x61\143\x6b" => "\x6d\151\156\151\157\x72\x61\x6e\147\x65\137\x73\x61\x6d\x6c\x5f\x69\x64\x70\137\x6d\145\x74\141\x64\x61\164\x61", "\164\x79\x70\x65" => MENU_CALLBACK);
+    $D6["\163\141\x6d\154\154\x6f\147\x6f\x75\x74"] = array("\x61\143\143\x65\163\163\40\143\141\x6c\x6c\142\x61\x63\153" => TRUE, "\x70\141\147\x65\40\x63\141\154\154\142\141\x63\x6b" => "\x6d\x69\x6e\151\157\x72\x61\156\147\145\137\163\141\x6d\x6c\x5f\151\144\160\137\x73\141\155\x6c\x6c\x6f\x67\157\x75\164", "\164\x79\x70\145" => MENU_CALLBACK);
+    return $D6;
 }
-
-function register_user(){
-    $payment_plan = isset($_GET['payment_plan']) ? $_GET['payment_plan'] : '';
-    //echo 'here';var_dump($payment_plan);exit;
-    miniorange_saml_registration($payment_plan);
+function miniorange_saml_idp_user_login(&$ln, $B3)
+{
+    if (!isset($_COOKIE["\x72\x65\163\x70\x6f\156\x73\x65\x5f\160\x61\162\141\x6d\x73"])) {
+        goto Yp;
+    }
+    $eR = json_decode(stripslashes($_COOKIE["\x72\x65\x73\160\x6f\x6e\x73\x65\x5f\x70\x61\162\x61\x6d\x73"]), true);
+    if (!(strcmp($eR["\155\157\x49\x64\160\163\145\156\x64\x52\145\x73\160\x6f\x6e\x73\x65"], "\x74\x72\165\x65") == 0)) {
+        goto X2;
+    }
+    mo_idp_send_reponse($eR["\x61\x63\x73\137\x75\162\x6c"], $eR["\x61\x75\x64\151\145\156\x63\145"], $eR["\x72\x65\154\141\x79\123\164\x61\x74\x65"], $eR["\151\156\x52\145\x73\160\x6f\156\x73\145\x54\x6f"]);
+    X2:
+    Yp:
 }
-
-function close_registration(){
+function miniorange_saml_idp_test_configurations()
+{
+    $V8 = "\57";
+    $Ux = variable_get("\155\151\156\151\157\162\141\x6e\147\x65\137\x73\141\155\x6c\137\151\144\160\137\x61\143\x73\137\165\162\154");
+    $ei = variable_get("\x6d\151\156\151\157\x72\x61\156\147\145\137\x73\141\155\154\137\151\x64\160\x5f\x73\160\x5f\x65\x6e\x74\151\x74\x79\137\151\x64");
+    if (!($Ux == '' || is_null($Ux) || $ei == '' || is_null($ei))) {
+        goto Sr;
+    }
+    drupal_set_message(t("\120\x6c\145\141\163\x65\40\x63\x6f\156\x66\151\x67\x75\x72\x65\40\171\157\x75\162\40\x53\120\40\143\157\x6e\x66\151\147\165\162\141\x74\x69\x6f\156\163\40\146\151\162\x73\164\x20\x61\x6e\144\x20\x74\x68\145\156\x20\143\x6c\x69\143\x6b\x20\x6f\x6e\40\x54\145\163\x74\x20\x43\157\156\x66\151\147\165\x72\141\x74\151\x6f\x6e\x2e"));
+    drupal_goto();
+    Sr:
+    miniorange_saml_idp_load_xmlseclib();
+    mo_idp_authorize_user($Ux, $ei, $V8);
+}
+function miniorange_saml_idp_login_request()
+{
+    if (!(array_key_exists("\123\x41\115\114\x52\x65\x71\165\145\163\x74", $_REQUEST) && !empty($_REQUEST["\x53\101\115\x4c\122\x65\x71\x75\145\163\x74"]))) {
+        goto Kg;
+    }
+    _read_saml_request($_REQUEST, $_GET);
+    Kg:
+}
+function miniorange_saml_idp_metadata()
+{
+    if (!(isset($_REQUEST["\161"]) && $_REQUEST["\x71"] == "\155\157\151\x64\160\x5f\155\x65\x74\141\144\141\x74\x61")) {
+        goto ES;
+    }
+    _generate_metadata();
+    ES:
+}
+function _generate_metadata()
+{
     global $base_url;
-    $requestUrl = $base_url . '/admin/config/people/miniorange_saml_idp/licensing';
-    if (Utilities::isCustomerRegistered()) {
-        variable_set('miniorange_saml_idp_status', 'MOIDP_CUSTOMER_SETUP');
-        variable_del('miniorange_saml_idp_customer_admin_email');
-        variable_del('miniorange_saml_idp_customer_admin_phone');
-        variable_del('miniorange_saml_idp_tx_id');
+    $at = $base_url . "\57";
+    $L8 = $at . "\x3f\161\75\x61\x64\x6d\151\156\x2f\x63\157\x6e\x66\151\x67\57\x70\x65\x6f\160\x6c\x65\57\155\151\x6e\x69\157\162\141\x6e\147\x65\137\163\x61\x6d\154\x5f\151\x64\160\57";
+    $UJ = $at . "\77\161\x3d\x69\156\x69\x74\x69\141\164\145\154\x6f\147\157\156";
+    $L4 = $at . "\x3f\x71\75\163\141\x6d\x6c\x6c\157\147\157\165\164";
+    $Jn = variable_get("\155\x69\x6e\x69\157\x72\141\156\x67\x65\137\x73\x61\155\154\137\151\144\160\137\145\x6e\x74\151\x74\171\137\151\x64");
+    $L8 = isset($Jn) && !empty($Jn) ? $Jn : $L8;
+    define("\x44\122\x55\120\x41\114\x5f\x42\101\123\x45\137\x52\x4f\117\x54", dirname(__FILE__));
+    $sn = drupal_get_path("\x6d\x6f\144\x75\154\x65", "\x6d\151\156\x69\x6f\x72\141\x6e\147\145\137\163\x61\155\x6c\137\x69\144\160");
+    $Zt = '';
+    $Zt = variable_get("\x6d\151\x6e\151\x6f\162\141\156\147\145\137\163\141\155\x6c\x5f\x69\x64\x70\137\160\x75\142\x6c\x5f\143\x65\162\x74\x69\x66\x69\x63\x61\164\x65");
+    if ($Zt != '') {
+        goto vr;
     }
-    drupal_goto($requestUrl);
+    $gF = DRUPAL_BASE_ROOT . DIRECTORY_SEPARATOR . "\162\145\163\x6f\x75\x72\x63\x65\x73" . DIRECTORY_SEPARATOR . "\151\x64\160\55\x73\151\x67\156\151\x6e\147\56\143\162\x74";
+    goto PC;
+    vr:
+    $gF = DRUPAL_BASE_ROOT . DIRECTORY_SEPARATOR . "\162\x65\163\x6f\x75\x72\143\145\163" . DIRECTORY_SEPARATOR . "\103\x75\x73\164\157\155\137\120\165\142\x6c\151\143\137\x43\145\162\x74\151\146\x69\143\x61\x74\x65\x2e\143\x72\x74";
+    PC:
+    $kq = file_get_contents($gF);
+    $kq = utilities::desanitize_certificate($kq);
+    header("\x43\157\156\164\145\x6e\164\x2d\x54\x79\x70\145\x3a\x20\164\145\x78\164\x2f\x78\x6d\154");
+    echo "\x3c\77\170\x6d\x6c\40\x76\145\x72\163\x69\x6f\x6e\75\42\61\x2e\60\42\x20\145\x6e\143\157\144\151\x6e\x67\x3d\x22\125\124\106\55\x38\42\77\x3e\74\155\x64\x3a\105\x6e\164\x69\x74\x79\x44\x65\163\143\x72\151\x70\164\157\x72\x20\170\x6d\x6c\156\x73\x3a\x6d\144\x3d\42\x75\x72\156\72\157\x61\x73\151\163\x3a\x6e\141\x6d\145\163\x3a\164\x63\x3a\123\x41\115\114\72\62\x2e\x30\72\155\x65\x74\141\x64\141\164\x61\42\40\x65\156\164\151\x74\x79\x49\x44\75\x22" . $L8 . "\42\76\74\155\144\x3a\x49\x44\120\123\x53\117\x44\x65\x73\143\162\x69\160\x74\157\162\40\127\x61\x6e\164\x41\x75\x74\x68\x6e\122\x65\161\x75\145\x73\164\163\x53\x69\x67\156\145\144\x3d\42\x74\162\165\x65\x22\x20\160\x72\x6f\x74\x6f\143\x6f\154\x53\165\x70\160\x6f\x72\x74\105\156\165\x6d\x65\162\141\x74\x69\157\156\x3d\x22\165\162\x6e\x3a\x6f\141\x73\151\163\72\x6e\141\x6d\x65\x73\x3a\164\143\72\123\101\115\x4c\72\62\56\x30\x3a\x70\162\157\164\x6f\143\x6f\154\42\76\x3c\x6d\144\72\x4b\x65\171\x44\x65\163\143\162\x69\x70\164\x6f\x72\40\12\11\x9\11\x75\163\x65\x3d\42\163\x69\147\156\x69\x6e\147\42\76\xa\11\11\x9\x3c\x64\163\72\113\145\x79\x49\x6e\146\157\x20\12\11\11\x9\x9\x78\x6d\x6c\x6e\x73\x3a\x64\163\75\42\150\164\x74\x70\72\x2f\57\167\167\167\x2e\x77\63\56\157\x72\147\57\x32\x30\60\x30\57\60\x39\57\x78\155\x6c\x64\163\151\147\43\x22\x3e\xa\11\x9\x9\11\74\144\163\72\x58\65\60\71\104\x61\x74\x61\76\xa\x9\11\11\11\11\74\144\x73\x3a\130\65\60\71\x43\145\x72\x74\x69\x66\x69\x63\x61\x74\145\x3e" . $kq . "\x3c\x2f\144\x73\x3a\x58\65\60\71\x43\145\162\164\x69\x66\151\143\x61\x74\145\76\xa\11\11\x9\x9\x3c\57\144\x73\x3a\x58\x35\60\x39\x44\141\x74\x61\76\xa\11\x9\x9\x3c\57\144\x73\x3a\x4b\145\x79\x49\156\x66\157\x3e\12\11\x9\74\57\155\x64\72\113\x65\x79\104\x65\163\143\162\x69\160\x74\x6f\x72\x3e\xa\xa\11\x9\x3c\x6d\x64\72\x4e\141\x6d\x65\111\104\x46\157\162\155\x61\164\x3e\x75\x72\156\x3a\x6f\141\163\151\x73\72\156\x61\155\145\163\x3a\164\143\x3a\123\x41\x4d\114\x3a\61\x2e\61\x3a\x6e\141\x6d\x65\x69\144\x2d\146\x6f\x72\x6d\x61\164\72\x65\x6d\x61\151\x6c\x41\144\144\x72\x65\163\163\x3c\57\155\x64\72\x4e\141\x6d\x65\x49\104\x46\x6f\162\x6d\x61\164\76\12\x9\x9\x3c\x6d\x64\72\x4e\x61\155\145\x49\x44\x46\x6f\162\155\141\x74\x3e\165\162\x6e\x3a\x6f\141\x73\151\163\x3a\x6e\141\x6d\145\163\x3a\164\143\72\x53\x41\115\x4c\72\x31\x2e\61\72\x6e\141\x6d\145\151\144\55\x66\x6f\162\x6d\141\x74\x3a\x75\156\163\x70\x65\143\151\146\x69\x65\144\74\x2f\155\x64\x3a\x4e\141\155\x65\111\x44\x46\x6f\162\155\x61\x74\x3e\12\x9\x9\x3c\x6d\144\72\123\151\156\x67\x6c\145\x53\151\x67\x6e\x4f\x6e\x53\x65\162\x76\x69\x63\x65\x20\12\x9\11\x9\x42\x69\156\144\151\156\147\75\42\x75\x72\156\72\157\x61\163\151\163\72\156\141\155\x65\163\x3a\164\x63\x3a\x53\101\x4d\114\x3a\x32\56\60\72\x62\x69\x6e\144\x69\156\x67\163\72\x48\124\x54\x50\x2d\120\x4f\x53\124\x22\x20\12\x9\x9\x9\114\157\x63\x61\164\x69\x6f\x6e\75\42" . $UJ . "\x22\57\76\12\11\11\x3c\x6d\x64\72\x53\x69\x6e\x67\x6c\x65\x53\151\x67\x6e\x4f\x6e\123\x65\162\x76\151\143\x65\x20\12\11\11\11\102\x69\x6e\144\x69\156\147\75\42\x75\162\x6e\x3a\x6f\x61\x73\151\x73\72\x6e\141\x6d\145\163\x3a\164\143\72\123\101\115\x4c\x3a\x32\x2e\60\72\x62\x69\x6e\x64\151\156\x67\163\72\110\x54\124\120\55\122\x65\x64\x69\x72\x65\143\x74\42\40\xa\11\11\11\114\x6f\x63\x61\164\x69\x6f\156\75\42" . $UJ . "\x22\57\x3e\xa\x9\x9\x3c\155\144\x3a\123\x69\x6e\x67\x6c\145\x4c\157\147\x6f\x75\x74\x53\145\x72\166\151\143\x65\x20\12\x9\x9\11\x42\x69\156\144\x69\156\x67\x3d\x22\165\x72\x6e\72\157\x61\163\151\x73\72\x6e\x61\155\x65\x73\72\164\x63\x3a\123\101\115\x4c\x3a\62\x2e\60\72\142\151\x6e\144\x69\156\147\x73\72\x48\124\x54\120\x2d\x52\x65\x64\x69\x72\x65\143\x74\x22\40\xa\11\x9\11\114\157\143\x61\x74\x69\157\156\75\x22" . $L4 . "\x22\x2f\76\12\11\11\74\x6d\144\72\123\x69\156\147\154\x65\x4c\x6f\x67\157\165\164\123\x65\x72\166\151\x63\145\x20\xa\11\11\x9\x42\151\x6e\x64\151\156\147\75\42\x75\x72\x6e\72\157\x61\x73\151\163\72\x6e\x61\x6d\145\x73\72\x74\143\x3a\123\101\x4d\114\72\x32\x2e\x30\72\x62\x69\x6e\144\151\156\x67\x73\72\110\x54\x54\120\x2d\120\x4f\x53\124\x22\40\xa\x9\11\11\114\x6f\143\x61\164\x69\157\x6e\x3d\42" . $L4 . "\42\57\x3e\12\x9\x3c\x2f\155\144\x3a\111\x44\x50\x53\x53\117\x44\145\163\x63\162\151\x70\x74\x6f\162\x3e\xa\40\x20\x3c\x2f\155\x64\x3a\x45\156\164\151\x74\171\104\x65\163\143\x72\x69\160\x74\157\x72\x3e";
+    die;
 }
-
-/**
-* Send SAML Response after user Login.
-*/
-
-function miniorange_saml_idp_user_login(&$edit, $account){
-	if(isset($_COOKIE['response_params'])){
-		$response_params =  json_decode(stripslashes($_COOKIE['response_params']),true);
-		if(strcmp( $response_params['moIdpsendResponse'], 'true') == 0) {
-			mo_idp_send_reponse($response_params['acs_url'],$response_params['audience'],$response_params['relayState'],$response_params['inResponseTo']);
-		}
-	}
-}
-
-/**
-* Initiate configurations testing.
-*/
-
-function miniorange_saml_idp_test_configurations(){
-	$relayState = '/';
-	$acs = variable_get('miniorange_saml_idp_acs_url');
-	$sp_issuer = variable_get('miniorange_saml_idp_sp_entity_id');
-
-	if($acs == '' || is_null($acs) || $sp_issuer == '' || is_null($sp_issuer)) {
-        echo '<div style="font-family:Calibri;padding:0 3%;">';
-        echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-                <div style="color: #a94442;font-size:14pt; margin-bottom:20px;">
-                    <p><strong>Error: </strong>Please configure your Service Provider (SP) first and then click on Test Configuration.</p>
-                    <p><strong>Possible Cause: </strong> ACS URL or SP Entity ID not found.</p>
-                
-                </div>
-                <div style="margin:3%;display:block;text-align:center;">';
-        ?>
-        <div style="margin:3%;display:block;text-align:center;"><input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();"></a></div>
-        <?php
-        exit;
-	}
-	mo_idp_authorize_user($acs,$sp_issuer,$relayState);
-}
-
-
-/**
-* Initiate SAML Login.
-*/
-function miniorange_saml_idp_login_request() {
-  if(array_key_exists('SAMLRequest', $_REQUEST) && !empty($_REQUEST['SAMLRequest'])) {
-      _read_saml_request($_REQUEST,$_GET);
-  }
-}
-
-function miniorange_saml_idp_metadata(){
-    if(isset($_REQUEST['q']) && $_REQUEST['q'] == 'moidp_metadata') {
-        _generate_metadata();
-    }
-}
-
-function miniorange_saml_idp_download_metadata(){
-    if(isset($_REQUEST['q']) && $_REQUEST['q'] == 'moidp_download_metadata') {
-        _generate_metadata(true);
-    }
-}
-
-function _generate_metadata($download=false){
+function miniorange_saml_idp_user_logout()
+{
     global $base_url;
-    $site_url = $base_url . '/';
-    $entity_id = $site_url . '?q=admin/config/people/miniorange_saml_idp/';
-    $login_url = $site_url . '?q=initiatelogon';
-
-    define('DRUPAL_BASE_ROOT', dirname(__FILE__));
-    $module_path = drupal_get_path('module', 'miniorange_saml_idp');
-    //echo DRUPAL_BASE_ROOT;
-    $cert_path = DRUPAL_BASE_ROOT . DIRECTORY_SEPARATOR .  'resources' . DIRECTORY_SEPARATOR . 'idp-signing.crt';
-
-    //ob_clean();
-    $certificate = file_get_contents($cert_path);
-    $certificate = Utilities::desanitize_certificate($certificate);
-
-    if($download){
-        header('Content-Disposition: attachment; filename="Metadata.xml"');
-    }
-    else {
-        header('Content-Type: text/xml');
-    }
-    echo'<?xml version="1.0" encoding="UTF-8"?>
-    <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="'.$entity_id.'">
-        <md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
-            <md:KeyDescriptor use="signing">
-		        <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
-			        <ds:X509Data>
-				        <ds:X509Certificate>'.$certificate.'</ds:X509Certificate>
-			        </ds:X509Data>
-		        </ds:KeyInfo>
-	        </md:KeyDescriptor>
-	        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
-	        <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat>
-	        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="'.$login_url.'"/>
-	        <md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="'.$login_url.'"/>
-	    </md:IDPSSODescriptor>
-    </md:EntityDescriptor>';
-    exit;
+    global $user;
+    $at = $base_url . "\x2f";
+    $L1 = $at . "\77\x71\x3d\x61\x64\155\151\x6e\57\x63\x6f\x6e\x66\x69\x67\57\160\145\157\x70\x6c\145\57\x6d\x69\x6e\x69\157\162\x61\x6e\147\145\137\163\141\155\x6c\x5f\151\x64\x70\x2f";
+    $L4 = variable_get("\155\151\x6e\151\x6f\162\141\x6e\147\x65\137\163\x61\x6d\154\137\x69\144\160\x5f\163\154\x6f\x5f\165\x72\x6c", '');
+    $Md = variable_get("\x6d\151\x6e\x69\157\x72\x61\156\147\x65\137\x73\x61\155\154\x5f\151\144\x70\x5f\156\x61\155\x65\151\x64\x5f\141\x74\164\x72\x5f\155\x61\x70");
+    $QB = $Md == "\145\x6d\141\151\x6c\101\144\144\162\145\163\163" ? $user->mail : $user->name;
+    Utilities::mo_idp_send_logout_request($QB, $L1, $L4);
 }
-
-function _read_saml_request($REQUEST,$GET) {
-    $samlRequest = $REQUEST['SAMLRequest'];
-    $relayState = '/';
-    if(array_key_exists('RelayState', $REQUEST)) {
-	    $relayState = $REQUEST['RelayState'];
+function miniorange_saml_idp_samllogout()
+{
+    global $base_url;
+    $at = $base_url . "\x2f";
+    $L1 = $at . "\x3f\x71\x3d\141\144\155\x69\x6e\x2f\x63\157\x6e\x66\x69\147\57\x70\145\x6f\x70\154\145\x2f\155\x69\156\151\157\162\141\x6e\x67\x65\x5f\x73\141\x6d\x6c\x5f\151\144\160\x2f";
+    $L4 = variable_get("\x6d\x69\x6e\151\157\x72\x61\156\x67\x65\137\x73\x61\155\154\x5f\x69\144\160\137\163\x6c\157\x5f\165\x72\154", '');
+    if (empty($L4)) {
+        goto px;
     }
-
-    $samlRequest = base64_decode($samlRequest);
-    if(array_key_exists('SAMLRequest', $GET) && !empty($GET['SAMLRequest'])) {
-        $samlRequest = gzinflate($samlRequest);
+    if (array_key_exists("\123\101\115\114\x52\145\161\x75\x65\x73\164", $_REQUEST) && !empty($_REQUEST["\x53\101\x4d\x4c\122\145\x71\x75\x65\x73\x74"])) {
+        goto l4;
     }
-
-    $document = new DOMDocument();
-    $document->loadXML($samlRequest);
-    $samlRequestXML = $document->firstChild;
-
-    $authnRequest = new AuthnRequest($samlRequestXML);
-
+    if (!(array_key_exists("\x53\x41\115\114\x52\145\x73\x70\x6f\156\x73\x65", $_REQUEST) && !empty($_REQUEST["\123\x41\x4d\114\122\x65\x73\x70\157\156\x73\x65"]))) {
+        goto q9;
+    }
+    Utilities::_read_saml_response($_REQUEST, $_GET);
+    q9:
+    goto n0;
+    l4:
+    Utilities::_read_samllogout_request($_REQUEST, $_GET);
+    n0:
+    goto se;
+    px:
+    session_destroy();
+    drupal_goto($base_url);
+    die;
+    se:
+}
+function miniorange_saml_idp_initiated_login()
+{
+    global $base_url;
+    $sp = $_REQUEST["\x73\160"];
+    $Pw = variable_get("\155\151\x6e\151\x6f\x72\x61\x6e\x67\145\x5f\163\x61\x6d\x6c\137\x69\144\160\x5f\x73\x70\137\x6e\141\x6d\x65", '');
+    if (!($sp != $Pw)) {
+        goto FB;
+    }
+    drupal_goto($base_url);
+    FB:
+    $E5 = variable_get("\155\151\156\x69\157\162\x61\156\147\x65\137\x73\141\155\154\137\151\144\160\x5f\141\143\163\137\165\162\x6c", '');
+    $ei = variable_get("\x6d\151\156\151\157\x72\x61\156\147\x65\x5f\x73\141\x6d\154\137\151\144\x70\137\163\x70\x5f\145\x6e\x74\x69\164\x79\x5f\x69\x64", '');
+    $bS = "\x2f";
+    $qm = variable_get("\x6d\x69\156\x69\x6f\x72\141\x6e\147\x65\x5f\163\x61\155\x6c\x5f\151\x64\160\x5f\162\x65\x6c\141\171\x5f\163\x74\141\x74\145", '');
+    if (!(!empty($qm) && !is_null($qm))) {
+        goto WJ;
+    }
+    $bS = $qm;
+    WJ:
+    mo_idp_authorize_user($E5, $ei, $bS);
+}
+function _read_saml_request($O0, $k3)
+{
+    $UU = $O0["\x53\101\115\x4c\x52\145\161\x75\145\163\x74"];
+    $V8 = "\x2f";
+    if (!array_key_exists("\122\x65\154\141\x79\x53\x74\x61\x74\145", $O0)) {
+        goto Ug;
+    }
+    $V8 = $O0["\122\x65\154\x61\171\x53\x74\x61\164\145"];
+    Ug:
+    miniorange_saml_idp_load_xmlseclib();
+    $UU = base64_decode($UU);
+    if (!(array_key_exists("\123\x41\x4d\x4c\x52\x65\161\x75\x65\x73\164", $k3) && !empty($k3["\x53\101\115\114\122\x65\161\x75\x65\x73\164"]))) {
+        goto vd;
+    }
+    $UU = gzinflate($UU);
+    vd:
+    $sV = new DOMDocument();
+    $sV->loadXML($UU);
+    $gn = $sV->firstChild;
+    $gV = new AuthnRequest($gn);
     $errors = '';
-    if(strtotime($authnRequest->getIssueInstant()) > (time() + 60))
-        $errors.= '<strong>INVALID_REQUEST: </strong>Request time is greater than the current time.<br/>';
-    if($authnRequest->getVersion()!=='2.0')
-        $errors.='We only support SAML 2.0! Please send a SAML 2.0 request.<br/>';
-    $acs_url = variable_get('miniorange_saml_idp_acs_url');
-    $sp_issuer = variable_get('miniorange_saml_idp_sp_entity_id', NULL);
-    $acs_url_from_request = $authnRequest->getAssertionConsumerServiceURL();
-    $sp_issuer_from_request = $authnRequest->getIssuer();
-
-    if(empty($acs_url) || empty($sp_issuer)){
-        $errors.= '<strong>INVALID_SP: </strong>Service Provider is not configured. Please configure your Service Provider.<br/>';
-    }else{
-        if(strcmp($acs_url,$acs_url_from_request) !== 0 ){
-            $errors.= '<strong>INVALID_ACS: </strong>Invalid ACS URL!. Please check your Service Provider Configurations.<br/>';
-	    }
-        if(strcmp($sp_issuer,$sp_issuer_from_request) !== 0){
-            $errors.='<strong>INVALID_ISSUER: </strong>Invalid Issuer! Please check your configuration.<br/>';
-        }
+    if (!(strtotime($gV->getIssueInstant()) > time() + 60)) {
+        goto JB;
     }
-
-    $inResponseTo = $authnRequest->getRequestID();  // sending inresponeTo parameter with the SAML response
-
-    if(empty($errors)){
-    	$module_path = drupal_get_path('module', 'miniorange_saml_idp');
-        ?>
-	    <div style="vertical-align:center;text-align:center;width:100%;font-size:25px;background-color:white;">
-	        <img src="<?php echo $module_path;?>/includes/images/loader_gif.gif"></img>
-	        <h3>PROCESSING...PLEASE WAIT!</h3>
-	    </div>
-        <?php
-        mo_idp_authorize_user($acs_url_from_request,$sp_issuer_from_request,$relayState,$inResponseTo);
-    } else{
-	    echo sprintf($errors);
-	    exit;
+    $errors .= "\74\x73\164\162\x6f\x6e\x67\x3e\111\116\x56\x41\x4c\111\104\137\x52\105\x51\125\x45\x53\x54\72\40\74\x2f\x73\x74\162\157\156\147\76\x52\145\161\165\145\x73\164\x20\164\x69\x6d\x65\x20\151\163\40\x67\162\145\141\164\x65\x72\40\164\150\x61\156\x20\164\x68\145\x20\143\x75\x72\x72\x65\156\x74\x20\164\151\x6d\x65\56\74\x62\162\x2f\x3e";
+    JB:
+    if (!($gV->getVersion() !== "\62\x2e\60")) {
+        goto lh;
     }
+    $errors .= "\x57\145\40\x6f\156\x6c\171\40\163\165\160\160\157\x72\164\x20\123\x41\x4d\x4c\40\x32\x2e\60\41\40\120\154\x65\141\163\x65\x20\x73\145\156\144\40\141\40\123\x41\x4d\x4c\x20\62\56\60\40\x72\x65\x71\x75\145\163\x74\56\74\142\162\x2f\76";
+    lh:
+    $E5 = variable_get("\155\x69\x6e\x69\x6f\x72\141\156\x67\x65\137\x73\x61\x6d\x6c\x5f\151\144\x70\137\141\143\163\137\x75\162\154", '');
+    $ei = variable_get("\155\151\156\x69\x6f\162\x61\x6e\147\145\137\x73\x61\155\154\137\151\x64\x70\137\163\160\x5f\145\x6e\x74\151\164\x79\x5f\151\x64", '');
+    $BY = $gV->getAssertionConsumerServiceURL();
+    $Os = $gV->getIssuer();
+    if (empty($E5) || empty($ei)) {
+        goto D9;
+    }
+    if (!(strcmp($E5, $BY) !== 0)) {
+        goto g2;
+    }
+    $errors .= "\74\x73\x74\x72\157\156\147\76\x49\116\x56\101\114\111\104\x5f\101\x43\x53\x3a\40\74\x2f\163\x74\162\x6f\x6e\147\x3e\111\156\x76\x61\154\x69\144\40\x41\103\x53\40\125\122\114\x21\56\x20\120\154\145\141\163\x65\40\x63\150\145\x63\x6b\x20\171\157\165\162\x20\x53\145\162\166\x69\143\145\40\120\x72\157\166\151\144\x65\x72\x20\103\157\156\146\151\x67\x75\162\141\164\x69\157\156\x73\56\74\x62\x72\x2f\x3e";
+    g2:
+    if (!(strcmp($ei, $Os) !== 0)) {
+        goto Lf;
+    }
+    $errors .= "\74\163\164\162\x6f\x6e\147\76\111\116\126\101\114\111\104\137\x49\x53\123\125\x45\122\x3a\x20\74\x2f\x73\x74\162\157\156\147\76\111\156\166\141\154\x69\144\x20\111\163\x73\165\145\x72\x21\40\x50\x6c\145\x61\x73\x65\40\143\150\145\x63\153\x20\171\157\x75\162\x20\x63\157\x6e\146\x69\147\x75\162\x61\164\x69\157\156\x2e\x3c\x62\162\x2f\x3e";
+    Lf:
+    goto RT;
+    D9:
+    $errors .= "\74\x73\x74\162\x6f\x6e\x67\76\x49\x4e\x56\x41\114\x49\x44\137\x53\120\x3a\x20\x3c\57\x73\164\x72\x6f\x6e\147\x3e\123\145\x72\x76\x69\143\x65\x20\120\x72\x6f\166\x69\144\145\x72\40\151\163\40\156\x6f\x74\40\x63\x6f\156\x66\x69\147\x75\162\145\144\x2e\x20\120\x6c\145\141\x73\x65\x20\143\157\x6e\146\151\x67\x75\162\x65\x20\x79\157\x75\162\40\123\x65\x72\x76\151\143\x65\40\x50\x72\157\x76\151\144\145\162\x2e\x3c\142\x72\57\76";
+    RT:
+    $kn = $gV->getRequestID();
+    if (!empty($errors)) {
+        goto W0;
+    }
+    $x_ = Utilities::validateElement($gn);
+    $Q6 = variable_get("\155\151\x6e\x69\x6f\162\x61\x6e\x67\145\137\163\141\x6d\x6c\x5f\151\x64\160\137\x63\x65\162\164\x69\x66\151\x63\141\164\145\x5f\163\x69\147\156\145\x64", '');
+    $Q6 = XMLSecurityKey::getRawThumbprint($Q6);
+    $Q6 = iconv("\x55\124\x46\55\70", "\103\120\x31\x32\65\x32\57\x2f\111\107\x4e\117\122\x45", $Q6);
+    $Q6 = preg_replace("\x2f\134\163\53\x2f", '', $Q6);
+    if (!($x_ !== FALSE)) {
+        goto je;
+    }
+    $oR = Utilities::processRequest($Q6, $x_);
+    if (!($oR === FALSE)) {
+        goto r_;
+    }
+    $errors .= "\74\163\164\162\x6f\x6e\x67\x3e\x49\116\x56\101\x4c\111\x44\x5f\x53\x49\x47\x4e\101\x54\125\122\x45\x3a\40\x3c\x2f\x73\164\162\157\156\x67\76\111\x6e\166\x61\x6c\x69\144\x20\x53\151\147\x6e\141\164\165\x72\x65\x21\56\x3c\x62\x72\x2f\76";
+    die;
+    r_:
+    je:
+    W0:
+    if (empty($errors)) {
+        goto oI;
+    }
+    echo sprintf($errors);
+    die;
+    goto Af;
+    oI:
+    mo_idp_authorize_user($BY, $Os, $V8, $kn);
+    Af:
 }
-
-function mo_idp_authorize_user($acs_url,$audience,$relayState,$inResponseTo=null){
+function mo_idp_authorize_user($E5, $WN, $V8, $kn = null)
+{
     global $user;
     if (user_is_logged_in()) {
-        mo_idp_send_reponse($acs_url,$audience,$relayState,$inResponseTo);
-    } else {
-        $saml_response_params = array('moIdpsendResponse' => "true" , "acs_url" => $acs_url , "audience" => $audience , "relayState" => $relayState,"inResponseTo" => $inResponseTo );
-	    setcookie("response_params",json_encode($saml_response_params));
-	    global $base_url;
-	    $redirect_url = $base_url . '/';
-        drupal_goto($redirect_url);
-	    exit;
+        goto A6;
     }
+    $Dg = array("\x6d\157\111\144\160\x73\x65\x6e\x64\x52\x65\163\160\157\x6e\x73\x65" => "\x74\x72\x75\145", "\x61\x63\163\137\165\x72\x6c" => $E5, "\x61\165\144\x69\x65\x6e\143\145" => $WN, "\162\x65\154\x61\171\x53\x74\x61\164\145" => $V8, "\151\156\122\x65\x73\160\157\x6e\163\145\x54\157" => $kn);
+    setcookie("\x72\x65\x73\160\157\x6e\x73\145\x5f\160\141\162\141\x6d\163", json_encode($Dg));
+    global $base_url;
+    $di = $base_url . "\x2f";
+    $ee = variable_get("\155\x69\x6e\151\157\162\x61\x6e\x67\145\137\x73\141\x6d\x6c\137\151\x64\x70\137\x64\x72\x75\160\141\x6c\x5f\x6c\157\x67\x69\x6e\x5f\160\141\x67\145\137\165\x72\154", '');
+    $di = isset($ee) && !empty($ee) ? $ee : $di;
+    drupal_goto($di);
+    goto GH;
+    A6:
+    mo_idp_send_reponse($E5, $WN, $V8, $kn);
+    GH:
 }
-
-function mo_idp_send_reponse($acs_url,$audience,$relayState, $inResponseTo=null){
+function mo_idp_send_reponse($E5, $WN, $V8, $kn = null)
+{
     global $user;
-	$current_user = $user;
-
-	if(!in_array('administrator',$current_user->roles)){
-	    ob_end_clean();
-	    echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-			<div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Single Sign On not Allowed</strong> </p>
-    			<p>This is a trial module meant for Administrator use only.</p>
-				<p>The Single Sign On feature for end users is available in the premium version of the module.</p>
-			</div>
-			<div style="margin:3%;display:block;text-align:center;">';
-	    exit;
-	}
-	$email = $current_user->mail;
-	$username = $current_user->name;
-	global $base_url;
-	$issue1 = variable_get('miniorange_saml_idp_issuerID','');
-  $issuer = $issue1 !='' ? $issue1 : $base_url . '/?q=admin/config/people/miniorange_saml_idp/';
-	$name_id_attr = (variable_get('miniorange_saml_idp_nameid_attr_map') == '')?'emailAddress' : variable_get('miniorange_saml_idp_nameid_attr_map');
-	$name_id_attr_format = variable_get('miniorange_saml_idp_nameid_format');
-	$idp_assertion_signed = variable_get('miniorange_saml_idp_assertion_signed');
-	$state = variable_get('miniorange_saml_idp_relay_state', '');
-	if(!empty($state) && !is_null($state)){
-		$relayState = $state;
-	}
-
-	//miniorange_saml_idp_load_xmlseclib();
-
-	$saml_response_obj = new GenerateResponse($email,$username, $acs_url, $issuer, $audience,$inResponseTo, $name_id_attr,$name_id_attr_format,$idp_assertion_signed);
-	$saml_response = $saml_response_obj->createSamlResponse();
-	setcookie("response_params","");
-	_send_response($saml_response, $relayState,$acs_url);
+    $current_user = $user;
+    $Wp = $current_user->mail;
+    $ND = $current_user->name;
+    global $base_url;
+    $L1 = $base_url . "\x2f\x3f\161\x3d\x61\x64\155\x69\156\x2f\143\x6f\156\146\x69\147\57\160\x65\x6f\x70\154\145\57\x6d\x69\156\151\157\x72\x61\x6e\147\145\137\163\141\155\x6c\137\x69\x64\160\57";
+    $pf = variable_get("\x6d\x69\156\151\x6f\162\141\156\147\x65\x5f\163\x61\155\x6c\137\151\x64\160\x5f\156\x61\x6d\x65\x69\144\x5f\x61\x74\x74\162\x5f\x6d\141\160");
+    $dJ = variable_get("\x6d\x69\156\x69\x6f\x72\141\156\x67\x65\137\163\141\x6d\x6c\137\x69\144\x70\137\162\x65\x73\x70\157\156\163\145\137\x73\x69\147\156\x65\x64");
+    $yO = variable_get("\x6d\x69\x6e\151\x6f\162\141\156\x67\145\137\163\x61\x6d\154\137\x69\144\160\137\x61\163\x73\x65\162\x74\151\x6f\156\137\163\151\x67\x6e\x65\144");
+    $rJ = variable_get("\x6d\151\156\x69\x6f\x72\x61\x6e\x67\x65\x5f\163\x61\155\x6c\x5f\x69\x64\x70\x5f\145\156\x63\162\171\x70\x74\x65\x64\x5f\x61\163\x73\145\x72\x74\151\x6f\156");
+    $rL = variable_get("\x6d\x69\156\x69\x6f\162\x61\156\x67\x65\137\x73\x61\x6d\x6c\137\x69\144\x70\137\x63\x65\162\x74\x69\146\151\143\141\x74\145\137\x65\156\x63\162\171\160\x74\x65\144");
+    $c6 = variable_get("\155\151\156\x69\x6f\x72\141\x6e\x67\x65\x5f\x73\141\x6d\x6c\x5f\151\x64\x70\137\156\x61\155\x65\151\144\x5f\146\157\x72\x6d\141\x74");
+    $zg = mo_get_idp_attributes($current_user);
+    miniorange_saml_idp_load_xmlseclib();
+    $rY = variable_get("\x6d\151\x6e\x6f\x72\141\x6e\147\145\x5f\163\x61\x6d\154\x5f\x63\x75\x73\x74\x6f\155\145\162\137\141\x64\155\151\156\x5f\146\162\x61\165\x64\137\143\x68\145\x63\x6b");
+    $Ri = variable_get("\x6d\x69\x6e\x69\157\x72\x61\156\x67\x65\x5f\163\x61\x6d\x6c\x5f\151\144\x70\137\143\165\163\164\157\155\x65\162\137\141\x64\x6d\151\x6e\x5f\x74\x6f\x6b\145\x6e");
+    $G0 = variable_get("\x6d\151\156\x69\157\162\141\x6e\x67\145\x5f\x73\x61\x6d\x6c\x5f\151\x64\x70\x5f\143\165\163\x74\157\155\145\x72\x5f\x61\144\155\x69\x6e\x5f\x65\155\141\x69\x6c");
+    $bi = variable_get("\x6d\151\156\151\157\x72\141\156\x67\x65\137\163\x61\155\154\137\x69\x64\x70\137\163\155\154\137\x6c\x6b");
+    global $base_url;
+    global $oL;
+    $vu = $_SERVER["\x44\x4f\103\x55\115\x45\x4e\124\137\x52\117\x4f\x54"] . $oL;
+    $Ds = trim($base_url, "\57");
+    if (preg_match("\43\x5e\x68\x74\x74\x70\50\x73\x29\x3f\72\x2f\57\43", $Ds)) {
+        goto oC;
+    }
+    $Ds = "\150\164\164\x70\x3a\57\57" . $Ds;
+    oC:
+    $qC = parse_url($Ds);
+    $zQ = preg_replace("\x2f\136\167\x77\x77\x5c\56\x2f", '', $qC["\x68\x6f\x73\164"] . $qC["\160\x61\164\150"]);
+    $HP = $vu . $zQ;
+    $YC = Utilities::encrypt($HP, $Ri);
+    if ($YC == $rY && $G0 != null && $G0 != '') {
+        goto Uj;
+    }
+    if ($G0 != null && $G0 != '') {
+        goto it;
+    }
+    if (!($G0 == null || $G0 == '')) {
+        goto a6;
+    }
+    echo "\x3c\144\151\x76\x20\163\x74\x79\154\145\75\x22\x66\157\x6e\x74\x2d\x66\x61\x6d\151\x6c\x79\72\103\141\x6c\151\x62\x72\151\73\x70\141\144\x64\151\x6e\147\x3a\60\x20\x33\x25\x3b\42\x3e";
+    echo "\x3c\x64\x69\166\x20\163\x74\x79\x6c\x65\75\42\143\x6f\154\157\162\72\x20\x23\141\x39\64\x34\x34\62\73\142\141\x63\153\x67\x72\x6f\165\156\144\55\x63\157\x6c\x6f\x72\72\x20\x23\146\62\x64\x65\x64\x65\73\x70\141\144\x64\151\156\x67\72\x20\x31\65\160\x78\73\x6d\x61\x72\147\151\x6e\x2d\142\x6f\x74\x74\157\155\72\40\x32\60\x70\x78\x3b\164\145\x78\164\x2d\141\x6c\151\x67\156\72\143\145\x6e\x74\145\162\x3b\142\x6f\162\144\x65\162\x3a\61\x70\x78\40\163\x6f\x6c\151\144\x20\43\x45\x36\102\63\102\x32\73\146\157\x6e\x74\55\x73\x69\x7a\x65\72\x31\70\x70\164\x3b\42\76\x20\105\122\x52\117\x52\x3c\x2f\x64\x69\166\x3e\12\x20\x20\40\x20\40\40\40\x20\x20\40\40\x20\40\x20\x20\40\40\x20\40\x20\40\x20\40\40\x20\40\40\40\x3c\144\151\166\40\x73\164\x79\154\145\x3d\42\x63\x6f\154\x6f\162\72\40\43\141\71\x34\x34\64\62\73\146\157\156\164\x2d\163\151\172\145\72\x31\x34\160\164\x3b\40\x6d\x61\x72\147\x69\156\55\x62\x6f\164\164\x6f\x6d\72\62\x30\160\170\73\42\76\x3c\x70\x3e\x3c\x73\164\x72\x6f\x6e\147\x3e\x45\162\x72\x6f\162\72\x20\x3c\57\x73\164\x72\157\x6e\x67\x3e\131\x6f\165\40\141\x72\x65\40\x6e\x6f\164\x20\x6c\x6f\x67\x67\x65\x64\40\x69\156\x2e\x3c\x2f\x70\76\12\x20\40\40\40\x20\40\40\40\40\40\x20\x20\40\x20\x20\40\x20\40\40\40\x20\x20\40\40\40\40\40\x20\x20\40\x20\40\74\x70\x3e\120\154\145\141\163\145\40\154\x6f\x67\x69\x6e\40\146\151\162\x73\x74\40\x74\157\40\141\x63\164\151\166\141\164\145\x20\163\151\x6e\x67\154\x65\x20\x73\x69\147\156\x20\157\x6e\56\x3c\x2f\x70\76\12\40\x20\x20\40\40\40\x20\x20\40\40\40\40\x20\40\40\40\x20\40\40\x20\x20\40\40\40\40\40\x20\40\x20\x20\x20\x20\74\160\76\74\x73\164\x72\157\x6e\147\x3e\120\157\x73\x73\151\142\x6c\145\x20\x43\x61\x75\x73\145\72\40\x3c\57\x73\x74\x72\157\156\147\76\x4d\x61\153\145\40\x73\165\162\x65\40\171\x6f\x75\x20\150\141\166\145\40\154\157\x67\147\x65\x64\x20\151\156\x2f\40\x52\x65\147\151\163\164\145\x72\x20\x69\x6e\x20\164\157\40\x70\154\165\x67\151\x6e\56\x3c\57\x70\x3e\xa\40\40\40\40\40\x20\x20\x20\x20\x20\40\40\40\40\x20\40\40\40\x20\x20\40\x20\40\x20\40\40\40\40\74\57\144\151\x76\x3e\12\40\x20\x20\40\x20\40\40\40\x20\x20\40\x20\x20\40\x20\x20\x20\40\x20\x20\40\40\40\x20\x20\x20\40\40\x3c\144\x69\x76\x20\x73\x74\x79\154\x65\75\42\155\x61\162\147\x69\x6e\x3a\63\x25\x3b\x64\151\x73\x70\x6c\x61\171\72\x62\x6c\157\143\x6b\73\164\x65\170\x74\x2d\141\x6c\x69\x67\x6e\x3a\x63\x65\x6e\x74\x65\162\73\42\x3e\74\x2f\144\x69\x76\x3e\12\40\x20\40\x20\x20\40\x20\40\40\40\x20\40\x20\40\x20\40\40\40\x20\40\x20\x20\40\x20\x20\x20\40\x20\x3c\x64\x69\166\x20\x73\x74\171\x6c\145\75\x22\x6d\141\162\147\151\x6e\72\x33\x25\x3b\144\x69\163\160\154\x61\171\72\x62\x6c\x6f\143\x6b\x3b\164\x65\170\164\x2d\141\x6c\151\147\x6e\72\x63\145\x6e\164\145\162\x3b\42\76\12\40\x20\x20\40\40\x20\x20\40\x20\40\40\40\x20\x20\40\x20\x20\40\x20\x20\40\x20\40\x20\40\40\x20\x20\40\x20\40\x20\74\151\156\160\x75\x74\40\x73\164\171\154\x65\x3d\42\160\141\x64\x64\x69\x6e\147\72\61\x25\x3b\167\151\144\x74\x68\72\x31\x30\60\x70\170\73\142\141\x63\x6b\x67\162\x6f\x75\x6e\144\x3a\x20\43\60\x30\71\61\103\x44\40\x6e\157\156\145\40\162\145\160\x65\141\164\x20\x73\143\x72\x6f\154\x6c\x20\x30\45\x20\60\x25\x3b\x63\165\x72\163\x6f\162\x3a\40\160\x6f\151\x6e\164\x65\x72\x3b\146\157\156\164\x2d\x73\x69\x7a\x65\72\61\x35\160\170\73\x62\157\x72\144\145\x72\55\167\x69\144\164\x68\72\x20\x31\x70\x78\x3b\142\157\162\144\145\162\55\x73\164\x79\154\x65\x3a\40\163\x6f\x6c\151\x64\73\142\x6f\x72\144\145\x72\55\162\141\x64\x69\165\163\72\40\x33\160\x78\x3b\x77\150\x69\x74\145\x2d\x73\160\141\143\x65\72\x20\156\157\167\x72\141\x70\73\x62\157\x78\x2d\163\151\172\x69\x6e\147\x3a\x20\142\157\x72\144\x65\x72\x2d\142\x6f\170\73\142\157\x72\x64\145\162\55\x63\x6f\x6c\157\x72\72\40\43\60\60\x37\x33\x41\x41\x3b\142\x6f\170\55\163\150\141\x64\157\x77\x3a\40\60\x70\x78\40\x31\160\x78\x20\60\160\170\40\162\147\142\x61\x28\x31\x32\x30\54\x20\x32\x30\x30\54\x20\x32\x33\60\54\40\x30\56\x36\x29\40\151\156\163\145\164\x3b\143\157\154\157\x72\x3a\x20\x23\106\106\106\x3b\x22\164\x79\160\145\75\42\x62\165\x74\164\157\x6e\x22\x20\x76\x61\x6c\x75\145\75\42\104\157\x6e\145\42\x20\x6f\156\x43\x6c\151\143\153\75\x22\163\x65\154\x66\56\x63\154\157\x73\145\x28\51\73\42\x3e\12\x20\40\40\40\x20\40\x20\40\x20\x20\x20\40\x20\x20\x20\x20\40\x20\40\x20\40\x20\40\x20\40\x20\x20\x20\x3c\x2f\x64\x69\x76\x3e";
+    die;
+    a6:
+    goto PD;
+    it:
+    echo "\74\x64\x69\x76\40\163\164\x79\154\x65\75\x22\x66\157\x6e\x74\55\146\141\155\x69\154\x79\x3a\x43\141\154\x69\x62\162\151\x3b\160\141\x64\x64\151\156\x67\x3a\x30\40\63\x25\73\42\x3e";
+    echo "\74\x64\x69\x76\x20\x73\x74\171\154\145\x3d\42\x63\x6f\154\157\x72\x3a\x20\x23\141\x39\x34\x34\x34\x32\73\142\141\x63\153\147\x72\x6f\x75\156\x64\x2d\143\157\x6c\157\x72\x3a\x20\x23\146\x32\144\x65\144\x65\x3b\160\x61\x64\144\x69\x6e\x67\x3a\40\x31\65\160\x78\x3b\x6d\141\x72\x67\151\156\x2d\142\157\x74\x74\157\x6d\72\x20\62\x30\160\x78\73\164\145\x78\164\55\x61\x6c\x69\x67\x6e\72\143\x65\x6e\164\145\x72\x3b\142\157\x72\x64\145\x72\72\61\160\170\40\x73\157\x6c\151\x64\40\43\105\66\102\x33\x42\62\73\146\x6f\x6e\164\x2d\163\151\x7a\145\x3a\61\x38\x70\x74\x3b\x22\x3e\40\105\122\x52\x4f\122\74\x2f\144\151\166\76\12\x20\x20\40\x20\x20\x20\40\40\40\x20\x20\x20\40\40\x20\40\40\x20\x20\40\40\40\x20\40\x20\x20\x20\x20\x3c\x64\151\166\40\163\164\x79\x6c\145\75\42\x63\157\x6c\x6f\x72\72\x20\x23\x61\x39\x34\x34\x34\62\73\146\x6f\x6e\x74\x2d\163\x69\172\145\x3a\61\x34\x70\164\73\x20\155\x61\x72\147\x69\156\x2d\x62\x6f\x74\164\157\x6d\x3a\62\x30\160\x78\x3b\x22\76\x3c\160\x3e\x3c\163\x74\162\x6f\x6e\x67\76\105\162\x72\157\162\x3a\40\74\57\163\x74\162\157\x6e\x67\x3e\114\x69\x63\x65\156\x73\x65\40\153\x65\171\x20\x79\x6f\165\40\x68\x61\x76\145\x20\145\156\x74\x65\162\x65\x64\x20\x68\x61\x73\x20\141\154\162\x65\x61\x64\x79\x20\142\145\x65\156\40\165\163\x65\144\56\74\57\160\x3e\xa\x20\40\x20\x20\x20\x20\40\40\40\40\x20\40\40\x20\40\x20\x20\x20\x20\40\40\x20\x20\x20\x20\x20\x20\40\40\40\40\x20\74\160\x3e\x50\x6c\145\141\163\x65\40\145\x6e\164\x65\x72\x20\x61\x20\x6b\145\x79\x20\x77\150\x69\143\x68\40\x68\141\x73\40\156\x6f\x74\40\142\x65\x65\x6e\40\x75\x73\x65\x64\x20\x62\x65\x66\x6f\x72\145\x20\x6f\156\x20\x61\156\171\x20\157\164\x68\145\162\40\x69\x6e\163\x74\141\156\143\145\x20\157\162\x20\151\x66\40\x79\x6f\165\x20\x68\x61\x76\145\x20\145\170\141\x75\x73\x74\x65\144\40\x61\x6c\154\x20\x79\x6f\x75\162\x20\153\145\x79\163\x20\x74\150\145\x6e\x20\142\165\171\x20\x6d\x6f\162\x65\x20\154\151\x63\x65\x6e\x73\145\40\x66\x72\157\155\40\114\151\143\x65\x6e\x73\151\x6e\x67\56\x3c\57\x70\x3e\xa\x20\40\40\x20\40\x20\x20\x20\40\x20\x20\x20\40\x20\x20\40\40\x20\x20\x20\40\40\x20\x20\x20\x20\40\x20\x3c\57\x64\151\166\x3e\12\x20\40\40\x20\x20\40\40\40\x20\x20\x20\x20\40\x20\x20\x20\40\x20\x20\40\x20\x20\40\x20\40\x20\40\40\x3c\x64\x69\x76\40\163\x74\171\154\x65\x3d\x22\155\x61\162\x67\x69\x6e\72\x33\x25\x3b\144\151\x73\160\x6c\141\x79\72\142\x6c\x6f\143\153\73\x74\145\170\x74\55\141\x6c\151\x67\x6e\x3a\x63\145\x6e\x74\x65\x72\x3b\42\x3e\x3c\x2f\x64\x69\x76\x3e\12\40\x20\40\40\x20\40\40\40\40\40\x20\40\x20\40\x20\x20\40\40\x20\x20\40\x20\40\x20\x20\x20\x20\40\74\144\151\x76\x20\x73\164\x79\154\x65\75\x22\x6d\x61\x72\x67\x69\x6e\x3a\63\45\73\144\151\163\160\154\x61\171\72\142\154\157\x63\x6b\73\x74\145\170\164\55\141\154\151\147\x6e\72\x63\145\x6e\x74\x65\162\x3b\42\x3e\xa\40\x20\x20\40\x20\x20\x20\x20\40\x20\x20\x20\40\x20\x20\40\x20\x20\40\40\40\40\x20\40\x20\x20\x20\x20\40\x20\x20\40\x3c\151\x6e\x70\165\164\x20\x73\x74\171\154\x65\x3d\x22\x70\x61\x64\144\x69\156\147\72\61\45\x3b\167\151\144\164\x68\72\61\60\x30\x70\x78\73\142\x61\143\153\147\162\x6f\x75\156\144\72\40\43\60\60\x39\x31\103\x44\x20\x6e\x6f\x6e\145\x20\x72\145\x70\x65\x61\x74\40\x73\x63\x72\157\154\x6c\40\x30\x25\x20\60\x25\x3b\143\x75\x72\163\x6f\162\72\40\x70\157\151\156\x74\145\x72\73\x66\x6f\156\x74\x2d\163\151\172\145\72\x31\x35\x70\170\x3b\142\157\162\144\145\x72\x2d\x77\x69\x64\x74\x68\x3a\40\x31\x70\170\x3b\142\x6f\162\x64\145\x72\55\163\164\171\x6c\145\72\40\163\x6f\154\x69\144\x3b\x62\157\162\144\x65\162\55\x72\141\144\x69\x75\x73\72\x20\63\160\x78\73\167\150\x69\x74\145\x2d\x73\160\x61\x63\x65\72\40\x6e\157\x77\x72\x61\160\73\x62\x6f\170\55\x73\x69\172\x69\x6e\147\72\40\142\157\162\144\x65\x72\55\x62\x6f\x78\73\x62\157\162\144\145\x72\55\x63\x6f\154\x6f\x72\x3a\40\43\x30\x30\x37\63\x41\101\x3b\142\157\170\55\x73\150\141\x64\157\x77\72\x20\x30\160\170\x20\61\x70\x78\40\x30\160\x78\x20\x72\x67\x62\x61\x28\x31\62\60\54\x20\x32\x30\60\x2c\40\62\x33\x30\54\x20\x30\56\x36\51\40\151\x6e\163\145\164\73\143\x6f\x6c\157\x72\72\x20\43\x46\106\106\73\42\164\x79\160\x65\x3d\42\x62\165\164\164\157\156\x22\x20\x76\x61\154\165\x65\x3d\x22\x44\x6f\x6e\x65\x22\40\157\x6e\x43\x6c\x69\143\153\x3d\x22\163\x65\x6c\x66\56\x63\154\x6f\x73\x65\50\x29\x3b\42\x3e\12\x20\40\x20\40\40\40\40\x20\40\x20\40\x20\40\40\40\x20\40\40\40\x20\x20\x20\40\x20\x20\40\40\x20\74\57\144\x69\x76\x3e";
+    die;
+    PD:
+    goto nF;
+    Uj:
+    if (isset($bi)) {
+        goto Ut;
+    }
+    echo "\74\144\151\166\40\163\164\171\154\x65\x3d\x22\x66\157\x6e\x74\55\x66\141\x6d\x69\x6c\171\72\x43\141\x6c\151\x62\x72\151\x3b\x70\141\x64\x64\x69\156\147\x3a\60\40\63\45\x3b\42\76";
+    echo "\74\x64\151\x76\x20\163\x74\x79\x6c\145\x3d\x22\143\x6f\x6c\157\162\x3a\40\43\x61\x39\x34\64\x34\x32\x3b\x62\141\x63\x6b\x67\x72\157\x75\x6e\144\x2d\x63\x6f\x6c\x6f\x72\x3a\40\43\x66\x32\x64\x65\x64\145\x3b\160\x61\x64\144\151\156\x67\72\x20\61\65\160\170\73\x6d\x61\162\x67\151\x6e\55\142\157\164\x74\157\155\72\40\x32\x30\x70\170\x3b\164\x65\170\164\x2d\x61\x6c\151\147\x6e\x3a\143\x65\x6e\164\x65\162\x3b\142\x6f\162\x64\x65\x72\72\x31\x70\170\40\163\157\154\151\x64\40\x23\x45\66\x42\x33\x42\62\x3b\146\x6f\156\164\x2d\163\151\172\x65\72\x31\x38\160\x74\x3b\42\76\40\x45\122\122\x4f\x52\x3c\x2f\x64\x69\x76\x3e\12\x20\x20\x20\40\40\x20\40\40\40\x20\40\x20\40\x20\40\x20\40\x20\x20\40\x20\x20\40\40\x20\x20\40\40\x3c\x64\x69\166\x20\163\x74\x79\x6c\x65\x3d\42\143\157\x6c\x6f\x72\72\40\x23\x61\x39\x34\x34\x34\x32\73\x66\157\x6e\164\x2d\163\x69\172\145\x3a\x31\64\x70\164\73\x20\x6d\141\x72\x67\151\156\55\x62\x6f\x74\164\x6f\x6d\x3a\x32\x30\x70\170\x3b\x22\x3e\x3c\160\76\x3c\x73\x74\x72\157\x6e\x67\76\x45\x72\162\157\x72\72\40\x3c\x2f\163\164\x72\x6f\156\147\x3e\x59\x6f\165\40\x68\141\166\145\40\156\x6f\x74\x20\x61\x63\164\151\x76\x61\x74\145\x64\x20\160\154\x75\x67\151\x6e\40\171\145\164\x2e\x3c\x2f\160\76\12\x20\x20\40\40\x20\40\x20\40\40\40\x20\40\x20\40\40\40\x20\x20\40\x20\x20\40\x20\x20\x20\40\40\40\x20\x20\40\40\x3c\x70\x3e\120\154\x65\141\x73\145\x20\x65\x6e\164\x65\x72\40\x61\x20\114\151\143\x65\x6e\x73\145\x20\x6b\x65\x79\x20\x77\150\x69\143\150\40\150\x61\x73\x20\x6e\x6f\x74\40\142\x65\x65\x6e\40\165\163\145\x64\x20\142\x65\146\157\162\145\x20\x6f\156\x20\x61\x6e\171\40\x6f\x74\x68\145\162\40\x69\156\x73\x74\x61\156\x63\145\40\x6f\x72\x20\x69\x66\40\x79\x6f\165\x20\150\141\x76\145\x20\x65\170\141\x75\x73\x74\145\144\x20\141\154\x6c\40\171\x6f\165\x72\40\x6b\x65\171\x73\40\164\150\145\x6e\40\142\165\x79\x20\x6d\x6f\162\x65\40\154\x69\x63\x65\x6e\163\x65\40\x66\162\157\x6d\x20\114\151\143\x65\156\x73\151\x6e\147\56\74\57\160\76\12\x20\x20\x20\x20\40\x20\x20\40\x20\x20\x20\x20\40\40\40\40\x20\40\x20\40\x20\40\40\40\x20\x20\40\x20\74\x2f\x64\x69\x76\76\xa\40\40\x20\x20\40\40\40\40\x20\x20\40\40\x20\40\x20\x20\x20\40\x20\40\40\40\x20\x20\40\x20\40\x20\74\x64\x69\x76\x20\163\164\x79\x6c\x65\75\42\155\x61\162\147\151\x6e\x3a\x33\x25\x3b\x64\151\163\160\154\x61\171\x3a\x62\154\x6f\143\153\73\x74\145\x78\x74\x2d\x61\x6c\x69\147\x6e\72\143\x65\x6e\x74\x65\162\x3b\x22\76\x3c\x2f\x64\x69\166\x3e\xa\x20\x20\x20\40\40\40\x20\x20\x20\x20\x20\40\x20\40\40\40\40\x20\x20\x20\x20\40\40\x20\40\40\40\40\74\144\151\x76\40\x73\164\171\x6c\145\75\x22\155\141\x72\x67\x69\156\x3a\x33\45\x3b\x64\151\x73\x70\x6c\141\171\72\x62\154\157\143\153\73\x74\x65\x78\x74\55\141\x6c\x69\147\156\72\143\145\x6e\x74\x65\162\x3b\x22\76\xa\40\x20\x20\x20\40\40\40\40\40\40\40\40\x20\40\40\x20\x20\x20\40\x20\x20\x20\40\x20\40\x20\40\x20\x20\x20\40\40\74\x69\156\160\x75\164\40\163\x74\x79\154\145\75\42\160\x61\144\x64\151\156\147\72\x31\x25\73\x77\x69\144\x74\x68\72\61\60\x30\x70\x78\73\142\141\143\x6b\x67\162\157\x75\156\144\72\40\43\60\x30\x39\61\x43\104\40\156\x6f\x6e\x65\x20\162\145\160\x65\x61\164\x20\163\143\x72\157\154\x6c\x20\x30\45\40\x30\x25\x3b\143\x75\x72\163\x6f\x72\72\40\160\157\x69\x6e\164\x65\162\73\x66\157\x6e\x74\x2d\163\x69\172\x65\72\x31\65\160\170\x3b\142\x6f\162\144\x65\162\55\167\151\144\x74\x68\72\x20\61\x70\x78\73\142\157\x72\144\145\x72\x2d\x73\x74\x79\x6c\145\72\40\163\157\154\151\x64\x3b\x62\157\162\x64\x65\x72\x2d\162\141\144\x69\165\x73\x3a\40\63\x70\170\73\x77\150\151\x74\145\55\x73\x70\141\143\x65\x3a\40\x6e\x6f\x77\162\141\x70\x3b\142\x6f\x78\x2d\x73\151\172\151\x6e\x67\72\40\142\157\x72\144\x65\162\x2d\142\157\170\x3b\x62\157\x72\x64\x65\x72\55\x63\x6f\154\157\x72\x3a\x20\43\x30\60\67\63\x41\x41\x3b\x62\x6f\170\x2d\x73\150\141\x64\x6f\x77\x3a\40\60\x70\170\x20\x31\160\x78\40\x30\x70\x78\x20\162\x67\x62\141\50\x31\62\60\x2c\40\62\60\x30\x2c\40\62\x33\x30\54\40\x30\56\x36\51\40\x69\x6e\x73\x65\164\x3b\x63\157\x6c\x6f\x72\72\x20\43\106\106\x46\x3b\x22\x74\171\x70\x65\x3d\42\142\165\x74\164\x6f\156\x22\40\166\x61\154\x75\145\x3d\42\104\157\156\145\42\x20\157\x6e\x43\x6c\151\x63\153\75\x22\163\145\154\x66\x2e\x63\154\157\163\x65\50\x29\x3b\x22\76\xa\x20\x20\40\40\40\x20\x20\x20\x20\x20\x20\40\40\x20\40\x20\x20\40\x20\40\x20\x20\x20\x20\x20\40\x20\40\74\x2f\x64\151\166\76";
+    die;
+    goto iN;
+    Ut:
+    $dd = new GenerateResponse($Wp, $ND, $E5, $L1, $WN, $pf, $dJ, $yO, $rJ, $rL, $zg, $c6, $kn);
+    iN:
+    nF:
+    $AE = $dd->createSamlResponse();
+    unset($_COOKIE["\x72\x65\x73\x70\x6f\156\163\145\x5f\x70\x61\162\x61\x6d\163"]);
+    setcookie("\162\145\x73\x70\x6f\x6e\x73\x65\x5f\160\141\x72\x61\x6d\x73", '', time() - 3600);
+    _send_response($AE, $V8, $E5);
 }
-
-function _send_response($saml_response, $ssoUrl,$acs_url){
-	$saml_response = base64_encode($saml_response);
-	?>
-	<form id="responseform" action="<?php echo $acs_url; ?>" method="post">
-		<input type="hidden" name="SAMLResponse" value="<?php echo htmlspecialchars($saml_response); ?>" />
-		<input type="hidden" name="RelayState" value="<?php echo $ssoUrl; ?>" />
+function mo_get_idp_attributes($current_user)
+{
+    $Wp = $current_user->mail;
+    $ND = $current_user->name;
+    $iJ = $current_user->status;
+    $yy = $current_user->roles;
+    $Cy = $yy;
+    $kl = array();
+    $hx = variable_get("\x6d\x69\x6e\151\157\162\141\x6e\x67\x65\x5f\x73\x61\155\x6c\137\x69\x64\x70\137\141\x74\x74\x72\x31\x5f\x6e\x61\x6d\x65");
+    $xg = variable_get("\155\x69\156\x69\x6f\162\141\x6e\147\x65\137\x73\x61\x6d\x6c\x5f\151\144\160\137\x61\164\164\162\61\x5f\166\141\x6c\165\145");
+    if (!(!empty($hx) && !empty($xg))) {
+        goto JO;
+    }
+    $zf = mo_get_attribute_value($Wp, $ND, $iJ, $Cy, $xg);
+    $kl[$hx] = $zf;
+    JO:
+    $c5 = variable_get("\155\x69\x6e\151\157\162\x61\156\147\x65\x5f\163\141\155\154\137\x69\144\x70\137\x61\164\164\162\62\x5f\156\x61\155\x65");
+    $zL = variable_get("\x6d\x69\156\151\157\x72\141\x6e\x67\145\x5f\x73\141\155\x6c\137\x69\x64\160\137\x61\164\164\162\x32\x5f\166\x61\x6c\x75\x65");
+    if (!(!empty($c5) && !empty($zL))) {
+        goto K9;
+    }
+    $zf = mo_get_attribute_value($Wp, $ND, $iJ, $Cy, $zL);
+    $kl[$c5] = $zf;
+    K9:
+    $UM = variable_get("\x6d\x69\x6e\x69\157\x72\x61\156\147\x65\x5f\163\141\155\154\137\x69\144\x70\137\141\x74\164\x72\x33\x5f\x6e\x61\155\x65");
+    $Ip = variable_get("\x6d\x69\x6e\x69\x6f\162\x61\156\147\145\x5f\163\x61\155\x6c\137\151\x64\160\137\141\x74\x74\x72\x33\x5f\166\141\x6c\165\145");
+    if (!(!empty($UM) && !empty($Ip))) {
+        goto Xh;
+    }
+    $zf = mo_get_attribute_value($Wp, $ND, $iJ, $Cy, $Ip);
+    $kl[$UM] = $zf;
+    Xh:
+    $iK = variable_get("\x6d\x69\x6e\151\157\x72\x61\x6e\x67\145\137\x73\x61\x6d\154\x5f\151\144\160\137\x61\164\x74\162\x34\x5f\x6e\x61\155\145");
+    $xf = variable_get("\155\151\156\x69\x6f\x72\x61\156\147\145\x5f\x73\141\x6d\x6c\137\151\x64\x70\x5f\x61\x74\x74\x72\64\137\x76\141\x6c\165\145");
+    if (!(!empty($iK) && !empty($xf))) {
+        goto dt;
+    }
+    $zf = mo_get_attribute_value($Wp, $ND, $iJ, $Cy, $xf);
+    $kl[$iK] = $zf;
+    dt:
+    $hZ = variable_get("\x6d\151\x6e\151\x6f\162\x61\156\x67\145\137\x73\141\x6d\154\137\x69\144\160\x5f\165\163\145\x72\x5f\x61\x74\x74\x72\x69\142\165\164\145\x73", '');
+    if (!(isset($hZ) && !empty($hZ))) {
+        goto Wb;
+    }
+    $hZ = json_decode($hZ, true);
+    $y3 = user_load($current_user->uid);
+    foreach ($hZ as $BQ) {
+        $Qc = $BQ["\x61\x74\x74\162\x5f\156\141\x6d\x65"];
+        $r_ = $BQ["\141\164\164\162\x5f\166\141\154\x75\x65"];
+        if (!isset($y3->{$r_})) {
+            goto eb;
+        }
+        $KV = $y3->{$r_};
+        if (!isset($KV["\x75\x6e\144"][0]["\166\x61\x6c\x75\145"])) {
+            goto rM;
+        }
+        $zf = $KV["\x75\x6e\144"][0]["\x76\x61\x6c\x75\145"];
+        if (empty($zf)) {
+            goto At;
+        }
+        $kl[$Qc] = $zf;
+        At:
+        rM:
+        eb:
+        nk:
+    }
+    JG:
+    Wb:
+    return $kl;
+}
+function mo_get_attribute_value($Wp, $ND, $iJ, $yy, $I8)
+{
+    switch ($I8) {
+        case "\156\x61\x6d\x65":
+            return $ND;
+        case "\x6d\141\151\x6c":
+            return $Wp;
+        case "\163\164\x61\164\165\163":
+            return $iJ;
+        case "\162\x6f\x6c\145\163":
+            return $yy;
+        default:
+            return '';
+    }
+    tl:
+    UO:
+}
+function _send_response($AE, $Fo, $E5)
+{
+    $AE = base64_encode($AE);
+    $sn = drupal_get_path("\x6d\157\144\x75\154\x65", "\x6d\x69\x6e\x69\x6f\x72\141\156\147\x65\137\x73\x61\155\x6c\137\x69\x64\x70");
+    echo "\74\x64\x69\x76\x20\x73\x74\x79\154\145\75\42\166\x65\162\164\151\x63\x61\154\x2d\x61\x6c\151\x67\x6e\x3a\x63\145\x6e\164\145\x72\73\164\145\170\x74\x2d\141\x6c\151\x67\156\x3a\143\x65\156\x74\x65\162\73\x77\151\x64\x74\150\x3a\61\x30\x30\x25\x3b\146\157\x6e\x74\55\163\151\172\x65\72\x32\x35\x70\170\73\142\x61\143\153\147\162\157\x75\x6e\144\55\x63\157\154\157\162\72\167\x68\151\164\145\x3b\x22\76\12\11\40\x20\74\x69\x6d\x67\x20\163\162\143\75\42" . $sn . "\x2f\x69\x6e\143\154\165\x64\145\163\57\151\x6d\x61\147\145\x73\57\x6c\x6f\x61\x64\145\x72\137\x67\x69\146\56\147\151\146\x22\76\74\x2f\x69\x6d\147\x3e\12\x9\40\x20\x3c\x68\x33\76\x50\122\x4f\x43\105\123\x53\x49\x4e\107\x2e\56\x2e\120\114\105\101\123\x45\x20\127\101\111\x54\41\74\57\x68\x33\76\12\x9\x3c\57\x64\x69\166\x3e";
+    ?>
+	<form id="responseform" action="<?php 
+    echo $E5;
+    ?>
+" method="post">
+		<input type="hidden" name="SAMLResponse" value="<?php 
+    echo htmlspecialchars($AE);
+    ?>
+" />
+		<input type="hidden" name="RelayState" value="<?php 
+    echo $Fo;
+    ?>
+" />
 	</form>
 	<script>
 		setTimeout(function(){
 			document.getElementById('responseform').submit();
-		}, 100);
+		}, 100);	
 	</script>
-<?php
-	exit;
+<?php 
+    die;
 }
-
-/**
-* Implements hook_libraries_info().
-*/
-// function miniorange_saml_idp_libraries_info() {
-//     $libraries['xmlseclibs'] = array(
-//         'name' => 'XML Encryption and Signatures',
-//         'vendor url' => 'https://code.google.com/p/xmlseclibs/',
-//         'download url' => 'https://xmlseclibs.googlecode.com/files/xmlseclibs-1.3.1.tar.gz',
-//         'version arguments' => array(
-//             'file'    => 'xmlseclibs.php',
-//             'pattern' => '/@version\s*(.*)$/',
-//             'lines'   => 100,
-//         ),
-//         'files' => array(
-//             'php' => array(
-//                 'xmlseclibs.php',
-//             ),
-//         ),
-//     );
-//     return $libraries;
-// }
-
-// function miniorange_saml_idp_load_xmlseclib(){
-// 	// Try main library path.
-//     if (libraries_get_path('xmlseclibs')) {
-//         $xmlseclibs_file = libraries_get_path('xmlseclibs') . '/xmlseclibs.php';
-//     }
-//     else {
-//         // Trying alternate library path.
-//         $xmlseclibs_file = libraries_get_path('xmlseclibs-master') . '/xmlseclibs.php';
-//     }
-
-//     libraries_load('xmlseclibs');
-//     if (!class_exists('XMLSecurityKey') && !@include($xmlseclibs_file)) {
-//         echo "<div>
-//                 <p><font class='alert' background-color='crimson' color='red'>Error: xmlseclibs not loaded properly</font></p>
-// 	            <p>You can download xmlseclibs from <a href='https://github.com/robrichards/xmlseclibs/tree/1.4' target='_blank'>here</a>.
-// 	            <br>Extract the archive and place it under <b>sites/all/libraries/</b> in your Drupal directory.</p>
-// 	        <div>";
-//         exit();
-//     }
-// }
+function miniorange_saml_idp_libraries_info()
+{
+    $WJ["\170\155\154\x73\145\143\154\151\x62\163"] = array("\x6e\141\x6d\x65" => "\130\x4d\114\40\x45\x6e\x63\162\x79\x70\x74\151\x6f\156\40\x61\156\144\x20\123\x69\147\156\141\x74\x75\162\x65\163", "\x76\x65\x6e\144\x6f\x72\x20\x75\162\x6c" => "\x68\164\x74\160\x73\72\x2f\57\143\x6f\144\145\x2e\147\157\157\x67\x6c\145\56\143\x6f\x6d\x2f\x70\x2f\170\x6d\154\163\x65\x63\154\x69\x62\163\57", "\144\157\167\156\154\x6f\x61\x64\40\165\x72\154" => "\x68\164\164\160\163\x3a\x2f\57\170\155\154\163\x65\x63\x6c\151\x62\163\56\x67\x6f\x6f\x67\x6c\x65\x63\157\x64\x65\x2e\x63\x6f\x6d\57\x66\151\x6c\145\x73\x2f\170\155\154\x73\x65\x63\154\151\142\163\x2d\x31\x2e\63\x2e\x31\x2e\164\141\x72\56\x67\x7a", "\x76\x65\x72\x73\151\x6f\x6e\40\141\x72\x67\x75\155\145\x6e\164\163" => array("\146\x69\154\145" => "\170\x6d\154\x73\145\x63\x6c\151\142\x73\56\160\x68\160", "\x70\x61\164\x74\x65\162\x6e" => "\57\100\166\145\x72\x73\151\x6f\x6e\x5c\163\x2a\x28\56\x2a\51\44\57", "\x6c\151\x6e\145\x73" => 100), "\x66\151\154\x65\163" => array("\160\150\160" => array("\170\x6d\154\x73\145\x63\154\151\x62\163\56\x70\150\160")));
+    return $WJ;
+}
+function miniorange_saml_idp_disable()
+{
+    $rz = new MiniorangeSAMLIdpCustomer(NULL, NULL, NULL, NULL);
+    $S4 = json_decode($rz->update_status(), true);
+    if (!(strcasecmp($S4["\x73\x74\x61\x74\165\x73"], "\123\x55\103\x43\105\x53\x53") == 0)) {
+        goto Cf;
+    }
+    variable_set("\155\151\156\151\x6f\x72\141\x6e\x67\x65\137\x73\141\155\x6c\x5f\x69\x64\x70\137\x73\164\x61\164\x75\163", "\115\x4f\x49\x44\x50\x5f\x56\x45\x52\x49\x46\x59\x5f\114\x49\103\x45\116\123\105");
+    variable_del("\x6d\x69\156\x69\x6f\x72\x61\156\147\x65\x5f\x73\x61\155\154\x5f\151\x64\x70\137\x73\x6d\154\x5f\154\153");
+    variable_del("\x6d\151\156\x69\x6f\x72\141\x6e\147\145\137\163\x61\155\154\x5f\151\x64\160\137\x73\160\x5f\156\141\155\x65");
+    variable_del("\x6d\x69\156\151\157\162\141\156\147\x65\x5f\163\x61\155\x6c\x5f\x69\144\x70\x5f\x73\160\x5f\145\x6e\x74\151\x74\x79\x5f\x69\x64");
+    variable_del("\x6d\x69\x6e\x69\x6f\x72\x61\156\x67\145\x5f\x73\x61\x6d\x6c\137\x69\144\x70\x5f\141\143\163\137\165\162\x6c");
+    Cf:
+}
+function miniorange_saml_idp_load_xmlseclib()
+{
+    if (libraries_get_path("\x78\155\x6c\x73\x65\143\x6c\x69\x62\163")) {
+        goto C7;
+    }
+    $PT = libraries_get_path("\170\x6d\x6c\x73\145\x63\x6c\x69\142\x73\55\155\x61\x73\164\x65\x72") . "\x2f\x78\155\154\x73\145\x63\154\x69\142\163\56\160\150\x70";
+    goto hz;
+    C7:
+    $PT = libraries_get_path("\170\x6d\154\x73\x65\x63\x6c\151\x62\163") . "\x2f\x78\155\x6c\163\x65\143\x6c\151\x62\163\x2e\160\x68\160";
+    hz:
+    libraries_load("\170\155\154\x73\x65\143\154\x69\x62\x73");
+    if (!class_exists("\x58\x4d\114\123\x65\143\x75\162\x69\164\x79\x4b\x65\x79") && !@(include $PT)) {
+        goto aC;
+    }
+    goto zD;
+    aC:
+    echo "\170\155\x6c\x73\x65\x63\x6c\151\x62\163\x20\x6e\x6f\164\x20\154\157\x61\144\x65\144\x20\160\x72\x6f\160\145\162\154\171";
+    die;
+    zD:
+}

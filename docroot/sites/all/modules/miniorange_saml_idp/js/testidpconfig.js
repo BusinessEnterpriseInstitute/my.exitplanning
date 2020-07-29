@@ -25,10 +25,3 @@ function hide_gen_cert_form() {
     jQuery('#mo_gen_cert').show();
     jQuery('#mo_gen_tab').show();
 }
-
-function click_to_upgrade_or_register(url){
-    if(url.search("xecurify")==-1)
-        window.location = url;
-    else
-        window.open(url,"_blank" );
-}
