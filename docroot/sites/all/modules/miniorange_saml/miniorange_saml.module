@@ -1,0 +1,774 @@
+<?php
+/**
+ * @file
+ * Module file for miniOrange SAML Module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function miniorange_saml_menu()
+{
+
+    $items['admin/config/people/miniorange_saml'] = array(
+        'title' => 'miniOrange SAML Login Configuration',
+        'description' => 'miniOrange SAML Login Configuration',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('miniorange_saml_customer_setup'),
+        'access arguments' => array('administer site configuration'),
+        'file' => 'miniorange_saml_customer_setup.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/customer_setup'] = array(
+        'title' => 'Register/Login',
+        'weight' => -9,
+        'type' => MENU_DEFAULT_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_customer_setup'),
+        'file' => 'miniorange_saml_customer_setup.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/idp_setup'] = array(
+        'title' => 'Service Provider Metadata',
+        'weight' => -8,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_sp_information'),
+        'file' => 'miniorange_sp_information.inc',
+        'type' => MENU_LOCAL_TASK,
+    );
+
+    $items['admin/config/people/miniorange_saml/sp_setup'] = array(
+        'title' => 'Service Provider Setup',
+        'weight' => -7,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_idp_setup'),
+        'file' => 'miniorange_saml_idp_setup.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/signon_settings'] = array(
+        'title' => 'Signin',
+        'weight' => -6,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_login_options'),
+        'file' => 'miniorange_saml_login_options.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/mapping_config'] = array(
+        'title' => 'Mapping',
+        'weight' => -5,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_mapping'),
+        'file' => 'miniorange_saml_mapping.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/export_config'] = array(
+        'title' => 'Import/Export',
+        'weight' => -4,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_export_config'),
+        'file' => 'miniorange_saml_export_config.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/custom_certificate'] = array(
+        'title' => 'Certificate',
+        'weight' => -3,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('mo_saml_add_custom_certificate'),
+        'file' => 'mo_saml_add_custom_certificate.inc',
+    );
+
+    $items['admin/config/people/miniorange_saml/licensing'] = array(
+        'title' => 'Upgrade Plans',
+        'weight' => -2,
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer site configuration'),
+        'page arguments' => array('miniorange_saml_licensing'),
+        'file' => 'miniorange_saml_licensing.inc',
+    );
+
+
+    $items['samllogin'] = array(
+        'access callback' => TRUE,
+        'page callback' => 'saml_login',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['samlassertion'] = array(
+        'access callback' => TRUE,
+        'page callback' => 'saml_response',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['samllogout'] = array(
+        'access callback' => TRUE,
+        'page callback' => 'saml_logout',
+        'type' => MENU_CALLBACK
+    );
+
+    $items['testConfig'] = array(
+        'access callback' => TRUE,
+        'page callback' => 'test_configuration',
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['showSAMLrequest'] = array(
+        'access arguments' => array('administer site configuration'),
+        'page callback' => 'SAML_Request_Generator',
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['showSAMLresponse'] = array(
+        'access arguments' => array('administer site configuration'),
+        'page callback' => 'SAML_Response_Generator',
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['removeLicense'] = array(
+        'access callback' => TRUE,
+        'page callback' => 'remove_license_key',
+        'type' => MENU_CALLBACK,
+    );
+
+     $items['mosp_metadata'] = array(
+      'access callback' => TRUE,
+      'page callback' => 'miniorange_saml_metadata',
+      'type' => MENU_CALLBACK
+    );
+
+    return $items;
+}
+
+function miniorange_saml_update_projects_alter(&$projects)
+{
+
+    $upgrade_url = variable_get('miniorange_saml_sp_upgrade_url');
+    $upgrade_url = is_null($upgrade_url) ? MiniorangeSAMLConstants::BASE_URL : $upgrade_url;
+    if (array_key_exists('miniorange_saml', $projects)) {
+        $projects['miniorange_saml']['info']['project status url'] = $upgrade_url;
+    }
+}
+
+
+/*
+*when metadata url is used
+*/
+
+function miniorange_saml_metadata() {
+  if(isset($_REQUEST['q']) && $_REQUEST['q'] == 'mosp_metadata') {
+    $download = isset($_GET['download']) ? $_GET['download'] : '';
+    _generate_metadata($download);
+  }
+}
+
+function _generate_metadata($download){
+    
+    $base_site_url = Utilities::miniorange_get_baseURL();
+    $module_path = drupal_get_path('module', 'miniorange_saml');
+    $issuer_id =Utilities::getIssuer();
+    if (substr($base_site_url , -1) == '/') {
+        $acs_url = $base_site_url . '?q=samlassertion';
+        $logout_url = $base_site_url . '?user/logout';
+    } else {
+        $acs_url = $base_site_url . '/?q=samlassertion';
+        $logout_url = $base_site_url . '/user/logout';
+    } 
+    $certificate_content = file_get_contents(Utilities::getCertificatePath());
+
+    $certificate = Utilities::desanitize_certificate($certificate_content);
+
+      if($download){
+        header('Content-Disposition: attachment; filename="Metadata.xml"');
+      }
+      else {
+        header('Content-Type: text/xml');
+      }
+
+    echo '<?xml version="1.0"?>
+        <md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" validUntil="2020-10-28T23:59:59Z" cacheDuration="PT1446808792S" entityID="' . $issuer_id . '">
+          <md:SPSSODescriptor AuthnRequestsSigned="true" WantAssertionsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+            <md:KeyDescriptor use="signing">
+              <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                  <ds:X509Certificate>' . $certificate . '</ds:X509Certificate>
+                </ds:X509Data>
+              </ds:KeyInfo>
+            </md:KeyDescriptor>
+            <md:KeyDescriptor use="encryption">
+              <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                  <ds:X509Certificate>' . $certificate . '</ds:X509Certificate>
+                </ds:X509Data>
+              </ds:KeyInfo>
+            </md:KeyDescriptor>
+            <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="' . $logout_url . '"/>
+            <md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="' . $logout_url . '"/>
+            <md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat>
+            <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat>
+            <md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat>
+            <md:AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="' . $acs_url . '" index="1"/>
+          </md:SPSSODescriptor>
+          <md:Organization>
+            <md:OrganizationName xml:lang="en-US">miniOrange</md:OrganizationName>
+            <md:OrganizationDisplayName xml:lang="en-US">miniOrange</md:OrganizationDisplayName>
+            <md:OrganizationURL xml:lang="en-US">http://miniorange.com</md:OrganizationURL>
+          </md:Organization>
+          <md:ContactPerson contactType="technical">
+            <md:GivenName>miniOrange</md:GivenName>
+            <md:EmailAddress>info@xecurify.com</md:EmailAddress>
+          </md:ContactPerson>
+          <md:ContactPerson contactType="support">
+            <md:GivenName>miniOrange</md:GivenName>
+            <md:EmailAddress>info@xecurify.com</md:EmailAddress>
+          </md:ContactPerson>
+        </md:EntityDescriptor>';
+        exit;
+}
+
+/*
+ * Function to remove license key and make changes in the database.
+ * */
+function remove_license_key() {
+    if (variable_get('miniorange_saml_license_key', NULL) != NULL) {
+
+        $username = variable_get('miniorange_saml_customer_admin_email', NULL);
+        $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
+        $customer = new MiniorangeSAMLCustomer($username, $phone, NULL, NULL);
+        $response = json_decode($customer->updateStatus());
+
+        if ($response->status == 'SUCCESS') {
+
+            variable_del('miniorange_saml_license_key');
+            variable_del('miniorange_saml_customer_admin_email');
+            variable_del('miniorange_saml_customer_admin_phone');
+            variable_del('miniorange_saml_customer_api_key');
+            variable_del('t_site_status');
+            variable_del('minorange_saml_customer_admin_fraud_check');
+            variable_del('site_ck_l');
+            variable_del('miniorange_saml_customer_admin_token');
+            variable_del('miniorange_saml_customer_id');
+
+            variable_set('miniorange_saml_status', 'CUSTOMER_SETUP');
+            header('Location: admin/config/people/miniorange_saml');
+        }
+    }
+}
+/**
+ * Test configuration callback
+ */
+function test_configuration()
+{
+    $base_site_url = Utilities::miniorange_get_baseURL();
+    $sendRelayState = "testValidate";
+    $ssoUrl = variable_get("miniorange_saml_idp_login_url", "");
+    $acsUrl = $base_site_url . "/?q=samlassertion";
+   
+    $issuer = Utilities::getIssuer();
+    $request_signed = variable_get('miniorange_saml_request_signed');
+    $sign_algo = variable_get('security_signature_algorithm');
+    $http_binding = variable_get('miniorange_saml_http_binding', 'HTTP-Redirect');
+    $nameid_format = variable_get('miniorange_nameid_format', "");
+    $samlRequest = Utilities::createAuthnRequest($acsUrl, $issuer, $ssoUrl, $nameid_format, 'false', $http_binding);
+
+    $authn_request = new MiniOrangeAuthnRequest();
+    $authn_request->sendSamlRequestByBindingType($samlRequest, $http_binding, $sendRelayState, $ssoUrl, $request_signed, $sign_algo);
+
+}
+
+/**
+ * Show SAML Request
+ */
+function SAML_Request_Generator()
+{
+    $sso_url = variable_get('miniorange_saml_idp_login_url', '');
+    $nameid_format = variable_get('miniorange_nameid_format', '');
+    $acs_url = Utilities::miniorange_get_baseURL() . '/?q=samlassertion';
+    $samlRequestXML = Utilities::createSAMLRequest($acs_url, Utilities::getIssuer(), $sso_url, $nameid_format);
+    $sendRelayState = "displaySAMLRequest";
+    Utilities::Print_SAML_Request($samlRequestXML, $sendRelayState);
+}
+
+/**
+ * Show SAML Response
+ */
+function SAML_Response_Generator()
+{
+
+    $b_url=Utilities::miniorange_get_baseURL();
+    $sendRelayState = "showSamlResponse";
+    $ssoUrl = variable_get("miniorange_saml_idp_login_url", "");
+    $acsUrl = $b_url . "/?q=samlassertion";
+    $issuer = Utilities::getIssuer();
+    $nameid_format = variable_get('miniorange_nameid_format', "");
+    $http_binding = variable_get('miniorange_saml_http_binding', 'HTTP-Redirect');
+    $samlRequest = Utilities::createAuthnRequest($acsUrl, $issuer, $ssoUrl, $nameid_format, 'false', $http_binding);
+
+    $redirect = $ssoUrl;
+    if (strpos($ssoUrl, '?') !== false) {
+        $redirect .= '&';
+    } else {
+        $redirect .= '?';
+    }
+    if($http_binding== 'HTTP-Redirect'){
+        $redirect .= 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState);
+        drupal_goto($redirect);
+    }
+    else{
+        Utilities::postSAMLRequest($ssoUrl, base64_encode($samlRequest), $sendRelayState);
+    }
+    exit();
+}
+
+/**
+ * Implements hook_form_alter().
+ */
+function miniorange_saml_form_alter(&$form, &$form_state, $form_id)
+{
+    $base_site_url = Utilities::miniorange_get_baseURL();
+    $force_auth = variable_get('miniorange_saml_force_auth', FALSE);
+    $backdoor_enabled = variable_get('miniorange_saml_enable_backdoor', FALSE);
+    $auto_redirect = variable_get('miniorange_saml_auto_redirect_to_idp', FALSE);
+    $enable_saml_login = variable_get('miniorange_saml_enable_login', FALSE);
+    $relay_state = variable_get('miniorange_saml_default_relaystate', $base_site_url . '/' . current_path());
+    $backdoor_query=variable_get('miniorange_backdoor_query','false');
+
+    if ($enable_saml_login) {
+        if ($force_auth && !user_is_logged_in() && !isset($_POST['pass'])) {
+            $query_parameters = drupal_get_query_parameters();
+            if (!$backdoor_enabled || !isset($query_parameters['saml_login']) || $query_parameters['saml_login'] !=$backdoor_query ) {
+                saml_login($relay_state);
+            }
+        }
+
+        if (($form_id == 'user_login_block' || $form_id == 'user_login') && !isset($_POST['pass'])) {
+
+            $query_parameters = drupal_get_query_parameters();
+            if ($auto_redirect && (!$backdoor_enabled || !isset($query_parameters['saml_login']) || $query_parameters['saml_login']!=$backdoor_query) ) {
+                saml_login($relay_state);
+            }
+
+            $saml_login_url = $base_site_url . '/?q=samllogin';
+            $idp_name = variable_get('miniorange_saml_idp_name', '');
+            $form['loginurl'] = array(array(
+                '#markup' => '<a href="' . $saml_login_url . '">Login using ' . $idp_name . '</a>'
+            ));
+        }
+    }
+}
+
+/**
+ * Initiate SAML Login.
+ */
+function saml_login($relay_state = '')
+{
+    $saml_login_enabled = variable_get('miniorange_saml_enable_login', FALSE);
+    if ($saml_login_enabled) {
+        $args = drupal_get_query_parameters();
+        $base_site_url = Utilities::miniorange_get_baseURL();
+       
+        $issuer = Utilities::getIssuer();
+        $acs_url = $base_site_url . '/?q=samlassertion';
+        $sso_url = variable_get('miniorange_saml_idp_login_url', '');
+        $http_binding = variable_get('miniorange_saml_http_binding', 'HTTP-Redirect');
+        $request_signed = variable_get('miniorange_saml_request_signed');
+        $sign_algo = variable_get('security_signature_algorithm');
+        $relay_state = isset($args['destination']) ? trim($args['destination'], "'") : '';
+        $upgradeUrl = variable_get('miniorange_saml_sp_upgrade_url');
+        if(is_null($upgradeUrl) || empty($upgradeUrl) || strpos($upgradeUrl,"/moas/api/plugin/drupalJoomlaUpdate/")){
+            $key        = variable_get('miniorange_saml_customer_admin_token');
+            $code       = AESEncryption::decrypt_data(variable_get('miniorange_saml_license_key'),$key);
+            $apiKey     =  variable_get('miniorange_saml_customer_api_key');
+            $customerId = variable_get('miniorange_saml_customer_id');
+            $upgradeUrl = Utilities::createUpdateUrl($code, 'drupal_miniorange_saml_premium_plan', 'DRUPAL_SAML_SP_enterprise_MODULE',$apiKey,$customerId,MiniorangeSAMLConstants::BASE_URL);
+            variable_set('miniorange_saml_sp_upgrade_url',$upgradeUrl);
+
+        }
+
+
+        if (empty($relay_state)) {
+            $relay_state = variable_get('miniorange_saml_default_relaystate', '');
+        }
+
+        if (empty($relay_state)) {
+            $relay_state = $_SERVER['HTTP_REFERER'];
+        }
+
+        if (empty($relay_state)) {
+            $pre = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+            $url = $pre . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+            $relay_state = $url;
+        }
+
+
+        if (empty($relay_state)||$relay_state==$base_site_url.'/?q=saml_login') {
+            $relay_state = $base_site_url;
+        }
+        $authn_request = new MiniOrangeAuthnRequest();
+        $authn_request->initiateLogin($acs_url, $sso_url, $issuer, $relay_state, $http_binding, $request_signed, $sign_algo);
+    }
+    else{
+        drupal_set_message('Please enable <b>Login with SAML</b> to initiate the SSO.','error');
+        drupal_goto(Utilities::miniorange_get_baseURL());
+    }
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+// function miniorange_saml_libraries_info()
+// {
+//     $libraries['xmlseclibs'] = array(
+//         'name' => 'XML Encryption and Signatures',
+//         'vendor url' => 'https://code.google.com/p/xmlseclibs/',
+//         'download url' => 'https://xmlseclibs.googlecode.com/files/xmlseclibs-1.3.1.tar.gz',
+//         'version arguments' => array(
+//             'file' => 'xmlseclibs.php',
+//             'pattern' => '/@version\s*(.*)$/',
+//             'lines' => 100,
+//         ),
+//         'files' => array(
+//             'php' => array(
+//                 'xmlseclibs.php',
+//             ),
+//         ),
+//     );
+
+//     return $libraries;
+// }
+
+/**
+ * Implements hook_user_logout().
+ */
+function miniorange_saml_user_logout()
+{
+    Utilities::mo_saml_logout();
+}
+
+function saml_logout()
+{
+    echo $_REQUEST['RelayState'];
+    exit;
+    session_destroy();
+    drupal_goto($_REQUEST['RelayState']);
+    exit;
+}
+
+/**
+ * Validate SAML Response and authenticate user.
+ */
+function saml_response()
+{
+    global $user;
+    $base_site_url = Utilities::miniorange_get_baseURL();
+    $acs_url = $base_site_url . '/?q=samlassertion';
+    $cert_fingerprint = variable_get('miniorange_saml_idp_x509_certificate', '');
+    $issuer = variable_get('miniorange_saml_idp_issuer', '');
+  
+    $sp_entity_id = Utilities::getIssuer();
+   
+    $default_role = variable_get('miniorange_saml_default_role', '');
+
+    $username_attribute = variable_get('miniorange_saml_username_attribute', '');
+
+    // // Try main library path.
+    // if (libraries_get_path('xmlseclibs')) {
+    //     $xmlseclibs_file = libraries_get_path('xmlseclibs') . '/xmlseclibs.php';
+    // } else {
+    //     // Trying alternate library path.
+    //     $xmlseclibs_file = libraries_get_path('xmlseclibs-master') . '/xmlseclibs.php';
+    // }
+
+    // libraries_load('xmlseclibs');
+
+    // if (!class_exists('XMLSecurityKey') && !@include($xmlseclibs_file)) {
+    //     echo "<div>
+    //     <p><font class='alert' background-color='crimson' color='red'>Error: xmlseclibs not loaded properly</font></p>
+    //     <p>You can download xmlseclibs from <a href='https://github.com/robrichards/xmlseclibs/tree/1.4' target='_blank'>here</a>.
+    //     <br>Extract the archive and place it under <b>sites/all/libraries/</b> in your Drupal directory.</p>
+    //     <div>";
+    //     exit();
+    // }
+
+    if (isset($_GET['SAMLResponse'])) {
+        session_destroy();
+        drupal_goto($base_site_url);
+    } else {
+        /*Custom Attributes*/
+        $attrs = array();
+        $sp_attr1 = variable_get('miniorange_saml_attr1_name', '');
+
+        $idp_attr1 = variable_get('miniorange_saml_idp_attr1_name', '');
+        $sp_attr2 = variable_get('miniorange_saml_attr2_name', '');
+        $idp_attr2 = variable_get('miniorange_saml_idp_attr2_name', '');
+        $sp_attr3 = variable_get('miniorange_saml_attr3_name', '');
+        $idp_attr3 = variable_get('miniorange_saml_idp_attr3_name', '');
+        $sp_attr4 = variable_get('miniorange_saml_attr4_name', '');
+        $idp_attr4 = variable_get('miniorange_saml_idp_attr4_name', '');
+        $sp_attr5 = variable_get('miniorange_saml_attr5_name', '');
+        $idp_attr5 = variable_get('miniorange_saml_idp_attr5_name', '');
+
+        $userProfileAttribues = variable_get('miniorange_saml_sp_user_attributes', '');
+
+        if (isset($sp_attr1) && !empty($sp_attr1) && !empty($idp_attr1)) {
+            $attrs[$sp_attr1] = $idp_attr1;
+        }
+        if (isset($sp_attr2) && !empty($sp_attr2) && !empty($idp_attr2)) {
+            $attrs[$sp_attr2] = $idp_attr2;
+        }
+        if (isset($sp_attr3) && !empty($sp_attr3) && !empty($idp_attr3)) {
+            $attrs[$sp_attr3] = $idp_attr3;
+        }
+        if (isset($sp_attr4) && !empty($sp_attr4) && !empty($idp_attr4)) {
+            $attrs[$sp_attr4] = $idp_attr4;
+        }
+        if (isset($sp_attr5) && !empty($sp_attr5) && !empty($idp_attr5)) {
+            $attrs[$sp_attr5] = $idp_attr5;
+        }
+
+        $userProfileAttribues = json_decode($userProfileAttribues, true);
+
+        if (is_array($userProfileAttribues)) {
+            foreach ($userProfileAttribues as $profileAttribute) {
+                $user_attr_name = $profileAttribute["attr_name"];
+                $user_attr_value = $profileAttribute["attr_value"];
+                $attrs[$user_attr_name] = $user_attr_value;
+            }
+        }
+
+        /*Custom Roles*/
+
+        $role = array();
+        $role = is_null(variable_get('rolemap'))||empty(variable_get('rolemap'))?array():variable_get('rolemap');
+        $response_obj = new MiniOrangeAcs();
+
+        /*Duplicate License Check */
+
+        $fraud_check = variable_get('minorange_saml_customer_admin_fraud_check');
+        $key = variable_get('miniorange_saml_customer_admin_token');
+        $username = variable_get('miniorange_saml_customer_admin_email');
+
+        global $base_url;
+        global $base_path;
+        $current_path = $_SERVER['DOCUMENT_ROOT'] . $base_path;
+        $home_url = trim($base_url, '/');
+
+        if (!preg_match('#^http(s)?://#', $home_url)) {
+            $home_url = 'http://' . $home_url;
+        }
+        $current_urlParts = parse_url($home_url);
+        if ( !empty( $current_urlParts ) ) {
+			$current_urlParts_Path = isset( $current_urlParts['path'] ) ? $current_urlParts['path'] : '';
+            $current_domain = preg_replace('/^www\./', '', $current_urlParts['host'] . $current_urlParts_Path);
+        }
+        $current_path_domain = $current_path . $current_domain;
+          
+            $response = $response_obj->processSamlResponse($_POST, $acs_url, $cert_fingerprint, $issuer, $base_site_url, $sp_entity_id, $username_attribute, $attrs, $role);
+       
+
+        if (($response['email'] == '') || !filter_var($response['email'], FILTER_VALIDATE_EMAIL)) {
+            echo '<div style="font-family:Calibri;padding:0 3%;">';
+            echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
+                    <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>User is restrictred to login.</p>
+                        <p>Please contact your administrator and report the following error:</p>
+                        <p><strong>Possible Cause: </strong> Error in receiving the email ID.</p>      
+                    </div>
+                    <div style="margin:3%;display:block;text-align:center;">';
+            ?>
+            <div style="margin:3%;display:block;text-align:center;"><a href=" <?php echo $base_url ?> "><input
+                            style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"
+                            type="button" value="Done" onClick="self.close();"></a></div>
+            <?php
+            exit;
+        }
+
+        
+        $account = user_load_by_name($response['username']);
+       
+        /*
+        * This is added for domain restriction
+        *
+        */
+
+         
+        if(Utilities::Is_Restricted_Domain($response['email'])===TRUE){
+            echo '<div style="font-family:Calibri;padding:0 3%;">';
+                echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
+                      <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>You are not allowed to login.</p>
+                          <p>Please contact your administrator and report the following error:</p>
+                          <p><strong>Possible Cause: </strong> Your domain may be blocked by admin</p>
+                      </div>
+                      <div style="margin:3%;display:block;text-align:center;">';
+                      exit;
+               
+        }
+        /*
+        * Domain restriction check ends
+        */
+
+        // Create user if not already present.
+        if ($account == NULL) {
+            $disable_autocreate_users = variable_get('miniorange_saml_disable_autocreate_users', FALSE);
+            if ($disable_autocreate_users) {
+                echo '<div style="font-family:Calibri;padding:0 3%;">';
+                echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
+                      <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>User is restrictred to login.</p>
+                          <p>Please contact your administrator and report the following error:</p>
+                          <p><strong>Possible Cause: </strong> Non existing users are not allowed to login.</p>
+                      </div>
+                      <div style="margin:3%;display:block;text-align:center;">';
+                ?>
+                <div style="margin:3%;display:block;text-align:center;"><a href=" <?php echo $base_url ?> "><input
+                                style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"
+                                type="button" value="Done" onClick="self.close();"></a></div>
+                <?php
+                exit();
+            } else {
+                $random_password = user_password(8);
+                $enable_role_mapping=variable_get('miniorange_saml_enable_rolemapping',FALSE);
+                $new_user = array(
+                    'name' => $response['username'],
+                    'mail' => $response['email'],
+                    'pass' => $random_password,
+                    'status' => 1,
+                );
+                if($enable_role_mapping){
+                    $result = array_search($default_role, user_roles());
+                    $dc[$result] = $default_role;
+                    $new_user['roles']=$dc;
+                }
+                $account = user_save(NULL, $new_user);
+            }
+        }
+
+        $customFieldAttributes = $response['customFieldAttributes'];
+        if (isset($customFieldAttributes) && !empty($customFieldAttributes)) {
+            foreach ($customFieldAttributes as $key => $value) {
+                $account = user_load($account->uid);
+                $account->{$key}['und'][0]['value'] = $value;
+                user_save($account);
+            }
+        }
+
+        $customFieldRoles = $response['customFieldRoles'];
+        if (!is_null($account) && variable_get('miniorange_saml_enable_rolemapping',FALSE) ) {
+            $account = user_load($account->uid);
+            if (variable_get('miniorange_saml_disable_role_update')) {
+                $assigned_roles = $account->{"roles"};
+                foreach ($assigned_roles as $key => $value) {
+                    if (!in_array($value, $role)) {
+                        $arr[$key] = $value;
+                    }
+                }
+            } 
+
+            if (isset($customFieldRoles) && !empty($customFieldRoles)) {
+                foreach ($customFieldRoles as $key => $value) {
+                    $cust_role = $key;
+                    $arr[$key] = $value;
+                    $account->{"roles"} = $arr;
+                    user_save($account);
+                }
+            }
+        }
+        // Flood control check and check if user is blocked.
+        if (flood_is_allowed($response['username'], 3600) && user_is_blocked($response['username']) == FALSE) {
+            // Allowed to proceed.
+            // Clear flood control event.
+            flood_clear_event($response['username']);
+            $user = user_load($account->uid);
+            $edit = array();
+            $edit['name'] = $user->name;
+            /***********************************************/
+            $result = array_slice($account->roles, 1);
+            $key = '';
+            if (isset($result[0])) {
+                $key = array_search($result[0], user_roles());
+            }
+            if (isset($key) && !is_null($key) && $key != '') {
+                $grp = variable_get(str_replace(' ', '', $account->{"roles"}[$key] . '_sin'), '');
+                if (!is_null($grp)) {
+                    $temp_relay = variable_get(str_replace(' ', '', $account->{"roles"}[$key] . '_sin'), '');
+                }
+            }
+            /***********************************************/
+
+            $relay = variable_get('miniorange_saml_default_relaystate', '');
+
+            if (isset($temp_relay) && $temp_relay != '') {
+                $edit['redirect'] = $temp_relay;
+            } else if (isset($relay) && $relay != '') {
+                $edit['redirect'] = $relay;
+            } else if (isset($response['relay_state']) && $response['relay_state'] != '') {
+                $edit['redirect'] = $response['relay_state'];
+            } else {
+                $edit['redirect'] = $base_site_url;
+            }
+
+            $_SESSION['sessionIndex'] = $response['sessionIndex'];
+            $_SESSION['NameID'] = $response['NameID'];
+            $_SESSION['mo_saml']['logged_in_with_idp'] = true;
+            if (isset($key) && !is_null($key) && $key != '') {
+                $sout = variable_get(str_replace(' ', '', $account->{"roles"}[$key] . '_sout'), '');
+                if (!is_null($sout)) {
+                    $_SESSION['logout'] = variable_get(str_replace(' ', '', $account->{"roles"}[$key] . '_sout'), '');
+                }
+            }
+            user_login_finalize($edit);
+            drupal_goto($edit['redirect']);
+        } else {
+            // Register flood control event.
+            flood_register_event($response['username'], 3600);
+            form_set_error('user_login_block', t('You are not allowed to login. Please contact the administrator.'));
+            drupal_goto();
+        }
+    }
+}
+
+function miniorange_saml_init()
+{
+
+    $relay_state = '';
+    $force_auth = variable_get('miniorange_saml_force_auth', FALSE);
+    $enable_saml_login = variable_get('miniorange_saml_enable_login', FALSE);
+    $enable_backdoor = variable_get('miniorange_saml_enable_backdoor', FALSE);
+    $backdoor_query=variable_get('miniorange_backdoor_query','false');
+    if ($enable_saml_login) {
+        if ($enable_backdoor && isset($_GET['saml_login']) && $_GET['saml_login'] == $backdoor_query) {
+            //Do nothing.
+        } else if ($force_auth && !user_is_logged_in() && !isset($_POST['SAMLResponse']) && !isset($_POST['pass'])) {
+            saml_login($relay_state);
+        }
+
+        if (variable_get('miniorange_saml_license_key', NULL) == NULL) {
+            variable_del('miniorange_saml_enable_login');
+            variable_del('miniorange_saml_force_auth');
+            variable_del('miniorange_saml_enable_backdoor');
+        }
+    }
+}
+
+/*
+ *  cron hook for Certificate rollover
+ */
+function miniorange_saml_cron()
+{
+
+    $fetch_metadeta = variable_get('miniorange_saml_fetch_metadata_time_intervals', '');
+    $url = variable_get('miniorange_saml_meta_data_url', '');
+    $idp_name = variable_get('miniorange_saml_idp_name');
+    if ($fetch_metadeta == 1 && $url != '') {
+        $arrContextOptions = array(
+            "ssl" => array(
+                "verify_peer" => false,
+                "verify_peer_name" => false,
+            ),
+        );
+        $file = file_get_contents($url, false, stream_context_create($arrContextOptions));
+        Utilities::upload_metadata($file, true, $idp_name);
+    }
+}
+
