@@ -7,54 +7,54 @@ class SAML2_Response
     private $destination;
     private $certificates;
     private $signatureData;
-    public function __construct(DOMElement $uQ = NULL)
+    public function __construct(DOMElement $TW = NULL)
     {
         $this->assertions = array();
         $this->certificates = array();
-        if (!($uQ === NULL)) {
-            goto mA;
+        if (!($TW === NULL)) {
+            goto dH;
         }
         return;
-        mA:
-        $Rd = Utilities::validateElement($uQ);
-        if (!($Rd !== FALSE)) {
-            goto l2;
+        dH:
+        $x1 = Utilities::validateElement($TW);
+        if (!($x1 !== FALSE)) {
+            goto jL;
         }
-        $this->certificates = $Rd["\103\x65\x72\x74\151\146\x69\x63\141\x74\x65\163"];
-        $this->signatureData = $Rd;
-        l2:
-        if (!$uQ->hasAttribute("\104\145\x73\x74\151\x6e\x61\164\x69\157\156")) {
-            goto hM;
+        $this->certificates = $x1["\x43\145\162\164\x69\x66\x69\143\141\164\145\x73"];
+        $this->signatureData = $x1;
+        jL:
+        if (!$TW->hasAttribute("\x44\145\163\164\151\x6e\141\164\151\157\x6e")) {
+            goto Q5;
         }
-        $this->destination = $uQ->getAttribute("\104\x65\x73\x74\151\156\141\164\151\x6f\156");
-        hM:
-        $oB = $uQ->firstChild;
-        zj:
-        if (!($oB !== NULL)) {
-            goto za;
+        $this->destination = $TW->getAttribute("\x44\145\163\x74\151\156\x61\x74\151\157\156");
+        Q5:
+        $FF = $TW->firstChild;
+        fO:
+        if (!($FF !== NULL)) {
+            goto dR;
         }
-        if (!($oB->namespaceURI !== "\165\x72\156\x3a\x6f\141\163\x69\163\x3a\x6e\x61\155\x65\x73\72\x74\x63\x3a\x53\101\115\114\72\x32\x2e\60\x3a\141\163\x73\x65\162\164\x69\x6f\156")) {
-            goto re;
+        if (!($FF->namespaceURI !== "\x75\x72\x6e\x3a\x6f\x61\163\x69\x73\x3a\x6e\x61\155\145\x73\x3a\x74\x63\72\x53\101\115\114\x3a\62\x2e\60\72\141\x73\163\x65\x72\x74\151\157\x6e")) {
+            goto cE;
         }
-        goto qi;
-        re:
-        if (!($oB->localName === "\x41\x73\163\x65\x72\164\x69\x6f\156" || $oB->localName === "\105\156\x63\162\x79\160\164\145\x64\x41\163\163\x65\162\x74\x69\157\156")) {
-            goto pq;
+        goto jW;
+        cE:
+        if (!($FF->localName === "\x41\x73\x73\x65\x72\164\151\157\156" || $FF->localName === "\x45\x6e\143\162\171\x70\x74\145\x64\x41\x73\x73\x65\162\x74\x69\x6f\x6e")) {
+            goto sK;
         }
-        $this->assertions[] = new SAML2_Assertion($oB);
-        pq:
-        qi:
-        $oB = $oB->nextSibling;
-        goto zj;
-        za:
+        $this->assertions[] = new SAML2_Assertion($FF);
+        sK:
+        jW:
+        $FF = $FF->nextSibling;
+        goto fO;
+        dR:
     }
     public function getAssertions()
     {
         return $this->assertions;
     }
-    public function setAssertions(array $jf)
+    public function setAssertions(array $pk)
     {
-        $this->assertions = $jf;
+        $this->assertions = $pk;
     }
     public function getDestination()
     {
@@ -62,13 +62,13 @@ class SAML2_Response
     }
     public function toUnsignedXML()
     {
-        $nv = parent::toUnsignedXML();
-        foreach ($this->assertions as $wm) {
-            $wm->toXML($nv);
-            rs:
+        $NQ = parent::toUnsignedXML();
+        foreach ($this->assertions as $pv) {
+            $pv->toXML($NQ);
+            cG:
         }
-        Q8:
-        return $nv;
+        g5:
+        return $NQ;
     }
     public function getCertificates()
     {
