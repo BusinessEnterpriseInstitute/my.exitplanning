@@ -49,6 +49,7 @@
           window.location.href = "/wizard-b";
         }
       });
+      
 /**
       $(function(c) {
       $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){
