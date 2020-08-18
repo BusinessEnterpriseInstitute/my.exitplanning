@@ -50,6 +50,12 @@
         }
       });
       
+      window. hsConversionsSettings = {
+        loadImmediately: false,
+          identificationEmail: "",
+          identificationToken: ""
+      };
+      window.HubSpotConversations.widget.load();
 /**
       $(function(c) {
       $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){

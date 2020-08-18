@@ -249,6 +249,24 @@
       <!--Hubspot Script-->
         <!-- Start of HubSpot Embed Code -->
         <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/6036342.js"></script>
+        <script type="text/javascript">
+          function onConversationsAPIReady() {
+            console.log(`HubSpot Conversations API: ${window.HubSpotConversations}`);
+          }
+        
+          /*
+           If external API methods are already available, use them.
+          */
+          if (window.HubSpotConversations) {
+            onConversationsAPIReady();
+          } else {
+            /*
+              Otherwise, callbacks can be added to the hsConversationsOnReady on the window object.
+              These callbacks will be called once the external API has been initialized.
+            */
+            window.hsConversationsOnReady = [onConversationsAPIReady];
+          }
+        </script>
         <!-- End of HubSpot Embed Code -->
       <!--End of Hubspot Script-->
       <!-- Hotjar Tracking Code for www.exitplanning.com -->
@@ -269,7 +287,6 @@
     <?php endif;?>
   </footer>
   <!--/.l-footer -->
-
 
   <?php if ($messages && $zurb_foundation_messages_modal): print $messages; endif; ?>
 </div>
