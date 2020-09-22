@@ -664,7 +664,7 @@ function _autologout_logout() {
   global $user;
 
   if (variable_get('autologout_use_watchdog', FALSE)) {
-    watchdog('user', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
+    watchdog('Autologout', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
   }
 
   if (module_exists('cas')) {
