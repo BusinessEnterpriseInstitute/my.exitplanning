@@ -49,7 +49,14 @@
           window.location.href = "/wizard-b";
         }
       });
-      
+
+      // Hubspot Bucket Credits
+      var _hsq = window._hsq = window._hsq || [];
+      _hsq.push(['setContentType', 'BLOG']);
+      _hsq.push(['setContentType', 'PODCAST']);
+      _hsq.push(['setContentType', 'EVENTS']);
+      _hsq.push(['setContentType', 'SOLUTIONS']);
+      _hsq.push(['setContentType', 'MEMBERSHIP']);
 /**
       $(function(c) {
       $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){
