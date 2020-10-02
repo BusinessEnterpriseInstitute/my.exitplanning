@@ -1,0 +1,35 @@
+Index: docroot/sites/all/modules/autologout/autologout.module
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- docroot/sites/all/modules/autologout/autologout.module	(revision 206d3ff5998217e132da248914e16e97d2b96ba2)
++++ docroot/sites/all/modules/autologout/autologout.module	(date 1601658830673)
+@@ -664,17 +664,20 @@
+   global $user;
+ 
+   if (variable_get('autologout_use_watchdog', FALSE)) {
+-    watchdog('Autologout', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
++    watchdog('user', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
+   }
+ 
+-  // Destroy the current session.
+-  module_invoke_all('user_logout', $user);
+-  session_destroy();
++  if (module_exists('cas')) {
++    cas_logout(TRUE);
++  } else {
++    // Destroy the current session.
++    module_invoke_all('user_logout', $user);
++    session_destroy();
+ 
+-  // Load the anonymous user.
+-  $user = drupal_anonymous_user();
++    // Load the anonymous user.
++    $user = drupal_anonymous_user();
++  }
+ }
+-
+ /**
+  * Helper to determine if a given user should be autologged out.
+  */
