@@ -5,21 +5,21 @@ class IDPMetadataReader
 {
     private $identityProviders;
     private $serviceProviders;
-    public function __construct(DOMNode $DP = NULL)
+    public function __construct(DOMNode $L_ = NULL)
     {
         $this->identityProviders = array();
         $this->serviceProviders = array();
-        $gq = Utilities::xpQuery($DP, "\x2e\57\x73\141\155\x6c\137\155\145\x74\x61\x64\x61\164\x61\72\x45\156\164\151\x74\171\x44\145\163\x63\162\x69\160\164\x6f\x72");
-        foreach ($gq as $mi) {
-            $h2 = Utilities::xpQuery($mi, "\x2e\57\163\x61\155\154\137\x6d\145\164\141\x64\x61\x74\141\x3a\111\x44\120\x53\x53\117\104\x65\x73\143\x72\151\x70\x74\157\162");
-            if (!(isset($h2) && !empty($h2))) {
-                goto f_;
+        $Dp = Utilities::xpQuery($L_, "\56\57\x73\141\x6d\x6c\x5f\155\145\164\141\x64\141\164\141\x3a\105\156\x74\x69\x74\x79\104\145\x73\143\x72\151\x70\164\x6f\162");
+        foreach ($Dp as $xs) {
+            $Ix = Utilities::xpQuery($xs, "\x2e\57\163\x61\x6d\x6c\x5f\x6d\145\x74\141\144\141\x74\141\72\x49\104\120\123\123\117\x44\x65\x73\x63\x72\151\160\x74\x6f\x72");
+            if (!(isset($Ix) && !empty($Ix))) {
+                goto sM;
             }
-            array_push($this->identityProviders, new IdentityProviders($mi));
-            f_:
-            Ho:
+            array_push($this->identityProviders, new IdentityProviders($xs));
+            sM:
+            Ya:
         }
-        am:
+        D6:
     }
     public function getIdentityProviders()
     {
@@ -39,124 +39,124 @@ class IdentityProviders
     private $signingCertificate;
     private $encryptionCertificate;
     private $signedRequest;
-    public function __construct(DOMElement $DP = NULL)
+    public function __construct(DOMElement $L_ = NULL)
     {
         $this->idpName = '';
         $this->loginDetails = array();
         $this->logoutDetails = array();
         $this->signingCertificate = array();
         $this->encryptionCertificate = array();
-        if (!$DP->hasAttribute("\x65\x6e\x74\x69\164\x79\x49\x44")) {
-            goto FR;
+        if (!$L_->hasAttribute("\145\156\x74\x69\x74\x79\x49\104")) {
+            goto W9;
         }
-        $this->entityID = $DP->getAttribute("\x65\x6e\x74\x69\x74\x79\x49\104");
-        FR:
-        if (!$DP->hasAttribute("\127\x61\x6e\164\101\165\164\150\x6e\122\145\161\x75\145\163\x74\163\x53\151\x67\x6e\x65\144")) {
-            goto vy;
+        $this->entityID = $L_->getAttribute("\145\156\x74\x69\x74\x79\111\104");
+        W9:
+        if (!$L_->hasAttribute("\127\141\156\x74\x41\165\164\150\156\x52\145\x71\165\x65\x73\x74\163\x53\151\x67\x6e\x65\x64")) {
+            goto oV;
         }
-        $this->signedRequest = $DP->getAttribute("\127\141\156\164\x41\x75\164\150\156\122\145\161\165\145\163\164\x73\123\151\147\156\145\144");
-        vy:
-        $h2 = Utilities::xpQuery($DP, "\x2e\57\163\141\x6d\x6c\137\x6d\x65\164\x61\x64\141\164\141\x3a\111\x44\x50\123\x53\x4f\104\145\163\143\162\151\x70\164\157\162");
-        if (count($h2) > 1) {
-            goto RW;
+        $this->signedRequest = $L_->getAttribute("\x57\x61\156\164\101\x75\164\x68\156\x52\145\x71\x75\x65\x73\x74\x73\x53\x69\147\156\x65\x64");
+        oV:
+        $Ix = Utilities::xpQuery($L_, "\56\57\x73\x61\x6d\x6c\137\x6d\145\x74\141\144\x61\x74\x61\x3a\111\x44\120\123\123\x4f\x44\x65\x73\143\162\x69\x70\x74\x6f\x72");
+        if (count($Ix) > 1) {
+            goto m3;
         }
-        if (empty($h2)) {
-            goto GW;
+        if (empty($Ix)) {
+            goto K_;
         }
-        goto fa;
-        RW:
-        throw new Exception("\115\x6f\x72\145\40\x74\150\141\156\40\x6f\x6e\x65\40\x3c\111\x44\x50\x53\x53\x4f\x44\x65\x73\x63\162\x69\x70\164\x6f\x72\x3e\40\x69\x6e\x20\74\105\x6e\164\x69\x74\171\x44\x65\163\x63\162\x69\x70\164\x6f\x72\x3e\56");
-        goto fa;
-        GW:
-        throw new Exception("\115\151\x73\x73\x69\x6e\x67\40\162\145\161\165\151\x72\145\144\x20\x3c\111\104\120\123\123\117\x44\x65\x73\143\162\x69\x70\164\157\x72\x3e\x20\x69\x6e\40\74\105\x6e\164\151\164\171\x44\x65\163\143\x72\151\x70\x74\157\162\x3e\56");
-        fa:
-        $RF = $h2[0];
-        $tH = Utilities::xpQuery($DP, "\x2e\57\x73\141\155\x6c\137\x6d\145\164\x61\144\141\164\x61\x3a\105\x78\x74\x65\156\163\151\x6f\156\163");
-        if (!$tH) {
-            goto Xc;
+        goto vV;
+        m3:
+        throw new Exception("\x4d\x6f\162\x65\40\164\150\141\x6e\x20\x6f\x6e\x65\40\x3c\111\x44\120\x53\123\x4f\x44\x65\x73\x63\162\x69\160\x74\x6f\x72\76\x20\151\156\x20\x3c\105\x6e\x74\151\x74\x79\104\145\x73\143\162\151\x70\x74\x6f\162\76\x2e");
+        goto vV;
+        K_:
+        throw new Exception("\115\x69\x73\163\151\x6e\x67\40\x72\x65\x71\x75\151\162\x65\144\x20\x3c\x49\104\x50\123\123\117\x44\145\x73\x63\162\151\160\164\157\162\x3e\x20\151\156\x20\74\x45\x6e\164\151\164\x79\104\145\163\143\x72\x69\x70\x74\x6f\162\x3e\56");
+        vV:
+        $Cd = $Ix[0];
+        $hn = Utilities::xpQuery($L_, "\56\57\x73\141\155\x6c\137\x6d\x65\x74\x61\x64\x61\164\x61\72\105\170\164\145\x6e\x73\151\x6f\x6e\x73");
+        if (!$hn) {
+            goto S2;
         }
-        $this->parseInfo($RF);
-        Xc:
-        $this->parseSSOService($RF);
-        $this->parseSLOService($RF);
-        $this->parsex509Certificate($RF);
+        $this->parseInfo($Cd);
+        S2:
+        $this->parseSSOService($Cd);
+        $this->parseSLOService($Cd);
+        $this->parsex509Certificate($Cd);
     }
-    private function parseInfo($DP)
+    private function parseInfo($L_)
     {
-        $KN = Utilities::xpQuery($DP, "\56\57\155\x64\165\151\x3a\125\111\111\156\x66\x6f\x2f\155\x64\165\x69\72\x44\x69\163\160\154\141\x79\x4e\x61\x6d\145");
-        foreach ($KN as $ge) {
-            if (!($ge->hasAttribute("\170\155\x6c\x3a\x6c\x61\156\147") && $ge->getAttribute("\170\x6d\x6c\x3a\154\141\x6e\147") == "\x65\x6e")) {
-                goto yJ;
+        $PY = Utilities::xpQuery($L_, "\56\57\155\x64\165\151\72\x55\x49\x49\x6e\146\x6f\x2f\155\x64\x75\x69\x3a\x44\151\x73\x70\x6c\141\x79\x4e\x61\x6d\x65");
+        foreach ($PY as $cg) {
+            if (!($cg->hasAttribute("\x78\155\154\72\154\141\x6e\x67") && $cg->getAttribute("\170\155\x6c\72\x6c\141\156\147") == "\145\156")) {
+                goto F7;
             }
-            $this->idpName = $ge->textContent;
-            yJ:
-            tx:
+            $this->idpName = $cg->textContent;
+            F7:
+            yO:
         }
-        T2:
+        hM:
     }
-    private function parseSSOService($DP)
+    private function parseSSOService($L_)
     {
-        $ef = Utilities::xpQuery($DP, "\56\57\x73\x61\x6d\x6c\137\x6d\x65\164\x61\144\x61\164\x61\72\123\x69\x6e\147\154\145\123\151\x67\156\x4f\x6e\123\145\162\166\x69\143\x65");
-        foreach ($ef as $EC) {
-            $mJ = str_replace("\x75\162\x6e\72\x6f\x61\163\x69\163\x3a\x6e\x61\155\145\x73\x3a\x74\x63\x3a\x53\101\115\114\x3a\x32\x2e\60\x3a\x62\x69\x6e\x64\x69\156\147\x73\x3a", '', $EC->getAttribute("\102\151\x6e\x64\x69\156\x67"));
-            $this->loginDetails = array_merge($this->loginDetails, array($mJ => $EC->getAttribute("\x4c\157\143\x61\x74\151\157\156")));
-            gk:
+        $XH = Utilities::xpQuery($L_, "\x2e\x2f\163\141\155\154\137\155\x65\164\141\144\x61\164\141\72\x53\x69\156\x67\154\145\x53\x69\x67\x6e\117\156\123\x65\162\x76\x69\143\x65");
+        foreach ($XH as $Ze) {
+            $RU = str_replace("\x75\162\x6e\x3a\x6f\x61\x73\151\163\72\156\141\x6d\145\163\72\x74\x63\x3a\123\x41\115\114\72\62\56\x30\x3a\x62\x69\156\144\x69\x6e\x67\163\72", '', $Ze->getAttribute("\102\151\x6e\144\x69\156\147"));
+            $this->loginDetails = array_merge($this->loginDetails, array($RU => $Ze->getAttribute("\114\x6f\x63\x61\x74\151\x6f\x6e")));
+            y4:
         }
-        M3:
+        Zz:
     }
-    private function parseSLOService($DP)
+    private function parseSLOService($L_)
     {
-        $lN = Utilities::xpQuery($DP, "\x2e\57\163\x61\x6d\154\137\155\145\164\x61\x64\x61\x74\141\x3a\x53\x69\156\x67\154\x65\114\157\x67\157\x75\x74\x53\145\x72\x76\x69\x63\145");
-        foreach ($lN as $Ix) {
-            $mJ = str_replace("\165\162\156\72\x6f\x61\163\x69\x73\x3a\156\x61\155\x65\x73\x3a\x74\x63\72\123\101\115\114\x3a\62\x2e\x30\72\x62\x69\156\144\x69\x6e\x67\163\x3a", '', $Ix->getAttribute("\102\151\x6e\144\151\156\x67"));
-            $this->logoutDetails = array_merge($this->logoutDetails, array($mJ => $Ix->getAttribute("\114\x6f\143\x61\x74\x69\157\x6e")));
-            LX:
+        $nS = Utilities::xpQuery($L_, "\56\57\163\x61\155\154\x5f\x6d\x65\x74\141\x64\141\x74\x61\x3a\x53\x69\x6e\x67\154\145\x4c\157\147\157\165\x74\x53\x65\x72\x76\x69\x63\x65");
+        foreach ($nS as $Wy) {
+            $RU = str_replace("\165\x72\x6e\72\157\x61\x73\151\163\72\x6e\x61\x6d\x65\163\x3a\x74\143\x3a\x53\101\x4d\114\x3a\x32\56\x30\72\142\x69\x6e\144\151\x6e\147\163\x3a", '', $Wy->getAttribute("\102\x69\x6e\144\151\x6e\147"));
+            $this->logoutDetails = array_merge($this->logoutDetails, array($RU => $Wy->getAttribute("\114\x6f\143\141\x74\151\157\156")));
+            T6:
         }
-        qz:
+        wR:
     }
-    private function parsex509Certificate($DP)
+    private function parsex509Certificate($L_)
     {
-        foreach (Utilities::xpQuery($DP, "\56\x2f\163\141\x6d\154\x5f\x6d\x65\164\x61\144\141\164\141\72\x4b\x65\171\x44\x65\x73\143\x72\x69\x70\x74\x6f\162") as $yn) {
-            if ($yn->hasAttribute("\x75\x73\x65")) {
-                goto gQ;
+        foreach (Utilities::xpQuery($L_, "\56\57\163\x61\x6d\154\137\155\x65\x74\x61\x64\x61\164\141\72\113\145\x79\104\145\163\143\162\151\160\x74\157\162") as $gu) {
+            if ($gu->hasAttribute("\x75\163\145")) {
+                goto qh;
             }
-            $this->parseSigningCertificate($yn);
-            goto lT;
-            gQ:
-            if ($yn->getAttribute("\165\163\145") == "\145\x6e\143\x72\171\160\164\151\x6f\156") {
-                goto zt;
+            $this->parseSigningCertificate($gu);
+            goto yE;
+            qh:
+            if ($gu->getAttribute("\165\x73\145") == "\145\156\143\162\x79\x70\164\x69\x6f\x6e") {
+                goto iZ;
             }
-            $this->parseSigningCertificate($yn);
-            goto sW;
-            zt:
-            $this->parseEncryptionCertificate($yn);
-            sW:
-            lT:
-            MB:
+            $this->parseSigningCertificate($gu);
+            goto T3;
+            iZ:
+            $this->parseEncryptionCertificate($gu);
+            T3:
+            yE:
+            fU:
         }
-        oO:
+        WZ:
     }
-    private function parseSigningCertificate($DP)
+    private function parseSigningCertificate($L_)
     {
-        $EI = Utilities::xpQuery($DP, "\56\57\144\x73\72\113\x65\x79\111\156\146\x6f\57\144\163\x3a\130\65\60\71\x44\141\x74\x61\x2f\144\x73\72\130\x35\x30\x39\103\x65\162\x74\x69\146\x69\x63\x61\164\145");
-        $T9 = trim($EI[0]->textContent);
-        $T9 = str_replace(array("\xd", "\12", "\x9", "\40"), '', $T9);
-        if (empty($EI)) {
-            goto KM;
+        $Ot = Utilities::xpQuery($L_, "\x2e\x2f\144\163\72\x4b\145\171\x49\156\x66\157\57\x64\163\x3a\130\x35\60\71\x44\x61\x74\141\x2f\x64\x73\x3a\x58\x35\x30\71\x43\x65\x72\164\x69\x66\151\143\x61\x74\x65");
+        $hl = trim($Ot[0]->textContent);
+        $hl = str_replace(array("\xd", "\12", "\11", "\40"), '', $hl);
+        if (empty($Ot)) {
+            goto Nt;
         }
-        array_push($this->signingCertificate, Utilities::sanitize_certificate($T9));
-        KM:
+        array_push($this->signingCertificate, Utilities::sanitize_certificate($hl));
+        Nt:
     }
-    private function parseEncryptionCertificate($DP)
+    private function parseEncryptionCertificate($L_)
     {
-        $EI = Utilities::xpQuery($DP, "\x2e\x2f\144\x73\72\x4b\145\x79\x49\x6e\x66\x6f\x2f\x64\163\72\130\x35\60\71\x44\141\x74\x61\57\x64\x73\x3a\130\65\x30\x39\103\145\x72\x74\x69\146\x69\x63\x61\x74\145");
-        $T9 = trim($EI[0]->textContent);
-        $T9 = str_replace(array("\15", "\12", "\x9", "\x20"), '', $T9);
-        if (empty($EI)) {
-            goto O9;
+        $Ot = Utilities::xpQuery($L_, "\56\x2f\x64\163\x3a\113\145\171\111\x6e\146\157\57\144\163\x3a\130\x35\x30\x39\104\x61\x74\x61\x2f\144\x73\x3a\130\x35\60\x39\103\145\162\x74\x69\x66\151\x63\141\164\145");
+        $hl = trim($Ot[0]->textContent);
+        $hl = str_replace(array("\15", "\12", "\11", "\40"), '', $hl);
+        if (empty($Ot)) {
+            goto LU;
         }
-        array_push($this->encryptionCertificate, $T9);
-        O9:
+        array_push($this->encryptionCertificate, $hl);
+        LU:
     }
     public function getIdpName()
     {
@@ -166,13 +166,13 @@ class IdentityProviders
     {
         return $this->entityID;
     }
-    public function getLoginURL($mJ)
+    public function getLoginURL($RU)
     {
-        return $this->loginDetails[$mJ];
+        return $this->loginDetails[$RU];
     }
-    public function getLogoutURL($mJ)
+    public function getLogoutURL($RU)
     {
-        return isset($this->logoutDetails[$mJ]) ? $this->logoutDetails[$mJ] : '';
+        return isset($this->logoutDetails[$RU]) ? $this->logoutDetails[$RU] : '';
     }
     public function getLoginDetails()
     {
