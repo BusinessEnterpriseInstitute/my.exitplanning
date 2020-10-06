@@ -664,19 +664,15 @@ function _autologout_logout() {
   global $user;
 
   if (variable_get('autologout_use_watchdog', FALSE)) {
-    watchdog('user', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
+    watchdog('Autologout', 'Session automatically closed for %name by autologout.', array('%name' => $user->name));
   }
 
-  if (module_exists('cas')) {
-      cas_logout(TRUE);
-  } else {
-      // Destroy the current session.
-      module_invoke_all('user_logout', $user);
-      session_destroy();
+  // Destroy the current session.
+  module_invoke_all('user_logout', $user);
+  session_destroy();
 
-      // Load the anonymous user.
-      $user = drupal_anonymous_user();
-  }
+  // Load the anonymous user.
+  $user = drupal_anonymous_user();
 }
 
 /**
