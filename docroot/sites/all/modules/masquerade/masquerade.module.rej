@@ -1,0 +1,72 @@
+***************
+*** 843,864 ****
+      return FALSE;
+    }
+  
+-   // Call logout hooks when switching from original user.
+-   masquerade_user_logout($user);
+    drupal_session_regenerate();
+  
+-   $query = db_insert('masquerade');
+-   $query->fields(array(
+-     'uid_from' => $user->uid,
+-     'uid_as' => $new_user->uid,
+-     'sid' => session_id(),
+-   ));
+-   $query->execute();
+-   // switch user
+- 
+-   watchdog('masquerade', 'User %user now masquerading as %masq_as.', array('%user' => $user->name, '%masq_as' => $new_user->name ? $new_user->name : variable_get('anonymous', t('Anonymous'))), WATCHDOG_INFO);
+    drupal_set_message(t('You are now masquerading as !masq_as.', array('!masq_as' => theme('username', array('account' => $new_user)))));
+-   $user->masquerading = $new_user->uid;
+    $user = $new_user;
+  
+    // Call all login hooks when switching to masquerading user.
+--- 727,737 ----
+      return FALSE;
+    }
+  
+    drupal_session_regenerate();
+  
++   watchdog('masquerade', 'User %user now masquerading as %masq_as.', array('%user' => $user->name, '%masq_as' => $new_user->name), WATCHDOG_INFO);
+    drupal_set_message(t('You are now masquerading as !masq_as.', array('!masq_as' => theme('username', array('account' => $new_user)))));
++   $_SESSION['masquerading'] = $user->uid;
+    $user = $new_user;
+  
+    // Call all login hooks when switching to masquerading user.
+***************
+*** 890,910 ****
+  function masquerade_switch_back() {
+    // switch user
+    global $user;
+-   cache_clear_all($user->uid, 'cache_menu', TRUE);
+-   $uid = db_query("SELECT m.uid_from FROM {masquerade} m WHERE m.sid = :sid AND m.uid_as = :uid_as ", array(
+-     ':sid' => session_id(),
+-     ':uid_as' => $user->uid,
+-   ))->fetchField();
+-   // erase record
+-   db_delete('masquerade')
+-     ->condition('sid', session_id())
+-     ->condition('uid_as', $user->uid)
+-     ->execute();
+- 
+-   $oldname = ($user->uid == 0 ? variable_get('anonymous', t('Anonymous')) : $user->name);
+- 
+-   // Call logout hooks when switching from masquerading user.
+-   masquerade_user_logout($user);
+    drupal_session_regenerate();
+  
+    $user = user_load($uid);
+--- 763,774 ----
+  function masquerade_switch_back() {
+    // switch user
+    global $user;
++ 
++   $oldname = $user->name;
++ 
++   // Clear the session.
++   $uid = $_SESSION['masquerading'];
++   unset($_SESSION['masquerading']);
+    drupal_session_regenerate();
+  
+    $user = user_load($uid);
