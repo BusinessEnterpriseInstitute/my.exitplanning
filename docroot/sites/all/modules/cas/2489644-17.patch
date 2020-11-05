@@ -1,0 +1,25 @@
+diff --git a/cas_server.module b/cas_server.module
+index 53f8169..a32210d 100644
+--- a/cas_server.module
++++ b/cas_server.module
+@@ -38,6 +38,20 @@ function cas_server_menu() {
+     'type' => MENU_CALLBACK,
+   );
+ 
++  $items['cas/p3/serviceValidate'] = array(
++    'page callback' => 'cas_server_service_validate',
++    'title' => 'CAS Service Validate',
++    'access callback' => TRUE,
++    'type' => MENU_CALLBACK,
++  );
++
++  $items['cas/p3/proxyValidate'] = array(
++    'page callback' => 'cas_server_service_validate',
++    'title' => 'CAS Proxy Ticket Validate',
++    'access callback' => TRUE,
++    'type' => MENU_CALLBACK,
++  );
++
+   $items['cas/logout'] = array(
+     'page callback' => 'cas_server_logout',
+     'title' => 'CAS Logout',
