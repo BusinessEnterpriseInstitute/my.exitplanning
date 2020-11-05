@@ -17,9 +17,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
+ *
  * PHP Version 5
  *
- * @file     CAS/ProxyChain/Any.php
+ * @file     CAS/Session/PhpSession.php
  * @category Authentication
  * @package  PhpCAS
  * @author   Adam Franco <afranco@middlebury.edu>
@@ -28,37 +29,17 @@
  */
 
 /**
- * A proxy-chain definition that will match any list of proxies.
+ * Empty class used as a default implementation for phpCAS.
  *
- * Use this class for quick testing or in certain production screnarios you
- * might want to allow allow any other valid service to proxy your service.
+ * Implements the standard PHP session handler without no alterations.
  *
- * THIS CLASS IS HOWEVER NOT RECOMMENDED FOR PRODUCTION AND HAS SECURITY
- * IMPLICATIONS: YOU ARE ALLOWING ANY SERVICE TO ACT ON BEHALF OF A USER
- * ON THIS SERVICE.
- *
- * @class    CAS_ProxyChain_Any
+ * @class    CAS_Session_PhpSession
  * @category Authentication
  * @package  PhpCAS
  * @author   Adam Franco <afranco@middlebury.edu>
  * @license  http://www.apache.org/licenses/LICENSE-2.0  Apache License 2.0
  * @link     https://wiki.jasig.org/display/CASC/phpCAS
  */
-class CAS_ProxyChain_Any
-implements CAS_ProxyChain_Interface
+class CAS_Session_PhpSession extends SessionHandler implements SessionHandlerInterface
 {
-
-    /**
-     * Match a list of proxies.
-     *
-     * @param array $list The list of proxies in front of this service.
-     *
-     * @return bool
-     */
-    public function matches(array $list)
-    {
-        phpCAS::trace("Using CAS_ProxyChain_Any. No proxy validation is performed.");
-        return true;
-    }
-
 }
