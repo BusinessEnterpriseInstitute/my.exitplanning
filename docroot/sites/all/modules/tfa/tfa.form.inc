@@ -1,17 +1,20 @@
 <?php
 
 /**
- * @file tfa.form.inc
+ * @file
+ * Form-related functions.
  */
 
 /**
  * Start of TFA process form.
  *
- * @param $account User account
+ * @param object $account
+ *   User account object.
  */
 function tfa_begin_form($account) {
   return drupal_get_form('tfa_form', $account);
 }
+
 /**
  * Main TFA process form builder.
  *
@@ -105,14 +108,19 @@ function tfa_form_submit($form, &$form_state) {
 /**
  * Get destination and options for $form_state['redirect'].
  *
- * @param array $context TFA account context
- * @param array $form_state Form API state array from tfa_form_submit()
- * @param $account User account
+ * @param array $context
+ *   TFA account context.
+ * @param array $form_state
+ *   Form API state array from tfa_form_submit().
+ * @param object $account
+ *   User account.
+ *
  * @return array
+ *   Array with the redirect destination, and options.
  */
-function _tfa_form_get_destination($context, $form_state, $account) {
+function _tfa_form_get_destination(array $context, array $form_state, $account) {
   $options = array();
-  $path = 'user';
+  $destination = 'user';
   if (!empty($_GET['pass-reset-token'])) {
     // If pass-reset-token was set then complete final process interrupted
     // from user_pass_reset().
@@ -125,43 +133,48 @@ function _tfa_form_get_destination($context, $form_state, $account) {
   }
   if (!empty($form_state['redirect'])) {
     if (is_array($form_state['redirect'])) {
-      $path = $form_state['redirect'][0];
+      $destination = $form_state['redirect'][0];
       $options = $form_state['redirect'][1];
     }
     else {
-      $path = $form_state['redirect'];
+      $destination = $form_state['redirect'];
     }
   }
   if (!empty($_GET['destination']) && !url_is_external($_GET['destination'])) {
-    $destination = drupal_parse_url($_GET['destination']);
-    $path = $destination['path'];
+    $query_destination = drupal_parse_url($_GET['destination']);
+    $destination = $query_destination['path'];
     $options['query'] = !empty($options['query']) ?
-      array_merge($options['query'], $destination['query']) : $destination['query'];
-    $options['fragment'] = $destination['fragment'];
+      array_merge($options['query'], $query_destination['query']) : $query_destination['query'];
+    $options['fragment'] = $query_destination['fragment'];
     unset($_GET['destination']);
   }
   // Context redirect takes final precedence.
   if (!empty($context['redirect'])) {
     if (is_array($context['redirect'])) {
-      $path = $context['redirect'][0];
+      $destination = $context['redirect'][0];
       $options = $context['redirect'][1];
     }
     else {
-      $path = $context['redirect'];
+      $destination = $context['redirect'];
     }
   }
   // Allow other modules to alter final destination. This is better than form
   // altering TFA forms because callers would need to check the TFA process
   // status to figure out when to act.
-  drupal_alter('tfa_complete_redirect', $path, $options);
-  return array($path, $options);
+  drupal_alter('tfa_complete_redirect', $destination, $options);
+  return array($destination, $options);
 }
 
 /**
  * Check if flood has been hit.
  *
  * @param Tfa $tfa
+ *   Tfa object.
+ *
  * @return bool
+ *   TRUE if the flood has been hit.
+ *
+ * phpcs:disable Drupal.Commenting.FunctionComment.TypeHintMissing
  */
 function _tfa_hit_flood($tfa) {
   if (variable_get('tfa_test_mode', 0)) {
@@ -172,7 +185,7 @@ function _tfa_hit_flood($tfa) {
   $context = $tfa->getContext();
   $identifier = variable_get('user_failed_login_identifier_uid_only', FALSE) ? $context['uid'] : $context['uid'] . '-' . ip_address();
 
-  // Check user specific flood
+  // Check user specific flood.
   if (!flood_is_allowed('tfa_user', variable_get('tfa_user_threshold', 6), $user_window, $identifier)) {
     drupal_set_message(t('You have reached the threshold for incorrect code entry attempts. Please try again in !time minutes.', array('!time' => round($user_window / 60))), 'error');
     return TRUE;
