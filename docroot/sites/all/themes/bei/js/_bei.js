@@ -50,20 +50,7 @@
         }
       });
 
-      // Hubspot Bucket Credits
-      var _hsq = window._hsq = window._hsq || [];
-      _hsq.push(['setPath', '/blog']);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['setPath', '/podcast']);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['setPath', '/event']);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['setPath', '/solutions']);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['setPath', '/membership']);
-      _hsq.push(['trackPageView']);
-      _hsq.push(['setPath', '/contact-us']);
-      _hsq.push(['trackPageView']);
+      
 /**
       $(function(c) {
       $('.block-webform-client-block-181086').on('click', ".alert-close", function(c){
