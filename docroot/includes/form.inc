@@ -2392,15 +2392,13 @@ function form_type_checkbox_value($element, $input = FALSE) {
  *   for this element. Return nothing to use the default.
  */
 function form_type_checkboxes_value($element, $input = FALSE) {
-		if ($input === FALSE) {
-		$value = array();
-		$element += array('#default_value' => array());
-		if (!empty($element['#default_value'])) { // check for empty array before using
-		foreach ($element['#default_value'] as $key) {
-		$value[$key] = $key;
-		}
-		}
-		return $value;
+  if ($input === FALSE) {
+    $value = array();
+    $element += array('#default_value' => array());
+    foreach ($element['#default_value'] as $key) {
+      $value[$key] = $key;
+    }
+    return $value;
   }
   elseif (is_array($input)) {
     // Programmatic form submissions use NULL to indicate that a checkbox
