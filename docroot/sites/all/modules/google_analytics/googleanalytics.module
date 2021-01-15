@@ -313,7 +313,7 @@ function googleanalytics_page_alter(&$page) {
 
     // Track logged in users across all devices.
     if (variable_get('googleanalytics_trackuserid', 0) && user_is_logged_in()) {
-      $create_only_fields['userId'] = googleanalytics_get_user_id();
+      $create_only_fields['userId'] = google_analytics_user_id_hash($user->uid);
     }
 
     // Create a tracker.
@@ -708,32 +708,4 @@ function _googleanalytics_visibility_header($account) {
   }
 
   return TRUE;
-}
-
-/**
- * Get formatted value of GA User-ID.
- *
- * @param int $uid
- *   Drupal UID. Optional.
- *
- * @return string
- *   Returns empty string when Tracking UserID is disabled or   anonymous user.
- *   Returns formatted value according to specified format.
- */
-function googleanalytics_get_user_id($uid = '') {
-  // Do not process anonymous users because they all have the same
-  // hash and Drupal UID.
-  if (empty($uid)) {
-    return '';
-  }
-  // Hashed User-ID is a default.
-  $userId = google_analytics_user_id_hash($uid);
-  $format = variable_get('googleanalytics_userid_format', 'hash');
-  if ($format == 'drupal_uid') {
-    $userId = $uid;
-  }
-  elseif ($format == 'combined') {
-    $userId = $uid . '-' . $userId;
-  }
-  return $userId;
 }
