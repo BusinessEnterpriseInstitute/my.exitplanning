@@ -6,16 +6,14 @@ core = 7.x
 dependencies[] = acquia_agent
 dependencies[] = search_api_solr
 
+files[] = includes/SearchApiAcquiaSearchConnection.php
 files[] = includes/SearchApiAcquiaSearchHttpTransport.php
 files[] = includes/SearchApiAcquiaSearchService.php
-files[] = includes/v2/SearchApiAcquiaSearchConnection.php
-files[] = includes/v3/SearchApiAcquiaSearchConnectionV3.php
-files[] = includes/v3/SearchApiAcquiaApi.php
-files[] = includes/v3/SearchApiAcquiaPreferredCore.php
-files[] = includes/v3/SearchApiAcquiaCrypt.php
 files[] = tests/search_api_acquia.test
-; Information added by Drupal.org packaging script on 2020-12-11
-version = "7.x-2.5"
+
+; Information added by Drupal.org packaging script on 2017-10-12
+version = "7.x-2.4"
 core = "7.x"
 project = "search_api_acquia"
-datestamp = "1607713534"
+datestamp = "1507844351"
+

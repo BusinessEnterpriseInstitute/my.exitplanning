@@ -11,9 +11,6 @@
  */
 class SearchApiAcquiaSearchService extends SearchApiSolrService {
 
-  const ACQUIA_SEARCH_API_V2 = '2';
-  const ACQUIA_SEARCH_API_V3 = '3';
-
   /**
    * The connection class used by this service.
    *
@@ -44,7 +41,7 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
     }
 
     // allow the connection to override the derived key
-    if (isset($this->options['derived_key']) && method_exists($this->solr, 'setDerivedKey')) {
+    if (isset($this->options['derived_key'])) {
       $this->solr->setDerivedKey($this->options['derived_key']);
     }
   }
@@ -96,8 +93,6 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
    * Set some special overrides for Acquia Search
    */
   public function setConnectionOptions() {
-    $this->setConnectionClass($this->isV3() ? SearchApiAcquiaSearchConnectionV3::class : SearchApiAcquiaSearchConnection::class);
-
     // Modify connection details live on every connect so we do not need to
     // resave the server details if we make modifications in settings.php.
     $identifier = acquia_agent_settings('acquia_identifier');
@@ -139,28 +134,12 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
     $options = $this->options += array(
       'edismax' => 0,
       'modify_acquia_connection' => FALSE,
-      'scheme' => 'https',
-      'acquia_search_api_version' => self::ACQUIA_SEARCH_API_V2,
+      'scheme' => 'http',
     );
 
     // HTTP authentication is not needed since Acquia Search uses an HMAC
     // authentication mechanism.
     $form['http']['#access'] = FALSE;
-
-    // Port should always force 443.
-    $form['scheme'] = array(
-      '#type' => 'value',
-      '#value' => '443',
-    );
-
-    // Scheme should always force https.
-    $form['scheme'] = array(
-        '#type' => 'value',
-        '#value' => 'https',
-    );
-
-    // Hiding to not make this form too confusing.
-    $form['advanced']['solr_version']['#access'] = FALSE;
 
     $form['edismax'] = array(
       '#type' => 'checkbox',
@@ -178,18 +157,12 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
       '#weight' => -20,
     );
 
-    $form['acquia_search_api_version'] = array(
-      '#type' => 'select',
-      '#options' => array(
-        self::ACQUIA_SEARCH_API_V2 => 'Solr 6 and below',
-        self::ACQUIA_SEARCH_API_V3 => 'Solr 7 and above',
-      ),
-      '#title' => 'Acquia Search Solr version',
-      '#default_value' => $options['acquia_search_api_version'],
-      '#description' => t('Only change this if you are absolutely certain about what you are doing. Any misconfigurations will most likely break your site\'s connection to Acquia Search.'),
-      '#weight' => -10,
-      '#disabled' => variable_get('acquia_search_disable_version_select', TRUE  ),
-    );
+    // Disable any port configuration option as Acquia will always be in
+    //control of those ports
+    $form['port']['#access'] = FALSE;
+    // Disable the http method that is selected as Acquia will always be https
+    // unless ACQUIA_DEVELOPMENT_NOSSL was set.
+    $form['scheme']['#access'] = FALSE;
 
     $form['clean_ids_form']['#weight'] = 10;
 
@@ -206,6 +179,13 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
     );
     $form['host']['#states'] = $states;
     $form['path']['#states'] = $states;
+
+    if ($this->options['scheme'] == 'https') {
+      $this->options['port'] = '443';
+    }
+    else {
+      $this->options['port'] = '80';
+    }
 
     // We cannot connect directly to the Solr instance, so don't make it a link.
     if (isset($form['server_description'])) {
@@ -282,8 +262,7 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
     // Set the qt to eDisMax if we have keywords and either the configuration
     // is set to always use eDisMax or the keys contain a wildcard (* or ?).
     $keys = $query->getOriginalKeys();
-    $edismax = isset($this->options['edismax']) ? $this->options['edismax'] : '';
-    if ($keys && is_scalar($keys) && (($wildcard = preg_match('/\S+[*?]/', $keys)) || $edismax)) {
+    if ($keys && is_scalar($keys) && (($wildcard = preg_match('/\S+[*?]/', $keys)) || $this->options['edismax'])) {
       $params['defType'] = 'edismax';
       if ($wildcard) {
         // Converts keys to lower case, reset keys in query and replaces param.
@@ -302,19 +281,4 @@ class SearchApiAcquiaSearchService extends SearchApiSolrService {
   public function toLower($matches) {
     return drupal_strtolower($matches[1]);
   }
-
-  /**
-   * Returns the current API version.
-   */
-  public function getAcquiaSearchApiVersion() {
-    return $this->options['acquia_search_api_version'] ?? self::ACQUIA_SEARCH_API_V2;
-  }
-
-  /**
-   * Checks if API version is V3.
-   */
-  private function isV3() {
-    return $this->getAcquiaSearchApiVersion() === self::ACQUIA_SEARCH_API_V3;
-  }
-
 }

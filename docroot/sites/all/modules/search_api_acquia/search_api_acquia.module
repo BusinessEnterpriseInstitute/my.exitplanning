@@ -21,8 +21,9 @@ function search_api_acquia_init() {
   $subscription = acquia_agent_settings('acquia_subscription_data');
   $sub_active = !empty($subscription['active']);
   if (!$auto_switch_disabled && $sub_active && !module_exists('acquia_search_multi_subs')) {
+    $core_service = search_api_acquia_get_core_service();
     $servers = search_api_server_load_multiple(FALSE, array('class' => 'acquia_search_service'));
-    $result = search_api_acquia_add_solr_overrides($servers);
+    $result = search_api_acquia_add_solr_overrides($core_service, $servers);
     // Store result in global for this request. @see search_api_acquia_requirements()
     $GLOBALS['conf']['search_api_acquia_init_result'] = $result;
   }
@@ -30,18 +31,15 @@ function search_api_acquia_init() {
 }
 
 /**
- * Helper function that instantiates and caches the preferred search core service.
+ * Helper function that instantiates and caches the SAPIPreferredSearchCoreService.
+ *
+ * @return Drupal\search_api_acquia\SAPIPreferredSearchCoreService
  */
-function search_api_acquia_get_core_service($acquia_search_api_version = SearchApiAcquiaSearchService::ACQUIA_SEARCH_API_V2) {
-  static $core_services;
+function search_api_acquia_get_core_service() {
+  static $core_service;
 
-  if (isset($core_services[$acquia_search_api_version])) {
-    return $core_services[$acquia_search_api_version];
-  }
-
-  if ($acquia_search_api_version === SearchApiAcquiaSearchService::ACQUIA_SEARCH_API_V3) {
-    $core_services[$acquia_search_api_version] = SearchApiAcquiaApi::getFromSettings()->getPreferredCoreService();
-    return $core_services[$acquia_search_api_version];
+  if (isset($core_service)) {
+    return $core_service;
   }
 
   module_load_include('php', 'search_api_acquia', 'src/SAPIPreferredSearchCoreService');
@@ -56,8 +54,8 @@ function search_api_acquia_get_core_service($acquia_search_api_version = SearchA
   $subscription = acquia_agent_settings('acquia_subscription_data');
 
   $available_cores = search_api_acquia_available_cores($subscription);
-  $core_services[$acquia_search_api_version] = new SAPIPreferredSearchCoreService($acquia_identifier, $ah_env, $sites_foldername, $ah_db_name, $available_cores);
-  return $core_services[$acquia_search_api_version];
+  $core_service = new SAPIPreferredSearchCoreService($acquia_identifier, $ah_env, $sites_foldername, $ah_db_name, $available_cores);
+  return $core_service;
 }
 
 /**
@@ -83,6 +81,7 @@ function search_api_acquia_available_cores($subscription) {
  * search core is not found, it enables the read-only mode so that the site
  * does not unintentionally connect to the wrong core and corrupts its index.
  *
+ * @param Drupal\search_api_acquia\SAPIPreferredSearchCoreService $core_service
  * @param array $servers
  *   The Search API Solr servers.
  *
@@ -90,57 +89,45 @@ function search_api_acquia_available_cores($subscription) {
  *   True if preferred core has been found in the list of available cores and
  *   it was used to override the search settings.
  */
-function search_api_acquia_add_solr_overrides($servers) {
-  $override = FALSE;
-  /**
-   * @var string $acquia_server_id
-   * @var SearchApiServer $server
-   */
-  foreach ($servers as $acquia_server_id => $server) {
-    $core_service = search_api_acquia_get_core_service($server->getAcquiaSearchApiVersion());
-    $override |= search_api_acquia_override_server($core_service, $acquia_server_id);
-  }
-
-  return $override;
-}
-
-/**
- * Overrides settings for a server.
- */
-function search_api_acquia_override_server($core_service, $server_id) {
+function search_api_acquia_add_solr_overrides($core_service, $servers) {
   global $conf;
 
-  // Skip if the Search API server has already been overridden.
-  if (!empty($conf['search_api_acquia_overrides'][$server_id])) {
-    if (empty($conf['search_api_acquia_overrides'][$server_id]['overridden_by_acquia_search'])) {
-      $conf['search_api_acquia_overrides'][$server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_EXISTING_OVERRIDE;
+  $overrode = FALSE;
+
+  foreach ($servers as $acquia_server_id => $server) {
+    // Skip if the Search API server has already been overridden.
+    if (!empty($conf['search_api_acquia_overrides'][$acquia_server_id])) {
+      if (empty($conf['search_api_acquia_overrides'][$acquia_server_id]['overridden_by_acquia_search'])) {
+        $conf['search_api_acquia_overrides'][$acquia_server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_EXISTING_OVERRIDE;
+      }
+      continue;
     }
-    return FALSE;
+
+    $conf['search_api_acquia_overrides'][$acquia_server_id]['acquia_search_possible_cores'] = $core_service->getListOfPossibleCores();
+
+    if ($core_service->isPreferredCoreAvailable()) {
+
+      $derived_key = search_api_acquia_get_derived_key_for_core($core_service->getPreferredCoreId());
+      $conf['search_api_acquia_overrides'][$acquia_server_id]['path'] = '/solr/' . $core_service->getPreferredCoreId();
+      $conf['search_api_acquia_overrides'][$acquia_server_id]['host'] = $core_service->getPreferredCoreHostname();
+      $conf['search_api_acquia_overrides'][$acquia_server_id]['derived_key'] = $derived_key;
+      $conf['search_api_acquia_overrides'][$acquia_server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_OVERRIDE_AUTO_SET;
+      $overrode = TRUE;
+      continue;
+    }
+
+    // At this point none of the available search cores match to what is
+    //   expected, so read-only mode should be set.
+    // Read only mode is actually set per-index during
+    //   search_api_acquia_search_api_index_load(), however we add a diagnostic
+    //   value here for testing.
+    if (!variable_get('acquia_search_disable_auto_read_only', 0)) {
+      $conf['search_api_acquia_overrides'][$acquia_server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_AUTO_SHOULD_OVERRIDE_READ_ONLY;
+      $overrode = TRUE;
+    }
   }
 
-  $conf['search_api_acquia_overrides'][$server_id]['acquia_search_possible_cores'] = $core_service->getListOfPossibleCores();
-
-  if ($core_service->isPreferredCoreAvailable()) {
-
-    $derived_key = search_api_acquia_get_derived_key_for_core($core_service->getPreferredCoreId());
-    $conf['search_api_acquia_overrides'][$server_id]['path'] = '/solr/' . $core_service->getPreferredCoreId();
-    $conf['search_api_acquia_overrides'][$server_id]['host'] = $core_service->getPreferredCoreHostname();
-    $conf['search_api_acquia_overrides'][$server_id]['derived_key'] = $derived_key;
-    $conf['search_api_acquia_overrides'][$server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_OVERRIDE_AUTO_SET;
-    return TRUE;
-  }
-
-  // At this point none of the available search cores match to what is
-  //   expected, so read-only mode should be set.
-  // Read only mode is actually set per-index during
-  //   search_api_acquia_search_api_index_load(), however we add a diagnostic
-  //   value here for testing.
-  if (!variable_get('acquia_search_disable_auto_read_only', 0)) {
-    $conf['search_api_acquia_overrides'][$server_id]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_AUTO_SHOULD_OVERRIDE_READ_ONLY;
-    return TRUE;
-  }
-
-  return FALSE;
+  return $overrode;
 }
 
 /**
@@ -160,20 +147,20 @@ function search_api_acquia_search_api_index_load($indexes) {
   $sub_active = !empty($subscription['active']);
 
   if (!$auto_switch_disabled && !$read_only_switch_disabled && $sub_active && !module_exists('acquia_search_multi_subs')) {
-    foreach ($indexes as &$index) {
-      $server = $index->server;
-      if (empty($server) || !search_api_acquia_get_core_service($server->getAcquiaSearchApiVersion())->isPreferredCoreAvailable()
-      ) {
-        // This covers circumstances where the Acquia Search service hasn't
-        // been completely set up. Preventing an empty server machine name
-        // from loading prevents array_flip errors in entity_load that are
-        // otherwise hard to debug.
-        continue;
-      }
-      $server = search_api_server_load($index->server);
-      if ($server && $server->class == 'acquia_search_service') {
-        $index->read_only = '1';
-        $conf['search_api_acquia_overrides'][$index->server]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_AUTO_OVERRIDE_READ_ONLY;
+    if (!search_api_acquia_get_core_service()->isPreferredCoreAvailable()) {
+      foreach ($indexes as &$index) {
+        if (empty($index->server)) {
+          // This covers circumstances where the Acquia Search service hasn't
+          // been completely set up. Preventing an empty server machine name
+          // from loading prevents array_flip errors in entity_load that are
+          // otherwise hard to debug.
+          continue;
+        }
+        $server = search_api_server_load($index->server);
+        if ($server && $server->class == 'acquia_search_service') {
+          $index->read_only = '1';
+          $conf['search_api_acquia_overrides'][$index->server]['overridden_by_acquia_search'] = SEARCH_API_ACQUIA_AUTO_OVERRIDE_READ_ONLY;
+        }
       }
     }
   }
@@ -204,7 +191,7 @@ function search_api_acquia_get_derived_key_for_core($core_id) {
 function search_api_acquia_form_search_api_admin_server_edit_alter(&$form, &$form_state) {
   $server = $form_state['server'];
   if ($server->class == 'acquia_search_service') {
-    if (!search_api_acquia_get_core_service($server->getAcquiaSearchApiVersion())->isPreferredCoreAvailable()) {
+    if (!search_api_acquia_get_core_service()->isPreferredCoreAvailable()) {
       drupal_set_message(search_api_acquia_get_read_only_mode_warning($server), 'warning');
     }
   }
@@ -220,7 +207,7 @@ function search_api_acquia_form_search_api_admin_server_edit_alter(&$form, &$for
 function search_api_acquia_form_search_api_admin_index_edit_alter(&$form, &$form_state) {
   global $conf;
   $server = search_api_index_get_server($form_state['index']);
-  if (is_object($server) && $server->class == 'acquia_search_service') {
+  if ($server->class == 'acquia_search_service') {
     search_api_acquia_add_form_status_message($form, $form_state, $server);
     // Show message if in read-only mode.
     if ($conf['search_api_acquia_overrides'][$server->machine_name]['overridden_by_acquia_search'] == SEARCH_API_ACQUIA_AUTO_OVERRIDE_READ_ONLY) {
@@ -298,7 +285,7 @@ function search_api_acquia_ping($server_id, $op = 'ping') {
   }
   if ($op == 'deep-ping') {
     try {
-      $result = $solr->makeServletRequest('admin/luke', array('numTerms' => 0));
+      $result = $solr->makeServletRequest('admin/luke');
       if ($result->code == 200) {
         return TRUE;
       }

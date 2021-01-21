@@ -41,7 +41,7 @@ class MigrateDestinationFieldCollection extends MigrateDestinationEntity {
    */
   protected $hostEntityType;
 
-  public static function getKeySchema() {
+  static public function getKeySchema() {
     return array(
       'item_id' => array(
         'type' => 'int',
@@ -191,7 +191,8 @@ class MigrateDestinationFieldCollection extends MigrateDestinationEntity {
  * Implements migrate hook_migrate_api().
  */
 function field_collection_migrate_api() {
-  return array(
+  $api = array(
     'api' => 2,
   );
+  return $api;
 }
