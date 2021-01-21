@@ -7,10 +7,18 @@
 
 use Drupal\acquia_search\PreferredSearchCoreService;
 
+// Original env ID for earlier versions of Acquia Search.
 define('ACQUIA_SEARCH_ENVIRONMENT_ID', 'acquia_search_server_1');
+// Env ID for V3 environments.
+define('ACQUIA_SEARCH_V3_ENVIRONMENT_ID', 'acquia_search_server_3');
+
 define('ACQUIA_SEARCH_OVERRIDE_AUTO_SET', 1);
 define('ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY', 2);
 define('ACQUIA_SEARCH_EXISTING_OVERRIDE', 3);
+define('ACQUIA_SEARCH_SOLR_CORE_V2', "2");
+define('ACQUIA_SEARCH_SOLR_CORE_V3', "3");
+
+module_load_include('inc', 'acquia_search', 'includes/acquia_search_solr.helpers');
 
 /**
  * Implements hook_init().
@@ -381,17 +389,6 @@ function acquia_search_enable_acquia_solr_environment() {
 }
 
 /**
- * Implements hook_disable().
- *
- * Helper function to clear variables we may have set.
- */
-// phpcs:ignore
-function acquia_search_disable() {
-  variable_del('apachesolr_default_environment');
-  variable_del('acquia_search_derived_key_salt');
-}
-
-/**
  * Implements hook_menu_alter().
  */
 function acquia_search_menu_alter(&$menu) {
@@ -420,7 +417,10 @@ function _acquia_search_set_version() {
  * Tests whether the environment is connected to Acquia Search.
  */
 function acquia_search_environment_connected($environment) {
-  if ($environment['service_class'] == 'AcquiaSearchService') {
+  if (in_array($environment['service_class'], [
+    AcquiaSearchService::class,
+    AcquiaSearchSolrService::class,
+  ])) {
     return TRUE;
   }
   $acquia_search_key = apachesolr_environment_variable_get($environment['env_id'], 'acquia_search_key');
@@ -434,7 +434,11 @@ function acquia_search_environment_connected($environment) {
  * Delete environment page access.
  */
 function acquia_search_environment_delete_access($environment) {
-  if (strstr($environment['env_id'], ACQUIA_SEARCH_ENVIRONMENT_ID)) {
+  if (empty($environment['env_id'])) {
+    return FALSE;
+  }
+
+  if ($environment['env_id'] === ACQUIA_SEARCH_V3_ENVIRONMENT_ID || $environment['env_id'] === ACQUIA_SEARCH_ENVIRONMENT_ID) {
     return FALSE;
   }
   // Fall back to the original check.
@@ -490,15 +494,160 @@ function acquia_search_form_apachesolr_environment_edit_form_alter(&$form, $form
     }
 
     $form['url']['#disabled'] = TRUE;
-    $form['url']['#type'] = 'hidden';
     $form['env_id']['#disabled'] = TRUE;
   }
   // Don't let the user delete the initial environment.
-  if ($env_id == ACQUIA_SEARCH_ENVIRONMENT_ID) {
+  $acquia_solr_environment = FALSE;
+  if ($env_id == ACQUIA_SEARCH_ENVIRONMENT_ID || $env_id == ACQUIA_SEARCH_V3_ENVIRONMENT_ID) {
     $form['name']['#disabled'] = TRUE;
     $form['actions']['delete']['#access'] = FALSE;
+    $acquia_solr_environment = TRUE;
   }
+
+  // Adding solr core select option.
+  $solr_core = '';
+  if ($environment['env_id'] == ACQUIA_SEARCH_ENVIRONMENT_ID) {
+    $solr_core = ACQUIA_SEARCH_SOLR_CORE_V2;
+  }
+  elseif ($environment['env_id'] == ACQUIA_SEARCH_V3_ENVIRONMENT_ID) {
+    $solr_core = ACQUIA_SEARCH_SOLR_CORE_V3;
+  }
+
+  $form_element['acquia_search_api']['acquia_search_solr_core'] = [
+    '#title' => t('Acquia Search Solr core'),
+    '#type' => 'select',
+    '#options' => [
+      ACQUIA_SEARCH_SOLR_CORE_V2 => 'Solr 6 and below',
+      ACQUIA_SEARCH_SOLR_CORE_V3 => 'Solr 7 and above',
+    ],
+    '#empty_value' => '',
+    '#empty_option' => t('- None -'),
+    '#default_value' => $solr_core,
+    '#description' => t('Select version of Solr Core.'),
+    '#disabled' => $acquia_solr_environment,
+    '#ajax' => [
+      'callback' => '_acquia_make_environment_url',
+      'event' => 'change',
+      'wrapper' => 'acquia_search_environment_values',
+    ],
+  ];
+  array_unshift($form, $form_element['acquia_search_api']);
+
+  $form['#prefix'] = '<div id="acquia_search_environment_values">';
+  $form['#suffix'] = '</div>';
+
+  $acquia_environment = acquia_search_get_environment();
+  // Override default values.
+  foreach ($acquia_environment as $key => $value) {
+    $environment[$key] = $value;
+  }
+  $environment['env_id'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
+  $environment['name'] = t('Acquia Search');
+
+  $form['actions']['save']['#submit'][] = 'acquia_search_solr_settings_form_new_environment_submit';
+  $form['actions']['save_edit']['#submit'] = ['acquia_search_solr_settings_form_new_environment_submit'];
   $form['actions']['save']['#validate'][] = 'acquia_search_environment_edit_form_validate';
+}
+
+/**
+ * Ajjax callback to set enviroment fields in form.
+ *
+ * @param mixed $form
+ *   Form array.
+ * @param mixed $form_state
+ *   Form state array.
+ *
+ * @return mixed
+ *   Returns Form array with field values.
+ */
+function _acquia_make_environment_url($form, &$form_state) {
+  $solr_version = $form_state['values']['acquia_search_solr_core'];
+
+  variable_set('acquia_search_solr_core', $form_state['values']['acquia_search_solr_core']);
+
+  if ($solr_version == ACQUIA_SEARCH_SOLR_CORE_V2) {
+    if (apachesolr_environment_load(ACQUIA_SEARCH_ENVIRONMENT_ID)) {
+      $message = t('Search environment already exists.');
+      drupal_set_message($message, 'warning');
+    }
+    $acquia_environment = acquia_search_get_environment();
+    // Override default values.
+    foreach ($acquia_environment as $key => $value) {
+      $environment[$key] = $value;
+    }
+    $form['name']['#value'] = t('Acquia Search');
+    $form['url']['#value'] = $environment['url'];
+    $form['env_id']['#value'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
+    $form['service_class']['#value'] = $environment['service_class'];
+
+    // Allow other modules to override this.
+    drupal_alter('acquia_search_enable', $environment);
+
+  }
+  elseif ($solr_version == ACQUIA_SEARCH_SOLR_CORE_V3) {
+    $api = _acquia_search_solr_get_api();
+    if (empty($api)) {
+      $form['name']['#value'] = '';
+      $form['url']['#value'] = '';
+      $form['env_id']['#value'] = '';
+      $form['service_class']['#value'] = '';
+      $form_state['rebuild'] = TRUE;
+      return $form;
+    }
+
+    if ($env = apachesolr_environment_load(ACQUIA_SEARCH_V3_ENVIRONMENT_ID)) {
+      if (!empty($env['service_class'])) {
+        $message = t('Search environment already exists.');
+        drupal_set_message($message, 'warning');
+      }
+    }
+
+    $preferred_index_service = $api->getPreferredIndexService();
+    if (!$preferred_index_service->isPreferredIndexAvailable()) {
+      $message = AcquiaSearchSolrMessages::getNoPreferredIndexError(
+        $preferred_index_service->getAvailableIndexesIds()
+      );
+      drupal_set_message($message, 'warning');
+      $form['name']['#value'] = '';
+      $form['url']['#value'] = '';
+      $form['env_id']['#value'] = '';
+      $form['service_class']['#value'] = '';
+      $form_state['rebuild'] = TRUE;
+      return $form;
+    }
+    $environment = apachesolr_environment_load(ACQUIA_SEARCH_V3_ENVIRONMENT_ID);
+    if (!$environment) {
+      $environment = [
+        'env_id' => ACQUIA_SEARCH_V3_ENVIRONMENT_ID,
+        'conf' => [],
+      ];
+
+      // Copy bundles from the previous default environment.
+      $orig_env_id = apachesolr_default_environment();
+      $orig_env = apachesolr_environment_load($orig_env_id);
+      $environment['index_bundles'] = $orig_env['index_bundles'];
+    }
+
+    $environment['name'] = t('Acquia Search');
+    $environment['service_class'] = AcquiaSearchSolrService::class;
+
+    $preferred_index = $preferred_index_service->getPreferredIndex();
+    $environment['url'] = sprintf('https://%s', $preferred_index['data']['index_url']);
+
+    $form['#environmet'] = $environment;
+    $form['name']['#value'] = $environment['name'];
+    $form['url']['#value'] = $environment['url'];
+    $form['env_id']['#value'] = ACQUIA_SEARCH_V3_ENVIRONMENT_ID;
+    $form['service_class']['#value'] = $environment['service_class'];
+  }
+  else {
+    $form['name']['#value'] = '';
+    $form['url']['#value'] = '';
+    $form['env_id']['#value'] = '';
+    $form['service_class']['#value'] = '';
+  }
+  $form_state['rebuild'] = TRUE;
+  return $form;
 }
 
 /**
@@ -539,37 +688,25 @@ function acquia_search_is_environment_overridden_to_read_only(array $environment
 }
 
 /**
- * Needs comment.
+ * Ensures environment parameters are unchanged.
+ *
+ * @param mixed $form
+ *   Form array.
+ * @param mixed $form_state
+ *   Form state array.
  */
 function acquia_search_environment_edit_form_validate($form, &$form_state) {
-  if ($form_state['values']['env_id'] == ACQUIA_SEARCH_ENVIRONMENT_ID) {
+  if ($form_state['values']['acquia_search_solr_core'] === ACQUIA_SEARCH_SOLR_CORE_V2) {
     // Make sure that the environment parameters have not been changed.
+    $form_state['values']['env_id'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
     $form_state['values'] = array_merge($form_state['values'], acquia_search_get_environment());
   }
-}
-
-/**
- * Implements hook_acquia_subscription_status().
- */
-function acquia_search_acquia_subscription_status($active, $subscription = FALSE) {
-  if ($active) {
-    acquia_search_enable_acquia_solr_environment();
-    // Refresh the salt with the subscription data returned by the heartbeat
-    // since it can change periodically.
-    $salt = variable_get('acquia_search_derived_key_salt', '');
-    if (isset($subscription['derived_key_salt']) && $salt != $subscription['derived_key_salt']) {
-      variable_set('acquia_search_derived_key_salt', $subscription['derived_key_salt']);
-    }
-  }
-  else {
-    if (is_int($subscription)) {
-      switch ($subscription) {
-        case ACQUIA_AGENT_SUBSCRIPTION_NOT_FOUND:
-        case ACQUIA_AGENT_SUBSCRIPTION_EXPIRED:
-          acquia_search_disable();
-          break;
-      }
-    }
+  if ($form_state['values']['acquia_search_solr_core'] === ACQUIA_SEARCH_SOLR_CORE_V3) {
+    // Make sure that the environment parameters have not been changed.
+    $form_state['values'] = array_merge($form_state['values'], [
+      'service_class' => AcquiaSearchSolrService::class,
+      'env_id' => ACQUIA_SEARCH_V3_ENVIRONMENT_ID,
+    ]);
   }
 }
 
@@ -802,6 +939,15 @@ function acquia_search_apachesolr_query_alter($query) {
       $query->replaceParam('q', $keys);
     }
   }
+
+  if ($environment['service_class'] === AcquiaSearchSolrService::class) {
+    // Converts qf parameter to required format.
+    $qf = $query->getParam('qf');
+    if (!empty($qf) && is_array($qf)) {
+      $qf_string = implode(' ', $qf);
+      $query->replaceParam('qf', $qf_string);
+    }
+  }
 }
 
 /**
@@ -809,4 +955,34 @@ function acquia_search_apachesolr_query_alter($query) {
  */
 function _acquia_search_lower($matches) {
   return drupal_strtolower($matches[1]);
+}
+
+/**
+ * Additional submit handler which creates preconfigured search environment.
+ *
+ * @param array $form
+ *   Form array.
+ * @param array $form_state
+ *   Form state array.
+ */
+function acquia_search_solr_settings_form_new_environment_submit(array $form, array &$form_state) {
+  variable_set('acquia_search_solr_core', $form_state['values']['acquia_search_solr_core']);
+  if (!acquia_agent_subscription_is_active()) {
+    return;
+  }
+
+  // Checking Solr Core version.
+  if (variable_get('acquia_search_solr_core', ACQUIA_SEARCH_SOLR_CORE_V2) === ACQUIA_SEARCH_SOLR_CORE_V3) {
+    // Make sure acquia search is the default search module.
+    variable_set('search_default_module', 'acquia_search');
+  }
+  else {
+    // Refresh the salt with the subscription data returned by the heartbeat
+    // since it can change periodically.
+    $salt = variable_get('acquia_search_derived_key_salt', '');
+    $subscription = acquia_agent_settings('acquia_subscription_data');
+    if (isset($subscription['derived_key_salt']) && $salt != $subscription['derived_key_salt']) {
+      variable_set('acquia_search_derived_key_salt', $subscription['derived_key_salt']);
+    }
+  }
 }
