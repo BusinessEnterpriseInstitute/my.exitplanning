@@ -1,0 +1,26 @@
+***************
+*** 41,50 ****
+    if ($conf) {
+      if ($data['type'] == 'current') {
+        global $user;
+-       $data = user_load($user->uid);
+        if (user_is_logged_in()) {
+          $data->logged_in_user = TRUE;
+        }
+      }
+      else {
+        $data = user_load($data['uid']);
+--- 41,53 ----
+    if ($conf) {
+      if ($data['type'] == 'current') {
+        global $user;
+        if (user_is_logged_in()) {
++         $data = user_load($user->uid);
+          $data->logged_in_user = TRUE;
+        }
++       else {
++         $data = drupal_anonymous_user();
++       }
+      }
+      else {
+        $data = user_load($data['uid']);
