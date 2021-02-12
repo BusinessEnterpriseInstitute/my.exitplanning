@@ -1,33 +1,20 @@
 <?php
+// $Id:
 /**
- * @file
- * Provide field handler to render a delete link.
- */
-
-/**
- * Field handler to present a link to delete a user to a revision.
+ * Field handler to present a link to delete a user to a revision
  */
 class views_handler_field_user_revision_link_delete extends views_handler_field_user_link {
-  /**
-   * {@inheritdoc}
-   */
-  public function construct() {
+  function construct() {
     parent::construct();
     $this->additional_fields['uid'] = 'uid';
     $this->additional_fields['vid'] = 'vid';
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function access() {
+  function access() {
     return user_access('delete user revisions');
   }
 
-  /**
-   * {@inheritdoc}
-   */
-  public function render_link($data, $values) {
+  function render_link($data, $values) {
     if (!$this->access()) {
       return;
     }
@@ -40,3 +27,4 @@ class views_handler_field_user_revision_link_delete extends views_handler_field_
     return $text;
   }
 }
+

@@ -4,9 +4,6 @@
  * Enables user revision.
  */
 
-// Count of accounts that will be processed per batch iteration.
-define('USER_REVISION_BATCH_USERS_LIMIT', 100);
-
 /**
  * Implements hook_views_api().
  */
@@ -18,6 +15,72 @@ function user_revision_views_api() {
 }
 
 /**
+ * Implements hook_disable().
+ */
+function user_revision_disable() {
+  module_load_include('install', 'user_revision');
+  $schema['users'] = array();
+  user_revision_schema_alter($schema);
+  foreach ($schema['users']['unique keys'] as $name => $spec) {
+    db_drop_unique_key('users', $name);
+  }
+}
+
+/**
+ * Implements hook_enable().
+ */
+function user_revision_enable() {
+  $users = db_select('users', 'u')
+    ->fields('u', array('uid', 'vid', 'name', 'mail', 'theme', 'signature', 'signature_format', 'status', 'timezone', 'language', 'picture', 'data'))
+    ->condition('u.vid', 0)
+    ->condition('u.uid', 0, '!=')
+    ->execute()
+    ->fetchAll();
+  foreach ($users as $user) {
+    db_insert('user_revision')
+      ->fields(array(
+        'uid' => $user->uid,
+        'log' => '',
+        'timestamp' => REQUEST_TIME,
+        'authorid' => $user->uid,
+        'name' => $user->name,
+        'mail' => $user->mail,
+        'theme' => $user->theme,
+        'signature' => $user->signature,
+        'signature_format' => $user->signature_format,
+        'status' => $user->status,
+        'timezone' => $user->timezone,
+        'language' => $user->language,
+        'picture' => $user->picture,
+        'data' => $user->data,
+      ))
+      ->execute();
+  }
+
+  $user_revisions = db_select('user_revision', 'ur')
+    ->fields('ur', array('uid', 'vid'))
+    ->execute()
+    ->fetchAll();
+  // This foreach updates each user only once as for each user there
+  // can be only 1 record in the {users} table with vid = 0.
+  foreach ($user_revisions as $user_revision) {
+    db_update('users')
+      ->condition('uid', $user_revision->uid)
+      ->condition('uid', 0, '!=')
+      ->condition('vid', 0)
+      ->fields(array('vid' => $user_revision->vid))
+      ->execute();
+  }
+
+  module_load_include('install', 'user_revision');
+  $schema['users'] = array();
+  user_revision_schema_alter($schema);
+  foreach ($schema['users']['unique keys'] as $name => $spec) {
+    db_add_unique_key('users', $name, $spec);
+  }
+}
+
+/**
  * Implements hook_menu().
  */
 function user_revision_menu() {
@@ -26,111 +89,66 @@ function user_revision_menu() {
     'page callback' => 'user_revision_overview',
     'page arguments' => array(1),
     'access callback' => '_user_revision_access',
-    'access arguments' => array(1, array(
-      'view user revisions',
-      'view own user revisions',
-      ),
-    ),
+    'access arguments' => array(1, array('view user revisions', 'view own user revisions')),
     'weight' => 2,
     'type' => MENU_LOCAL_TASK,
     'file' => 'user_revision.pages.inc',
   );
-  $items['user/%user/revisions/account/view'] = array(
+  $items['user/%user/revisions/%/view'] = array(
     'title' => 'Revisions',
     'page callback' => 'user_revision_show',
-    'page arguments' => array(1, 5),
+    'page arguments' => array(1, 3),
     'access callback' => '_user_revision_access',
-    'access arguments' => array(1, array(
-      'view user revisions',
-      'view own user revisions',
-      ),
-    ),
-    'type' => MENU_LOCAL_TASK,
+    'access arguments' => array(1, array('view user revisions', 'view own user revisions')),
   );
-  $items['user/%user_revision/revisions/account/%/revert'] = array(
+  $items['user/%user_revision/revisions/%/revert'] = array(
     'title' => 'Revert to earlier revision',
-    'load arguments' => array(4),
+    'load arguments' => array(3),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_revision_revert_confirm', 1),
     'access callback' => '_user_revision_access',
-    'access arguments' => array(1, array(
-      'revert user revisions',
-      'revert own user revisions',
-      ),
-    ),
-    'type' => MENU_CALLBACK,
+    'access arguments' => array(1, array('revert user revisions', 'revert own user revisions')),
     'file' => 'user_revision.pages.inc',
   );
-  $items['user/%user_revision/revisions/account/%/delete'] = array(
+  $items['user/%user_revision/revisions/%/delete'] = array(
     'title' => 'Delete earlier revision',
-    'load arguments' => array(4),
+    'load arguments' => array(3),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_revision_delete_confirm', 1),
     'access callback' => '_user_revision_access',
-    'access arguments' => array(1, array(
-      'delete user revisions',
-      'delete own user revisions',
-      ),
-    ),
-    'type' => MENU_CALLBACK,
+    'access arguments' => array(1, array('delete user revisions', 'delete own user revisions')),
     'file' => 'user_revision.pages.inc',
   );
   $items['admin/config/people/revisions'] = array(
-    'title' => 'Account revisions',
+    'title' => 'Revision settings',
     'description' => 'Configure revision settings.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('user_revision_admin_settings'),
     'access arguments' => array('view user revisions'),
     'file' => 'user_revision.admin.inc',
+    'weight' => 10,
   );
   return $items;
 }
 
 /**
- * Return the path index containing the vid value if on a user revision page,
- * otherwise 0.
- * Provided primarily for use by the user_diff module.
- * @see user_revision_menu()
+ * Access callback
  */
-function user_revision_vid_arg() {
-  $required_args = array(
-    0 => 'user',
-    2 => 'revisions',
-    3 => 'account',
-    4 => 'view',
-    5 => FALSE,
-  );
-  // The loop must result in one of the return statements being excuted.
-  foreach ($required_args as $index => $element) {
-    // if at the end, return the final index.
-    if (!$element) {
-      return ($index);
-    }
-    // If the path doesn't match, return 0.
-    if (arg($index) != $element) {
-      return 0;
-    }
-  }
-}
-
-/**
- * Access callback.
- */
-function _user_revision_access($u, $perm) {
+function _user_revision_access($u, $perm){
   global $user;
-  if (!is_array($perm)) {
+  if(!is_array($perm)){
     $perm = array($perm);
   }
   $access = FALSE;
-  foreach ($perm as $permission) {
-    if ($u->uid == $user->uid) {
+  foreach($perm as $permission){
+    if($u->uid == $user->uid){
       $access = user_access($permission) || $access;
     }
-    elseif (strpos($permission, 'own') === FALSE) {
+    elseif (strpos($permission, 'own') === FALSE){
       $access = user_access($permission) || $access;
     }
   }
-  $count = db_select('user_revision', 'ur')
+  $count= db_select('user_revision', 'ur')
     ->condition('ur.uid', $u->uid)
     ->countQuery()
     ->execute()
@@ -143,33 +161,32 @@ function _user_revision_access($u, $perm) {
  */
 function user_revision_permission() {
   return array(
-    'view user revisions' => array(
-      'title' => t('View any user revisions'),
-      'description' => t('Also required to administer user permissions'),
+    'view user revisions' =>  array(
+      'title' => t('View revisions'),
       'restrict access' => TRUE,
     ),
     'revert user revisions' => array(
-      'title' => t('Revert any user revisions'),
+      'title' => t('Revert revisions'),
       'restrict access' => TRUE,
     ),
     'delete user revisions' => array(
-      'title' => t('Delete any user revisions'),
+      'title' => t('Delete revisions'),
     ),
     'choose user revisions' => array(
       'title' => t('Choose to create revisions'),
-      'description' => t('Allow users to choose whether to create their own revisions'),
+      'description' => t('Allow users to create user revisions')
     ),
-    'view own user revisions' => array(
+    'view own user revisions' =>  array(
       'title' => t('View own revisions'),
-      'description' => t('Allow users to view their own revisions'),
+      'description' => t('Allow users to view their own user revisions'),
     ),
     'revert own user revisions' => array(
       'title' => t('Revert own revisions'),
-      'description' => t('Allow users to revert their own revisions'),
+      'description' => t('Allow users to revert their own user revisions'),
     ),
     'delete own user revisions' => array(
       'title' => t('Delete own revisions'),
-      'description' => t('Allow users to delete their own revisions'),
+      'description' => t('Allow users to delete their own user revisions'),
     ),
   );
 }
@@ -178,23 +195,14 @@ function user_revision_permission() {
  * Implements hook_admin_paths().
  */
 function user_revision_admin_paths() {
-  if (variable_get('user_revision_admin_theme', 0)) {
+  if (variable_get('node_admin_theme')) {
     $paths = array(
       'user/*/revisions' => TRUE,
-      'user/*/revisions/account/*' => TRUE,
+      'user/*/revisions/*/revert' => TRUE,
+      'user/*/revisions/*/delete' => TRUE,
     );
     return $paths;
   }
-}
-
-/**
- * Return the base URL for revisions.
- */
-function _user_revision_base_path($account) {
-  if (is_object($account)) {
-    $account = $account->uid;
-  }
-  return "user/$account/revisions/account";
 }
 
 /**
@@ -204,20 +212,13 @@ function _user_revision_base_path($account) {
  * revision handling for user objects.
  */
 class UserRevisionController extends UserController {
-  /**
-   * {@inheritdoc}
-   */
   function attachLoad(&$queried_users, $revision_id = FALSE) {
     parent::attachLoad($queried_users, $revision_id);
     foreach ($queried_users as $key => $record) {
       $queried_users[$key]->revision = 1;
     }
   }
-
-  /**
-   * {@inheritdoc}
-   */
-  function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
     $fields =& $query->getFields();
     unset($fields['timestamp']);
@@ -257,16 +258,10 @@ function user_revision_schema_alter(&$schema) {
  * Implements hook_entity_info_alter().
  */
 function user_revision_entity_info_alter(&$entity_info) {
-  module_load_install('user_revision');
+  module_load_install ('user_revision');
   $entity_info['user']['revision table'] = 'user_revision';
   $entity_info['user']['entity keys']['revision'] = 'vid';
   $entity_info['user']['controller class'] = 'UserRevisionController';
-  $entity_info['user']['view modes'] += array(
-    'revision' => array(
-      'label' => t('Revision display'),
-      'custom settings' => FALSE,
-    ),
-  );
 
   $schema = user_revision_schema();
   foreach ($schema['user_revision']['fields'] as $k => $field) {
@@ -277,6 +272,7 @@ function user_revision_entity_info_alter(&$entity_info) {
 
 /**
  * Implements hook_entity_property_info_alter().
+ * Play nice with the entity module.
  */
 function user_revision_entity_property_info_alter(&$info) {
   $info['user']['properties']['vid'] = array(
@@ -308,51 +304,37 @@ function user_revision_form_user_register_form_alter(&$form, &$form_state, $form
 }
 
 /**
-] * Implements hook_form_alter().
+ * Implements hook_form_alter().
  */
 function user_revision_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
-  // Only alter the form if it's the actual account form (i.e. not a profile2 form).
-  if ($form['#user_category'] == 'account') {
+  if(!isset($form['#user_category']) || (isset($form['#user_category']) && $form['#user_category'] == 'account')){
     $account = $form_state['user'];
-    $allowed = user_access('choose user revisions') || user_access('administer users');
-    $default = variable_get('user_revision_by_default', 1);
-    if ($allowed || $default) {
-      $form['revision_information'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Revision information'),
-        '#collapsible' => FALSE,
-        '#attributes' => array(
-          'class' => array('user-profile-form-revision-information'),
-        ),
-        '#weight' => 20,
-      );
-      $form['revision_information']['revision'] = array(
-        '#type' => $allowed? 'checkbox' : 'value',
-        '#title' => t('Create new revision'),
-        '#default_value' => $default,
-      );
-      $form['revision_information']['log'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Revision log message'),
-        '#rows' => 4,
-        '#description' => t('Provide an explanation of the changes you are making. This will help other authors understand your motivations.'),
-        '#states' => array(
-          'invisible' => array(
-            'input[name="revision"]' => array('checked' => FALSE),
-          ),
-        ),
-      );
-    }
-    else {
-      $form['revision'] = array(
-        '#type' => 'value',
-        '#value' => FALSE,
-      );
-      $form['log'] = array(
-        '#type' => 'value',
-        '#value' => '',
-      );
-    }
+    $form['revision_information'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Revision information'),
+      '#collapsible' => TRUE,
+      '#attributes' => array(
+        'class' => array('user-profile-form-revision-information'),
+      ),
+      '#weight' => 20,
+      '#access' => user_access('choose user revisions'),
+    );
+    $form['revision_information']['revision'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Create new revision'),
+      '#default_value' => variable_get('user_revision_by_default', 1),
+    );
+    $form['revision_information']['log'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Revision log message'),
+      '#rows' => 4,
+      '#description' => t('Provide an explanation of the changes you are making. This will help other authors understand your motivations.'),
+    );
+    $form['revision_information']['log']['#states'] = array(
+      'invisible' => array(
+        'input[name="revision"]' => array('checked' => FALSE),
+      ),
+    );
     $form['#submit'][] = 'user_revision_user_profile_form_submit';
 
     $form['vid'] = array(
@@ -365,6 +347,7 @@ function user_revision_form_user_profile_form_alter(&$form, &$form_state, $form_
     );
   }
 }
+
 /**
  * Submit function for the user account and profile editing form.
  */
@@ -380,88 +363,38 @@ function user_revision_user_profile_form_submit($form, &$form_state) {
 function user_revision_show($user, $vid) {
   $account = user_revision_load($user->uid, $vid);
   drupal_set_title(t('Revision of %title from %date', array('%title' => $user->name, '%date' => format_date($account->revision_timestamp))), PASS_THROUGH);
-  return user_view_page($account, 'revision');
+  return user_view_page($account, 'full');
 }
 
 /**
  * Load a revision.
  *
- * Loads a user object with revision support.
+ * Loads a user object with revision support
  */
 function user_revision_load($uid, $vid = NULL, $reset = FALSE) {
   if (isset($vid)) {
-    $user = entity_revision_load('user', $vid);
-    // Add the revision roles to user object.
-    $query = db_select('user_revision_roles', 'revision')
-      ->fields('role', array('rid', 'name'));
-    $query->join('role', 'role', 'role.rid = revision.rid');
-    $roles = $query->condition('revision.vid', $vid)
-      ->condition('revision.uid', $uid)
-      ->execute()
-      ->fetchAllKeyed();
-    $user->roles = $roles;
-
-    $fid = db_select('user_revision', 'ur')
-      ->condition('ur.vid', $vid)
-      ->fields('ur', array('picture'))
-      ->execute()
-      ->fetchField();
-
-    if ($fid) {
-      $user->picture = file_load($fid);
+    $conditions = (isset($vid) ? array('vid' => $vid) : array());
+    $users = user_load_multiple(array($uid), $conditions, $reset);
+    foreach($users as $key => $user){
+      $fid= db_select('user_revision', 'ur')
+        ->condition('ur.vid', $vid)
+        ->fields('ur', array('picture'))
+        ->execute()
+        ->fetchField();
+      if ($fid) {
+        $file = new stdClass();
+        $file->fid = $fid;
+        $users[$key]->picture = file_load($file->fid);
+      }
     }
-    return $user;
+    return reset($users);
   }
-}
-
-/**
- * Build the table of older revisions of a user.
- *
- * This is used by both user_revision view and user_rev_diff view.
- */
-function user_revision_list_build($viewed_user) {
-  $revisions = user_revision_list($viewed_user);
-
-  $data = array();
-  foreach ($revisions as $revision) {
-    $row = array();
-    $operations = array();
-
-    $revert_permission = _user_revision_access($viewed_user, array(
-        'revert user revisions',
-        'revert own user revisions',
-      )
-    );
-    $delete_permission = _user_revision_access($viewed_user, array(
-        'delete user revisions',
-        'delete own user revisions',
-      )
-    );
-    $vid = $revision->vid;
-    $link_base = _user_revision_base_path($viewed_user);
-    $row[$vid] = array(
-      'data' => t('!date by !username', array(
-        '!date' => l(format_date($revision->timestamp), "$link_base/view/$revision->vid"),
-        '!username' => theme('username', array('account' => $revision))
-      )) . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : ''),
-      'revision' => $revision,
-    );
-    if ($revision->current_vid > 0) {
-      $operations[] = array('data' => drupal_placeholder(t('current revision')), 'class' => array('revision-current'), 'colspan' => 2);
-    }
-    else {
-      $operations[] = $revert_permission? l(t('revert'), "$link_base/$revision->vid/revert") : '';
-      $operations[] = $delete_permission? l(t('delete'), "$link_base/$revision->vid/delete") : '';
-    }
-    $data[] = array('row' => $row, 'operations' => $operations);
-  }
-  return $data;
 }
 
 /**
  * Implements hook_user_insert().
  */
-function user_revision_user_insert(&$edit, $account, $category) {
+function user_revision_user_insert(&$edit, $account, $category){
   db_update('user_revision')
     ->condition('vid', $account->vid)
     ->fields(array('uid' => $account->uid))
@@ -474,21 +407,9 @@ function user_revision_user_insert(&$edit, $account, $category) {
 function user_revision_user_presave(&$edit, $account, $category) {
   global $user;
   $edit['log'] = empty($edit['log']) ? '' : $edit['log'];
-  $edit = array_merge((array) $account, $edit);
+  $edit = array_merge((array)$account, $edit);
   $edit['timestamp'] = REQUEST_TIME;
   $edit['authorid'] = $user->uid;
-
-  // Load the old hashed password again.
-  if (empty($edit['pass']) && !empty($edit['original']->pass)) {
-    $edit['pass'] = $edit['original']->pass;
-  }
-
-  // Allow this module to be extended.
-  $custom_fields = _user_revision_get_custom_fields($edit);
-  foreach ($custom_fields as $field => $value) {
-    $edit[$field] = $value;
-  }
-  $edit = array_merge((array) $custom_fields, $edit);
 
   if ((isset($edit['revision']) && $edit['revision'] == 1)
     || $account->is_new
@@ -504,19 +425,6 @@ function user_revision_user_presave(&$edit, $account, $category) {
     _user_save_revision($edit, array('vid'));
   }
 }
-
-/**
- * Adds a hook_user_revision_custom_fields() function.
- */
-function _user_revision_get_custom_fields($edit = NULL) {
-  $custom_fields = array();
-  foreach (module_implements('user_revision_custom_fields') as $module) {
-    $invoke = module_invoke($module, 'user_revision_custom_fields', $edit);
-    $custom_fields = array_merge($invoke, $custom_fields);
-  }
-  return $custom_fields;
-}
-
 
 /**
  * Implements hook_user_delete().
@@ -536,36 +444,24 @@ function user_revision_user_delete($account) {
 /**
  * Save record to the database.
  */
-function _user_save_revision(&$edit, $update = array()) {
+function _user_save_revision(&$edit, $update = NULL) {
   $picture = NULL;
-  if (isset($edit['picture']) && is_object($edit['picture'])) {
+  if(isset($edit['picture']) && is_object($edit['picture'])){
     $picture = $edit['picture'];
     $edit['picture'] = $picture->fid;
   }
-  // If $update is empty a new revision is created, otherwise the current vid is updated.
-  drupal_write_record('user_revision', $edit, $update);
-
-  // Insert each role to user_revision_roles table.
-  if (!empty($edit['roles'])) {
-    // If updating, delete any existing roles for this revision, as we're going to re-add them all.
-    if (!empty($update)) {
-      db_delete('user_revision_roles')
-        ->condition('uid', $edit['uid'])
-        ->condition('vid', $edit['vid'])
-        ->execute();
-    }
-    foreach (array_keys($edit['roles']) as $rid) {
-      // Only store real rids, "Authenticated User" is built-in.
-      if ($rid != DRUPAL_AUTHENTICATED_RID) {
-        user_revision_add_role($edit['uid'], $edit['vid'], $rid);
-      }
-    }
+  // add timestamp and author
+  if (isset($update)) {
+    $res = drupal_write_record('user_revision', $edit, $update);
   }
-
-  if (is_object($picture)) {
+  else {
+    $res = drupal_write_record('user_revision', $edit);
+  }
+  if(is_object($picture)){
     file_usage_add($picture, 'user_revision', 'user', $edit['vid']);
     $edit['picture'] = $picture;
   }
+  // pass new vid to user_save?
 }
 
 /**
@@ -574,18 +470,11 @@ function _user_save_revision(&$edit, $update = array()) {
 function user_revision_list($user) {
   $revisions = array();
   $result = db_select('user_revision', 'ur')
-    ->fields('ur', array(
-      'vid',
-      'log',
-      'authorid',
-      'ip',
-      'timestamp',
-    ));
+    ->fields('ur', array('vid', 'name', 'log', 'authorid', 'ip', 'uid', 'timestamp'));
   $user_alias = $result->leftJoin('users', 'u', "%alias.vid = ur.vid");
   $user_alias2 = $result->leftJoin('users', 'u2', "%alias.uid = ur.authorid");
   $result->addField($user_alias, 'vid', 'current_vid');
   $result->addField($user_alias2, 'name', 'current_name');
-  $result->fields($user_alias2, array('uid', 'name'));
 
   $result = $result->condition('ur.uid', $user->uid)
   ->orderBy('ur.vid', 'DESC')
@@ -600,48 +489,15 @@ function user_revision_list($user) {
 /**
  * Delete a user revision.
  *
- * @param object $revision
- *   The revision to delete, should have at least uid and vid.
+ * @param $revision_id
+ *   The revision ID to delete.
  */
 function user_revision_delete($revision) {
   db_delete('user_revision')
     ->condition('uid', $revision->uid)
     ->condition('vid', $revision->vid)
     ->execute();
-
-  // Delete the related version roles.
-  db_delete('user_revision_roles')
-    ->condition('uid', $revision->uid)
-    ->condition('vid', $revision->vid)
-    ->execute();
-
   module_invoke_all('user_revision_delete', $revision);
   field_attach_delete_revision('user', $revision);
   return TRUE;
-}
-
-/**
- * Implements hook_ctools_plugin_directory().
- */
-function user_revision_ctools_plugin_directory($owner, $plugin_type) {
-  if ($owner == 'ctools') {
-    return 'plugins/' . $plugin_type;
-  }
-  if ($owner == 'page_manager') {
-    return 'plugins/' . $plugin_type;
-  }
-}
-
-/**
- * Function to add a role to user_revision_roles table.
- */
-function user_revision_add_role($uid, $vid, $rid) {
-  // Add roles to user_revision_roles table.
-  db_insert('user_revision_roles')
-    ->fields(array(
-      'uid' => $uid,
-      'vid' => $vid,
-      'rid' => $rid,
-    )
-  )->execute();
 }

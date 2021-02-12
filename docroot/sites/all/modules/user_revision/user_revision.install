@@ -138,48 +138,6 @@ function user_revision_schema() {
     ),
   );
 
-  $schema['user_revision_roles'] = array(
-    'description' => 'Stores user_revision roles data.',
-    'fields' => array(
-      'uid' => array(
-        'description' => 'Primary Key: Unique user ID.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'vid' => array(
-        'description' => 'Primary Key: Unique version ID.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-      'rid' => array(
-        'description' => 'Primary Key: Role ID.',
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-      ),
-    ),
-    'indexes' => array(
-      'uid' => array('uid'),
-    ),
-    'primary key' => array('uid', 'vid', 'rid'),
-    'foreign keys' => array(
-      'versioned_user' => array(
-        'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
-      'version_id' => array(
-        'table' => 'user_revision',
-        'columns' => array('vid' => 'vid'),
-      ),
-      'role_id' => array(
-        'table' => 'role',
-        'columns' => array('rid' => 'rid'),
-      ),
-    ),
-  );
-
   return $schema;
 }
 
@@ -188,53 +146,73 @@ function user_revision_schema() {
  */
 function user_revision_install() {
   $schema['users'] = array();
-  include_once 'user_revision.module';
+  include_once('user_revision.module');
   user_revision_schema_alter($schema);
   foreach ($schema['users']['fields'] as $name => $spec) {
     db_add_field('users', $name, $spec);
   }
-  // Set all initial vid values equal to uid values.
   db_update('users')
     ->expression('vid', 'uid')
     ->execute();
 
-  // Add unique keys.
-  foreach ($schema['users']['unique keys'] as $key => $spec) {
-    db_add_unique_key('users', $key, $spec);
-  }
+  // Handle anon user first.
+  db_insert('user_revision')
+    ->fields(array(
+      'uid' => 0,
+      'vid' => 0,
+      'log' => '',
+      'timestamp' => 0,
+      'authorid' => 0,
+      'name' => '',
+      'mail' => '',
+      'theme' => '',
+      'signature' => '',
+      'status' => 0,
+      'language' => '',
+      'picture' => 0,
+    ))
+  ->execute();
 
-  // Update weight of module in system table.
-  db_update('system')
-    ->fields(array('weight' => 99))
-    ->condition('name', 'user_revision', '=')
+  // Make sure data is correct for anon user
+  db_update('user_revision')
+    ->condition('uid', 0)
+    ->fields(array('vid' => 0))
     ->execute();
 
-  // Prepare Batch API to add all users to the revision table.
-  $total_count = db_select('users', 'u')
+  // Add all users to the revision table
+  $users = db_select('users', 'u')
+    ->fields('u', array('uid', 'vid', 'name', 'mail', 'theme', 'signature', 'signature_format', 'status', 'timezone', 'language', 'picture', 'data'))
     ->condition('u.uid', 0, '!=')
-    ->countQuery()
     ->execute()
-    ->fetchField();
+    ->fetchAll();
+  foreach ($users as $user) {
+    db_insert('user_revision')
+      ->fields(array(
+        'uid' => $user->uid,
+        'vid' => $user->vid,
+        'log' => '',
+        'timestamp' => REQUEST_TIME,
+        'authorid' => $user->uid,
+        'name' => $user->name,
+        'mail' => $user->mail,
+        'theme' => $user->theme,
+        'signature' => $user->signature,
+        'signature_format' => $user->signature_format,
+        'status' => $user->status,
+        'timezone' => $user->timezone,
+        'language' => $user->language,
+        'picture' => $user->picture,
+        'data' => $user->data,
+      ))
+    ->execute();
+  }
 
-  $batch = array(
-    'operations' => array(
-      array('user_revision_table_init_data_batch_process', array($total_count)),
-    ),
-    'finished' => 'user_revision_table_init_data_batch_finished',
-    'title' => t('Updating revision table'),
-    'init_message' => t('Initializing.'),
-    'progress_message' => t('Completed @current of @total.'),
-    'error_message' => t('An error has occurred.'),
-    'file' => drupal_get_path('module', 'user_revision') . '/user_revision.batch.inc',
-  );
-
-  // Execute Batch API.
-  batch_set($batch);
+  db_update('system')->fields(array('weight' => 99))->condition('name', 'user_revision', '=')->execute();
 }
 
 /**
- * Implements hook_uninstall().
- */
+* Implementation of hook_uninstall().
+*/
 function user_revision_uninstall() {
   module_load_include('module', 'user_revision');
   $schema['users'] = array();
@@ -248,43 +226,9 @@ function user_revision_uninstall() {
 }
 
 /**
- * Change the weight of User Revision Module so all hooks are executed last.
- *
+ * Change the weight of User Revision Module so all user hooks are executed last.
  * This way all changes made in hook_user_presave etc. won't be lost.
  */
 function user_revision_update_7001() {
   db_update('system')->fields(array('weight' => 99))->condition('name', 'user_revision', '=')->execute();
-}
-
-/**
- * Create revisions with user roles.
- */
-function user_revision_update_7002() {
-  // Create the new revision role table.
-  if (!db_table_exists('user_revision_roles')) {
-    $user_role_revision_schema = drupal_get_schema_unprocessed('user_revision', 'user_revision_roles');
-    db_create_table('user_revision_roles', $user_role_revision_schema);
-  }
-  // Fetch all user revision records.
-  $data = db_select('user_revision', 'ur')
-    ->fields('ur', array('uid', 'vid'))
-    ->orderBy('ur.uid')
-    ->execute()
-    ->fetchAll();
-
-  foreach ($data as $row) {
-    // Search each role for the user.
-    $roles = db_select('users_roles', 'ur')
-      ->fields('ur', array('rid'))
-      ->condition('uid', $row->uid)
-      ->execute()
-      ->fetchAll();
-
-    if (!empty($roles)) {
-      foreach ($roles as $role) {
-        // Add roles to user_revision_roles table.
-        user_revision_add_role($row->uid, $row->vid, $role->rid);
-      }
-    }
-  }
 }

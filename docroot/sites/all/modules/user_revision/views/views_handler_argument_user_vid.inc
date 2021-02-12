@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide user vid argument handler.
@@ -9,10 +8,12 @@
  * Argument handler to accept a user revision id.
  */
 class views_handler_argument_user_vid extends views_handler_argument_numeric {
+  // No constructor is necessary.
+
   /**
    * Override the behavior of title(). Get the title of the revision.
    */
-  public function title_query() {
+  function title_query() {
     $names = array();
     $result = db_select('user_revision', 'ur')
       ->fields('ur', array('name'))
@@ -25,3 +26,4 @@ class views_handler_argument_user_vid extends views_handler_argument_numeric {
     return $names;
   }
 }
+
