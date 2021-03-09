@@ -346,7 +346,7 @@ function _bei_order_confirmation($order) {
 function template_preprocess_bei_order_confirmation(&$vars) {
   $order = $vars['bei_order'];
   global $user;
-  
+
   // Confirmation message if order was created but not submitted.
   if ($order->status == 0) {
     $confirmation = '
@@ -735,7 +735,7 @@ function bei_order_get_properties($order, array $options, $name, $entity_type) {
             );
           }
         }
-        
+
         $table = theme('table', array(
           'header' => $header,
           'rows' => $rows,
@@ -842,7 +842,7 @@ function bei_order_form_rules_panes_render_form_alter(&$form, &$form_state, $for
     $order_id = $form['parameter']['bei_order']['settings']['bei_order']['#value'];
     $form['parameter']['email']['settings']['email']['#type'] = 'textfield';
     $form['parameter']['email']['settings']['email']['#element_validate'] = array('bei_order_send_email_validation');
-    $form['parameter']['email']['settings']['email']['#default_value'] = t('wildflowergraphics@earthlink.net');
+    $form['parameter']['email']['settings']['email']['#default_value'] = t('amacarak@gmail.com');
     $form['parameter']['email_bcc']['settings']['email_bcc'] = array(
       '#type' => 'textfield',
       '#title' => t('Bcc'),
