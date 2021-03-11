@@ -35,6 +35,9 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
         case 'Name':
           $parameters['orderfield'] = 'name';
           break;
+        case 'Date':
+          $parameters['orderfield'] = 'date';
+          break;
       }
     }
     $result = NULL;
@@ -124,7 +127,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
   $header = array(
     array('data' => t('E-mail'), 'field' => 'email'),
     array('data' => t('Name'), 'field' => 'name'),
-    t('Date'),
+    array('data' => t('Date'), 'field' => 'date'),
     t('Reads e-mail with'),
   );
   // Add extra header column for update link on applicable pages.
@@ -144,7 +147,7 @@ function campaign_monitor_subscribers_list($list, $status = 'active') {
       'id' => 'cm-subscribers-active',
     ),
   ));
-  
+
   return $help_text . $counter . $table . $pager;
 }
 
@@ -220,7 +223,7 @@ function campaign_monitor_subscribers_subscriber_history($list) {
     }
   }
   else {
-    $campaigns = '<p class="panel callout warning">' . t('!message', array('!message' => $result->response->Message)) . '</p>'; 
+    $campaigns = '<p class="panel callout warning">' . t('!message', array('!message' => $result->response->Message)) . '</p>';
   }
   return $campaigns;
 }
