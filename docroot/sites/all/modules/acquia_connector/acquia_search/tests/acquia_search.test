@@ -461,7 +461,7 @@ class AcquiaSearchWebTestCase extends DrupalWebTestCase {
    * Overrides DrupalTestCase::setUp().
    */
   public function setUp() {
-    parent::setUp('acquia_agent', 'acquia_connector_test', 'search', 'apachesolr', 'apachesolr_search', 'acquia_search');
+    parent::setUp('acquia_agent', 'acquia_connector_test', 'apachesolr', 'apachesolr_search', 'acquia_search');
 
     // Generate and store a random set of credentials.
     $this->id = $this->randomName(10);
@@ -619,6 +619,29 @@ class AcquiaSearchWebTestCase extends DrupalWebTestCase {
     $edit = array('search_block_form' => 'test');
     $this->drupalPost('', $edit, t('Search'));
     $this->assertUrl('search/site/test', array(), t('The core search block redirects to the Apache Solr search page.'), 'Acquia Search');
+  }
+
+  /**
+   * Tests that global settings form contains EdisMax radio buttons.
+   */
+  public function testSearchEnvironmentsSettingsForm() {
+    $permissions = ['administer site configuration', 'administer search'];
+    $this->privilegedUser = $this->drupalCreateUser($permissions);
+    $this->drupalLogin($this->privilegedUser);
+
+    $this->drupalGet('admin/config/search/apachesolr/settings');
+    $this->assertResponse(200);
+    $this->assertText('Always allow advanced syntax for Acquia Search');
+  }
+
+  /**
+   * Tests that user have no access to delete search environment.
+   */
+  public function testDeleteSearchEnvironmentAccess() {
+    $this->assertFalse(acquia_search_environment_delete_access([]));
+
+    $environment = ['env_id' => ACQUIA_SEARCH_V3_ENVIRONMENT_ID];
+    $this->assertFalse(acquia_search_environment_delete_access($environment));
   }
 
 }
