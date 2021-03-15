@@ -25,9 +25,8 @@ install:
   # Create MySQL DB.
   - mysql -u root -e "CREATE DATABASE drupal; CREATE USER 'drupal'@'localhost' IDENTIFIED BY 'drupal'; GRANT ALL ON drupal.* TO 'drupal'@'localhost';"
 
-  # prestissimo allows composer to install packages in parallel.
-  - composer global require "hirak/prestissimo:^0.3"
   - composer global require --no-interaction drush/drush:^8.0
+  - export PATH=$PATH:/home/travis/.config/composer/vendor/bin
 
   # Install and configure Apache and PHP-FPM.
   # Adapted from TravisCI example: https://docs.travis-ci.com/user/languages/php/#apache--php
