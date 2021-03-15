@@ -1,0 +1,72 @@
+From f19ed87a129d1436730b8d7b3498f1b1894326d2 Mon Sep 17 00:00:00 2001
+From: Khalid Saifullah <khalid@outlook.com.au>
+Date: Thu, 28 Apr 2016 00:39:46 +1000
+Subject: [PATCH] Attach JS with form instead of drupal_add_js.
+
+---
+ .../all/modules/google_recaptcha/google_recaptcha.module  | 11 -----------
+ .../google_recaptcha/google_recaptcha.under_hood.inc      | 15 ++++++++++-----
+ 2 files changed, 10 insertions(+), 16 deletions(-)
+
+diff --git a/sites/all/modules/google_recaptcha/google_recaptcha.module b/sites/all/modules/google_recaptcha/google_recaptcha.module
+index 2b6e839..7c81b63 100644
+--- a/sites/all/modules/google_recaptcha/google_recaptcha.module
++++ b/sites/all/modules/google_recaptcha/google_recaptcha.module
+@@ -96,14 +96,3 @@ function google_recaptcha_form_alter(&$form, &$form_state, $form_id) {
+     }
+   }
+ }
+-
+-/**
+- * Implements hook_html_head_alter().
+- */
+-function google_recaptcha_html_head_alter(&$head_elements) {
+-  $tune_js = &drupal_static('google_recaptcha_js');
+-  $js = 'var google_recaptcha_onload = function() {' . $tune_js . '};';
+-  drupal_add_js($js, 'inline');
+-}
+-
+-
+diff --git a/sites/all/modules/google_recaptcha/google_recaptcha.under_hood.inc b/sites/all/modules/google_recaptcha/google_recaptcha.under_hood.inc
+index 1131ed2..990d300 100644
+--- a/sites/all/modules/google_recaptcha/google_recaptcha.under_hood.inc
++++ b/sites/all/modules/google_recaptcha/google_recaptcha.under_hood.inc
+@@ -10,13 +10,14 @@
+ function g_add_captcha(&$form, $form_id) {
+   $tune = variable_get('google_recaptcha');
+ 
+-  $js_options = array(
++  $recaptcha_api = array(
++    'data' => 'https://www.google.com/recaptcha/api.js?onload=google_recaptcha_onload&render=explicit',
+     'scope' => 'footer',
+     'type' => 'external',
+     'defer' => TRUE,
+     // and we waiting when 'async' param will be in core....
+   );
+-  drupal_add_js('https://www.google.com/recaptcha/api.js?onload=google_recaptcha_onload&render=explicit', $js_options);
++  $form['#attached']['js'][] = $recaptcha_api;
+ 
+   $captcha_form_name = 'google_recaptcha_' . $form_id;
+   $captcha_container = '<div id="' . $captcha_form_name . '"></div>';
+@@ -30,11 +31,15 @@ function g_add_captcha(&$form, $form_id) {
+     "theme" : "' . $widget_theme . '"});
+   ';
+ 
++  $recaptcha_load = array(
++    'data' => 'var google_recaptcha_onload = function() {' . $captcha_js . '};',
++    'scope' => 'header',
++    'type' => 'inline',
++  );
++  $form['#attached']['js'][] = $recaptcha_load;
++
+   $form['actions']['submit']['#prefix'] = empty($form['actions']['submit']['#prefix']) ? $captcha_container : $captcha_container . $form['actions']['submit']['#prefix'];
+   $form['#validate'][] = 'g_validate_submission';
+-
+-  $tune_js = &drupal_static('google_recaptcha_js');
+-  $tune_js .= $captcha_js;
+ }
+ 
+ /**
+-- 
+2.8.1
+
