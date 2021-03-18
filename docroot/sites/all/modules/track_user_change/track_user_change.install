@@ -1,0 +1,55 @@
+<?php
+
+/**
+ * @file
+ * Create user field 'field_user_changed'.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function track_user_change_enable() {
+  // Check if our field is not already created.
+  if (!field_info_field('field_user_changed')) {
+    $field = array(
+      'field_name' => 'field_user_changed',
+      'type' => 'number_integer',
+      'settings'    => array(
+        'max_length' => 11,
+      ),
+    );
+    field_create_field($field);
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_user_changed',
+      'entity_type' => 'user',
+      'label' => 'Changed',
+      'bundle' => 'user',
+      'widget' => array(
+        'type' => 'number',
+        'weight' => '1',
+      ),
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'hidden',
+        ),
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function track_user_change_uninstall() {
+  // Check our field existence and delete the field created by this module.
+  if (field_info_field('field_user_changed')) {
+    field_delete_field('field_user_changed');
+  }
+  // Check our instance existence and delete the instance created for our field.
+  if ($instance = field_info_instance('user', 'field_user_changed', 'user')) {
+    field_delete_instance($instance);
+  }
+}

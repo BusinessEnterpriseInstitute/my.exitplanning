@@ -1,0 +1,48 @@
+<?php
+
+/**
+ * @file
+ * Update last user update time in 'field_user_changed'.
+ */
+
+/**
+ * Implements hook_user_presave().
+ */
+function track_user_change_user_presave(&$edit, $account, $category) {
+  $field_language = field_language('user', $account, 'field_user_changed'); 
+  $edit['field_user_changed'][$field_language][0]['value'] = REQUEST_TIME;
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function track_user_change_form_user_admin_account_alter(&$form, &$form_state, $form_id) {
+  $changed_column = array(
+    'data'  => 'LAST CHANGED',
+    'field' => 'u.changed',
+  );
+  $operation_column = array_pop($form['accounts']['#header']);
+  $form['accounts']['#header']['changed'] = $changed_column;
+  $form['accounts']['#header']['operations'] = $operation_column;
+  foreach ($form['accounts']['#options'] as $key => $row) {
+    $user_object = user_load($key);
+    $field_language = field_language('user', $user_object, 'field_user_changed');
+    $changed_time = isset($user_object->field_user_changed[$field_language][0]['value'])? $user_object->field_user_changed[$field_language][0]['value'] : $user_object->created;
+    $operation_column = array_pop($form['accounts']['#options'][$key]);
+    $form['accounts']['#options'][$key]['changed'] = t('@time ago', array('@time' => format_interval(REQUEST_TIME - $changed_time)));
+    $form['accounts']['#options'][$key]['operations']['data'] = $operation_column;
+  }
+}
+
+/**
+ * Implements hook_help().
+ */
+function track_user_change_help($path) {
+  if ($path == 'admin/help#track_user_change') {
+    $help = '<p>' . t("This module is used to store user last update time.
+	By default during module installation a new user field 'field_user_changed'
+	will be created and this field captures user last update time.") . '<br />
+	<br />' . t("Also this field can be viewed in peoples page.") . '</p>';
+    return $help;
+  }
+}
