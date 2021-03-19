@@ -1,0 +1,30 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for module.
+ */
+
+/**
+ * Implements hook_field_schema().
+ */
+function changed_fields_custom_field_field_schema() {
+  return [
+    'columns' => [
+      'value_1' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ],
+      'value_2' => [
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ],
+    ],
+    'indexes' => [
+      'value_1' => ['value_1'],
+      'value_2' => ['value_2'],
+    ],
+  ];
+}

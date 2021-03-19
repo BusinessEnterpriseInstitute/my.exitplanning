@@ -1,0 +1,152 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Ben
+ * Date: 5/1/2016
+ * Time: 7:50 PM
+ */
+
+function form_tracking_statistics_form_tracking_data_keys() {
+  $path_size = variable_get('form_tracking_statistics_visitor_path_size', 20);
+
+  return [
+    'path' => [
+      'title' => 'Visitor Path',
+      'show_in_list' => FALSE,
+      'render_function' => 'form_tracking_statistics_render_path',
+      'path_size' => $path_size,
+    ],
+    'source' => [
+      'title' => 'Source',
+    ],
+  ];
+}
+
+function form_tracking_statistics_form_tracking_key_options($key, $key_info) {
+  $options = [];
+
+  switch ($key) {
+    case 'path':
+      $options['form_tracking_statistics_visitor_path_size'] = [
+        '#type' => 'textfield',
+        '#title' => t('Visitor path size'),
+        '#description' => t("Enter the maximum number of history items to show in the visitor path."),
+        '#default_value' => $key_info['path_size'],
+      ];
+      break;
+  }
+
+  return $options;
+}
+
+function form_tracking_statistics_render_path($key, $data, $key_info, $plain_text) {
+  $template = $plain_text ? "Visitor Path\n%s" : '<h4>Visitor Path</h4><ol>%s</ol>';
+
+  $list_items = [
+    'title' => 'Title',
+    'path' => 'Path',
+    'time_on_page' => 'Time on page'
+  ];
+
+  $item_template = $plain_text ? "%s\n%s" : '<li>%s<dl>%s</dl></li>';
+  $list_item_template = $plain_text ? '  %s: %s' : '<dt>%s</dt><dd>%s</dd>';
+  $size = variable_get('form_tracking_statistics_visitor_path_size', 20);
+  $offset = -$size;
+  $path_items = array_slice($data, $offset);
+  $items = [];
+  
+  foreach ($path_items as $path_item) {
+    $item_output = [];
+
+    foreach ($list_items as $id => $title) {
+      $item_output[] = sprintf($list_item_template, $title, $path_item[$id]);
+    }
+
+    $items[] = sprintf($item_template, $path_item['title'], implode("\n", $item_output));
+  }
+
+  return sprintf($template, implode("\n", $items));
+}
+
+/**
+ * @param $data
+ *
+ * @return array
+ */
+function form_tracking_statistics_form_tracking_session_data($data) {
+  $path = form_tracking_statistics_get_visitor_path($data['session_id'], $data['timestamp']);
+
+  $new_data = [
+    'path' => $path,
+    'source' => (isset($path[0]['referrer'])) ? $path[0]['referrer'] : '',
+  ];
+
+  return $new_data;
+}
+
+/**
+ * @param $session_id
+ * @param bool $current_timestamp A timestamp, or true to use time() or false
+ *                                to not diff the last step in the path
+ *
+ * @return array
+ */
+function form_tracking_statistics_get_visitor_path($session_id, $current_timestamp = FALSE) {
+  $path = [];
+
+  $results = db_query('SELECT * FROM {accesslog} WHERE sid = :sid', [':sid' => $session_id]);
+
+  foreach ($results as $record) {
+    $path[] = [
+      'timestamp' => $record->timestamp,
+      'time_on_page' => 0,
+      'title' => form_tracking_statistics_get_title($record),
+      'path' => drupal_get_path_alias($record->path),
+      'referrer' => $record->url,
+      'uid' => $record->uid,
+    ];
+  }
+
+  form_tracking_statistics_calculate_time_on_page($path, $current_timestamp);
+
+  return $path;
+}
+
+/**
+ * @param $path
+ * @param bool $current_timestamp
+ *
+ * @return mixed
+ */
+function form_tracking_statistics_calculate_time_on_page(&$path, $current_timestamp = FALSE) {
+  foreach ($path as $index => $item) {
+    if (isset($path[$index + 1])) {
+      $path[$index]['time_on_page'] = $path[$index + 1]['timestamp'] - $item['timestamp'];
+    } elseif ($current_timestamp) {
+      if (!is_numeric($current_timestamp)) {
+        $current_timestamp = time();
+      }
+
+      $path[$index]['time_on_page'] = $current_timestamp - $item['timestamp'];
+    }
+  }
+
+  return $path;
+}
+
+/**
+ * @param $record
+ *
+ * @return null|string
+ */
+function form_tracking_statistics_get_title($record) {
+  if (!empty($record->title)) {
+    return $record->title;
+  }
+
+  $front_path = drupal_get_normal_path(variable_get('site_frontpage', 'node'));
+
+  $title = ($record->path == $front_path) ? '[front page]' : '[no title]';
+
+  return t($title);
+}

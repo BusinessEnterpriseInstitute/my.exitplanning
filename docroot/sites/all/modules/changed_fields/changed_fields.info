@@ -1,0 +1,18 @@
+name = Changed Fields API
+description = Allows developers to react on changed node fields
+package = Changed Fields API
+core = 7.x
+
+files[] = src/CFObserverInterface.php
+files[] = src/CFNodeSubject.php
+files[] = src/FieldComparator/CFDefaultFieldComparator.php
+
+files[] = tests/default_field_comparator.test
+files[] = tests/extended_field_comparator.test
+
+; Information added by Drupal.org packaging script on 2017-07-20
+version = "7.x-3.0"
+core = "7.x"
+project = "changed_fields"
+datestamp = "1500578965"
+

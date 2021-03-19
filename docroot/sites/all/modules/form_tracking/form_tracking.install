@@ -1,0 +1,40 @@
+<?php
+/**
+ * @file
+ * Webform Visitor Data install file.
+ */
+
+function form_tracking_uninstall() {
+  if (db_table_exists('form_tracking') == TRUE) {
+    db_query('DROP table {form_tracking}');
+  }
+
+  db_delete('variable')->condition('name', "form_tracking_%", "LIKE")->execute();
+
+  cache_clear_all('variables', 'cache');
+}
+
+function form_tracking_schema() {
+  $schema = [];
+
+  $schema['form_tracking'] = [
+    'description' => 'Form tracking data storage',
+    'fields' => [
+      'sid' => [
+        'description' => 'The session ID of the visitor',
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'default' => '',
+        'length' => 255,
+      ],
+      'data' => [
+        'description' => 'Tracking data for this session',
+        'type' => 'text',
+        'not null' => TRUE,
+      ],
+    ],
+    'primary key' => array('sid'),
+  ];
+
+  return $schema;
+}

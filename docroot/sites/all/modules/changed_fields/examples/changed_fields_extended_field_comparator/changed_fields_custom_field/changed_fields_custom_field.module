@@ -1,0 +1,77 @@
+<?php
+
+/**
+ * @file
+ * Defines custom field type.
+ */
+
+/**
+ * Implements hook_field_info().
+ */
+function changed_fields_custom_field_field_info() {
+  return [
+    'changed_fields_custom_field' => [
+      'label' => t('Changed fields custom field'),
+      'description' => t('Custom field with two properties'),
+      'default_widget' => 'changed_fields_custom_field_widget',
+      'default_formatter' => 'changed_fields_custom_field_formatter',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function changed_fields_custom_field_field_formatter_info() {
+  return [
+    'changed_fields_custom_field_formatter' => [
+      'label' => t('Changed fields custom field formatter'),
+      'field types' => ['changed_fields_custom_field'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function changed_fields_custom_field_field_widget_info() {
+  return [
+    'changed_fields_custom_field_widget' => [
+      'label' => t('Changed fields custom field widget'),
+      'field types' => ['changed_fields_custom_field'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function changed_fields_custom_field_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  if ($instance['widget']['type'] == 'changed_fields_custom_field_widget') {
+    $element['value_1'] = [
+      '#type' => 'textarea',
+      '#default_value' => isset($items[$delta]['value_1']) ? $items[$delta]['value_1'] : NULL,
+      '#title' => t('Value 1'),
+      '#rows' => 20,
+    ];
+
+    $element['value_2'] = [
+      '#type' => 'textarea',
+      '#default_value' => isset($items[$delta]['value_2']) ? $items[$delta]['value_2'] : NULL,
+      '#title' => t('Value 2'),
+      '#rows' => 20,
+    ];
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function changed_fields_custom_field_field_is_empty($item, $field) {
+  if (!isset($item['value_1']) || $item['value_1'] === '') {
+    return !isset($item['value_2']) || $item['value_2'] === '';
+  }
+  return FALSE;
+}

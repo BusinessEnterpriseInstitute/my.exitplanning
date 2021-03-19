@@ -1,0 +1,117 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Ben
+ * Date: 5/1/2016
+ * Time: 7:50 PM
+ */
+
+/**
+ * @return array
+ */
+function form_tracking_webform_form_tracking_form_type_info() {
+  $info = [];
+
+  $info['webform'] = [
+    'name' => 'Webform',
+    'module' => 'form_tracking_webform',
+  ];
+
+  return $info;
+}
+
+function form_tracking_webform_form_tracking_forms() {
+  $forms = array();
+
+  $query = new EntityFieldQuery();
+
+  $query->entityCondition('entity_type', 'node')
+    ->entityCondition('bundle', 'webform');
+
+  $result = $query->execute();
+
+  if (!empty($result['node'])) {
+    foreach (array_keys($result['node']) as $nid) {
+      $node = node_load($nid);
+
+      $form_id = 'webform_client_form_' . $nid;
+
+      $title = $node->title . " ($form_id)";
+
+      $forms[$form_id] = $title;
+    }
+  }
+
+  return $forms;
+}
+
+/**
+ * @param $data
+ * @param $form
+ * @param $form_data
+ */
+function form_tracking_webform_form_tracking_inject(&$data, &$form, &$form_data) {
+  $form['submitted']['form_tracking_data']['#value'] = form_tracking_render($data, TRUE, FALSE);
+}
+
+function form_tracking_webform_form_tracking_setup($form_id) {
+  $nid = substr(strrchr($form_id, '_'), 1);
+
+  if (is_numeric($nid)) {
+    form_tracking_webform_component_setup($nid);
+  }
+}
+
+/**
+ * If the component has not been created, then create it
+ *
+ * @param $webform_nid
+ */
+function form_tracking_webform_component_setup($webform_nid) {
+  if (!form_tracking_webform_component_exists($webform_nid)) {
+    form_tracking_webform_component_insert($webform_nid);
+  }
+}
+
+function form_tracking_webform_component_exists($webform_nid) {
+  $nodes = &drupal_static(__FUNCTION__);
+
+  if (!isset($nodes)) {
+    $nodes = [];
+  }
+
+  if (!isset($nodes[$webform_nid])) {
+    $nodes[$webform_nid] = node_load($webform_nid);
+  }
+
+  if (isset($nodes[$webform_nid]->webform['components'])) {
+    foreach ($nodes[$webform_nid]->webform['components'] as $component) {
+      if (isset($component['form_key']) && $component['form_key'] == 'form_tracking_data') {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+function form_tracking_webform_component_insert($nid) {
+  if (!is_numeric($nid)) {
+    return;
+  }
+
+  $component = [
+    'name' => 'Form Tracking Data',
+    'form_key' => 'form_tracking_data',
+    'type' => 'hidden',
+    'mandatory' => 0,
+    'weight' => 100,
+    'nid' => $nid,
+    'pid' => 0,
+    'extra' => ['title_display' => 'inline'],
+  ];
+
+  drupal_set_message("Added Form Tracking Data field to Webform $nid.");
+
+  webform_component_insert($component);
+}
