@@ -749,7 +749,7 @@ table {
   }
   .mem-left-panel{
     min-height: 467px;
-    
+
   }
 }
 /**Add To Any floating Social Share**/
@@ -816,7 +816,7 @@ p.a2a_floating_style.a2a_vertical_style {
     height: 31.250rem !important;
     position: absolute !important;
   }
-}  
+}
 #popup-announcement-wrap {
   position: fixed !important;
 }
@@ -826,7 +826,7 @@ p.a2a_floating_style.a2a_vertical_style {
   border-color: #527182;
   margin-bottom: 1.25rem;
   padding-top: 1.25rem;
-  
+
 }
 .mem-left-panel h2.pane-title {
   color: #fff !important;
@@ -915,7 +915,7 @@ p.a2a_floating_style.a2a_vertical_style {
     height: 100%;
     background: rgba(255, 255, 255, .6);
     z-index: 1001;
-    border-radius: 12px !important; 
+    border-radius: 12px !important;
     display: none;
 }
 .popup {
@@ -966,4 +966,20 @@ p.a2a_floating_style.a2a_vertical_style {
   display: grid;
   grid-template-columns: repeat (auto-fill, minmax(340px, 1fr));
   grid-template-rows: auto;
+}
+.aexp-beta-link {
+  border-width: 0;
+  cursor: pointer;
+  font-family: "Open Sans",Helvetica,Arial,sans-serif;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0 0 1.25rem;
+  position: relative;
+  padding-top: .875rem;
+  padding-right: 1.75rem;
+  padding-bottom: .9375rem;
+  padding-left: 1.75rem;
+  font-size: .8125rem;
+  text-decoration: none;
+  text-align: center;
 }
