@@ -157,6 +157,7 @@ function fee_estimator_form($form, &$form_state) {
             '#value' => t('Start over'),
             '#submit' => array('fee_estimator_form_clear'),
             '#limit_validation_errors' => array(),
+            '#attributes' => array('onclick' => 'if(!confirm("Are you Sure?")){return false;}')
         ),
     );
     return $form;
