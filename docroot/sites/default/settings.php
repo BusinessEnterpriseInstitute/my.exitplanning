@@ -359,7 +359,7 @@ ini_set('session.cookie_lifetime', 2000000);
  */
 # $cookie_domain = '.example.com';
 
-$cookie_domain = ".exitplanning.com";
+/** $cookie_domain = ".exitplanning.com";**/
 
 /**
  * Variable overrides:
@@ -545,7 +545,7 @@ $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN"
 
 /** Set up the site to only use HTTPS**/
 
-$conf['https'] = FALSE;
+$conf['https'] = TRUE;
 
 /**
  * By default the page request process will return a fast 404 page for missing
