@@ -11,6 +11,7 @@
 function autologout_settings() {
   $form = array();
   $timeout = variable_get('autologout_timeout', 1800);
+  $user_roles = _autologout_user_roles();
 
   if (module_exists('jstimer')) {
     if (!module_exists('jst_timer')) {
@@ -53,9 +54,10 @@ function autologout_settings() {
   $form['autologout_role_logout'] = array(
     '#type' => 'checkbox',
     '#title' => t('Role Timeout'),
-    '#default_value' => variable_get('autologout_role_logout', FALSE),
+    '#default_value' => variable_get('autologout_role_logout', FALSE) && $user_roles,
     '#weight' => -4,
-    '#description' => t('Enable each role to have its own timeout threshold, a refresh maybe required for changes to take effect. Any role not ticked will use the default timeout value. Any role can have a value of 0 which means that they will never be logged out.'),
+    '#description' => t('This option is only available if at least one user role exists. Authenticated user\'s role is overlooked and "Timeout value in seconds" option is used for this.'),
+    '#disabled' => $user_roles ? FALSE : TRUE,
   );
 
   $form['autologout_redirect_url']  = array(
@@ -135,6 +137,7 @@ function autologout_settings() {
     '#type' => 'item',
     '#weight' => -2,
     '#title' => t('If Enabled every user in role will be logged out based on that roles timeout, unless the user has an individual timeout set.'),
+    '#description' => t('Enable each role to have its own timeout threshold, a refresh maybe required for changes to take effect. Any role not ticked will use the default timeout value. Any role can have a value of 0 which means that they will never be logged out.'),
     '#theme' => 'autologout_render_table',
     '#states' => array(
       'visible' => array(
@@ -143,22 +146,15 @@ function autologout_settings() {
     ),
   );
 
-  foreach (user_roles(TRUE) as $key => $role) {
-
+  foreach ($user_roles as $key => $role) {
     $form['table']['autologout_roles']['autologout_role_' . $key . '_timeout'] = array(
       '#type' => 'textfield',
       '#default_value' => variable_get('autologout_role_' . $key . '_timeout', $timeout),
       '#size' => 8,
-      '#theme' => 'textfield',
     );
-
-  }
-
-  foreach (user_roles(TRUE) as $key => $role) {
     $form['table']['autologout_roles']['autologout_role_' . $key] = array(
       '#type' => 'checkbox',
       '#default_value' => variable_get('autologout_role_' . $key, FALSE),
-      '#theme' => 'checkbox',
     );
   }
 
@@ -172,7 +168,7 @@ function autologout_settings_validate($form, &$form_state) {
   $max_timeout = $form_state['values']['autologout_max_timeout'];
 
   // Validate timeouts for each role.
-  foreach (user_roles(TRUE) as $key => $role) {
+  foreach (_autologout_user_roles() as $key => $role) {
     if (empty($form_state['values']['autologout_role_' . $key])) {
       // Don't validate role timeouts for non enabled roles.
       continue;

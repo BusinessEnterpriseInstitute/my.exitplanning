@@ -1,0 +1,388 @@
+diff --git a/autologout.admin.inc b/autologout.admin.inc
+index e1ed753..a3e9ceb 100644
+--- a/autologout.admin.inc
++++ b/autologout.admin.inc
+@@ -11,6 +11,7 @@
+ function autologout_settings() {
+   $form = array();
+   $timeout = variable_get('autologout_timeout', 1800);
++  $user_roles = _autologout_user_roles();
+ 
+   if (module_exists('jstimer')) {
+     if (!module_exists('jst_timer')) {
+@@ -53,9 +54,10 @@ function autologout_settings() {
+   $form['autologout_role_logout'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Role Timeout'),
+-    '#default_value' => variable_get('autologout_role_logout', FALSE),
++    '#default_value' => variable_get('autologout_role_logout', FALSE) && $user_roles,
+     '#weight' => -4,
+-    '#description' => t('Enable each role to have its own timeout threshold, a refresh maybe required for changes to take effect. Any role not ticked will use the default timeout value. Any role can have a value of 0 which means that they will never be logged out.'),
++    '#description' => t('This option is only available if at least one user role exists. Authenticated user\'s role is overlooked and "Timeout value in seconds" option is used for this.'),
++    '#disabled' => $user_roles ? FALSE : TRUE,
+   );
+ 
+   $form['autologout_redirect_url']  = array(
+@@ -135,6 +137,7 @@ function autologout_settings() {
+     '#type' => 'item',
+     '#weight' => -2,
+     '#title' => t('If Enabled every user in role will be logged out based on that roles timeout, unless the user has an individual timeout set.'),
++    '#description' => t('Enable each role to have its own timeout threshold, a refresh maybe required for changes to take effect. Any role not ticked will use the default timeout value. Any role can have a value of 0 which means that they will never be logged out.'),
+     '#theme' => 'autologout_render_table',
+     '#states' => array(
+       'visible' => array(
+@@ -143,22 +145,15 @@ function autologout_settings() {
+     ),
+   );
+ 
+-  foreach (user_roles(TRUE) as $key => $role) {
+-
++  foreach ($user_roles as $key => $role) {
+     $form['table']['autologout_roles']['autologout_role_' . $key . '_timeout'] = array(
+       '#type' => 'textfield',
+       '#default_value' => variable_get('autologout_role_' . $key . '_timeout', $timeout),
+       '#size' => 8,
+-      '#theme' => 'textfield',
+     );
+-
+-  }
+-
+-  foreach (user_roles(TRUE) as $key => $role) {
+     $form['table']['autologout_roles']['autologout_role_' . $key] = array(
+       '#type' => 'checkbox',
+       '#default_value' => variable_get('autologout_role_' . $key, FALSE),
+-      '#theme' => 'checkbox',
+     );
+   }
+ 
+@@ -172,7 +173,7 @@ function autologout_settings_validate($form, &$form_state) {
+   $max_timeout = $form_state['values']['autologout_max_timeout'];
+ 
+   // Validate timeouts for each role.
+-  foreach (user_roles(TRUE) as $key => $role) {
++  foreach (_autologout_user_roles() as $key => $role) {
+     if (empty($form_state['values']['autologout_role_' . $key])) {
+       // Don't validate role timeouts for non enabled roles.
+       continue;
+diff --git a/autologout.install b/autologout.install
+index e79ce76..25d6a2d 100644
+--- a/autologout.install
++++ b/autologout.install
+@@ -21,10 +21,9 @@ function autologout_uninstall() {
+   variable_del('autologout_no_dialog');
+   variable_del('autologout_whitelisted_ip_addresses');
+ 
+-  foreach (user_roles(TRUE) as $key => $role) {
++  foreach (_autologout_user_roles() as $key => $role) {
+     variable_del('autologout_role_' . $key);
+     variable_del('autologout_role_' . $key . '_timeout');
+-
+   }
+ 
+   $uids = array();
+@@ -86,3 +85,11 @@ function autologout_update_7401() {
+     ->condition('permission', 'auto administer autologout', '=')
+     ->execute();
+ }
++
++/**
++ * Remove autologout settings for authenticated user's role.
++ */
++function autologout_update_7402() {
++  variable_del('autologout_role_' . DRUPAL_AUTHENTICATED_RID);
++  variable_del('autologout_role_' . DRUPAL_AUTHENTICATED_RID . '_timeout');
++}
+diff --git a/autologout.module b/autologout.module
+index 9d6f4a9..983aa7b 100644
+--- a/autologout.module
++++ b/autologout.module
+@@ -215,7 +215,7 @@ function theme_autologout_render_table($variables) {
+   );
+ 
+   $rows = array();
+-  foreach (user_roles(TRUE) as $key => $role) {
++  foreach (_autologout_user_roles() as $key => $role) {
+     $rows[] = array(
+       'enable' => drupal_render($element['autologout_roles']['autologout_role_' . $key]),
+       'name' => t($role),
+@@ -584,11 +584,10 @@ function _autologout_get_remaining_time() {
+  */
+ function _autologout_get_role_timeout() {
+   $default_timeout = variable_get('autologout_timeout', 1800);
+-  $roles = user_roles(TRUE);
+   $role_timeout = array();
+ 
+   // Go through roles, get timeouts for each and return as array.
+-  foreach ($roles as $rid => $role) {
++  foreach (_autologout_user_roles() as $rid => $role) {
+     if (variable_get('autologout_role_' . $rid, FALSE)) {
+       $timeout_role = variable_get('autologout_role_' . $rid . '_timeout', $default_timeout);
+       $role_timeout[$rid] = $timeout_role;
+@@ -738,6 +737,20 @@ function _autologout_refresh_only() {
+ }
+ 
+ /**
++ * Get a user's roles.
++ *
++ * @return array
++ *   An associative array with the role id as the key and the role name as
++ *   value.
++ */
++function _autologout_user_roles() {
++  $user_roles = user_roles(TRUE);
++  unset($user_roles[DRUPAL_AUTHENTICATED_RID]);
++
++  return $user_roles;
++}
++
++/**
+  * Implements hook_user_login().
+  *
+  * Delete stale sessions for the user on login. This stops
+diff --git a/tests/autologout.test b/tests/autologout.test
+index ab8be5e..cd2ba85 100644
+--- a/tests/autologout.test
++++ b/tests/autologout.test
+@@ -230,46 +230,46 @@ class AutologoutTestCase extends DrupalWebTestCase {
+     // Default used if no role is specified.
+     variable_set('autologout_timeout', 100);
+     variable_set('autologout_role_logout', FALSE);
+-    variable_set('autologout_role_2', FALSE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', FALSE);
++    variable_set('autologout_role_4_timeout', 200);
+     $this->assertAutotimeout($uid, 100, t('User timeout uses default if no other option set'));
+ 
+     // Default used if role selected but no user's role is selected.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', FALSE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', FALSE);
++    variable_set('autologout_role_4_timeout', 200);
+     $this->assertAutotimeout($uid, 100, t('User timeout uses default if  role timeouts are used but not one of the current user.'));
+ 
+     // Role timeout is used if user's role is selected.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', TRUE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', TRUE);
++    variable_set('autologout_role_4_timeout', 200);
+     $this->assertAutotimeout($uid, 200, t('User timeout uses role value'));
+ 
+     // Role timeout is used if user's role is selected.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', TRUE);
+-    variable_set('autologout_role_2_timeout', 0);
++    variable_set('autologout_role_4', TRUE);
++    variable_set('autologout_role_4_timeout', 0);
+     $this->assertAutotimeout($uid, 0, t('User timeout uses role value of 0 if set for one of the user roles.'));
+ 
+     // Role timeout used if personal timeout is empty string.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', TRUE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', TRUE);
++    variable_set('autologout_role_4_timeout', 200);
+     variable_set('autologout_user_' . $uid, '');
+     $this->assertAutotimeout($uid, 200, t('User timeout uses role value if personal value is the empty string.'));
+ 
+     // Default timeout used if personal timeout is empty string.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', FALSE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', FALSE);
++    variable_set('autologout_role_4_timeout', 200);
+     variable_set('autologout_user_' . $uid, '');
+     $this->assertAutotimeout($uid, 100, t('User timeout uses default value if personal value is the empty string and no role timeout is specified.'));
+ 
+     // Personal timeout used if set.
+     variable_set('autologout_role_logout', TRUE);
+-    variable_set('autologout_role_2', TRUE);
+-    variable_set('autologout_role_2_timeout', 200);
++    variable_set('autologout_role_4', TRUE);
++    variable_set('autologout_role_4_timeout', 200);
+     variable_set('autologout_user_' . $uid, 300);
+     $this->assertAutotimeout($uid, 300, t('User timeout uses default value if personal value is the empty string and no role timeout is specified.'));
+   }
+@@ -327,8 +327,6 @@ class AutologoutTestCase extends DrupalWebTestCase {
+     $edit['autologout_max_timeout'] = 2000;
+     $edit['autologout_padding'] = 60;
+     $edit['autologout_role_logout'] = TRUE;
+-    $edit['autologout_role_2'] = TRUE;
+-    $edit['autologout_role_2_timeout'] = 1200;
+     $edit['autologout_role_3'] = TRUE;
+     $edit['autologout_role_3_timeout'] = 1200;
+     $edit['autologout_role_4'] = TRUE;
+@@ -343,8 +341,6 @@ class AutologoutTestCase extends DrupalWebTestCase {
+     $edit['autologout_max_timeout'] = 2000;
+     $edit['autologout_padding'] = 60;
+     $edit['autologout_role_logout'] = TRUE;
+-    $edit['autologout_role_2'] = TRUE;
+-    $edit['autologout_role_2_timeout'] = 1200;
+     $edit['autologout_role_3'] = TRUE;
+     $edit['autologout_role_3_timeout'] = 1200;
+     $edit['autologout_role_4'] = TRUE;
+@@ -359,10 +355,8 @@ class AutologoutTestCase extends DrupalWebTestCase {
+     $edit['autologout_max_timeout'] = 2000;
+     $edit['autologout_padding'] = 60;
+     $edit['autologout_role_logout'] = TRUE;
+-    $edit['autologout_role_2'] = TRUE;
+-    $edit['autologout_role_2_timeout'] = 2500;
+     $edit['autologout_role_3'] = TRUE;
+-    $edit['autologout_role_3_timeout'] = 1200;
++    $edit['autologout_role_3_timeout'] = 2500;
+     $edit['autologout_role_4'] = TRUE;
+     $edit['autologout_role_4_timeout'] = 1200;
+     $edit['autologout_redirect_url'] = TRUE;
+@@ -376,16 +370,14 @@ class AutologoutTestCase extends DrupalWebTestCase {
+     $edit['autologout_max_timeout'] = 2000;
+     $edit['autologout_padding'] = 60;
+     $edit['autologout_role_logout'] = TRUE;
+-    $edit['autologout_role_2'] = FALSE;
+-    $edit['autologout_role_2_timeout'] = 4000;
+     $edit['autologout_role_3'] = TRUE;
+     $edit['autologout_role_3_timeout'] = 1200;
+     $edit['autologout_role_4'] = FALSE;
+-    $edit['autologout_role_4_timeout'] = 1200;
++    $edit['autologout_role_4_timeout'] = 4000;
+     $edit['autologout_redirect_url'] = TRUE;
+ 
+     $this->drupalPost('admin/config/people/autologout', $edit, t('Save configuration'));
+-    $this->assertText(t('The configuration options have been saved.'), t('Unable to save autologout due to out of range role timeout for a role which is not enabled..'));
++    $this->assertText(t('The configuration options have been saved.'), t('Unable to save autologout due to out of range role timeout for a role which is not enabled.'));
+   }
+ 
+   /**
+@@ -602,9 +594,14 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+   protected $user;
+ 
+   /**
+-   * A role for the user.
++   * The first role for the user.
++   */
++  protected $role_1;
++
++  /**
++   * The second role for the user.
+    */
+-  protected $role;
++  protected $role_2;
+ 
+   /**
+    * getInfo() returns properties that are displayed in the test selection form.
+@@ -629,13 +626,21 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+       'access content',
+     ));
+ 
+-    $this->role = (object) array(
+-      'name' => 'test user role',
++    $this->role_1 = new stdClass();
++    $this->role_1->name = 'test user role 1';
++    user_role_save($this->role_1);
++
++    $this->role_2 = new stdClass();
++    $this->role_2->name = 'test user role 2';
++    user_role_save($this->role_2);
++
++    $new_roles = array(
++      $this->role_1->rid => $this->role_1->name,
++      $this->role_2->rid => $this->role_2->name,
+     );
+ 
+-    user_role_save($this->role);
++    $this->user->roles = $this->user->roles + $new_roles;
+ 
+-    $this->user->roles[$this->role->rid] = $this->role->name;
+     user_save($this->user);
+ 
+     $this->drupalLogin($this->user);
+@@ -656,8 +661,8 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+     variable_set("autologout_role_logout", '1');
+ 
+     // Role logout time is set to 10 seconds.
+-    variable_set("autologout_role_{$this->role->rid}", '1');
+-    variable_set("autologout_role_{$this->role->rid}_timeout", '10');
++    variable_set("autologout_role_{$this->role_1->rid}", '1');
++    variable_set("autologout_role_{$this->role_1->rid}_timeout", '10');
+ 
+     $user_timeout = _autologout_get_user_timeout($this->user->uid);
+     $roles = _autologout_get_role_timeout();
+@@ -687,9 +692,9 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+     // Enable role based logouts.
+     variable_set("autologout_role_logout", '1');
+ 
+-    // Role logout time is set to 15 seconds.
+-    variable_set("autologout_role_{$this->role->rid}", '1');
+-    variable_set("autologout_role_{$this->role->rid}_timeout", '15');
++    // Role 1 logout time is set to 15 seconds.
++    variable_set("autologout_role_{$this->role_1->rid}", '1');
++    variable_set("autologout_role_{$this->role_1->rid}_timeout", '15');
+ 
+     $user_timeout = _autologout_get_user_timeout($this->user->uid);
+     $this->assertEqual($user_timeout, 15, "The users timeout {$user_timeout} is equal to their role timeout of 15");
+@@ -717,24 +722,23 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+   /**
+    * Check the role timeout prescendence works when multiple roles have timeouts.
+    */
+-  public function testAutoLogoutTimeoutByRoleWhenAuthenticatedRoleHasATimeoutAuthenticatedIsLargerThanRole() {
++  public function testAutoLogoutTimeoutByRoleWhenFirstRoleHasATimeoutWhichIsSmallerThanSecondRole() {
+     // Standard logout time is 60 seconds.
+     variable_set("autologout_timeout", '60');
+ 
+     // Enable role based logouts.
+     variable_set("autologout_role_logout", '1');
+ 
+-    // Role logout time is set to 10 seconds.
+-    variable_set("autologout_role_{$this->role->rid}", '1');
+-    variable_set("autologout_role_{$this->role->rid}_timeout", '10');
++    // Role 1 logout time is set to 10 seconds.
++    variable_set("autologout_role_{$this->role_1->rid}", '1');
++    variable_set("autologout_role_{$this->role_1->rid}_timeout", '10');
+ 
+-    // Authenticated role has its own logout at 20 seconds.
+-    $authenticated_role = user_role_load_by_name('authenticated user');
+-    variable_set("autologout_role_{$authenticated_role->rid}", '1');
+-    variable_set("autologout_role_{$authenticated_role->rid}_timeout", '20');
++    // Role 2 has its own logout at 20 seconds.
++    variable_set("autologout_role_{$this->role_2->rid}", '1');
++    variable_set("autologout_role_{$this->role_2->rid}_timeout", '20');
+ 
+     $user_timeout = _autologout_get_user_timeout($this->user->uid);
+-    $this->assertEqual($user_timeout, 10, "The users timeout {$user_timeout} is equal to their role timeout of 10");
++    $this->assertEqual($user_timeout, 10, "The users timeout {$user_timeout} is equal to their first role timeout of 10");
+ 
+     // Check that the user can access the page after initial login.
+     $this->drupalGet('/');
+@@ -752,24 +756,23 @@ class AutoLogoutByRoleTestCase extends DrupalWebTestCase {
+   /**
+    * Check the role timeout prescendence works when multiple roles have timeouts.
+    */
+-  public function testAutoLogoutTimeoutByRoleWhenAuthenticatedRoleHasATimeoutAuthenticatedIsSmallerThanRole() {
++  public function testAutoLogoutTimeoutByRoleWhenFirstRoleHasATimeoutWhichIsLargerThanSecondRole() {
+     // Standard logout time is 60 seconds.
+     variable_set("autologout_timeout", '60');
+ 
+     // Enable role based logouts.
+     variable_set("autologout_role_logout", '1');
+ 
+-    // Role logout time is set to 20 seconds.
+-    variable_set("autologout_role_{$this->role->rid}", '1');
+-    variable_set("autologout_role_{$this->role->rid}_timeout", '20');
++    // Role 1 logout time is set to 20 seconds.
++    variable_set("autologout_role_{$this->role_1->rid}", '1');
++    variable_set("autologout_role_{$this->role_1->rid}_timeout", '20');
+ 
+-    // Authenticated role has its own logout at 10 seconds.
+-    $authenticated_role = user_role_load_by_name('authenticated user');
+-    variable_set("autologout_role_{$authenticated_role->rid}", '1');
+-    variable_set("autologout_role_{$authenticated_role->rid}_timeout", '10');
++    // Role 2 has its own logout at 10 seconds.
++    variable_set("autologout_role_{$this->role_2->rid}", '1');
++    variable_set("autologout_role_{$this->role_2->rid}_timeout", '10');
+ 
+     $user_timeout = _autologout_get_user_timeout($this->user->uid);
+-    $this->assertEqual($user_timeout, 10, "The users timeout {$user_timeout} is equal to the authenticated timeout of 10");
++    $this->assertEqual($user_timeout, 10, "The users timeout {$user_timeout} is equal to their second role timeout of 10");
+ 
+     // Check that the user can access the page after initial login.
+     $this->drupalGet('/');

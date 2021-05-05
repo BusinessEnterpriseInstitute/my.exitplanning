@@ -21,10 +21,9 @@ function autologout_uninstall() {
   variable_del('autologout_no_dialog');
   variable_del('autologout_whitelisted_ip_addresses');
 
-  foreach (user_roles(TRUE) as $key => $role) {
+  foreach (_autologout_user_roles() as $key => $role) {
     variable_del('autologout_role_' . $key);
     variable_del('autologout_role_' . $key . '_timeout');
-
   }
 
   $uids = array();
@@ -85,4 +84,12 @@ function autologout_update_7401() {
     ->fields(array('permission' => 'administer autologout'))
     ->condition('permission', 'auto administer autologout', '=')
     ->execute();
+}
+
+/**
+ * Remove autologout settings for authenticated user's role.
+ */
+function autologout_update_7402() {
+  variable_del('autologout_role_' . DRUPAL_AUTHENTICATED_RID);
+  variable_del('autologout_role_' . DRUPAL_AUTHENTICATED_RID . '_timeout');
 }

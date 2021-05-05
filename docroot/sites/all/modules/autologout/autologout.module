@@ -215,7 +215,7 @@ function theme_autologout_render_table($variables) {
   );
 
   $rows = array();
-  foreach (user_roles(TRUE) as $key => $role) {
+  foreach (_autologout_user_roles() as $key => $role) {
     $rows[] = array(
       'enable' => drupal_render($element['autologout_roles']['autologout_role_' . $key]),
       'name' => t($role),
@@ -584,11 +584,10 @@ function _autologout_get_remaining_time() {
  */
 function _autologout_get_role_timeout() {
   $default_timeout = variable_get('autologout_timeout', 1800);
-  $roles = user_roles(TRUE);
   $role_timeout = array();
 
   // Go through roles, get timeouts for each and return as array.
-  foreach ($roles as $rid => $role) {
+  foreach (_autologout_user_roles() as $rid => $role) {
     if (variable_get('autologout_role_' . $rid, FALSE)) {
       $timeout_role = variable_get('autologout_role_' . $rid . '_timeout', $default_timeout);
       $role_timeout[$rid] = $timeout_role;
@@ -735,6 +734,20 @@ function _autologout_refresh_only() {
   }
 
   return FALSE;
+}
+
+/**
+ * Get a user's roles.
+ *
+ * @return array
+ *   An associative array with the role id as the key and the role name as
+ *   value.
+ */
+function _autologout_user_roles() {
+  $user_roles = user_roles(TRUE);
+  unset($user_roles[DRUPAL_AUTHENTICATED_RID]);
+
+  return $user_roles;
 }
 
 /**
