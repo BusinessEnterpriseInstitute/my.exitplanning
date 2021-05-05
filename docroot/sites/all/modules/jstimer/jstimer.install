@@ -1,0 +1,36 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the jstimer module.
+ * No db schema, just the variables.
+ */
+
+
+/**
+ * Updates separate jstimer format variables to new array format.
+ */
+function jstimer_update_7000() {
+  $formats = array();
+  $formats[] = variable_get('jstimer_output_format', '');
+  $formats[] = variable_get('jstimer_output_format_1', '');
+  $formats[] = variable_get('jstimer_output_format_2', '');
+  $formats[] = variable_get('jstimer_output_format_3', '');
+
+  foreach ($formats as $i => $format) {
+    if ($format == '') {
+      unset($formats[$i]);
+    }
+  }
+  $formats = array_values($formats);
+  variable_set('jst_timer_formats', $formats);
+
+  variable_del('jstimer_output_format');
+  variable_del('jstimer_output_format_1');
+  variable_del('jstimer_output_format_2');
+  variable_del('jstimer_output_format_3');
+  
+  $msg = variable_get('jstimer_complete_statement', '');
+  variable_set('jst_timer_complete_message', $msg);
+
+}

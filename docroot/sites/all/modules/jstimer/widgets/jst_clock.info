@@ -1,0 +1,12 @@
+name = Widget: clock
+description = Embeddable clock widget.
+dependencies[] = jstimer
+package = "Javascript timer"
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2017-01-10
+version = "7.x-1.4"
+core = "7.x"
+project = "jstimer"
+datestamp = "1484064186"
+
