@@ -14,8 +14,8 @@ files[] = includes/v3/SearchApiAcquiaApi.php
 files[] = includes/v3/SearchApiAcquiaPreferredCore.php
 files[] = includes/v3/SearchApiAcquiaCrypt.php
 files[] = tests/search_api_acquia.test
-; Information added by Drupal.org packaging script on 2020-12-11
-version = "7.x-2.5"
+; Information added by Drupal.org packaging script on 2021-03-16
+version = "7.x-2.6"
 core = "7.x"
 project = "search_api_acquia"
-datestamp = "1607713534"
+datestamp = "1615927650"
