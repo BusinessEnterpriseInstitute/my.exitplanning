@@ -1,0 +1,16 @@
+***************
+*** 956,961 ****
+        'last' => 'b',
+        'value:0' => 'a',
+        'value:2' => 'c',
+        'count' => 4,
+        'keys' => '2, 0, 4, 1',
+        'keys:value:3' => '1',
+--- 956,962 ----
+        'last' => 'b',
+        'value:0' => 'a',
+        'value:2' => 'c',
++       'value:#property' => NULL,
+        'count' => 4,
+        'keys' => '2, 0, 4, 1',
+        'keys:value:3' => '1',

@@ -41,7 +41,7 @@ function image_field_views_data_views_data_alter(&$data, $field) {
     $pseudo_field_name = 'reverse_' . $field['field_name'] . '_' . $entity_type;
 
     list($label, $all_labels) = field_views_field_label($field['field_name']);
-    $entity = $entity_info['label'];
+    $entity = isset($entity_info['label']);
     if ($entity == t('Node')) {
       $entity = t('Content');
     }
@@ -53,8 +53,8 @@ function image_field_views_data_views_data_alter(&$data, $field) {
       'field_name' => $field['field_name'],
       'field table' => _field_sql_storage_tablename($field),
       'field field' => $field['field_name'] . '_fid',
-      'base' => $entity_info['base table'],
-      'base field' => $entity_info['entity keys']['id'],
+      'base' => isset($entity_info['base table']),
+      'base field' => isset($entity_info['entity keys']['id']),
       'label' => t('!field_name', array('!field_name' => $field['field_name'])),
       'join_extra' => array(
         0 => array(
