@@ -38,6 +38,7 @@ class Recurly_BillingInfoTest extends Recurly_TestCase
     $this->assertEquals($billing_info->year, null);
     $this->assertEquals($billing_info->month, null);
     $this->assertEquals($billing_info->amazon_billing_agreement_id, null);
+    $this->assertEquals($billing_info->amazon_region, null);
     $this->assertEquals($billing_info->paypal_billing_agreement_id, 'abc123');
     $this->assertEquals($billing_info->getHref(), 'https://api.recurly.com/v2/accounts/paypal1234567890/billing_info');
   }
@@ -51,6 +52,7 @@ class Recurly_BillingInfoTest extends Recurly_TestCase
     $this->assertEquals($billing_info->month, null);
     $this->assertEquals($billing_info->paypal_billing_agreement_id, null);
     $this->assertEquals($billing_info->amazon_billing_agreement_id, 'C01-1234567-8901234');
+    $this->assertEquals($billing_info->amazon_region, 'us');
     $this->assertEquals($billing_info->getHref(), 'https://api.recurly.com/v2/accounts/amazon1234567890/billing_info');
   }
 
@@ -103,6 +105,43 @@ class Recurly_BillingInfoTest extends Recurly_TestCase
       "<?xml version=\"1.0\"?>\n<billing_info><token_id>abc123</token_id></billing_info>\n"
     );
     $billing_info->create();
+  }
+
+  public function testTransactionType() {
+    $billing_info = new Recurly_BillingInfo(null, $this->client);
+    $billing_info->transaction_type = 'moto';
+
+    $this->assertInstanceOf('Recurly_BillingInfo', $billing_info);
+    $this->assertEquals(
+      $billing_info->xml(),
+      "<?xml version=\"1.0\"?>\n<billing_info><transaction_type>moto</transaction_type></billing_info>\n"
+    );
+  }
+
+  public function testForExternalHppType() {
+    $billing_info = new Recurly_BillingInfo(null, $this->client);
+    $billing_info->token_id = 'abc123';
+    $billing_info->external_hpp_type = 'adyen';
+
+    $this->assertInstanceOf('Recurly_BillingInfo', $billing_info);
+    $this->assertEquals(
+      $billing_info->xml(),
+      "<?xml version=\"1.0\"?>\n<billing_info><token_id>abc123</token_id><external_hpp_type>adyen</external_hpp_type></billing_info>\n"
+    );
+  }
+
+  public function testForGatewayToken() {
+    $billing_info = new Recurly_BillingInfo(null, $this->client);
+    $billing_info->gateway_token = 'x1x2x3';
+    $billing_info->gateway_code = 'abc123';
+    $billing_info->month = '11';
+    $billing_info->year = '2025';
+
+    $this->assertInstanceOf('Recurly_BillingInfo', $billing_info);
+    $this->assertEquals(
+      $billing_info->xml(),
+      "<?xml version=\"1.0\"?>\n<billing_info><month>11</month><year>2025</year><gateway_token>x1x2x3</gateway_token><gateway_code>abc123</gateway_code></billing_info>\n"
+    );
   }
 
 }

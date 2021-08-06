@@ -12,9 +12,9 @@ be careful when upgrading.
 
 ## Requirements
 
-###cURL and OpenSSL
+### cURL and OpenSSL
 
-The PHP library depends on PHP 5.3.0 (or higher) and libcurl compiled with
+The PHP library depends on PHP 5.6 (or higher, though only PHP 7.2 or newer is officially supported) and libcurl compiled with
 OpenSSL support. Open up a `phpinfo();` page and verify that under the curl
 section, there's a line that says something like:
 
@@ -22,7 +22,8 @@ section, there's a line that says something like:
 libcurl/7.19.5 OpenSSL/1.0.1g zlib/1.2.3.3 libidn/1.15
 ```
 
-Please ensure that your OpenSSL version supports TLS v1.1 or higher. At a minimum use v1.0.1g, however we recommend v1.1.0 and up.
+Please ensure that your OpenSSL version supports TLS v1.2 (or higher) and that it meets [PHP's requirements for the OpenSSL cryptography extension](http://php.net/manual/en/openssl.requirements.php).
+Some older versions of OpenSSL will not necessarily work properly with the Recurly API. For security reasons, it is strongly encouraged to use the latest version of OpenSSL.
 
 ### Timezone
 You will need to specify your server's timezone before using the Recurly PHP client. This is necessary for the library to properly handle datetime conversions. You can do this in your `php.ini` file:
@@ -43,12 +44,11 @@ date_default_timezone_set('America/Los_Angeles');
 
 If you're using [Composer](http://getcomposer.org/), you can simply add a
 dependency on `recurly/recurly-client` to your project's `composer.json` file.
-Here's an example of a dependency on 2.7:
 
 ```json
 {
     "require": {
-        "recurly/recurly-client": "2.7.*"
+        "recurly/recurly-client": "2.12.*"
     }
 }
 ```
@@ -105,7 +105,7 @@ You can run our unit tests by using Composer to install PHPUnit:
 
 ```
 $ curl -s https://getcomposer.org/installer | php
-$ php composer.phar install --dev
+$ php composer.phar install
 $ vendor/bin/phpunit
 ```
 
@@ -114,10 +114,9 @@ $ vendor/bin/phpunit
 - [https://support.recurly.com](https://support.recurly.com)
 - [stackoverflow](http://stackoverflow.com/questions/tagged/recurly)
 
-## Announcements
+## Supported Versions
 
-- [@recurly](https://twitter.com/recurly)
-- [Google Group Announcements](https://groups.google.com/group/recurly-api)
+We support all ["currently supported versions" of PHP](http://php.net/supported-versions.php).
 
 ## Contributing Guidelines
 

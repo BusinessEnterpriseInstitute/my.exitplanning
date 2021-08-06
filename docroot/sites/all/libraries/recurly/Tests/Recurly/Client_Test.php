@@ -8,7 +8,7 @@ class Recurly_ClientTest extends Recurly_TestCase
     $this->client->addResponse('GET', '/accounts', 'client/deprecated-200.xml');
 
     // This should print an error but not raise.
-    $accounts = Recurly_AccountList::get(null, $this->client)->count();
+    $accounts = Recurly_AccountList::get(null, $this->client)->get();
   }
 
   public function testUnauthorizedError() {
@@ -39,5 +39,20 @@ class Recurly_ClientTest extends Recurly_TestCase
       $this->fail("Expected Recurly_ConnectionError");
     }
     catch (Recurly_ConnectionError $e) {}
+  }
+
+  // Test that the <details> tag from a 400 response is appended to the message
+  public function testBadRequestError() {
+    $this->client->addResponse('POST', '/purchases', 'client/bad-request-400.xml');
+
+    try {
+      $purchase = new Recurly_Purchase();
+      $purchase->address = 'something unacceptable';
+
+      $collection = Recurly_Purchase::invoice($purchase, $this->client);
+    }
+    catch(Recurly_Error $e) {
+      $this->assertEquals($e->getMessage(), "The provided XML was invalid. Details: Unacceptable tags <address>");
+    }
   }
 }
