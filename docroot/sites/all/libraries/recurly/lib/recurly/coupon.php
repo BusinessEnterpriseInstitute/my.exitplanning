@@ -77,7 +77,7 @@ class Recurly_Coupon extends Recurly_Resource
       }
     }
 
-   return null;
+   //return null;
   }
 
   public function update() {
