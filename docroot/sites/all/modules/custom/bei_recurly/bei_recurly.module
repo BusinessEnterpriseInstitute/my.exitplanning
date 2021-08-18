@@ -432,7 +432,7 @@ function bei_recurly_checkout_billing_form($form, &$form_state) {
     $form_state['extra_info']['coupon_description'] = '';
     $code = check_plain($form_state['input']['coupon_code']);
     try {
-      $coupon = Recurly_Coupon::get($code);
+      $coupon = Recurly_Coupon::get($couponCode);
       $coupon_values = $coupon->getValues();
       $form_state['extra_info']['coupon_description'] = (isset($coupon_values['description'])) ? $coupon_values['description'] : ''; 
     }
