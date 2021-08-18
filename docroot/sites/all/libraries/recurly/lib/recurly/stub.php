@@ -18,10 +18,6 @@ class Recurly_Stub extends Recurly_Base
 
   /**
    * Retrieve the stubbed resource.
-   *
-   * @param array $params
-   * @return object
-   * @throws Recurly_Error
    */
   function get($params = null) {
     $uri = self::_uriWithParams($this->_href, $params);

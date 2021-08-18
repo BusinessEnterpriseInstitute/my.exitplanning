@@ -2,9 +2,6 @@
 
 class Recurly_ShippingAddress extends Recurly_Resource
 {
-  /**
-   * @throws Recurly_Error
-   */
   public function update() {
     $this->_save(Recurly_Client::PUT, $this->getHref());
   }
@@ -16,15 +13,21 @@ class Recurly_ShippingAddress extends Recurly_Resource
     return array(
       'address1', 'address2', 'city', 'state',
       'zip', 'country', 'phone', 'email', 'nickname',
-      'first_name', 'last_name', 'company', 'vat_number'
+      'first_name', 'last_name', 'company'
     );
   }
   protected function populateXmlDoc(&$doc, &$node, &$obj, $nested = false) {
-    if ($this->isEmbedded($node, 'shipping_addresses')) {
+    if ($this->isEmbedded($node)) {
       $shippingAddressNode = $node->appendChild($doc->createElement($this->getNodeName()));
-      parent::populateXmlDoc($doc, $shippingAddressNode, $obj, $nested);
+      parent::populateXmlDoc($doc, $shippingAddressNode, $obj);
     } else {
-      parent::populateXmlDoc($doc, $node, $obj, $nested);
+      parent::populateXmlDoc($doc, $node, $obj);
     }
+  }
+
+  private function isEmbedded($node) {
+    $path = explode('/', $node->getNodePath());
+    $last = $path[count($path)-1];
+    return $last == 'shipping_addresses';
   }
 }

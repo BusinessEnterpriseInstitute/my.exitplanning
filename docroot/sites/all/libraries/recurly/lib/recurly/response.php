@@ -12,10 +12,6 @@ class Recurly_ClientResponse
     $this->body = $body;
   }
 
-  /**
-   * @param $object
-   * @throws Recurly_ValidationError
-   */
   public function assertSuccessResponse($object)
   {
     if ($this->statusCode == 422)
@@ -43,13 +39,10 @@ class Recurly_ClientResponse
     }
   }
 
-  /**
-   * @throws Recurly_Error
-   */
   public function assertValidResponse()
   {
-    if (!empty($this->headers['recurly-deprecated'])) {
-      error_log("WARNING: API version {$this->headers['x-api-version']} is deprecated and will only be available until {$this->headers['recurly-sunset-date']}. Please upgrade the Recurly PHP client.");
+    if (!empty($this->headers['Recurly-Deprecated'])) {
+      error_log("WARNING: API version {$this->headers['X-Api-Version']} is deprecated and will only be available until {$this->headers['Recurly-Sunset-Date']}. Please upgrade the Recurly PHP client.");
     }
 
     // Successful response code
@@ -58,13 +51,13 @@ class Recurly_ClientResponse
 
     // Do not fail here if the response is not valid XML
     $error = @$this->parseErrorXml($this->body);
-    $recurlyCode = (is_null($error) ? null : $error->symbol);
 
     switch ($this->statusCode) {
       case 0:
         throw new Recurly_ConnectionError('An error occurred while connecting to Recurly.');
       case 400:
-        $message = (is_null($error) ? 'Bad API Request' : (string) $error);
+        $message = (is_null($error) ? 'Bad API Request' : $error->description);
+        $recurlyCode = (is_null($error) ? null : $error->symbol);
         throw new Recurly_Error($message, 0, null, $recurlyCode);
       case 401:
         throw new Recurly_UnauthorizedError('Your API Key is not authorized to connect to Recurly.');
@@ -72,7 +65,7 @@ class Recurly_ClientResponse
         throw new Recurly_UnauthorizedError('Please use an API key to connect to Recurly.');
       case 404:
         $message = (is_null($error) ? 'Object not found' : $error->description);
-        throw new Recurly_NotFoundError($message, 0, null, $recurlyCode);
+        throw new Recurly_NotFoundError($message);
       case 422:
         // Handled in assertSuccessResponse()
         return;
@@ -102,9 +95,6 @@ class Recurly_ClientResponse
 
   private function parseErrorXml($xml) {
     $dom = new DOMDocument();
-
-    Recurly_Client::disableXmlEntityLoading();
-
     if (empty($xml) || !$dom->loadXML($xml)) return null;
 
     $rootNode = $dom->documentElement;
@@ -126,9 +116,6 @@ class Recurly_ClientResponse
           break;
         case 'description':
           $error->description = $node->nodeValue;
-          break;
-        case 'details':
-          $error->details = $node->nodeValue;
           break;
       }
       $node = $node->nextSibling;
