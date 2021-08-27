@@ -29,8 +29,7 @@ function theme_facetapi_facet_missing($variables) {
  * @ingroup themeable
  */
 function theme_facetapi_title($variables) {
-  $prefix = isset($variables['title_prefix']) ? $variables['title_prefix'] : 'Filter by';
-  return t('@title_prefix @title:', array('@title_prefix' => $prefix, '@title' => drupal_strtolower($variables['title'])));
+  return t('Filter by @title:', array('@title' => drupal_strtolower($variables['title'])));
 }
 
 /**

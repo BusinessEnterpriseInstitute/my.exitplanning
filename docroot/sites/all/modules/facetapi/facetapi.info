@@ -20,7 +20,7 @@ files[] = tests/facetapi.test
 
 
 ; Information added by Drupal.org packaging script on 2021-08-27
-version = "7.x-1.8"
+version = "7.x-1.9"
 core = "7.x"
 project = "facetapi"
-datestamp = "1630076312"
+datestamp = "1630088972"
