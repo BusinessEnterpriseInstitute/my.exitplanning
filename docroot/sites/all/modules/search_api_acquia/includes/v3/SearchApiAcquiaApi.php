@@ -283,7 +283,7 @@ class SearchApiAcquiaApi {
    */
   protected function sanitizeDatabaseRoleName(string $database_role) {
     // In database role naming, we only accept alphanumeric chars.
-    $pattern = '/[^a-zA-Z0-9]+/';
+    $pattern = '/[^a-zA-Z0-9_]+/';
     $database_role = preg_replace($pattern, '', $database_role);
     return $database_role;
   }

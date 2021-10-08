@@ -8,7 +8,7 @@ class AcquiaSearchSolrApi {
   /**
    * Request timeout in seconds.
    */
-  const REQUEST_TIMEOUT = 5;
+  const REQUEST_TIMEOUT = 60;
 
   /**
    * Subscription name.
@@ -282,8 +282,8 @@ class AcquiaSearchSolrApi {
    *   Sanitized string.
    */
   protected function sanitizeDatabaseRoleName(string $database_role) {
-    // In database role naming, we only accept alphanumeric chars.
-    $pattern = '/[^a-zA-Z0-9]+/';
+    // In database role naming, we only accept alphanumeric and underscores.
+    $pattern = '/[^a-zA-Z0-9_]+/';
     $database_role = preg_replace($pattern, '', $database_role);
     return $database_role;
   }

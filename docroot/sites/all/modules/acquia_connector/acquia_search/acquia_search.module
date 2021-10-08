@@ -82,36 +82,64 @@ function acquia_search_add_apachesolr_overrides(PreferredSearchCoreService $core
 
   foreach ($environments as $acquia_env_id => $environment) {
 
-    // Override Acquia search environments only.
-    if ($environment['service_class'] != 'AcquiaSearchService') {
-      continue;
-    }
-
     // Skip if the Acquia search environment has already been overridden.
     if (!empty($conf['apachesolr_environments'][$acquia_env_id])) {
       continue;
     }
 
-    $conf['apachesolr_environments'][$acquia_env_id]['acquia_search_possible_cores'] = $core_service->getListOfPossibleCores();
+    // Override Acquia search environments only.
+    if ($environment['service_class'] == 'AcquiaSearchService') {
+      $current_environment = acquia_search_get_environment();
+      if ($environment['url'] !== $current_environment['url']) {
+        $current_environment = array_merge($environment, $current_environment);
+        $conf['apachesolr_environments'][$acquia_env_id]['url'] = $current_environment['url'];
+        if (!empty($core_service->ah_env)) {
+          $derived_key = _acquia_search_derived_key($acquia_env_id);
+          $conf['apachesolr_environments'][$acquia_env_id]['conf'] = array('acquia_search_key' => $derived_key);
+        }
+        if ((empty($core_service->ah_env) || $core_service->ah_env !== 'dev') && empty($_SERVER['AH_PRODUCTION'])) {
+          $conf['apachesolr_environments'][$acquia_env_id]['conf'] = array('apachesolr_read_only' => 1);
+        }
+        $conf['apachesolr_environments'][$acquia_env_id]['overridden_by_acquia_search'] = ACQUIA_SEARCH_OVERRIDE_AUTO_SET;
+        drupal_static_reset('apachesolr_load_all_environments');
+        $overrode = TRUE;
+        continue;
+      }
 
-    if ($core_service->isPreferredCoreAvailable()) {
+      // At this point none of the available search cores match to what is
+      // expected. Switch the search into read-only mode.
+      if (!variable_get('acquia_search_disable_auto_read_only', 0)) {
+        $conf['apachesolr_environments'][$acquia_env_id]['conf'] = array('apachesolr_read_only' => 1);
+        $conf['apachesolr_environments'][$acquia_env_id]['overridden_by_acquia_search'] = ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY;
+        drupal_static_reset('apachesolr_load_all_environments');
+        $overrode = TRUE;
+      }
+    }
+    elseif ($environment['service_class'] == 'AcquiaSearchSolrService') {
+      $api = _acquia_search_solr_get_api();
+      if (empty($api)) {
+        continue;
+      }
 
-      $derived_key = acquia_search_get_derived_key_for_core($core_service->getPreferredCoreId());
-      $conf['apachesolr_environments'][$acquia_env_id]['url'] = $core_service->getPreferredCoreUrl();
+      $preferredIndexService = $api->getPreferredIndexService();
+      if (empty($preferredIndexService->isPreferredIndexAvailable())) {
+        continue;
+      }
+      $index = $preferredIndexService->getPreferredIndex();
+
+      $derived_key = _acquia_search_create_derived_key(
+        $index['data']['product_policies']['salt'],
+        $index['data']['key'],
+        $index['data']['secret_key']
+      );
+
+      $conf['apachesolr_environments'][$acquia_env_id]['url'] = 'https://' . $index['host'] . '/solr/' . $index['index_id'];
       $conf['apachesolr_environments'][$acquia_env_id]['conf'] = array('acquia_search_key' => $derived_key);
       $conf['apachesolr_environments'][$acquia_env_id]['overridden_by_acquia_search'] = ACQUIA_SEARCH_OVERRIDE_AUTO_SET;
       drupal_static_reset('apachesolr_load_all_environments');
       $overrode = TRUE;
       continue;
-    }
 
-    // At this point none of the available search cores match to what is
-    // expected. Switch the search into read-only mode.
-    if (!variable_get('acquia_search_disable_auto_read_only', 0)) {
-      $conf['apachesolr_environments'][$acquia_env_id]['conf'] = array('apachesolr_read_only' => 1);
-      $conf['apachesolr_environments'][$acquia_env_id]['overridden_by_acquia_search'] = ACQUIA_SEARCH_AUTO_OVERRIDE_READ_ONLY;
-      drupal_static_reset('apachesolr_load_all_environments');
-      $overrode = TRUE;
     }
 
   }
@@ -348,44 +376,55 @@ function acquia_search_help($path, $arg) {
  *
  * Set it as the default.
  */
-function acquia_search_enable_acquia_solr_environment() {
-  // Creates the new environment.
-  $environment = apachesolr_environment_load(ACQUIA_SEARCH_ENVIRONMENT_ID);
+function acquia_search_enable_acquia_solr_environment($env_id) {
+  $environment = apachesolr_environment_load($env_id);
+  $create_environment = TRUE;
   if (!$environment) {
-    $environment['conf'] = array();
+    $environment = [
+      'env_id' => $env_id,
+      'conf' => [
+        'apachesolr_read_only' => 1,
+      ],
+    ];
 
-    // Copy the bundles from the previous default environment.
+    // Copy bundles from the previous default environment.
     $orig_env_id = apachesolr_default_environment();
     $orig_env = apachesolr_environment_load($orig_env_id);
     $environment['index_bundles'] = $orig_env['index_bundles'];
 
-    // Also make sure that the default search page has Acquia Search as its
-    // default environment.
-    $default_search_page_id = apachesolr_search_default_search_page();
-    $default_search_page = apachesolr_search_page_load($default_search_page_id);
-    if (!empty($default_search_page) && ($default_search_page['env_id'] != ACQUIA_SEARCH_ENVIRONMENT_ID)) {
-      $default_search_page['env_id'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
-      apachesolr_search_page_save($default_search_page);
+    if ($env_id == ACQUIA_SEARCH_V3_ENVIRONMENT_ID) {
+      $api = _acquia_search_solr_get_api();
+      $preferred_index_service = $api->getPreferredIndexService();
+      $preferred_index = $preferred_index_service->getPreferredIndex();
+      $create_environment = empty($preferred_index) ? FALSE : TRUE;
+      $environment['url'] = sprintf('https://%s', $preferred_index['data']['index_url']);
+      $environment['service_class'] = AcquiaSearchSolrService::class;
     }
-
-    // Only set the default if we just created the environment.
-    // This will almost always happen, unless the module was disabled via SQL.
-    variable_set('apachesolr_default_environment', ACQUIA_SEARCH_ENVIRONMENT_ID);
-    // Make sure apachesolr search is the default search module.
-    variable_set('search_default_module', 'apachesolr_search');
+    if ($env_id == ACQUIA_SEARCH_ENVIRONMENT_ID) {
+      // Also make sure that the default search page has Acquia Search as its
+      // default environment.
+      $default_search_page_id = apachesolr_search_default_search_page();
+      $default_search_page = apachesolr_search_page_load($default_search_page_id);
+      if (!empty($default_search_page) && ($default_search_page['env_id'] != ACQUIA_SEARCH_ENVIRONMENT_ID)) {
+        $default_search_page['env_id'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
+        apachesolr_search_page_save($default_search_page);
+      }
+      // Only set the default if we just created the environment.
+      // This will almost always happen, unless the module was disabled via SQL.
+      variable_set('apachesolr_default_environment', ACQUIA_SEARCH_ENVIRONMENT_ID);
+      // Make sure apachesolr search is the default search module.
+      variable_set('search_default_module', 'apachesolr_search');
+      $acquia_environment = acquia_search_get_environment();
+      // Override default values.
+      foreach ($acquia_environment as $key => $value) {
+        $environment[$key] = $value;
+      }
+    }
   }
-
-  $acquia_environment = acquia_search_get_environment();
-  // Override default values.
-  foreach ($acquia_environment as $key => $value) {
-    $environment[$key] = $value;
-  }
-  $environment['env_id'] = ACQUIA_SEARCH_ENVIRONMENT_ID;
   $environment['name'] = t('Acquia Search');
-
   // Allow other modules to override this.
   drupal_alter('acquia_search_enable', $environment);
-  apachesolr_environment_save($environment);
+  $create_environment ? apachesolr_environment_save($environment) : '';
 }
 
 /**
@@ -417,6 +456,10 @@ function _acquia_search_set_version() {
  * Tests whether the environment is connected to Acquia Search.
  */
 function acquia_search_environment_connected($environment) {
+  if ($environment === FALSE) {
+    return FALSE;
+  }
+
   if (in_array($environment['service_class'], [
     AcquiaSearchService::class,
     AcquiaSearchSolrService::class,
@@ -493,6 +536,7 @@ function acquia_search_form_apachesolr_environment_edit_form_alter(&$form, $form
       $form['conf']['apachesolr_read_only']['#type'] = 'hidden';
     }
 
+    $form['url']['#default_value'] = $environment['url'];
     $form['url']['#disabled'] = TRUE;
     $form['env_id']['#disabled'] = TRUE;
   }
@@ -974,7 +1018,7 @@ function acquia_search_solr_settings_form_new_environment_submit(array $form, ar
   // Checking Solr Core version.
   if (variable_get('acquia_search_solr_core', ACQUIA_SEARCH_SOLR_CORE_V2) === ACQUIA_SEARCH_SOLR_CORE_V3) {
     // Make sure acquia search is the default search module.
-    variable_set('search_default_module', 'acquia_search');
+    variable_set('search_default_module', 'apachesolr_search');
   }
   else {
     // Refresh the salt with the subscription data returned by the heartbeat
@@ -983,6 +1027,37 @@ function acquia_search_solr_settings_form_new_environment_submit(array $form, ar
     $subscription = acquia_agent_settings('acquia_subscription_data');
     if (isset($subscription['derived_key_salt']) && $salt != $subscription['derived_key_salt']) {
       variable_set('acquia_search_derived_key_salt', $subscription['derived_key_salt']);
+    }
+  }
+}
+
+/**
+ * Implements hook_acquia_subscription_status().
+ */
+function acquia_search_acquia_subscription_status($active, $subscription = FALSE) {
+  if ($active) {
+    $available_cores = acquia_search_available_cores($subscription);
+    if (!empty($available_cores)) {
+      acquia_search_enable_acquia_solr_environment(ACQUIA_SEARCH_V3_ENVIRONMENT_ID);
+    }
+    else {
+      acquia_search_enable_acquia_solr_environment(ACQUIA_SEARCH_ENVIRONMENT_ID);
+    }
+    // Refresh the salt with the subscription data returned by the heartbeat
+    // since it can change periodically.
+    $salt = variable_get('acquia_search_derived_key_salt', '');
+    if (isset($subscription['derived_key_salt']) && $salt != $subscription['derived_key_salt']) {
+      variable_set('acquia_search_derived_key_salt', $subscription['derived_key_salt']);
+    }
+  }
+  else {
+    if (is_int($subscription)) {
+      switch ($subscription) {
+        case ACQUIA_AGENT_SUBSCRIPTION_NOT_FOUND:
+        case ACQUIA_AGENT_SUBSCRIPTION_EXPIRED:
+          acquia_search_disable();
+          break;
+      }
     }
   }
 }
