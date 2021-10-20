@@ -1,0 +1,9 @@
+name = Database Sanitize
+description = Provides drush commands for yaml sanitization files checks and generation.
+core = 7.x
+
+; Information added by Drupal.org packaging script on 2019-07-23
+version = "7.x-1.4"
+core = "7.x"
+project = "database_sanitize"
+datestamp = "1563892992"
