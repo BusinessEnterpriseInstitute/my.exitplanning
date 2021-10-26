@@ -3,106 +3,106 @@
 
 class MiniOrangeAuthnRequest
 {
-    public function initiateLogin($ZU, $EA, $Pz, $oG, $TY, $g6, $MR)
+    public function initiateLogin($mD, $o4, $u1, $X0, $MR, $yV, $cn)
     {
-        $xB = variable_get("\x6d\151\156\151\x6f\162\141\156\147\145\x5f\x6e\x61\x6d\145\x69\144\x5f\x66\x6f\162\155\x61\164", '');
-        $h7 = Utilities::createAuthnRequest($ZU, $Pz, $EA, $xB, "\146\141\154\163\145", $TY);
-        $this->sendSamlRequestByBindingType($h7, $TY, $oG, $EA, $g6, $MR);
+        $vm = variable_get("\155\151\x6e\x69\x6f\x72\x61\x6e\147\145\137\x6e\x61\155\145\151\x64\x5f\x66\157\162\x6d\141\164", '');
+        $Ka = Utilities::createAuthnRequest($mD, $u1, $o4, $vm, "\x66\141\154\163\145", $MR);
+        $this->sendSamlRequestByBindingType($Ka, $MR, $X0, $o4, $yV, $cn);
     }
-    function sendSamlRequestByBindingType($yk, $TY, $iZ, $E3, $g6, $MR)
+    function sendSamlRequestByBindingType($Mq, $MR, $ak, $IA, $yV, $cn)
     {
-        $Oi = drupal_get_path("\155\x6f\144\165\x6c\145", "\x6d\151\x6e\x69\157\x72\x61\x6e\x67\x65\137\x73\141\x6d\x6c");
-        if (empty($TY) || $TY == "\110\x54\x54\120\55\122\x65\x64\151\162\145\x63\x74") {
-            goto ib;
+        $t6 = drupal_get_path("\155\157\x64\x75\154\145", "\155\x69\x6e\x69\x6f\x72\141\x6e\x67\x65\x5f\x73\x61\155\x6c");
+        if (empty($MR) || $MR == "\x48\124\124\x50\x2d\x52\145\x64\x69\162\145\143\164") {
+            goto Yd;
         }
-        if ($g6) {
-            goto cK;
+        if ($yV) {
+            goto ZP;
         }
-        $x4 = base64_encode($yk);
-        Utilities::postSAMLRequest($E3, $x4, $iZ);
+        $Nt = base64_encode($Mq);
+        Utilities::postSAMLRequest($IA, $Nt, $ak);
         die;
-        cK:
-        $aq = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $Oi . DIRECTORY_SEPARATOR . "\x72\x65\x73\x6f\165\162\x63\x65\163" . DIRECTORY_SEPARATOR . Utilities::getKeyName();
-        $YD = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $Oi . DIRECTORY_SEPARATOR . "\x72\145\x73\x6f\x75\162\x63\145\163" . DIRECTORY_SEPARATOR . Utilities::getCertficateName();
-        $x4 = Utilities::signXML($yk, $YD, $aq, "\116\141\155\145\111\104\120\x6f\x6c\x69\143\x79", $MR);
-        Utilities::postSAMLRequest($E3, $x4, $iZ);
-        goto pF;
-        ib:
-        $yk = "\123\101\115\x4c\122\x65\x71\165\145\x73\164\x3d" . $yk . "\x26\x52\145\154\141\x79\x53\x74\x61\164\x65\x3d" . $iZ;
-        $OT = array("\x74\171\160\145" => "\x70\x72\151\166\141\x74\145");
-        if ($MR == "\x52\x53\101\x5f\123\110\101\62\x35\66") {
-            goto TX;
+        ZP:
+        $xs = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $t6 . DIRECTORY_SEPARATOR . "\x72\145\163\x6f\165\162\x63\145\163" . DIRECTORY_SEPARATOR . Utilities::getKeyName();
+        $Es = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $t6 . DIRECTORY_SEPARATOR . "\x72\x65\163\157\x75\x72\x63\145\163" . DIRECTORY_SEPARATOR . Utilities::getCertficateName();
+        $Nt = Utilities::signXML($Mq, $Es, $xs, "\116\x61\155\145\x49\104\x50\x6f\154\x69\x63\x79", $cn);
+        Utilities::postSAMLRequest($IA, $Nt, $ak);
+        goto RU;
+        Yd:
+        $Mq = "\x53\101\x4d\x4c\x52\x65\161\165\x65\x73\164\75" . $Mq . "\x26\x52\x65\154\141\171\123\x74\x61\x74\145\x3d" . $ak;
+        $E4 = array("\164\x79\x70\x65" => "\160\162\x69\x76\141\x74\x65");
+        if ($cn == "\x52\123\101\x5f\123\x48\101\x32\65\x36") {
+            goto Lp;
         }
-        if ($MR == "\122\123\x41\x5f\123\x48\101\63\x38\x34") {
-            goto Gl;
+        if ($cn == "\x52\x53\101\x5f\123\110\x41\63\x38\x34") {
+            goto CD;
         }
-        if ($MR == "\122\x53\101\x5f\123\x48\101\x35\x31\62") {
-            goto H5;
+        if ($cn == "\x52\123\x41\x5f\123\x48\x41\x35\61\62") {
+            goto qe;
         }
-        if ($MR == "\x52\123\101\137\x53\x48\101\x31") {
-            goto Tk;
+        if ($cn == "\x52\123\x41\x5f\x53\110\x41\x31") {
+            goto oi;
         }
-        goto gS;
-        TX:
-        $l9 = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $OT);
-        goto gS;
-        Gl:
-        $l9 = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $OT);
-        goto gS;
-        H5:
-        $l9 = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $OT);
-        goto gS;
-        Tk:
-        $l9 = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $OT);
-        gS:
-        $OK = Utilities::getKeyPath();
-        $l9->loadKey($OK, TRUE);
-        $ZF = new XMLSecurityDSig();
-        $J8 = $l9->signData($yk);
-        $J8 = base64_encode($J8);
-        $KI = $E3;
-        if (strpos($E3, "\77") !== false) {
-            goto pG;
+        goto br;
+        Lp:
+        $Rh = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $E4);
+        goto br;
+        CD:
+        $Rh = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $E4);
+        goto br;
+        qe:
+        $Rh = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $E4);
+        goto br;
+        oi:
+        $Rh = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $E4);
+        br:
+        $oj = Utilities::getKeyPath();
+        $Rh->loadKey($oj, TRUE);
+        $wG = new XMLSecurityDSig();
+        $yN = $Rh->signData($Mq);
+        $yN = base64_encode($yN);
+        $T9 = $IA;
+        if (strpos($IA, "\77") !== false) {
+            goto wW;
         }
-        $KI .= "\77";
-        goto j3;
-        pG:
-        $KI .= "\46";
-        j3:
-        if ($g6) {
-            goto a_;
+        $T9 .= "\x3f";
+        goto iC;
+        wW:
+        $T9 .= "\46";
+        iC:
+        if ($yV) {
+            goto op;
         }
-        $KI .= $yk;
-        goto FP;
-        a_:
-        if ($MR == "\122\123\x41\x5f\x53\x48\101\62\x35\66") {
-            goto tm;
+        $T9 .= $Mq;
+        goto cN;
+        op:
+        if ($cn == "\x52\x53\x41\137\x53\110\101\62\65\x36") {
+            goto IU;
         }
-        if ($MR == "\x52\x53\101\x5f\x53\110\101\x33\70\x34") {
-            goto a4;
+        if ($cn == "\x52\x53\101\x5f\123\110\x41\x33\x38\64") {
+            goto La;
         }
-        if ($MR == "\x52\123\x41\137\x53\110\101\65\x31\x32") {
-            goto jy;
+        if ($cn == "\122\123\101\137\x53\110\x41\65\x31\62") {
+            goto m6;
         }
-        if ($MR == "\122\x53\x41\137\123\110\101\x31") {
-            goto k2;
+        if ($cn == "\122\x53\x41\137\123\110\x41\x31") {
+            goto vG;
         }
-        goto I1;
-        tm:
-        $KI .= $yk . "\x26\x53\151\x67\101\x6c\x67\x3d" . urlencode(XMLSecurityKey::RSA_SHA256) . "\46\x53\151\x67\156\141\x74\x75\x72\145\75" . urlencode($J8);
-        goto I1;
-        a4:
-        $KI .= $yk . "\x26\x53\x69\147\101\x6c\147\75" . urlencode(XMLSecurityKey::RSA_SHA384) . "\x26\123\x69\147\156\141\164\x75\x72\145\x3d" . urlencode($J8);
-        goto I1;
-        jy:
-        $KI .= $yk . "\46\x53\x69\147\x41\x6c\147\x3d" . urlencode(XMLSecurityKey::RSA_SHA512) . "\46\x53\151\x67\x6e\x61\164\165\x72\145\75" . urlencode($J8);
-        goto I1;
-        k2:
-        $KI .= $yk . "\46\x53\151\x67\x41\154\x67\x3d" . urlencode(XMLSecurityKey::RSA_SHA1) . "\x26\x53\x69\147\x6e\x61\164\165\x72\145\75" . urlencode($J8);
-        I1:
-        FP:
-        header("\x4c\157\143\x61\164\151\x6f\x6e\x3a\40" . $KI);
+        goto Hk;
+        IU:
+        $T9 .= $Mq . "\x26\123\151\x67\x41\154\x67\75" . urlencode(XMLSecurityKey::RSA_SHA256) . "\x26\123\151\x67\x6e\141\x74\x75\162\x65\x3d" . urlencode($yN);
+        goto Hk;
+        La:
+        $T9 .= $Mq . "\46\123\x69\147\x41\x6c\x67\x3d" . urlencode(XMLSecurityKey::RSA_SHA384) . "\46\x53\x69\147\x6e\141\x74\x75\162\x65\x3d" . urlencode($yN);
+        goto Hk;
+        m6:
+        $T9 .= $Mq . "\46\x53\151\x67\x41\154\147\75" . urlencode(XMLSecurityKey::RSA_SHA512) . "\46\x53\x69\147\x6e\x61\164\165\x72\x65\x3d" . urlencode($yN);
+        goto Hk;
+        vG:
+        $T9 .= $Mq . "\46\123\x69\x67\x41\x6c\147\75" . urlencode(XMLSecurityKey::RSA_SHA1) . "\46\x53\x69\x67\156\x61\x74\x75\x72\145\75" . urlencode($yN);
+        Hk:
+        cN:
+        header("\114\x6f\143\141\x74\151\x6f\x6e\x3a\x20" . $T9);
         die;
-        pF:
+        RU:
     }
 }
