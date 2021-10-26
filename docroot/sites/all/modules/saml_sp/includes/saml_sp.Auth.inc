@@ -1,10 +1,12 @@
 <?php
+
 use OneLogin\Saml2\Auth;
-use OneLogin\Saml2\Utils;
-use RobRichards\XMLSecLibs\XMLSecurityKey;
+use OneLogin\Saml2\AuthnRequest;
 
 class saml_sp_Auth extends Auth {
   public $auth_callback;
+
+  protected $AuthnRequest;
 
   /**
    * Set the auth callback for after the response is returned
@@ -14,37 +16,14 @@ class saml_sp_Auth extends Auth {
   }
 
   /**
-    * Initiates the SSO process.
-    *
-    * @param string $returnTo   The target URL the user should be returned to after login.
-    * @param array  $parameters Extra parameters to be added to the GET
-    */
-   public function login($returnTo = null, array $parameters = array(), $forceAuthn = false, $isPassive = false, $stay=false, $setNameIdPolicy = true) {
+   * {@inheritdoc}
+   */
+  public function login($returnTo = null, array $parameters = array(), $forceAuthn = FALSE, $isPassive = FALSE, $stay = FALSE, $setNameIdPolicy = TRUE, $nameIdValueReq = NULL) {
 
     $settings = $this->getSettings();
-
-    $authnRequest = new saml_sp_AuthnRequest($settings, $forceAuthn, $isPassive, $setNameIdPolicy);
-
-    $this->_lastRequest = $authnRequest->getXML();
-    $this->_lastRequestID = $authnRequest->getId();
-
-    $samlRequest = $authnRequest->getRequest();
-    $parameters['SAMLRequest'] = $samlRequest;
-
-    if (!empty($returnTo)) {
-        $parameters['RelayState'] = $returnTo;
-    } else {
-        $parameters['RelayState'] = Utils::getSelfRoutedURLNoQuery();
-    }
-
     $security = $settings->getSecurityData();
     if (variable_get('saml_sp__debug', FALSE)) {
       watchdog('saml_sp', '$security => <pre>' . print_r($security, TRUE) . '</pre>');
-    }
-    if (isset($security['authnRequestsSigned']) && $security['authnRequestsSigned']) {
-        $signature = $this->buildRequestSignature($samlRequest, $parameters['RelayState'], $security['signatureAlgorithm']);
-        $parameters['SigAlg'] = $security['signatureAlgorithm'];
-        $parameters['Signature'] = $signature;
     }
 
     // get this necessary information for this IdP
@@ -69,16 +48,35 @@ class saml_sp_Auth extends Auth {
       watchdog('saml_sp', 'saml_sp_Auth::login $idp => <pre>@idp</pre>', array('@idp' => print_r($idp, TRUE)), WATCHDOG_DEBUG);
     }
 
+    $redirect_page = parent::login($returnTo, $parameters, $forceAuthn, $isPassive, $stay, $setNameIdPolicy, $nameIdValueReq);
+
+    if (variable_get('saml_sp__debug', FALSE)) {
+      watchdog('saml_sp', 'samlp:AuthnRequest =><br/><pre>@request</pre>', array('@request' => $this->getLastRequestXML()), WATCHDOG_DEBUG);
+      if (function_exists('dpm')) {
+        dpm($this->getLastRequestXML(), 'samlp:AuthnRequest');
+      }
+      else {
+        drupal_set_message('samlp:AuthnRequest => ' . $this->getLastRequestXML());
+      }
+    }
 
     // record the outbound Id of the request
-    $id = $authnRequest->getId();
+    $id = $this->getLastRequestID();
     saml_sp__track_request($id, $idp, $this->auth_callback);
-    if (variable_get('saml_sp__debug', FALSE) && module_exists('devel')) {
-      return t('This is a debug page, <a href="!url">you can proceed by clicking this link.</a> (this might not work, because "/" chars are encoded differently when the link is made by Drupal as opposed to redirected, as it is when debugging is turned off)', array('!url' => url($this->getSSOurl(), array('query' => $parameters))));
-    }
     if (variable_get('saml_sp__debug', FALSE)) {
       watchdog('saml_sp', 'Using $parameters => <pre>@parameters</pre>', array('@parameters' => print_r($parameters, TRUE)), WATCHDOG_DEBUG);
+      return t('This is a debug page, <a href="!url">you can proceed by clicking this link.</a> (this might not work, because "/" chars are encoded differently when the link is made by Drupal as opposed to redirected, as it is when debugging is turned off)', array('!url' => url($redirect_page, array('query' => $parameters))));
     }
-    return $this->redirectTo($this->getSSOurl(), $parameters, $stay);
+
+    return $redirect_page;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function buildAuthnRequest($settings, $forceAuthn, $isPassive, $setNameIdPolicy, $nameIdValueReq = null)
+  {
+    $this->AuthnRequest =  new AuthnRequest($settings, $forceAuthn, $isPassive, $setNameIdPolicy, $nameIdValueReq);
+    return $this->AuthnRequest;
   }
 }

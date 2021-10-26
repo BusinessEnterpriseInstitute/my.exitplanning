@@ -146,6 +146,7 @@ function saml_sp_schema() {
  */
 function saml_sp_uninstall() {
   variable_del('saml_sp_drupal_login__idp');
+  variable_del('saml_sp__idp_selection');
   variable_del('saml_sp__cert_location');
   variable_del('saml_sp__key_location');
   variable_del('saml_sp__security');

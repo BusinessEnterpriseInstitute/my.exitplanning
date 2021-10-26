@@ -1,4 +1,4 @@
-ub php-salSAML Service Provider
+SAML Service Provider
 =====================
 
 This package provides two modules:
@@ -39,6 +39,12 @@ will throw deprecation warnings for mcrypt functions in PHP 7.1. If you are
 using PHP 7.1+ you can use the PHP-SAML 3.0.0-namespaceless branch from the
 Github repository. The 7.x-2.x version of the saml_sp module will not be
 updated to use the 3.0.0 branch using namespaces.
+
+After the php-saml library installed, it requires a xmlseclibs library on which Simple SAML toolkit for PHP library depends on, it should be installed to your libraries folder.
+
+'git clone https://github.com/robrichards/xmlseclibs.git'
+
+Clear the cache, your module is ready for configuration.
 
 SimpleSamlPHP Configuration
 ===========================

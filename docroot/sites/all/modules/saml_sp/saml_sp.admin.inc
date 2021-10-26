@@ -114,7 +114,7 @@ function saml_sp__configure_idp_form($form, &$form_state, $saml_idp = NULL) {
     '#description' => t('Login URL of the Identity Provider server.'),
     '#default_value' => $saml_idp->login_url,
     '#required' => TRUE,
-    '#max_length' => 255,
+    '#maxlength' => 255,
   );
 
   $form['idp']['idp_logout_url'] = array(
@@ -123,7 +123,7 @@ function saml_sp__configure_idp_form($form, &$form_state, $saml_idp = NULL) {
     '#description' => t('Logout URL of the Identity Provider server.'),
     '#default_value' => $saml_idp->logout_url,
     '#required' => TRUE,
-    '#max_length' => 255,
+    '#maxlength' => 255,
   );
   $form['idp']['idp_x509_certs'] = array(
     '#type' => 'fieldset',
@@ -172,7 +172,6 @@ function saml_sp__configure_idp_form($form, &$form_state, $saml_idp = NULL) {
         '#title' => $title,
         '#description' => t('Enter an application certificate provided by the IdP.'),
         '#default_value' => $encoded_cert,
-        '#max_length' => 1024,
       );
 
       $form['idp']['idp_x509_certs'][$count]['details'] = array(
@@ -194,7 +193,6 @@ function saml_sp__configure_idp_form($form, &$form_state, $saml_idp = NULL) {
     '#title' => t('x.509 Certificate @count', array('@count' => $count)),
     '#description' => t('Enter an application certificate provided by the IdP'),
     '#default_value' => '',
-    '#max_length' => 1024,
   );
 
   // get the list of supported contexts
@@ -517,6 +515,30 @@ function saml_sp__admin_config($form, &$form_state) {
     '#default_value' => variable_get('saml_sp__new_cert_location', ''),
     '#suffix' => saml_sp_get_cert_info(variable_get('saml_sp__new_cert_location', '')),
   );
+
+  if (module_exists('saml_sp_drupal_login')) {
+    $metadata_idp_machine_name = variable_get('saml_sp_drupal_login__idp', '');
+  }
+  else {
+    $idps = saml_sp__load_all_idps();
+    $options = array();
+
+    foreach ($idps as $idp_machine_name => $idp_data) {
+      $options[$idp_machine_name] = $idp_data->name;
+    }
+
+    $metadata_idp_machine_name = variable_get('saml_sp__idp_selection', '');
+
+    $form['saml_sp__idp_selection'] = array(
+      '#type' => 'select',
+      '#title' => t('IdP for Generating Metadata'),
+      '#description' => t('Please select an IdP to generate Federation Metadata for.'),
+      '#options' => $options,
+      '#empty_option' => t('Please select an IdP'),
+      '#default_value' => $metadata_idp_machine_name,
+    );
+  }
+
   $error = FALSE;
   try {
     $metadata = saml_sp__get_metadata(NULL, FALSE);
@@ -550,7 +572,7 @@ function saml_sp__admin_config($form, &$form_state) {
       '#description'    => t(
         'This metadata for @idp can also be accessed !link',
         array(
-          '@idp' => variable_get('saml_sp_drupal_login__idp', ''),
+          '@idp' => $metadata_idp_machine_name,
           '!link' => l(t('here'), saml_sp__metadata_url()),
         )),
       '#disabled'       => TRUE,

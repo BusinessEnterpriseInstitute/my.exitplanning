@@ -11,11 +11,8 @@
  * Uses the OneLogin PHP-SAML toolkit: https://github.com/onelogin/php-saml
  */
 
-// require PHP SAML 2.0 or greater
-define('PHP_SAML_LIBRARY_MIN_VERSION', '3.0.0');
-
-// Default name to identify this application to IDPs.
-define('DRUPAL_SAML_SP__APP_NAME_DEFAULT', 'drupal-saml-sp');
+// require PHP SAML 3.4.0 or greater
+define('PHP_SAML_LIBRARY_MIN_VERSION', '3.4.0');
 
 // Expect a response from the IDP within 2 minutes.
 define('SAML_SP_REQUEST_STORE_TIMEOUT', 120);
@@ -307,10 +304,10 @@ function saml_sp_libraries_info() {
   $libraries['php-saml'] = array(
     'name' => 'Simple SAML toolkit for PHP',
     'vendor url' => 'https://github.com/onelogin/php-saml',
-    'download url' => 'https://github.com/onelogin/php-saml/archive/master.zip',
+    'download url' => 'https://github.com/onelogin/php-saml/archive/3.4.1.zip',
     'version arguments' => array(
       'file'    => 'CHANGELOG',
-      'pattern' => '/v\.([0-9a-zA-Z\.-]+)/',
+      'pattern' => '/v\.?([0-9a-zA-Z\.-]+)/',
     ),
     'files' => array(
       'php' => array(
@@ -338,8 +335,9 @@ function saml_sp_libraries_info() {
     'vendor url' => 'https://github.com/robrichards/xmlseclibs',
     'download url' => 'https://github.com/robrichards/xmlseclibs/archive/master.zip',
     'version arguments' => array(
-      'file'    => 'CHANGELOG.txt',
-      'pattern' => '/[0-9?]{2}, [a-zA-Z?]{3} [0-9]{4}, (.*)/',
+      'file'    => 'xmlseclibs.php',
+      'pattern' => '/@version\s*(.*)/',
+      'lines' => 100,
     ),
     'files' => array(
       'php' => array(
@@ -383,7 +381,7 @@ function saml_sp_requirements($phase) {
     else {
       $requirements['php_saml_library'] = array(
         'title' => $t($library['name']),
-        'value' => $t('At least @a', array('@a' => 3)),
+        'value' => $t('At least @a', array('@a' => PHP_SAML_LIBRARY_MIN_VERSION)),
         'severity' => REQUIREMENT_ERROR,
         'description' => $t('You need to download a later version of the !library and replace the old version (%current_version) located in the %path directory on your server.', array('!library' => l($t('PHP SAML library'), $library['download url']), '%path' => $library['library path'], '%current_version' => $library['version'])),
       );
@@ -459,8 +457,15 @@ function saml_sp__get_settings($idp) {
     'binding' => 'urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect',
   );
 
+  $signing_certs = $idp->x509_certs;
+
+  if (empty($signing_certs)) {
+    $single_cert = !empty($idp->x509_cert) ? $idp->x509_cert : "";
+    $signing_certs = explode("\n", $single_cert);
+  }
+
   $settings['idp']['x509certMulti'] = array(
-    'signing' => $idp->x509_certs ?: explode("\n", $idp->x509_cert),
+    'signing' => $signing_certs,
     'encryption' => $idp->x509_certs,
   );
 
@@ -579,7 +584,13 @@ function saml_sp_authn_context_settings($setting) {
 function saml_sp__get_metadata($idp, $output_page = FALSE) {
   if (empty($idp)) {
     // no $idp was given, we will try to see if there is a default one set
-    $idp_selection = variable_get('saml_sp_drupal_login__idp', '');
+    if (module_exists('saml_sp_drupal_login')) {
+      $idp_selection = variable_get('saml_sp_drupal_login__idp', '');
+    }
+    else {
+      $idp_selection = variable_get('saml_sp__idp_selection', '');
+    }
+
     $idp = saml_sp_idp_load($idp_selection);
     if (empty($idp)) {
       // there is also no default $idp set
@@ -643,11 +654,15 @@ function saml_sp_start($idp, $callback) {
 
   $settings = saml_sp__get_settings($idp);
   $auth = new saml_sp_Auth($settings);
+  $auth->setAuthCallback($callback);
+  $redirect = $auth->login($return_to, array(), FALSE, FALSE, TRUE); // make sure we stay
+
   if (variable_get('saml_sp__debug', FALSE)) {
     watchdog('saml_sp', '$auth => <pre>@auth</pre>', array('@auth' => print_r($auth, TRUE)), WATCHDOG_DEBUG);
+    return $redirect;
   }
-  $auth->setAuthCallback($callback);
-  return $auth->login($return_to);
+  drupal_goto($redirect);
+
 }
 
 /**
@@ -661,15 +676,14 @@ function saml_sp_start($idp, $callback) {
  * The function to invoke on completion of a SAML authentication request.
  */
 function saml_sp__track_request($id, $idp, $callback) {
-  if (variable_get('saml_sp__debug', FALSE)) {
-    watchdog('saml_sp', __function__ . ' - $idp => <pre>@idp</pre>', array('@idp' => print_r($idp, TRUE)), WATCHDOG_DEBUG);
-  }
   $data = array(
     'id' => $id,
     'idp' => $idp->machine_name ?: variable_get('saml_sp_drupal_login__idp', ''),
     'callback' => $callback,
   );
-
+  if (variable_get('saml_sp__debug', FALSE)) {
+    watchdog('saml_sp', __function__ . ' - $data => <pre>@data</pre>', array('@data' => print_r($data, TRUE)), WATCHDOG_DEBUG);
+  }
   saml_sp_request_store($id, $data);
 }
 
@@ -724,16 +738,21 @@ function _saml_sp__default_idp() {
 function _saml_sp__prepare() {
   $library = libraries_load('php-saml');
   if ($library['installed'] === FALSE && user_access('configure saml sp')) {
-    drupal_set_message(t('The %library library hasn\'t been installed. Please download it from <a href="!library_url" target="_blank">%library_url</a> and place it in %library_path',
-      array(
-        '%library' => $library['name'],
-        '!library_url' => $library['vendor url'],
-        '%library_url' => $library['vendor url'],
-        '%library_path' => $library['library path'],
-      )),
-      'warning',
-      FALSE
-    );
+    if (isset($library['error message']) && !empty($library['error message'])) {
+      drupal_set_message($library['error message'], 'error', FALSE);
+    }
+    else {
+      drupal_set_message(t('The %library library hasn\'t been installed. Please download it from <a href="!library_url" target="_blank">%library_url</a> and place it in %library_path',
+        array(
+          '%library' => $library['name'],
+          '!library_url' => $library['vendor url'],
+          '%library_url' => $library['vendor url'],
+          '%library_path' => $library['library path'],
+        )),
+        'warning',
+        FALSE
+      );
+    }
   }
   return $library;
 }
