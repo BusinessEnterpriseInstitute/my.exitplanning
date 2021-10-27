@@ -577,8 +577,8 @@ function _restrict_by_ip_validate_ip($ip_address) {
       }
     }
     else {
-      $ret['messages'][] .= 'IP Address in Incorrect Format. Check IP Address ' . $ipaddress;
-      $ret['result'] = FALSE;
+      $ret['messages'][] = "IP Address in Incorrect Format. Check IP Address " . $ipaddress;
+      $ret = array('result' => TRUE, 'messages' => array());
     }
 
     // Check the validity of the network address in the given CIDR block,
