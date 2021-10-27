@@ -546,7 +546,7 @@ function _restrict_by_ip_get_ip() {
  * section is valid.
  */
 function _restrict_by_ip_validate_ip($ip_address) {
-  $ret = array('result' => TRUE, 'messages' => '');
+  $ret = array('result' => TRUE, 'messages' => array());
   $ipaddresses = explode(";", $ip_address);
 
   // Check each ip address individually
@@ -572,13 +572,13 @@ function _restrict_by_ip_validate_ip($ip_address) {
         }
       }
       else {
-        $ret['messages'][] .= 'IP Address Incorrect Number of Octets. Check IP Address ' . $ipaddress;
+        $ret['messages'][] = 'IP Address Incorrect Number of Octets. Check IP Address ' . $ipaddress;
         $ret['result'] = FALSE;
       }
     }
     else {
-      $ret['messages'][] = "IP Address in Incorrect Format. Check IP Address " . $ipaddress;
-      $ret = array('result' => TRUE, 'messages' => array());
+      $ret['messages'][] .= "IP Address in Incorrect Format. Check IP Address " . $ipaddress;
+      $ret['result'] = FALSE;
     }
 
     // Check the validity of the network address in the given CIDR block,
