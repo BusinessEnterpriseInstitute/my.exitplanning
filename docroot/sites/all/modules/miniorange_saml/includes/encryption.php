@@ -3,24 +3,23 @@
 
 class AESEncryption
 {
-    public static function encrypt_data($iu, $Rh)
+    public static function encrypt_data($uq, $hG)
     {
-        $Rh = openssl_digest($Rh, "\163\150\x61\62\x35\x36");
-        $o6 = "\101\x45\123\55\x31\x32\70\x2d\103\x42\x43";
-        $ii = openssl_cipher_iv_length($o6);
-        $sN = openssl_random_pseudo_bytes($ii);
-        $A0 = openssl_encrypt($iu, $o6, $Rh, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $sN);
-        return base64_encode($sN . $A0);
+        $hG = openssl_digest($hG, "\163\150\141\x32\65\66");
+        $R2 = "\x41\105\x53\55\61\62\x38\x2d\x43\x42\103";
+        $Je = openssl_cipher_iv_length($R2);
+        $pI = openssl_random_pseudo_bytes($Je);
+        $Ln = openssl_encrypt($uq, $R2, $hG, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $pI);
+        return base64_encode($pI . $Ln);
     }
-    public static function decrypt_data($iu, $Rh, $o6 = "\x41\105\123\55\61\62\70\55\103\102\x43")
+    public static function decrypt_data($uq, $hG, $R2 = "\101\x45\x53\55\61\x32\x38\55\103\102\x43")
     {
-        $T_ = base64_decode($iu);
-        $Rh = openssl_digest($Rh, "\163\150\x61\62\65\x36");
-        $ii = openssl_cipher_iv_length($o6);
-        $sN = substr($T_, 0, $ii);
-        $iu = substr($T_, $ii);
-        $H3 = openssl_decrypt($iu, $o6, $Rh, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $sN);
-        return $H3;
+        $dH = base64_decode($uq);
+        $hG = openssl_digest($hG, "\163\x68\x61\62\x35\x36");
+        $Je = openssl_cipher_iv_length($R2);
+        $pI = substr($dH, 0, $Je);
+        $uq = substr($dH, $Je);
+        $cO = openssl_decrypt($uq, $R2, $hG, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $pI);
+        return $cO;
     }
 }
-?>
