@@ -599,24 +599,16 @@ function _restrict_by_ip_validate_ip($ip_address) {
  * _restrict_by_ip_cidrcheck('192.168.10.100','192.168.10.0/24'); returns 1
  * _restrict_by_ip_cidrcheck('192.168.10.100','192.168.12.0/24'); returns 0
  */
-function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
-  // Seperate ip address and cidr mask
-  $netmask = explode("/", $ipslashcidr);
-  // Get valid network as long
-  $ip_net = ip2long($netmask[0]);
-  // Get valid network mask as long
-  if ((ip2long($ip_net) & ~((1 << (32 - $netmask)) - 1) ))
-  {
-    return true;
-  }
-  // Get ip address to check as long
-  $ip_ip = ip2long($iptocheck);
-  // Mask ip address to check to get subnet
-  $ip_ip_net = $ip_ip & $ip_mask;
-  // Only returns 1 if the valid network
-  //and the subnet of the ip address
-  //to check are the same
-  return ($ip_ip_net == $ip_net);
+function _restrict_by_ip_cidrcheck($IP, $CIDR) {
+  list ($net, $mask) = explode ('/', $CIDR);
+
+  $ip_net = ip2long ($net);
+  $ip_mask = ~((1 << (32 - $mask)) - 1);
+
+  $ip_ip = ip2long ($IP);
+
+  return (($ip_ip & $ip_mask) == ($ip_net & $ip_mask));
+
 }
 
 /**
