@@ -606,7 +606,7 @@ function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
   $ip_net = ip2long($netmask[0]);
   // Get valid network mask as long
   if (isset($netmask)) {
-    $ip_mask = ~((1 << (32 - $netmask[1])) - 1);
+    $ip_mask = ~((1 << (32 - $netmask[1])) + 1);
   }
   // Get ip address to check as long
   $ip_ip = ip2long($iptocheck);
