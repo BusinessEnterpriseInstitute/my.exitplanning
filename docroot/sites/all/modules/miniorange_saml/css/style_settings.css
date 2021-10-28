@@ -617,17 +617,6 @@ p.mo_saml_pricing-rate {
     border-radius: 4px;
 }
 
-.mo_saml_license_expiry
-{
-  display: block;
-  margin-top: 10px;
-  text-align: center;
-  font-size: 15px;
-  color: #a51b00;/*rgba(128, 0, 0, 0.80);*/
-  background-color: rgba(255, 0, 0, 0.15);
-  padding: 5px;
-}
-
 
 /*css for backdoor url customization*/
 #miniorange_saml_backdoor_table div{
