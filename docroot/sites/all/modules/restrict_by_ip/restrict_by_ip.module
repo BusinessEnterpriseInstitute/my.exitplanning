@@ -585,7 +585,7 @@ function _restrict_by_ip_validate_ip($ip_address) {
     // by ensuring that the network address part is valid within the
     // CIDR block itself. If it's not, the notation is invalid.
     if ($ret['result'] && !_restrict_by_ip_cidrcheck($cidr[0], $ipaddress)) {
-      $ret['messages'][] = "The network address in the '. $ipaddress . ' block is not valid.";
+      $ret['messages'][] = 'The network address in the "'. $ipaddress . '" block is not valid.';
       $ret['result'] = FALSE;
     }
 
