@@ -5,9 +5,9 @@ core = 7.x
 configure = "admin/config/people/restrict_by_ip"
 files[] = restrict_by_ip.test
 
-; Information added by Drupal.org packaging script on 2015-07-12
-version = "7.x-3.1"
+; Information added by Drupal.org packaging script on 2017-10-05
+version = "7.x-3.1+3-dev"
 core = "7.x"
 project = "restrict_by_ip"
-datestamp = "1436699642"
+datestamp = "1507247647"
 

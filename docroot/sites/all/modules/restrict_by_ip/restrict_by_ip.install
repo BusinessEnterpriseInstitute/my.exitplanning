@@ -9,7 +9,8 @@ function restrict_by_ip_schema() {
     'fields' => array(
       'uid' => array(
         'type' => 'int',
-        'unsigned' => TRUE
+        'unsigned' => TRUE,
+        'not null' => TRUE,
       ),
       'restrict_by_ip_address' => array(
         'type'  => 'varchar',
