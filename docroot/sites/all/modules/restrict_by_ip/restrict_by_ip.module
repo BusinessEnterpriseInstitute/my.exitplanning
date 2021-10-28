@@ -605,7 +605,10 @@ function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
   // Get valid network as long
   $ip_net = ip2long($netmask[0]);
   // Get valid network mask as long
-  if (isset($netmask)) $ip_mask = ~((1 << (32 - $netmask[1])) - 1);
+  if ((ip2long($ip_net) & ~((1 << (32 - $netmask)) - 1) ))
+  {
+    return true;
+  }
   // Get ip address to check as long
   $ip_ip = ip2long($iptocheck);
   // Mask ip address to check to get subnet
