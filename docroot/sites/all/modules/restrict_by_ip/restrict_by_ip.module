@@ -644,7 +644,7 @@ function theme_restrict_by_ip_login_list() {
 
   // Handle user one as a special case
   $row = db_query("SELECT u.name, rbi.restrict_by_ip_address as restriction FROM {users} u LEFT JOIN {restrict_by_ip} rbi ON rbi.uid = u.uid WHERE u.uid = 1 ")->fetchObject();
-  $rows[] = array($row->name . ' (DRUPAL USER 1)', isset($row->restriction) ? $row->restriction : '<strong><span style="color: red">No Restriction</span></strong>', l('edit', 'admin/config/people/restrict_by_ip/login/edit/1', array('query' => array('destination' => 'admin/config/people/restrict_by_ip/login'))));
+  $rows[] = array($row->name . ' (DRUPAL USER 1)', $row->restriction ?? '<strong><span style="color: red">No Restriction</span></strong>', l('edit', 'admin/config/people/restrict_by_ip/login/edit/1', array('query' => array('destination' => 'admin/config/people/restrict_by_ip/login'))));
 
   // Grab all other restrictions and list beneath
   $result = db_query("SELECT u.name, rbi.uid, rbi.restrict_by_ip_address as restriction FROM {restrict_by_ip} rbi INNER JOIN {users} u ON rbi.uid = u.uid WHERE u.uid != 1 ORDER BY rbi.uid ASC");
