@@ -552,7 +552,7 @@ function _restrict_by_ip_get_ip() {
  * section is valid.
  */
 function _restrict_by_ip_validate_ip($ip_address) {
-  $ret = array('result' => TRUE, 'messages' => '');
+  $ret = array('result' => TRUE, 'messages' => array());
   $ipaddresses = explode(";", $ip_address);
 
   // Check each ip address individually
@@ -567,23 +567,23 @@ function _restrict_by_ip_validate_ip($ip_address) {
         // Check each octet is valid - numeric and 0 < value < 255
         for ($i=0; $i<count($ipaddr); $i++) {
           if ((!is_numeric($ipaddr[$i])) || ($ipaddr[$i] < 0) || ($ipaddr[$i] > 255)) {
-            $ret['messages'][] .= 'Illegal value for an IP Address. Each IP Address must be valid.  Check IP Address ' . $ipaddress;
+            $ret['messages'][] = "Illegal value for an IP Address. Each IP Address must be valid.  Check IP Address " . $ipaddress;
             $ret['result'] = FALSE;
           }
         }
         // Check cidr mask value - numeric and 0 < value < 33
         if((!is_numeric($cidr[1])) || ($cidr[1]<1) || ($cidr[1]>32)) {
-          $ret['messages'][] .= 'Illegal value for CIDR. Please correct CIDR with value of ' . $ipaddress;
+          $ret['messages'][] = "Illegal value for CIDR. Please correct CIDR with value of " . $ipaddress;
           $ret['result'] = FALSE;
         }
       }
       else {
-        $ret['messages'][] .= 'IP Address Incorrect Number of Octets. Check IP Address ' . $ipaddress;
+        $ret['messages'][] = "IP Address Incorrect Number of Octets. Check IP Address " . $ipaddress;
         $ret['result'] = FALSE;
       }
     }
     else {
-      $ret['messages'][] .= 'IP Address in Incorrect Format. Check IP Address ' . $ipaddress;
+      $ret['messages'][] = "IP Address in Incorrect Format. Check IP Address " . $ipaddress;
       $ret['result'] = FALSE;
     }
 
@@ -591,7 +591,7 @@ function _restrict_by_ip_validate_ip($ip_address) {
     // by ensuring that the network address part is valid within the
     // CIDR block itself. If it's not, the notation is invalid.
     if ($ret['result'] && !_restrict_by_ip_cidrcheck($cidr[0], $ipaddress)) {
-      $ret['messages'][] .= 'The network address in the "'. $ipaddress . '" block is not valid.';
+      $ret['messages'][] = "The network address in the ". $ipaddress . " block is not valid.";
       $ret['result'] = FALSE;
     }
 
