@@ -620,7 +620,25 @@ function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
   //to check are the same
   return ($ip_ip_net == $ip_net);
 }
+function _restrict_by_ip_cidr_range( $cidr, $chkip=null )
+{
+  // Assign IP / mask
+  list($ip,$mask) = explode("/",$cidr);
 
+  // Sanitize IP
+  $ip1 = preg_replace( '_(\d+\.\d+\.\d+\.\d+).*$_', '$1', "$ip.0.0.0" );
+
+  // Calculate range
+  $ip2 = long2ip( ip2long( $ip1 ) - 1 + ( 1 << ( 32 - $mask) ) );
+
+  // are we cidr range cheking?
+  if ( $chkip != null && ! filter_var( $chkip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false )
+  {
+    return ip2long( $ip1 ) <= ip2long( $chkip ) && ip2long( $ip2 ) >= ip2long( $chkip ) ? true : false;
+  } else {
+    return "$ip1 - $ip2";
+  }
+}
 /**
  * Certain characters will be automatically converted to underscores by PHP when
  * included in a form name. Example <input name="a.b" /> becomes $_POST["a_b"].
