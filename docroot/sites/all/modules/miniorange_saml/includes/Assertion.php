@@ -1,7 +1,7 @@
 <?php
 
 
-include_once "\125\x74\151\154\151\164\151\145\x73\x2e\x70\x68\x70";
+include_once "\x55\x74\151\x6c\151\x74\x69\x65\x73\x2e\x70\150\160";
 class SAML2_Assertion
 {
     private $id;
@@ -29,616 +29,616 @@ class SAML2_Assertion
     private $requiredEncAttributes;
     private $SubjectConfirmation;
     protected $wasSignedAtConstruction = FALSE;
-    public function __construct(DOMElement $L_ = NULL)
+    public function __construct(DOMElement $p3 = NULL)
     {
         $this->id = Utilities::generateId();
         $this->issueInstant = Utilities::generateTimestamp();
         $this->issuer = '';
         $this->authnInstant = Utilities::generateTimestamp();
         $this->attributes = array();
-        $this->nameFormat = "\x75\162\x6e\72\157\x61\163\151\x73\72\156\x61\155\x65\163\x3a\164\x63\x3a\123\101\115\114\x3a\x31\56\61\x3a\156\141\155\145\151\x64\55\x66\157\162\x6d\141\164\x3a\165\x6e\163\x70\x65\143\x69\146\151\x65\144";
+        $this->nameFormat = "\x75\162\156\x3a\157\x61\163\x69\163\72\x6e\141\155\x65\x73\72\164\143\72\x53\x41\x4d\114\x3a\61\56\61\x3a\156\141\155\145\x69\144\x2d\x66\157\x72\x6d\x61\164\72\165\156\163\160\x65\x63\151\x66\x69\145\x64";
         $this->certificates = array();
         $this->AuthenticatingAuthority = array();
         $this->SubjectConfirmation = array();
-        if (!($L_ === NULL)) {
-            goto mY;
+        if (!($p3 === NULL)) {
+            goto X9;
         }
         return;
-        mY:
-        if (!($L_->localName === "\105\156\143\x72\171\160\164\145\x64\x41\163\163\x65\162\x74\x69\157\156")) {
-            goto x6;
+        X9:
+        if (!($p3->localName === "\105\x6e\143\x72\x79\x70\164\145\144\x41\x73\x73\145\162\164\x69\157\156")) {
+            goto rx;
         }
-        $HC = Utilities::xpQuery($L_, "\56\57\170\145\x6e\143\72\105\156\x63\162\171\x70\164\145\x64\104\141\x74\141");
-        $je = Utilities::xpQuery($L_, "\x2e\57\x78\x65\156\x63\72\x45\x6e\143\162\x79\160\x74\x65\x64\x44\141\x74\x61\x2f\x64\x73\x3a\113\145\171\111\156\x66\157\57\170\145\x6e\x63\x3a\x45\x6e\143\x72\171\160\164\145\144\113\145\x79");
-        $TI = '';
-        if (empty($je)) {
-            goto pl;
+        $kE = Utilities::xpQuery($p3, "\56\x2f\170\x65\156\143\x3a\105\156\x63\x72\x79\160\x74\x65\x64\104\141\164\141");
+        $dk = Utilities::xpQuery($p3, "\x2e\x2f\x78\x65\x6e\x63\x3a\x45\x6e\x63\x72\x79\x70\x74\145\x64\x44\x61\x74\x61\57\144\163\72\113\x65\x79\111\156\146\157\x2f\x78\x65\156\x63\x3a\105\156\x63\162\x79\x70\x74\145\144\113\x65\x79");
+        $Ei = '';
+        if (empty($dk)) {
+            goto iB;
         }
-        $TI = $je[0]->firstChild->getAttribute("\x41\154\x67\157\162\x69\x74\x68\155");
-        goto I_;
-        pl:
-        $je = Utilities::xpQuery($L_, "\56\57\x78\x65\x6e\x63\72\105\156\143\x72\171\x70\x74\x65\x64\x4b\x65\x79\57\x78\145\156\x63\72\x45\x6e\143\162\171\160\164\x69\x6f\156\115\x65\164\x68\157\144");
-        $TI = $je[0]->getAttribute("\101\154\x67\x6f\x72\x69\x74\x68\x6d");
-        I_:
-        $vy = Utilities::getEncryptionAlgorithm($TI);
-        if (count($HC) === 0) {
-            goto cs;
+        $Ei = $dk[0]->firstChild->getAttribute("\101\154\x67\x6f\162\x69\x74\150\155");
+        goto sf;
+        iB:
+        $dk = Utilities::xpQuery($p3, "\x2e\x2f\x78\145\156\143\72\x45\x6e\143\162\x79\160\164\145\x64\x4b\145\171\57\170\145\x6e\x63\72\105\x6e\x63\162\171\160\x74\x69\x6f\x6e\x4d\145\x74\150\x6f\x64");
+        $Ei = $dk[0]->getAttribute("\101\x6c\x67\x6f\162\x69\164\x68\155");
+        sf:
+        $Qs = Utilities::getEncryptionAlgorithm($Ei);
+        if (count($kE) === 0) {
+            goto xl;
         }
-        if (count($HC) > 1) {
-            goto Eq;
+        if (count($kE) > 1) {
+            goto O7;
         }
-        goto Ke;
-        cs:
-        throw new Exception("\x4d\151\163\163\151\x6e\147\40\145\x6e\x63\x72\x79\x70\x74\x65\144\x20\144\x61\x74\x61\40\x69\x6e\40\x3c\x73\141\155\154\72\105\x6e\x63\162\171\x70\x74\x65\144\x41\163\x73\x65\x72\164\151\157\x6e\x3e\x2e");
-        goto Ke;
-        Eq:
-        throw new Exception("\115\157\x72\145\40\x74\x68\x61\156\40\157\x6e\145\x20\145\x6e\x63\162\x79\x70\164\x65\x64\40\x64\141\164\141\x20\x65\x6c\x65\x6d\x65\x6e\164\x20\151\156\40\74\x73\x61\155\154\72\105\156\x63\162\x79\160\x74\145\144\101\163\163\145\x72\164\x69\157\156\76\x2e");
-        Ke:
-        $un = '';
-        $un = variable_get("\155\x69\156\151\157\x72\x61\x6e\x67\145\x5f\x73\141\155\x6c\137\x70\x72\151\166\x61\164\145\137\x63\145\x72\x74\151\146\x69\x63\x61\x74\x65");
-        $l9 = new XMLSecurityKey($vy, array("\164\171\x70\145" => "\160\x72\x69\166\141\164\x65"));
-        $LC = drupal_get_path("\x6d\157\x64\x75\x6c\145", "\x6d\x69\156\x69\157\x72\x61\x6e\x67\x65\137\x73\x61\x6d\154");
-        if ($un != '') {
-            goto VY;
+        goto dB;
+        xl:
+        throw new Exception("\x4d\x69\163\x73\x69\x6e\147\40\145\x6e\143\x72\x79\x70\164\145\144\40\x64\141\x74\141\x20\x69\156\x20\74\163\141\155\154\x3a\x45\x6e\143\x72\x79\x70\164\145\144\101\163\x73\x65\162\164\151\x6f\x6e\x3e\56");
+        goto dB;
+        O7:
+        throw new Exception("\115\x6f\x72\x65\40\x74\150\141\x6e\x20\x6f\x6e\145\x20\145\x6e\143\162\x79\160\x74\145\144\40\144\141\x74\x61\x20\145\154\145\155\x65\x6e\164\x20\x69\156\40\74\x73\x61\x6d\x6c\72\x45\156\x63\x72\171\160\164\x65\x64\x41\163\163\145\x72\164\151\157\156\76\x2e");
+        dB:
+        $vC = '';
+        $vC = variable_get("\x6d\151\156\151\157\x72\x61\x6e\x67\145\137\163\x61\x6d\154\x5f\160\x72\x69\x76\141\x74\145\x5f\143\x65\x72\x74\151\146\x69\x63\141\x74\x65");
+        $im = new XMLSecurityKey($Qs, array("\164\171\x70\x65" => "\x70\162\x69\x76\141\x74\x65"));
+        $Hm = drupal_get_path("\155\157\144\165\x6c\x65", "\x6d\151\x6e\x69\157\x72\x61\x6e\x67\x65\x5f\x73\141\155\154");
+        if ($vC != '') {
+            goto DY;
         }
-        $Rq = $LC . "\57\162\x65\163\x6f\x75\x72\143\x65\163\57\163\160\55\x6b\x65\171\56\x6b\x65\x79";
-        goto hk;
-        VY:
-        $Rq = $LC . "\57\162\145\x73\157\x75\162\143\x65\x73\57\x43\165\163\x74\157\155\137\120\x72\151\x76\141\x74\145\137\103\x65\x72\164\x69\x66\x69\x63\141\x74\x65\x2e\x6b\145\x79";
-        hk:
-        $l9->loadKey($Rq, TRUE);
-        $jS = new XMLSecurityKey($vy, array("\x74\171\160\145" => "\x70\162\151\166\141\x74\x65"));
-        $xp = $LC . "\x2f\162\x65\x73\x6f\165\162\x63\x65\x73\57\x6d\x69\x6e\151\157\x72\x61\156\x67\x65\137\x73\x70\x5f\x70\162\x69\166\x5f\153\x65\x79\56\x6b\x65\x79";
-        $jS->loadKey($xp, TRUE);
-        $S1 = array();
-        $L_ = Utilities::decryptElement($HC[0], $l9, $S1, $jS);
-        x6:
-        if ($L_->hasAttribute("\111\x44")) {
-            goto Bg;
+        $DM = $Hm . "\57\162\x65\163\157\x75\162\x63\x65\163\x2f\x73\x70\55\153\145\x79\56\153\x65\x79";
+        goto EQ;
+        DY:
+        $DM = $Hm . "\x2f\x72\x65\163\157\165\x72\x63\x65\163\57\103\x75\x73\x74\x6f\155\x5f\120\x72\151\x76\141\164\145\137\x43\x65\x72\x74\x69\x66\x69\143\x61\164\145\x2e\153\x65\x79";
+        EQ:
+        $im->loadKey($DM, TRUE);
+        $gt = new XMLSecurityKey($Qs, array("\164\171\160\145" => "\x70\162\151\x76\141\x74\x65"));
+        $DB = $Hm . "\x2f\162\x65\x73\x6f\165\162\143\145\x73\57\x6d\151\x6e\x69\157\x72\141\156\x67\145\x5f\163\x70\137\160\162\151\166\137\x6b\145\171\x2e\x6b\145\171";
+        $gt->loadKey($DB, TRUE);
+        $Fp = array();
+        $p3 = Utilities::decryptElement($kE[0], $im, $Fp, $gt);
+        rx:
+        if ($p3->hasAttribute("\x49\x44")) {
+            goto NA;
         }
-        throw new Exception("\x4d\x69\x73\x73\151\156\147\x20\111\x44\x20\141\x74\164\162\x69\x62\x75\x74\145\40\157\156\40\123\x41\115\x4c\40\x61\163\x73\145\x72\x74\151\157\156\56");
-        Bg:
-        $this->id = $L_->getAttribute("\111\104");
-        if (!($L_->getAttribute("\126\145\x72\163\x69\157\x6e") !== "\62\56\60")) {
-            goto kE;
+        throw new Exception("\115\x69\x73\163\x69\x6e\x67\x20\111\104\x20\141\164\x74\x72\x69\142\165\164\145\x20\x6f\156\40\x53\x41\x4d\114\x20\141\163\x73\x65\x72\164\x69\x6f\x6e\56");
+        NA:
+        $this->id = $p3->getAttribute("\111\x44");
+        if (!($p3->getAttribute("\126\x65\x72\x73\x69\157\x6e") !== "\x32\56\x30")) {
+            goto G9;
         }
-        throw new Exception("\x55\156\x73\165\x70\160\x6f\x72\x74\145\x64\40\166\145\x72\163\151\x6f\156\72\40" . $L_->getAttribute("\x56\x65\162\163\x69\157\x6e"));
-        kE:
-        $this->issueInstant = Utilities::xsDateTimeToTimestamp($L_->getAttribute("\111\x73\x73\x75\x65\x49\x6e\163\164\x61\156\x74"));
-        $Pz = Utilities::xpQuery($L_, "\56\57\163\141\x6d\x6c\137\x61\163\x73\145\162\x74\x69\x6f\x6e\72\111\163\163\x75\x65\162");
-        if (!empty($Pz)) {
-            goto Sj;
+        throw new Exception("\125\x6e\163\165\160\160\x6f\162\164\x65\x64\x20\x76\145\x72\163\151\157\156\72\x20" . $p3->getAttribute("\126\x65\x72\163\x69\x6f\x6e"));
+        G9:
+        $this->issueInstant = Utilities::xsDateTimeToTimestamp($p3->getAttribute("\x49\163\x73\165\x65\111\156\x73\x74\141\156\x74"));
+        $JS = Utilities::xpQuery($p3, "\56\57\163\141\155\x6c\137\x61\163\163\145\x72\164\151\157\x6e\72\111\163\x73\165\145\162");
+        if (!empty($JS)) {
+            goto n9;
         }
-        throw new Exception("\115\x69\163\163\151\156\147\x20\74\x73\141\x6d\x6c\72\111\163\163\x75\145\x72\76\40\x69\156\x20\x61\163\163\145\162\164\x69\157\156\x2e");
-        Sj:
-        $this->issuer = trim($Pz[0]->textContent);
-        $this->parseConditions($L_);
-        $this->parseAuthnStatement($L_);
-        $this->parseAttributes($L_);
-        $this->parseEncryptedAttributes($L_);
-        $this->parseSignature($L_);
-        $this->parseSubject($L_);
+        throw new Exception("\x4d\x69\163\x73\151\x6e\147\x20\74\163\x61\x6d\x6c\72\111\x73\x73\165\x65\162\x3e\x20\x69\156\40\x61\x73\x73\145\162\164\151\x6f\x6e\x2e");
+        n9:
+        $this->issuer = trim($JS[0]->textContent);
+        $this->parseConditions($p3);
+        $this->parseAuthnStatement($p3);
+        $this->parseAttributes($p3);
+        $this->parseEncryptedAttributes($p3);
+        $this->parseSignature($p3);
+        $this->parseSubject($p3);
     }
-    private function parseSubject(DOMElement $L_)
+    private function parseSubject(DOMElement $p3)
     {
-        $mO = Utilities::xpQuery($L_, "\x2e\x2f\163\x61\x6d\x6c\x5f\x61\x73\x73\145\162\x74\x69\x6f\156\x3a\x53\x75\x62\x6a\145\143\x74");
-        if (empty($mO)) {
-            goto vT;
+        $gO = Utilities::xpQuery($p3, "\56\x2f\163\141\155\154\137\141\x73\x73\145\162\164\151\157\156\x3a\123\x75\142\152\x65\143\x74");
+        if (empty($gO)) {
+            goto dy;
         }
-        if (count($mO) > 1) {
-            goto pJ;
+        if (count($gO) > 1) {
+            goto Yu;
         }
-        goto Z7;
-        vT:
+        goto wK;
+        dy:
         return;
-        goto Z7;
-        pJ:
-        throw new Exception("\x4d\157\162\145\40\164\x68\141\x6e\40\x6f\x6e\x65\40\74\163\141\155\154\72\x53\x75\142\x6a\145\143\164\x3e\x20\151\156\x20\74\x73\141\155\x6c\x3a\x41\x73\163\x65\162\164\151\157\156\76\x2e");
-        Z7:
-        $mO = $mO[0];
-        $PV = Utilities::xpQuery($mO, "\x2e\x2f\x73\x61\x6d\154\x5f\141\163\163\145\x72\x74\x69\x6f\156\72\116\141\155\x65\x49\104\x20\174\40\56\57\x73\x61\x6d\x6c\137\141\163\163\x65\x72\x74\151\157\x6e\x3a\105\156\143\x72\x79\160\x74\145\144\x49\104\57\x78\145\x6e\x63\72\105\x6e\x63\162\x79\160\x74\x65\x64\104\141\x74\141");
-        if (empty($PV)) {
-            goto xn;
+        goto wK;
+        Yu:
+        throw new Exception("\x4d\x6f\162\x65\x20\x74\x68\x61\156\x20\157\156\145\x20\74\163\x61\155\x6c\72\x53\165\142\x6a\x65\143\x74\76\40\151\156\40\74\163\x61\155\154\x3a\101\x73\163\x65\162\x74\x69\157\x6e\76\x2e");
+        wK:
+        $gO = $gO[0];
+        $rq = Utilities::xpQuery($gO, "\x2e\x2f\163\x61\x6d\154\137\x61\x73\163\x65\x72\164\x69\157\156\x3a\x4e\x61\x6d\145\111\104\40\174\40\x2e\x2f\163\x61\x6d\x6c\137\x61\x73\x73\x65\x72\x74\151\157\x6e\72\x45\156\143\162\x79\x70\x74\145\x64\x49\104\x2f\x78\145\x6e\143\x3a\105\156\143\162\x79\x70\164\x65\144\x44\141\x74\x61");
+        if (empty($rq)) {
+            goto rs;
         }
-        if (count($PV) > 1) {
-            goto C0;
+        if (count($rq) > 1) {
+            goto Y5;
         }
-        goto sF;
-        xn:
-        throw new Exception("\115\x69\x73\x73\x69\x6e\x67\x20\x3c\x73\x61\x6d\x6c\72\x4e\x61\155\x65\x49\x44\x3e\x20\157\162\40\x3c\163\x61\x6d\154\72\105\156\x63\162\171\x70\x74\x65\x64\x49\x44\x3e\x20\x69\x6e\40\74\x73\141\155\x6c\72\x53\165\142\152\x65\x63\x74\x3e\x2e");
-        goto sF;
-        C0:
-        throw new Exception("\115\x6f\162\145\40\164\150\x61\x6e\40\157\156\x65\40\x3c\163\141\x6d\154\x3a\116\141\x6d\x65\111\104\x3e\x20\157\x72\40\74\x73\141\155\154\x3a\105\156\143\x72\171\x70\164\145\x64\x44\x3e\40\151\156\x20\74\163\141\155\154\x3a\123\x75\x62\x6a\145\x63\164\76\56");
-        sF:
-        $PV = $PV[0];
-        if ($PV->localName === "\105\156\x63\x72\x79\160\x74\x65\x64\104\x61\164\141") {
-            goto OR1;
+        goto H9;
+        rs:
+        throw new Exception("\115\x69\163\x73\x69\156\147\x20\74\x73\141\155\154\72\116\x61\155\x65\111\x44\76\x20\157\x72\40\x3c\163\141\x6d\x6c\x3a\105\156\143\162\x79\160\x74\145\x64\111\x44\x3e\x20\151\x6e\x20\x3c\163\x61\x6d\154\72\123\x75\142\152\x65\143\164\x3e\x2e");
+        goto H9;
+        Y5:
+        throw new Exception("\x4d\x6f\x72\145\x20\x74\x68\x61\156\40\157\x6e\x65\40\x3c\163\141\x6d\154\72\x4e\x61\155\145\x49\104\x3e\x20\x6f\162\40\74\163\141\x6d\154\72\x45\x6e\143\162\x79\x70\x74\145\144\104\x3e\x20\151\156\x20\x3c\x73\141\x6d\x6c\72\123\165\142\152\145\143\164\76\56");
+        H9:
+        $rq = $rq[0];
+        if ($rq->localName === "\105\x6e\x63\x72\x79\160\x74\x65\x64\x44\141\164\141") {
+            goto Nd;
         }
-        $this->nameId = Utilities::parseNameId($PV);
-        goto C8;
-        OR1:
-        $this->encryptedNameId = $PV;
-        C8:
+        $this->nameId = Utilities::parseNameId($rq);
+        goto oj;
+        Nd:
+        $this->encryptedNameId = $rq;
+        oj:
     }
-    private function parseConditions(DOMElement $L_)
+    private function parseConditions(DOMElement $p3)
     {
-        $De = Utilities::xpQuery($L_, "\56\x2f\x73\141\155\154\x5f\x61\x73\x73\145\x72\x74\151\x6f\156\x3a\x43\x6f\156\144\x69\164\151\x6f\x6e\163");
-        if (empty($De)) {
-            goto Wa;
+        $Kh = Utilities::xpQuery($p3, "\x2e\57\x73\141\x6d\x6c\x5f\141\163\163\x65\x72\x74\151\x6f\x6e\x3a\x43\157\156\x64\151\164\151\157\x6e\x73");
+        if (empty($Kh)) {
+            goto LL;
         }
-        if (count($De) > 1) {
-            goto S_;
+        if (count($Kh) > 1) {
+            goto VN;
         }
-        goto p6;
-        Wa:
+        goto g_;
+        LL:
         return;
-        goto p6;
-        S_:
-        throw new Exception("\115\157\x72\x65\40\164\150\141\156\x20\x6f\156\145\x20\74\163\141\155\154\x3a\103\157\156\x64\x69\164\151\157\156\x73\76\x20\x69\x6e\x20\74\163\x61\155\154\x3a\x41\163\163\145\x72\164\151\157\156\76\x2e");
-        p6:
-        $De = $De[0];
-        if (!$De->hasAttribute("\116\x6f\164\x42\145\x66\157\x72\145")) {
-            goto Y6;
+        goto g_;
+        VN:
+        throw new Exception("\115\x6f\x72\x65\x20\164\150\x61\156\x20\x6f\x6e\145\40\x3c\163\x61\x6d\154\x3a\x43\157\156\144\151\x74\x69\x6f\156\x73\76\x20\151\156\40\74\163\141\x6d\154\x3a\x41\x73\163\145\162\164\151\157\x6e\x3e\x2e");
+        g_:
+        $Kh = $Kh[0];
+        if (!$Kh->hasAttribute("\116\x6f\164\x42\145\x66\x6f\x72\x65")) {
+            goto j3;
         }
-        $HO = Utilities::xsDateTimeToTimestamp($De->getAttribute("\x4e\x6f\x74\x42\145\146\157\x72\x65"));
-        if (!($this->notBefore === NULL || $this->notBefore < $HO)) {
-            goto KC;
+        $QK = Utilities::xsDateTimeToTimestamp($Kh->getAttribute("\x4e\x6f\x74\102\x65\146\157\162\145"));
+        if (!($this->notBefore === NULL || $this->notBefore < $QK)) {
+            goto FF;
         }
-        $this->notBefore = $HO;
-        KC:
-        Y6:
-        if (!$De->hasAttribute("\x4e\157\x74\117\x6e\117\x72\x41\146\164\x65\162")) {
-            goto jH;
+        $this->notBefore = $QK;
+        FF:
+        j3:
+        if (!$Kh->hasAttribute("\116\157\164\117\x6e\x4f\x72\101\x66\x74\x65\162")) {
+            goto EY;
         }
-        $Lh = Utilities::xsDateTimeToTimestamp($De->getAttribute("\x4e\x6f\x74\x4f\156\117\x72\x41\x66\164\x65\x72"));
-        if (!($this->notOnOrAfter === NULL || $this->notOnOrAfter > $Lh)) {
-            goto aK;
+        $Jc = Utilities::xsDateTimeToTimestamp($Kh->getAttribute("\116\157\164\x4f\x6e\x4f\162\101\x66\164\145\x72"));
+        if (!($this->notOnOrAfter === NULL || $this->notOnOrAfter > $Jc)) {
+            goto hj;
         }
-        $this->notOnOrAfter = $Lh;
-        aK:
-        jH:
-        $SP = $De->firstChild;
-        QL:
-        if (!($SP !== NULL)) {
-            goto EG;
+        $this->notOnOrAfter = $Jc;
+        hj:
+        EY:
+        $OZ = $Kh->firstChild;
+        Gd:
+        if (!($OZ !== NULL)) {
+            goto n0;
         }
-        if (!$SP instanceof DOMText) {
-            goto fS;
+        if (!$OZ instanceof DOMText) {
+            goto jS;
         }
-        goto uw;
-        fS:
-        if (!($SP->namespaceURI !== "\165\x72\156\x3a\x6f\141\x73\x69\x73\72\156\x61\155\x65\163\72\164\x63\72\x53\x41\x4d\x4c\x3a\62\56\60\x3a\141\163\x73\x65\162\164\x69\x6f\156")) {
-            goto Ad;
+        goto yF;
+        jS:
+        if (!($OZ->namespaceURI !== "\165\x72\156\72\x6f\x61\163\151\x73\x3a\x6e\x61\x6d\145\x73\72\164\x63\x3a\123\x41\x4d\114\72\62\56\x30\72\141\x73\x73\x65\x72\x74\x69\157\x6e")) {
+            goto Kc;
         }
-        throw new Exception("\x55\156\153\156\157\167\x6e\x20\156\x61\155\x65\163\160\x61\143\x65\40\x6f\x66\40\x63\157\156\144\151\164\x69\x6f\x6e\72\40" . var_export($SP->namespaceURI, TRUE));
-        Ad:
-        switch ($SP->localName) {
-            case "\x41\x75\x64\x69\x65\156\143\x65\122\145\x73\164\162\x69\143\164\x69\157\x6e":
-                $CA = Utilities::extractStrings($SP, "\x75\x72\156\x3a\157\141\x73\x69\163\x3a\x6e\x61\155\145\163\x3a\x74\x63\72\123\101\x4d\x4c\x3a\x32\x2e\x30\72\x61\163\x73\x65\x72\164\x69\x6f\156", "\x41\165\x64\151\145\156\143\145");
+        throw new Exception("\x55\156\x6b\156\x6f\167\156\40\x6e\x61\x6d\x65\163\x70\x61\143\145\40\157\x66\40\143\x6f\x6e\x64\151\164\151\157\156\x3a\x20" . var_export($OZ->namespaceURI, TRUE));
+        Kc:
+        switch ($OZ->localName) {
+            case "\x41\x75\144\x69\x65\x6e\143\145\x52\145\163\164\x72\151\143\164\151\157\156":
+                $zB = Utilities::extractStrings($OZ, "\x75\x72\156\x3a\157\x61\163\151\x73\72\x6e\141\155\145\x73\x3a\164\143\72\123\101\115\114\x3a\x32\56\x30\72\141\163\x73\145\162\164\x69\x6f\156", "\x41\165\144\151\x65\x6e\x63\145");
                 if ($this->validAudiences === NULL) {
-                    goto j9;
+                    goto xM;
                 }
-                $this->validAudiences = array_intersect($this->validAudiences, $CA);
-                goto IA;
-                j9:
-                $this->validAudiences = $CA;
-                IA:
-                goto nZ;
-            case "\117\x6e\145\x54\151\x6d\x65\125\163\x65":
-                goto nZ;
-            case "\x50\x72\157\x78\171\x52\x65\163\164\162\151\x63\164\x69\157\156":
-                goto nZ;
+                $this->validAudiences = array_intersect($this->validAudiences, $zB);
+                goto Rd;
+                xM:
+                $this->validAudiences = $zB;
+                Rd:
+                goto kp;
+            case "\117\156\x65\124\151\155\145\125\x73\145":
+                goto kp;
+            case "\x50\162\x6f\x78\x79\122\x65\x73\x74\162\x69\143\164\151\x6f\156":
+                goto kp;
             default:
-                throw new Exception("\x55\x6e\x6b\x6e\x6f\167\156\x20\143\157\156\144\x69\164\x69\x6f\x6e\x3a\40" . var_export($SP->localName, TRUE));
+                throw new Exception("\125\156\x6b\x6e\x6f\167\x6e\40\x63\157\x6e\x64\x69\x74\151\157\x6e\72\40" . var_export($OZ->localName, TRUE));
         }
-        RG:
-        nZ:
-        uw:
-        $SP = $SP->nextSibling;
-        goto QL;
-        EG:
+        eY:
+        kp:
+        yF:
+        $OZ = $OZ->nextSibling;
+        goto Gd;
+        n0:
     }
-    private function parseAuthnStatement(DOMElement $L_)
+    private function parseAuthnStatement(DOMElement $p3)
     {
-        $VQ = Utilities::xpQuery($L_, "\56\x2f\163\x61\155\x6c\137\x61\163\x73\x65\x72\x74\x69\x6f\x6e\72\x41\165\x74\x68\156\123\164\x61\x74\145\155\145\156\164");
-        if (empty($VQ)) {
-            goto Rp;
+        $sW = Utilities::xpQuery($p3, "\56\x2f\163\x61\x6d\x6c\137\x61\x73\x73\x65\x72\164\151\x6f\156\72\101\165\164\150\156\x53\x74\141\x74\145\155\145\x6e\x74");
+        if (empty($sW)) {
+            goto ZE;
         }
-        if (count($VQ) > 1) {
-            goto GR;
+        if (count($sW) > 1) {
+            goto VJ;
         }
-        goto jn;
-        Rp:
+        goto RE;
+        ZE:
         $this->authnInstant = NULL;
         return;
-        goto jn;
-        GR:
-        throw new Exception("\x4d\157\x72\145\40\164\150\x61\164\x20\x6f\156\x65\40\74\163\x61\155\x6c\x3a\101\165\x74\150\x6e\123\164\x61\164\145\x6d\145\156\x74\x3e\40\151\156\x20\x3c\x73\141\155\154\72\x41\163\x73\x65\162\x74\151\x6f\156\x3e\x20\156\x6f\x74\x20\x73\165\x70\160\x6f\162\164\x65\x64\x2e");
-        jn:
-        $Tx = $VQ[0];
-        if ($Tx->hasAttribute("\101\x75\164\150\x6e\x49\x6e\x73\x74\x61\156\x74")) {
-            goto U3;
+        goto RE;
+        VJ:
+        throw new Exception("\x4d\157\x72\x65\x20\164\x68\x61\164\40\157\x6e\x65\40\74\x73\x61\x6d\x6c\72\101\165\x74\150\156\123\x74\141\x74\145\x6d\x65\x6e\x74\76\40\151\156\40\74\163\141\x6d\x6c\x3a\101\163\163\145\x72\164\x69\x6f\x6e\x3e\40\156\x6f\x74\40\163\x75\x70\x70\157\162\x74\x65\144\x2e");
+        RE:
+        $W8 = $sW[0];
+        if ($W8->hasAttribute("\x41\x75\x74\150\156\111\x6e\x73\164\141\156\x74")) {
+            goto nw;
         }
-        throw new Exception("\x4d\151\163\163\x69\x6e\147\40\162\145\x71\165\x69\x72\145\x64\x20\x41\x75\164\x68\x6e\x49\156\163\164\141\156\x74\x20\x61\x74\164\162\x69\142\x75\164\145\40\x6f\156\x20\x3c\163\141\x6d\154\72\x41\165\164\150\156\x53\164\x61\164\145\155\145\x6e\x74\76\56");
-        U3:
-        $this->authnInstant = Utilities::xsDateTimeToTimestamp($Tx->getAttribute("\x41\x75\x74\150\x6e\111\x6e\x73\x74\141\x6e\164"));
-        if (!$Tx->hasAttribute("\x53\145\x73\x73\151\x6f\156\x4e\x6f\x74\117\x6e\x4f\162\x41\146\x74\145\x72")) {
-            goto vl;
+        throw new Exception("\115\x69\163\163\x69\156\x67\40\x72\145\161\x75\x69\162\145\144\40\101\165\x74\x68\x6e\111\x6e\x73\x74\141\x6e\x74\x20\x61\x74\164\162\x69\x62\165\x74\x65\40\157\156\40\x3c\163\x61\155\x6c\72\101\165\164\150\156\123\x74\141\x74\x65\155\x65\x6e\164\x3e\x2e");
+        nw:
+        $this->authnInstant = Utilities::xsDateTimeToTimestamp($W8->getAttribute("\x41\165\x74\x68\156\x49\x6e\163\x74\141\x6e\164"));
+        if (!$W8->hasAttribute("\x53\145\x73\x73\151\x6f\x6e\116\157\x74\x4f\156\117\x72\101\146\164\145\x72")) {
+            goto yg;
         }
-        $this->sessionNotOnOrAfter = Utilities::xsDateTimeToTimestamp($Tx->getAttribute("\x53\145\163\163\x69\x6f\x6e\x4e\x6f\164\x4f\156\117\162\101\146\x74\145\162"));
-        vl:
-        if (!$Tx->hasAttribute("\x53\145\163\x73\x69\x6f\156\x49\156\x64\x65\170")) {
-            goto sJ;
+        $this->sessionNotOnOrAfter = Utilities::xsDateTimeToTimestamp($W8->getAttribute("\123\x65\163\163\x69\157\x6e\116\157\164\x4f\x6e\117\162\101\x66\164\x65\162"));
+        yg:
+        if (!$W8->hasAttribute("\123\145\163\x73\151\157\156\x49\156\x64\145\170")) {
+            goto bO;
         }
-        $this->sessionIndex = $Tx->getAttribute("\x53\145\x73\163\151\x6f\x6e\x49\x6e\x64\145\170");
-        sJ:
-        $this->parseAuthnContext($Tx);
+        $this->sessionIndex = $W8->getAttribute("\123\x65\163\x73\151\x6f\156\x49\x6e\x64\x65\170");
+        bO:
+        $this->parseAuthnContext($W8);
     }
-    private function parseAuthnContext(DOMElement $uD)
+    private function parseAuthnContext(DOMElement $K6)
     {
-        $wc = Utilities::xpQuery($uD, "\56\x2f\x73\141\155\154\x5f\x61\163\163\x65\162\164\x69\157\156\72\101\165\164\x68\x6e\x43\x6f\156\x74\x65\170\164");
-        if (count($wc) > 1) {
-            goto Cw;
+        $Q1 = Utilities::xpQuery($K6, "\56\x2f\x73\141\155\154\137\141\163\x73\x65\x72\164\151\157\x6e\72\x41\165\164\150\x6e\x43\157\156\164\x65\170\x74");
+        if (count($Q1) > 1) {
+            goto Fe;
         }
-        if (empty($wc)) {
-            goto PQ;
+        if (empty($Q1)) {
+            goto Xn;
         }
-        goto Bv;
-        Cw:
-        throw new Exception("\115\x6f\162\x65\40\x74\150\141\x6e\40\x6f\156\x65\x20\74\x73\x61\155\154\72\x41\x75\x74\x68\156\x43\x6f\156\164\145\x78\164\x3e\x20\x69\156\40\74\x73\x61\155\154\x3a\101\x75\164\150\x6e\x53\164\141\164\x65\155\145\x6e\164\76\x2e");
-        goto Bv;
-        PQ:
-        throw new Exception("\x4d\x69\x73\x73\x69\x6e\147\x20\162\145\161\165\151\162\145\x64\40\74\x73\x61\x6d\x6c\x3a\x41\x75\164\x68\x6e\103\157\x6e\164\x65\170\164\x3e\x20\x69\x6e\40\x3c\163\x61\155\154\72\x41\165\164\150\156\x53\x74\x61\164\x65\155\x65\156\x74\x3e\x2e");
-        Bv:
-        $Sh = $wc[0];
-        $pv = Utilities::xpQuery($Sh, "\x2e\57\163\141\x6d\x6c\x5f\x61\163\163\x65\x72\164\x69\157\x6e\x3a\x41\x75\x74\150\156\103\x6f\156\164\x65\170\164\104\x65\143\x6c\x52\145\x66");
-        if (count($pv) > 1) {
-            goto nH;
+        goto pC;
+        Fe:
+        throw new Exception("\x4d\157\162\145\x20\x74\150\x61\x6e\x20\x6f\x6e\145\40\74\163\x61\x6d\154\72\101\165\164\150\156\x43\x6f\156\x74\x65\x78\164\x3e\40\x69\x6e\40\74\x73\141\155\154\72\x41\x75\164\150\x6e\123\x74\x61\164\x65\155\145\x6e\164\x3e\56");
+        goto pC;
+        Xn:
+        throw new Exception("\115\151\163\x73\x69\x6e\x67\40\x72\145\161\x75\151\x72\x65\x64\40\74\x73\x61\x6d\x6c\x3a\x41\165\x74\150\x6e\103\x6f\x6e\164\x65\170\x74\x3e\x20\151\156\x20\x3c\x73\141\x6d\x6c\x3a\101\x75\x74\150\x6e\x53\x74\x61\164\145\155\x65\156\x74\x3e\56");
+        pC:
+        $RR = $Q1[0];
+        $Oq = Utilities::xpQuery($RR, "\56\57\x73\141\x6d\154\x5f\141\163\x73\x65\162\x74\151\x6f\x6e\72\101\x75\x74\150\x6e\x43\157\x6e\164\145\x78\164\x44\145\143\154\122\x65\146");
+        if (count($Oq) > 1) {
+            goto lJ;
         }
-        if (count($pv) === 1) {
-            goto IT;
+        if (count($Oq) === 1) {
+            goto TU;
         }
-        goto P4;
-        nH:
-        throw new Exception("\x4d\x6f\x72\145\x20\164\x68\141\156\40\157\x6e\145\x20\x3c\x73\141\x6d\154\72\101\x75\x74\x68\156\103\157\156\x74\x65\170\x74\x44\145\x63\x6c\122\145\146\x3e\40\146\x6f\165\156\x64\77");
-        goto P4;
-        IT:
-        $this->setAuthnContextDeclRef(trim($pv[0]->textContent));
-        P4:
-        $ik = Utilities::xpQuery($Sh, "\x2e\x2f\163\x61\x6d\x6c\137\141\x73\x73\x65\x72\164\151\x6f\156\72\x41\165\x74\x68\156\103\157\x6e\x74\145\x78\164\x44\x65\143\x6c");
-        if (count($ik) > 1) {
-            goto U1;
+        goto hB;
+        lJ:
+        throw new Exception("\x4d\x6f\162\145\x20\x74\150\x61\156\40\x6f\156\x65\40\74\163\x61\x6d\154\x3a\101\165\x74\150\x6e\103\x6f\156\164\x65\x78\x74\104\x65\x63\x6c\122\145\146\x3e\40\146\x6f\165\156\144\77");
+        goto hB;
+        TU:
+        $this->setAuthnContextDeclRef(trim($Oq[0]->textContent));
+        hB:
+        $Et = Utilities::xpQuery($RR, "\x2e\x2f\163\141\x6d\x6c\x5f\x61\x73\x73\145\x72\164\151\x6f\x6e\72\x41\165\164\150\156\x43\157\156\x74\x65\x78\164\x44\x65\x63\154");
+        if (count($Et) > 1) {
+            goto GF;
         }
-        if (count($ik) === 1) {
-            goto OM;
+        if (count($Et) === 1) {
+            goto hr;
         }
-        goto yz;
-        U1:
-        throw new Exception("\x4d\x6f\162\145\x20\164\150\x61\156\x20\x6f\x6e\x65\x20\74\163\x61\x6d\154\72\x41\x75\x74\150\x6e\103\157\156\164\x65\170\x74\x44\x65\x63\154\x3e\x20\146\157\165\156\x64\77");
-        goto yz;
-        OM:
-        $this->setAuthnContextDecl(new SAML2_XML_Chunk($ik[0]));
-        yz:
-        $e3 = Utilities::xpQuery($Sh, "\56\57\x73\x61\155\154\137\141\163\x73\x65\x72\164\151\157\x6e\x3a\x41\165\164\150\156\103\157\x6e\164\x65\x78\164\x43\x6c\141\163\x73\122\x65\146");
-        if (count($e3) > 1) {
-            goto Rh;
+        goto a9;
+        GF:
+        throw new Exception("\x4d\x6f\x72\145\x20\x74\150\141\x6e\x20\157\156\x65\40\x3c\x73\141\x6d\x6c\72\x41\x75\x74\x68\x6e\103\x6f\x6e\164\x65\170\x74\x44\145\x63\x6c\76\x20\x66\157\x75\x6e\144\77");
+        goto a9;
+        hr:
+        $this->setAuthnContextDecl(new SAML2_XML_Chunk($Et[0]));
+        a9:
+        $vZ = Utilities::xpQuery($RR, "\x2e\57\x73\141\155\154\137\141\163\163\x65\x72\164\x69\157\156\x3a\x41\x75\164\150\x6e\103\x6f\156\164\145\x78\164\x43\x6c\141\x73\163\x52\x65\146");
+        if (count($vZ) > 1) {
+            goto l4;
         }
-        if (count($e3) === 1) {
-            goto UT;
+        if (count($vZ) === 1) {
+            goto ei;
         }
-        goto AM;
-        Rh:
-        throw new Exception("\x4d\157\162\145\x20\164\x68\x61\x6e\40\157\156\x65\x20\x3c\163\x61\x6d\x6c\72\101\165\x74\x68\x6e\103\157\x6e\x74\145\170\x74\103\x6c\x61\163\x73\122\x65\146\76\x20\151\156\x20\74\x73\x61\155\154\x3a\101\165\x74\150\x6e\x43\157\156\164\145\x78\164\76\56");
-        goto AM;
-        UT:
-        $this->setAuthnContextClassRef(trim($e3[0]->textContent));
-        AM:
+        goto MD;
+        l4:
+        throw new Exception("\x4d\157\162\145\x20\x74\150\141\x6e\x20\157\156\145\x20\x3c\x73\141\x6d\x6c\72\x41\x75\164\150\x6e\103\x6f\x6e\x74\145\170\x74\x43\154\x61\163\163\x52\x65\x66\76\x20\151\x6e\x20\x3c\163\x61\155\154\72\101\165\164\x68\x6e\103\157\156\164\145\170\x74\76\x2e");
+        goto MD;
+        ei:
+        $this->setAuthnContextClassRef(trim($vZ[0]->textContent));
+        MD:
         if (!(empty($this->authnContextClassRef) && empty($this->authnContextDecl) && empty($this->authnContextDeclRef))) {
-            goto FC;
+            goto NC;
         }
-        throw new Exception("\x4d\x69\163\163\x69\x6e\x67\40\x65\x69\x74\x68\x65\162\x20\x3c\x73\x61\x6d\x6c\72\101\165\164\150\156\x43\x6f\156\x74\x65\170\164\103\x6c\x61\x73\163\x52\x65\146\76\40\x6f\x72\x20\x3c\163\x61\x6d\x6c\x3a\101\165\x74\x68\156\x43\157\x6e\164\145\x78\x74\104\145\x63\x6c\x52\x65\146\76\x20\x6f\162\x20\74\x73\141\155\154\72\x41\x75\x74\150\x6e\103\x6f\x6e\x74\x65\x78\x74\x44\x65\x63\154\x3e");
-        FC:
-        $this->AuthenticatingAuthority = Utilities::extractStrings($Sh, "\165\162\156\72\157\x61\x73\x69\x73\72\x6e\141\155\x65\163\x3a\x74\x63\x3a\123\x41\x4d\114\72\x32\56\x30\72\141\163\163\145\162\164\x69\157\x6e", "\x41\x75\164\150\145\x6e\164\151\143\141\x74\151\x6e\x67\101\x75\x74\150\157\162\151\164\171");
+        throw new Exception("\x4d\151\163\163\151\156\x67\40\x65\x69\164\150\145\162\x20\x3c\x73\x61\155\x6c\x3a\x41\165\164\150\156\x43\157\x6e\164\x65\x78\x74\x43\154\141\163\163\x52\x65\146\76\40\157\x72\x20\x3c\163\x61\x6d\154\x3a\101\x75\164\150\156\x43\x6f\x6e\x74\145\170\164\x44\145\x63\154\122\x65\x66\76\x20\x6f\162\40\74\x73\x61\x6d\154\72\x41\x75\x74\150\x6e\x43\x6f\156\164\x65\170\164\x44\x65\143\x6c\x3e");
+        NC:
+        $this->AuthenticatingAuthority = Utilities::extractStrings($RR, "\165\x72\x6e\72\157\x61\x73\x69\163\72\156\141\155\145\163\x3a\164\x63\x3a\123\101\x4d\x4c\x3a\62\x2e\60\72\x61\163\163\x65\162\164\151\x6f\x6e", "\x41\165\164\150\145\156\164\151\143\141\164\151\x6e\x67\101\165\x74\150\x6f\162\x69\164\171");
     }
-    private function parseAttributes(DOMElement $L_)
+    private function parseAttributes(DOMElement $p3)
     {
-        $q7 = TRUE;
-        $K5 = Utilities::xpQuery($L_, "\56\57\163\141\155\154\137\141\x73\163\145\x72\x74\151\x6f\x6e\72\101\164\x74\x72\x69\142\165\164\145\x53\x74\x61\x74\x65\x6d\x65\156\164\57\163\141\x6d\154\x5f\x61\x73\163\145\x72\164\151\x6f\x6e\x3a\x41\164\x74\x72\x69\x62\x75\164\145");
-        foreach ($K5 as $Aa) {
-            if ($Aa->hasAttribute("\116\141\x6d\x65")) {
-                goto uh;
+        $jb = TRUE;
+        $NP = Utilities::xpQuery($p3, "\56\x2f\x73\141\x6d\154\x5f\141\x73\163\x65\x72\164\151\x6f\156\72\x41\x74\x74\162\151\142\165\x74\x65\123\x74\141\164\x65\x6d\x65\156\164\x2f\x73\x61\x6d\154\x5f\141\x73\x73\145\162\x74\x69\157\156\72\x41\x74\164\162\151\x62\165\164\145");
+        foreach ($NP as $MB) {
+            if ($MB->hasAttribute("\116\x61\x6d\x65")) {
+                goto D1;
             }
-            throw new Exception("\x4d\151\x73\163\x69\x6e\x67\40\x6e\141\x6d\145\x20\x6f\x6e\40\x3c\163\x61\155\x6c\x3a\x41\164\164\162\151\142\165\x74\x65\76\x20\145\x6c\145\x6d\145\x6e\164\x2e");
-            uh:
-            $cg = $Aa->getAttribute("\x4e\x61\x6d\145");
-            if ($Aa->hasAttribute("\x4e\141\x6d\145\106\x6f\162\155\141\x74")) {
-                goto va;
+            throw new Exception("\115\x69\163\163\151\156\x67\x20\156\141\x6d\x65\40\x6f\156\40\x3c\x73\x61\x6d\x6c\72\101\x74\x74\162\151\x62\165\164\x65\76\40\x65\x6c\145\155\x65\x6e\x74\56");
+            D1:
+            $wL = $MB->getAttribute("\x4e\x61\155\x65");
+            if ($MB->hasAttribute("\x4e\x61\155\x65\x46\157\x72\155\141\x74")) {
+                goto mI;
             }
-            $hJ = "\165\x72\156\x3a\x6f\141\163\151\x73\x3a\156\141\155\145\163\x3a\x74\143\72\x53\101\115\x4c\x3a\61\56\x31\72\x6e\141\155\145\151\144\55\x66\x6f\162\155\x61\x74\x3a\165\156\163\160\x65\143\x69\146\x69\x65\x64";
-            goto NJ;
-            va:
-            $hJ = $Aa->getAttribute("\116\141\155\x65\106\x6f\x72\155\141\164");
-            NJ:
-            if ($q7) {
-                goto dJ;
+            $g3 = "\x75\162\156\72\157\141\x73\x69\x73\x3a\156\x61\x6d\145\163\x3a\164\x63\x3a\x53\x41\115\x4c\x3a\x31\56\x31\x3a\156\x61\155\145\151\x64\x2d\146\x6f\x72\x6d\141\x74\x3a\165\x6e\x73\160\x65\x63\151\x66\x69\145\x64";
+            goto oh;
+            mI:
+            $g3 = $MB->getAttribute("\116\x61\x6d\x65\x46\157\x72\155\x61\x74");
+            oh:
+            if ($jb) {
+                goto G0;
             }
-            if (!($this->nameFormat !== $hJ)) {
-                goto t2;
+            if (!($this->nameFormat !== $g3)) {
+                goto L4;
             }
-            $this->nameFormat = "\x75\x72\x6e\x3a\157\x61\163\151\163\x3a\156\x61\x6d\145\x73\x3a\x74\x63\72\123\x41\115\x4c\x3a\x31\56\x31\x3a\x6e\x61\x6d\145\x69\144\x2d\x66\157\162\x6d\x61\164\x3a\165\x6e\x73\160\145\143\151\146\x69\145\144";
-            t2:
-            goto iW;
-            dJ:
-            $this->nameFormat = $hJ;
-            $q7 = FALSE;
-            iW:
-            if (array_key_exists($cg, $this->attributes)) {
-                goto es;
+            $this->nameFormat = "\x75\162\x6e\x3a\x6f\x61\x73\x69\x73\x3a\x6e\141\x6d\145\163\x3a\164\143\72\x53\101\115\x4c\72\x31\x2e\x31\x3a\156\x61\155\145\151\144\55\x66\157\162\x6d\x61\164\x3a\165\x6e\163\x70\145\x63\x69\x66\x69\x65\x64";
+            L4:
+            goto v4;
+            G0:
+            $this->nameFormat = $g3;
+            $jb = FALSE;
+            v4:
+            if (array_key_exists($wL, $this->attributes)) {
+                goto fY;
             }
-            $this->attributes[$cg] = array();
-            es:
-            $EP = Utilities::xpQuery($Aa, "\56\x2f\163\141\x6d\154\x5f\x61\163\163\145\x72\164\x69\x6f\156\x3a\101\164\x74\x72\151\142\165\x74\x65\x56\x61\154\x75\145");
-            foreach ($EP as $qO) {
-                $this->attributes[$cg][] = trim($qO->textContent);
-                n_:
+            $this->attributes[$wL] = array();
+            fY:
+            $nJ = Utilities::xpQuery($MB, "\56\57\x73\x61\x6d\154\137\x61\163\163\x65\x72\164\x69\x6f\x6e\72\x41\164\164\x72\151\x62\165\164\x65\126\141\x6c\165\145");
+            foreach ($nJ as $ar) {
+                $this->attributes[$wL][] = trim($ar->textContent);
+                UJ:
             }
-            kd:
-            iO:
+            Es:
+            vw:
         }
-        y9:
+        Lj:
     }
-    private function parseEncryptedAttributes(DOMElement $L_)
+    private function parseEncryptedAttributes(DOMElement $p3)
     {
-        $this->encryptedAttribute = Utilities::xpQuery($L_, "\56\x2f\x73\x61\155\x6c\x5f\x61\163\163\145\162\x74\x69\157\x6e\x3a\x41\164\164\162\x69\x62\165\x74\145\123\164\141\164\x65\155\x65\156\164\x2f\163\x61\155\x6c\x5f\x61\x73\x73\x65\x72\164\x69\157\x6e\72\105\x6e\x63\x72\x79\160\164\x65\144\101\164\164\162\151\x62\x75\164\x65");
+        $this->encryptedAttribute = Utilities::xpQuery($p3, "\x2e\57\163\141\x6d\x6c\x5f\x61\x73\x73\145\162\x74\x69\x6f\x6e\72\101\164\x74\x72\x69\x62\x75\164\x65\x53\x74\x61\x74\x65\x6d\145\x6e\164\x2f\163\x61\x6d\x6c\137\141\x73\x73\x65\162\164\151\157\156\x3a\105\x6e\143\x72\171\x70\164\x65\x64\101\164\164\x72\151\x62\165\x74\145");
     }
-    private function parseSignature(DOMElement $L_)
+    private function parseSignature(DOMElement $p3)
     {
-        $R3 = Utilities::validateElement($L_);
-        if (!($R3 !== FALSE)) {
-            goto oe;
+        $ja = Utilities::validateElement($p3);
+        if (!($ja !== FALSE)) {
+            goto VO;
         }
         $this->wasSignedAtConstruction = TRUE;
-        $this->certificates = $R3["\x43\145\x72\164\x69\146\151\143\x61\x74\x65\x73"];
-        $this->signatureData = $R3;
-        oe:
+        $this->certificates = $ja["\x43\145\x72\x74\x69\146\151\x63\141\164\x65\163"];
+        $this->signatureData = $ja;
+        VO:
     }
-    public function validate(XMLSecurityKey $l9)
+    public function validate(XMLSecurityKey $im)
     {
         if (!($this->signatureData === NULL)) {
-            goto mv;
+            goto Ao;
         }
         return FALSE;
-        mv:
-        Utilities::validateSignature($this->signatureData, $l9);
+        Ao:
+        Utilities::validateSignature($this->signatureData, $im);
         return TRUE;
     }
     public function getId()
     {
         return $this->id;
     }
-    public function setId($kI)
+    public function setId($vv)
     {
-        $this->id = $kI;
+        $this->id = $vv;
     }
     public function getIssueInstant()
     {
         return $this->issueInstant;
     }
-    public function setIssueInstant($ZY)
+    public function setIssueInstant($gd)
     {
-        $this->issueInstant = $ZY;
+        $this->issueInstant = $gd;
     }
     public function getIssuer()
     {
         return $this->issuer;
     }
-    public function setIssuer($Pz)
+    public function setIssuer($JS)
     {
-        $this->issuer = $Pz;
+        $this->issuer = $JS;
     }
     public function getNameId()
     {
         if (!($this->encryptedNameId !== NULL)) {
-            goto cf;
+            goto cT;
         }
-        throw new Exception("\x41\164\164\145\x6d\x70\164\145\144\x20\x74\157\x20\162\145\164\x72\151\x65\x76\145\40\x65\156\143\x72\171\160\x74\145\144\40\x4e\141\x6d\x65\111\x44\40\x77\151\164\x68\x6f\165\x74\x20\x64\145\143\x72\171\160\164\x69\156\x67\x20\151\x74\40\146\x69\x72\163\164\56");
-        cf:
+        throw new Exception("\x41\164\x74\x65\155\x70\x74\145\x64\40\x74\157\x20\162\x65\x74\162\x69\145\x76\145\40\x65\x6e\x63\x72\171\160\164\145\144\40\116\141\155\145\x49\104\x20\167\x69\164\x68\157\x75\164\x20\x64\145\x63\x72\171\x70\164\x69\x6e\x67\x20\x69\x74\40\x66\151\162\163\x74\x2e");
+        cT:
         return $this->nameId;
     }
-    public function setNameId($PV)
+    public function setNameId($rq)
     {
-        $this->nameId = $PV;
+        $this->nameId = $rq;
     }
     public function isNameIdEncrypted()
     {
         if (!($this->encryptedNameId !== NULL)) {
-            goto em;
+            goto cx;
         }
         return TRUE;
-        em:
+        cx:
         return FALSE;
     }
-    public function encryptNameId(XMLSecurityKey $l9)
+    public function encryptNameId(XMLSecurityKey $im)
     {
-        $t0 = new DOMDocument();
-        $V1 = $t0->createElement("\162\157\x6f\164");
-        $t0->appendChild($V1);
-        Utilities::addNameId($V1, $this->nameId);
-        $PV = $V1->firstChild;
-        Utilities::getContainer()->debugMessage($PV, "\145\x6e\x63\x72\x79\160\x74");
-        $pe = new XMLSecEnc();
-        $pe->setNode($PV);
-        $pe->type = XMLSecEnc::Element;
-        $mI = new XMLSecurityKey(XMLSecurityKey::AES128_CBC);
-        $mI->generateSessionKey();
-        $pe->encryptKey($l9, $mI);
-        $this->encryptedNameId = $pe->encryptNode($mI);
+        $Q6 = new DOMDocument();
+        $QR = $Q6->createElement("\162\157\157\164");
+        $Q6->appendChild($QR);
+        Utilities::addNameId($QR, $this->nameId);
+        $rq = $QR->firstChild;
+        Utilities::getContainer()->debugMessage($rq, "\x65\x6e\143\x72\x79\160\x74");
+        $FQ = new XMLSecEnc();
+        $FQ->setNode($rq);
+        $FQ->type = XMLSecEnc::Element;
+        $Tl = new XMLSecurityKey(XMLSecurityKey::AES128_CBC);
+        $Tl->generateSessionKey();
+        $FQ->encryptKey($im, $Tl);
+        $this->encryptedNameId = $FQ->encryptNode($Tl);
         $this->nameId = NULL;
     }
-    public function decryptNameId(XMLSecurityKey $l9, array $S1 = array())
+    public function decryptNameId(XMLSecurityKey $im, array $Fp = array())
     {
         if (!($this->encryptedNameId === NULL)) {
-            goto mX;
+            goto cP;
         }
         return;
-        mX:
-        $PV = Utilities::decryptElement($this->encryptedNameId, $l9, $S1);
-        Utilities::getContainer()->debugMessage($PV, "\x64\145\143\x72\171\x70\x74");
-        $this->nameId = Utilities::parseNameId($PV);
+        cP:
+        $rq = Utilities::decryptElement($this->encryptedNameId, $im, $Fp);
+        Utilities::getContainer()->debugMessage($rq, "\144\x65\x63\162\x79\160\x74");
+        $this->nameId = Utilities::parseNameId($rq);
         $this->encryptedNameId = NULL;
     }
-    public function decryptAttributes(XMLSecurityKey $l9, array $S1 = array())
+    public function decryptAttributes(XMLSecurityKey $im, array $Fp = array())
     {
         if (!($this->encryptedAttribute === NULL)) {
-            goto T5;
+            goto xi;
         }
         return;
-        T5:
-        $q7 = TRUE;
-        $K5 = $this->encryptedAttribute;
-        foreach ($K5 as $YR) {
-            $Aa = Utilities::decryptElement($YR->getElementsByTagName("\105\x6e\143\162\171\x70\x74\x65\x64\x44\141\164\141")->item(0), $l9, $S1);
-            if ($Aa->hasAttribute("\x4e\141\155\145")) {
-                goto j5;
+        xi:
+        $jb = TRUE;
+        $NP = $this->encryptedAttribute;
+        foreach ($NP as $Di) {
+            $MB = Utilities::decryptElement($Di->getElementsByTagName("\105\156\x63\x72\x79\x70\164\145\x64\x44\141\x74\x61")->item(0), $im, $Fp);
+            if ($MB->hasAttribute("\x4e\x61\x6d\x65")) {
+                goto HG;
             }
-            throw new Exception("\115\151\163\163\151\156\147\x20\156\x61\155\x65\40\x6f\156\x20\74\163\141\155\154\72\101\x74\164\x72\x69\142\165\164\145\76\40\145\x6c\145\x6d\145\x6e\x74\x2e");
-            j5:
-            $cg = $Aa->getAttribute("\x4e\x61\x6d\x65");
-            if ($Aa->hasAttribute("\116\x61\x6d\x65\x46\157\162\x6d\x61\164")) {
-                goto n2;
+            throw new Exception("\x4d\151\x73\x73\x69\156\x67\x20\x6e\141\x6d\145\40\x6f\x6e\x20\74\x73\x61\155\154\72\101\164\164\162\151\142\165\x74\x65\x3e\x20\145\x6c\145\x6d\145\x6e\x74\x2e");
+            HG:
+            $wL = $MB->getAttribute("\x4e\x61\155\145");
+            if ($MB->hasAttribute("\116\141\x6d\145\106\157\x72\x6d\141\164")) {
+                goto uP;
             }
-            $hJ = "\165\162\x6e\72\x6f\141\x73\151\163\x3a\x6e\x61\x6d\145\x73\x3a\164\143\72\123\x41\115\114\72\x32\56\60\x3a\x61\164\164\x72\x6e\141\155\x65\x2d\x66\x6f\162\x6d\141\x74\x3a\165\156\163\x70\145\143\151\x66\151\145\x64";
-            goto br;
-            n2:
-            $hJ = $Aa->getAttribute("\x4e\141\155\145\x46\157\x72\155\x61\x74");
-            br:
-            if ($q7) {
-                goto t0;
+            $g3 = "\165\x72\x6e\x3a\x6f\141\x73\x69\x73\72\156\x61\x6d\x65\x73\x3a\164\143\72\123\101\x4d\x4c\72\62\56\x30\x3a\141\164\x74\x72\156\141\155\x65\55\x66\x6f\162\155\x61\164\72\165\x6e\163\x70\145\143\151\146\x69\x65\144";
+            goto qT;
+            uP:
+            $g3 = $MB->getAttribute("\116\141\155\x65\106\x6f\162\x6d\141\x74");
+            qT:
+            if ($jb) {
+                goto u1;
             }
-            if (!($this->nameFormat !== $hJ)) {
-                goto sx;
+            if (!($this->nameFormat !== $g3)) {
+                goto ay;
             }
-            $this->nameFormat = "\165\162\x6e\x3a\157\141\x73\151\163\x3a\x6e\x61\155\145\x73\72\x74\x63\x3a\123\101\x4d\x4c\72\x32\56\60\72\x61\x74\x74\x72\x6e\141\x6d\x65\55\146\157\162\x6d\x61\x74\x3a\x75\x6e\x73\x70\x65\143\151\x66\x69\145\x64";
-            sx:
-            goto WN;
-            t0:
-            $this->nameFormat = $hJ;
-            $q7 = FALSE;
-            WN:
-            if (array_key_exists($cg, $this->attributes)) {
-                goto w6;
+            $this->nameFormat = "\x75\162\x6e\x3a\x6f\x61\163\x69\163\x3a\x6e\x61\x6d\145\x73\x3a\x74\143\x3a\123\101\115\x4c\72\x32\x2e\60\x3a\141\164\164\162\156\x61\155\x65\55\146\157\162\x6d\141\164\72\165\156\x73\160\145\143\151\x66\151\x65\144";
+            ay:
+            goto N7;
+            u1:
+            $this->nameFormat = $g3;
+            $jb = FALSE;
+            N7:
+            if (array_key_exists($wL, $this->attributes)) {
+                goto pF;
             }
-            $this->attributes[$cg] = array();
-            w6:
-            $EP = Utilities::xpQuery($Aa, "\x2e\57\163\x61\x6d\154\x5f\x61\x73\163\x65\x72\x74\x69\157\156\x3a\101\x74\x74\x72\151\x62\x75\x74\x65\126\141\154\x75\x65");
-            foreach ($EP as $qO) {
-                $this->attributes[$cg][] = trim($qO->textContent);
-                TI:
+            $this->attributes[$wL] = array();
+            pF:
+            $nJ = Utilities::xpQuery($MB, "\56\57\x73\141\155\x6c\x5f\141\163\x73\x65\162\164\151\157\156\72\101\x74\164\x72\151\x62\165\164\x65\126\141\154\x75\x65");
+            foreach ($nJ as $ar) {
+                $this->attributes[$wL][] = trim($ar->textContent);
+                S7:
             }
-            Es:
-            RS:
+            i3:
+            dE:
         }
-        Zw:
+        sQ:
     }
     public function getNotBefore()
     {
         return $this->notBefore;
     }
-    public function setNotBefore($HO)
+    public function setNotBefore($QK)
     {
-        $this->notBefore = $HO;
+        $this->notBefore = $QK;
     }
     public function getNotOnOrAfter()
     {
         return $this->notOnOrAfter;
     }
-    public function setNotOnOrAfter($Lh)
+    public function setNotOnOrAfter($Jc)
     {
-        $this->notOnOrAfter = $Lh;
+        $this->notOnOrAfter = $Jc;
     }
-    public function setEncryptedAttributes($jA)
+    public function setEncryptedAttributes($tU)
     {
-        $this->requiredEncAttributes = $jA;
+        $this->requiredEncAttributes = $tU;
     }
     public function getValidAudiences()
     {
         return $this->validAudiences;
     }
-    public function setValidAudiences(array $t2 = NULL)
+    public function setValidAudiences(array $Xf = NULL)
     {
-        $this->validAudiences = $t2;
+        $this->validAudiences = $Xf;
     }
     public function getAuthnInstant()
     {
         return $this->authnInstant;
     }
-    public function setAuthnInstant($Gl)
+    public function setAuthnInstant($de)
     {
-        $this->authnInstant = $Gl;
+        $this->authnInstant = $de;
     }
     public function getSessionNotOnOrAfter()
     {
         return $this->sessionNotOnOrAfter;
     }
-    public function setSessionNotOnOrAfter($HV)
+    public function setSessionNotOnOrAfter($Bh)
     {
-        $this->sessionNotOnOrAfter = $HV;
+        $this->sessionNotOnOrAfter = $Bh;
     }
     public function getSessionIndex()
     {
         return $this->sessionIndex;
     }
-    public function setSessionIndex($Cn)
+    public function setSessionIndex($u2)
     {
-        $this->sessionIndex = $Cn;
+        $this->sessionIndex = $u2;
     }
     public function getAuthnContext()
     {
         if (empty($this->authnContextClassRef)) {
-            goto Vl;
+            goto Ty;
         }
         return $this->authnContextClassRef;
-        Vl:
+        Ty:
         if (empty($this->authnContextDeclRef)) {
-            goto sy;
+            goto eQ;
         }
         return $this->authnContextDeclRef;
-        sy:
+        eQ:
         return NULL;
     }
-    public function setAuthnContext($T4)
+    public function setAuthnContext($je)
     {
-        $this->setAuthnContextClassRef($T4);
+        $this->setAuthnContextClassRef($je);
     }
     public function getAuthnContextClassRef()
     {
         return $this->authnContextClassRef;
     }
-    public function setAuthnContextClassRef($Bq)
+    public function setAuthnContextClassRef($tm)
     {
-        $this->authnContextClassRef = $Bq;
+        $this->authnContextClassRef = $tm;
     }
-    public function setAuthnContextDecl(SAML2_XML_Chunk $B4)
+    public function setAuthnContextDecl(SAML2_XML_Chunk $iJ)
     {
         if (empty($this->authnContextDeclRef)) {
-            goto AA;
+            goto rJ;
         }
-        throw new Exception("\101\x75\164\150\x6e\103\x6f\156\x74\x65\x78\x74\x44\145\143\x6c\122\x65\x66\x20\x69\x73\40\x61\x6c\x72\x65\x61\144\x79\40\x72\145\x67\x69\163\164\x65\162\145\x64\x21\40\x4d\x61\171\40\157\x6e\154\x79\40\150\x61\166\x65\x20\x65\x69\x74\150\145\x72\x20\141\x20\x44\x65\143\x6c\40\x6f\x72\40\141\40\x44\x65\143\154\122\x65\x66\54\40\x6e\157\164\x20\142\x6f\164\x68\x21");
-        AA:
-        $this->authnContextDecl = $B4;
+        throw new Exception("\101\165\x74\150\156\x43\x6f\156\164\x65\x78\x74\104\x65\143\x6c\x52\x65\146\x20\151\x73\40\141\x6c\162\x65\141\144\x79\x20\x72\x65\147\151\163\164\145\x72\x65\144\x21\40\115\141\x79\40\x6f\x6e\x6c\x79\40\x68\141\x76\145\40\x65\x69\164\x68\145\x72\x20\141\x20\104\145\143\x6c\x20\x6f\x72\40\141\40\104\x65\x63\x6c\122\x65\x66\x2c\40\156\x6f\x74\40\142\157\164\x68\41");
+        rJ:
+        $this->authnContextDecl = $iJ;
     }
     public function getAuthnContextDecl()
     {
         return $this->authnContextDecl;
     }
-    public function setAuthnContextDeclRef($Rp)
+    public function setAuthnContextDeclRef($OD)
     {
         if (empty($this->authnContextDecl)) {
-            goto fK;
+            goto jT;
         }
-        throw new Exception("\101\165\164\x68\x6e\x43\x6f\x6e\164\145\170\x74\x44\x65\143\154\40\151\x73\x20\x61\154\162\145\x61\x64\x79\x20\162\145\147\x69\163\x74\145\162\x65\144\x21\x20\x4d\x61\x79\x20\x6f\156\154\171\40\150\141\x76\145\x20\x65\x69\164\x68\x65\162\40\x61\x20\x44\x65\x63\154\x20\157\x72\x20\x61\x20\x44\145\x63\x6c\122\145\146\x2c\40\x6e\x6f\164\40\x62\x6f\164\x68\41");
-        fK:
-        $this->authnContextDeclRef = $Rp;
+        throw new Exception("\x41\x75\x74\150\x6e\x43\x6f\x6e\164\145\170\x74\x44\145\143\154\x20\x69\163\x20\x61\154\162\145\x61\144\x79\40\x72\x65\147\x69\163\164\x65\162\x65\x64\41\40\115\141\x79\x20\x6f\x6e\x6c\x79\x20\x68\x61\166\145\40\x65\151\x74\150\x65\162\x20\141\40\104\145\x63\x6c\40\157\x72\40\141\x20\x44\145\143\x6c\x52\x65\146\54\x20\156\x6f\x74\40\x62\157\x74\x68\x21");
+        jT:
+        $this->authnContextDeclRef = $OD;
     }
     public function getAuthnContextDeclRef()
     {
@@ -648,33 +648,33 @@ class SAML2_Assertion
     {
         return $this->AuthenticatingAuthority;
     }
-    public function setAuthenticatingAuthority($AA)
+    public function setAuthenticatingAuthority($AB)
     {
-        $this->AuthenticatingAuthority = $AA;
+        $this->AuthenticatingAuthority = $AB;
     }
     public function getAttributes()
     {
         return $this->attributes;
     }
-    public function setAttributes(array $K5)
+    public function setAttributes(array $NP)
     {
-        $this->attributes = $K5;
+        $this->attributes = $NP;
     }
     public function getAttributeNameFormat()
     {
         return $this->nameFormat;
     }
-    public function setAttributeNameFormat($hJ)
+    public function setAttributeNameFormat($g3)
     {
-        $this->nameFormat = $hJ;
+        $this->nameFormat = $g3;
     }
     public function getSubjectConfirmation()
     {
         return $this->SubjectConfirmation;
     }
-    public function setSubjectConfirmation(array $hE)
+    public function setSubjectConfirmation(array $a4)
     {
-        $this->SubjectConfirmation = $hE;
+        $this->SubjectConfirmation = $a4;
     }
     public function getSignatureKey()
     {
@@ -684,21 +684,21 @@ class SAML2_Assertion
     {
         return $this->signatureData;
     }
-    public function setSignatureKey(XMLsecurityKey $DO = NULL)
+    public function setSignatureKey(XMLsecurityKey $yv = NULL)
     {
-        $this->signatureKey = $DO;
+        $this->signatureKey = $yv;
     }
     public function getEncryptionKey()
     {
         return $this->encryptionKey;
     }
-    public function setEncryptionKey(XMLSecurityKey $tZ = NULL)
+    public function setEncryptionKey(XMLSecurityKey $ab = NULL)
     {
-        $this->encryptionKey = $tZ;
+        $this->encryptionKey = $ab;
     }
-    public function setCertificates(array $Un)
+    public function setCertificates(array $MH)
     {
-        $this->certificates = $Un;
+        $this->certificates = $MH;
     }
     public function getCertificates()
     {
@@ -708,282 +708,282 @@ class SAML2_Assertion
     {
         return $this->wasSignedAtConstruction;
     }
-    public function toXML(DOMNode $s4 = NULL)
+    public function toXML(DOMNode $dh = NULL)
     {
-        if ($s4 === NULL) {
-            goto Vk;
+        if ($dh === NULL) {
+            goto bY;
         }
-        $XU = $s4->ownerDocument;
-        goto DD;
-        Vk:
-        $XU = new DOMDocument();
-        $s4 = $XU;
-        DD:
-        $V1 = $XU->createElementNS("\165\x72\x6e\x3a\x6f\x61\163\151\x73\72\x6e\141\155\x65\x73\72\164\x63\72\123\101\115\114\72\x32\56\60\x3a\x61\x73\163\x65\162\x74\x69\157\156", "\x73\x61\155\x6c\x3a" . "\101\163\x73\145\162\164\x69\157\156");
-        $s4->appendChild($V1);
-        $V1->setAttributeNS("\165\162\x6e\x3a\157\141\163\151\163\x3a\156\x61\155\x65\163\72\x74\143\x3a\x53\101\x4d\x4c\72\62\x2e\60\x3a\160\162\157\164\157\x63\x6f\154", "\163\141\155\154\160\72\164\155\160", "\164\x6d\160");
-        $V1->removeAttributeNS("\165\162\156\x3a\x6f\141\163\x69\x73\72\x6e\x61\155\x65\163\x3a\x74\143\x3a\x53\x41\x4d\114\72\x32\x2e\x30\72\x70\162\157\164\157\x63\x6f\x6c", "\x74\x6d\160");
-        $V1->setAttributeNS("\150\164\x74\x70\x3a\x2f\x2f\167\167\167\x2e\x77\63\56\x6f\x72\147\57\x32\60\60\x31\57\x58\x4d\x4c\123\x63\x68\145\x6d\141\55\151\156\163\x74\x61\156\x63\145", "\x78\x73\x69\x3a\x74\x6d\x70", "\x74\x6d\160");
-        $V1->removeAttributeNS("\x68\x74\164\160\x3a\x2f\x2f\x77\167\x77\x2e\167\x33\x2e\157\x72\x67\57\62\x30\60\x31\57\x58\x4d\x4c\123\x63\150\145\155\x61\x2d\151\156\163\164\141\156\143\x65", "\x74\155\x70");
-        $V1->setAttributeNS("\x68\x74\x74\160\72\x2f\57\167\167\x77\56\167\x33\56\x6f\162\x67\x2f\x32\x30\60\x31\57\x58\115\x4c\x53\143\150\x65\155\x61", "\170\163\72\164\155\160", "\x74\155\x70");
-        $V1->removeAttributeNS("\150\x74\164\x70\x3a\57\57\167\x77\167\x2e\167\63\56\x6f\x72\x67\57\62\60\60\x31\57\x58\x4d\114\123\x63\150\145\155\141", "\164\x6d\160");
-        $V1->setAttribute("\x49\x44", $this->id);
-        $V1->setAttribute("\126\145\x72\x73\151\x6f\156", "\62\56\60");
-        $V1->setAttribute("\111\x73\163\165\x65\x49\156\163\164\141\156\x74", gmdate("\x59\x2d\155\x2d\x64\x5c\124\110\x3a\151\72\x73\x5c\x5a", $this->issueInstant));
-        $Pz = Utilities::addString($V1, "\x75\162\156\72\157\x61\x73\x69\x73\x3a\156\x61\x6d\x65\x73\72\164\x63\x3a\x53\x41\x4d\x4c\72\x32\56\60\72\x61\x73\x73\145\x72\x74\151\x6f\156", "\163\x61\155\x6c\72\111\x73\163\x75\145\x72", $this->issuer);
-        $this->addSubject($V1);
-        $this->addConditions($V1);
-        $this->addAuthnStatement($V1);
+        $RJ = $dh->ownerDocument;
+        goto Hf;
+        bY:
+        $RJ = new DOMDocument();
+        $dh = $RJ;
+        Hf:
+        $QR = $RJ->createElementNS("\x75\162\156\72\157\141\x73\x69\x73\72\x6e\x61\155\x65\163\72\x74\x63\x3a\x53\x41\x4d\x4c\72\62\56\60\x3a\141\163\163\145\x72\x74\x69\x6f\156", "\x73\x61\155\x6c\x3a" . "\101\163\163\145\162\x74\x69\157\x6e");
+        $dh->appendChild($QR);
+        $QR->setAttributeNS("\165\162\156\x3a\157\141\x73\151\x73\72\x6e\x61\x6d\x65\x73\x3a\164\143\72\123\x41\x4d\x4c\x3a\62\x2e\60\72\x70\x72\157\164\157\x63\157\154", "\163\x61\155\154\x70\x3a\x74\155\160", "\164\155\160");
+        $QR->removeAttributeNS("\165\162\156\x3a\157\141\x73\151\x73\72\x6e\x61\x6d\145\x73\72\x74\x63\72\x53\101\x4d\114\72\x32\x2e\x30\x3a\160\x72\x6f\x74\157\143\157\154", "\x74\155\x70");
+        $QR->setAttributeNS("\150\164\x74\x70\72\57\57\167\167\x77\x2e\167\63\56\x6f\x72\x67\x2f\x32\60\x30\61\x2f\x58\x4d\x4c\x53\x63\x68\145\x6d\141\55\x69\x6e\163\164\x61\x6e\x63\145", "\170\163\151\72\x74\155\x70", "\x74\x6d\x70");
+        $QR->removeAttributeNS("\x68\164\164\x70\x3a\57\57\167\167\167\56\167\63\x2e\x6f\162\x67\57\62\x30\x30\61\x2f\130\x4d\x4c\x53\x63\x68\145\x6d\x61\x2d\151\x6e\x73\x74\141\156\x63\x65", "\x74\x6d\160");
+        $QR->setAttributeNS("\x68\x74\164\160\72\x2f\57\x77\167\167\x2e\x77\63\x2e\157\162\x67\57\x32\x30\x30\61\57\130\x4d\x4c\x53\x63\150\x65\x6d\x61", "\170\x73\x3a\164\155\x70", "\164\x6d\160");
+        $QR->removeAttributeNS("\x68\164\164\x70\72\57\57\167\x77\167\56\x77\x33\x2e\x6f\x72\x67\x2f\x32\60\x30\x31\x2f\130\115\x4c\123\143\150\x65\155\x61", "\x74\155\x70");
+        $QR->setAttribute("\x49\x44", $this->id);
+        $QR->setAttribute("\126\145\162\163\x69\x6f\156", "\62\56\60");
+        $QR->setAttribute("\111\x73\163\x75\145\x49\x6e\x73\x74\x61\x6e\x74", gmdate("\x59\x2d\155\x2d\x64\134\124\110\x3a\151\x3a\x73\x5c\132", $this->issueInstant));
+        $JS = Utilities::addString($QR, "\165\162\x6e\72\x6f\141\163\151\163\x3a\x6e\x61\x6d\145\163\x3a\164\143\x3a\x53\101\115\x4c\x3a\x32\56\60\72\141\x73\163\x65\162\164\151\157\156", "\x73\x61\x6d\154\72\111\163\x73\x75\145\162", $this->issuer);
+        $this->addSubject($QR);
+        $this->addConditions($QR);
+        $this->addAuthnStatement($QR);
         if ($this->requiredEncAttributes == FALSE) {
-            goto zf;
+            goto PN;
         }
-        $this->addEncryptedAttributeStatement($V1);
-        goto vY;
-        zf:
-        $this->addAttributeStatement($V1);
-        vY:
+        $this->addEncryptedAttributeStatement($QR);
+        goto Sb;
+        PN:
+        $this->addAttributeStatement($QR);
+        Sb:
         if (!($this->signatureKey !== NULL)) {
-            goto JW;
+            goto Ab;
         }
-        Utilities::insertSignature($this->signatureKey, $this->certificates, $V1, $Pz->nextSibling);
-        JW:
-        return $V1;
+        Utilities::insertSignature($this->signatureKey, $this->certificates, $QR, $JS->nextSibling);
+        Ab:
+        return $QR;
     }
-    private function addSubject(DOMElement $V1)
+    private function addSubject(DOMElement $QR)
     {
         if (!($this->nameId === NULL && $this->encryptedNameId === NULL)) {
-            goto dm;
+            goto Pg;
         }
         return;
-        dm:
-        $mO = $V1->ownerDocument->createElementNS("\x75\162\x6e\72\157\x61\x73\151\163\72\156\141\155\x65\x73\x3a\164\x63\x3a\123\101\x4d\114\x3a\x32\x2e\60\72\141\163\163\x65\x72\164\151\157\x6e", "\163\141\x6d\x6c\72\x53\x75\142\x6a\x65\x63\x74");
-        $V1->appendChild($mO);
+        Pg:
+        $gO = $QR->ownerDocument->createElementNS("\x75\162\x6e\72\157\x61\163\x69\163\72\156\x61\x6d\x65\163\72\164\x63\x3a\123\101\115\114\x3a\62\56\x30\72\x61\x73\163\145\x72\164\151\157\156", "\163\141\x6d\154\72\x53\x75\x62\x6a\x65\143\x74");
+        $QR->appendChild($gO);
         if ($this->encryptedNameId === NULL) {
-            goto LE;
+            goto b8;
         }
-        $QC = $mO->ownerDocument->createElementNS("\165\162\x6e\72\157\141\x73\151\x73\x3a\156\141\155\145\x73\x3a\x74\143\72\x53\101\x4d\x4c\x3a\x32\56\x30\72\x61\163\x73\x65\x72\164\x69\x6f\156", "\x73\x61\x6d\x6c\72" . "\x45\156\x63\x72\x79\x70\x74\x65\144\111\x44");
-        $mO->appendChild($QC);
-        $QC->appendChild($mO->ownerDocument->importNode($this->encryptedNameId, TRUE));
-        goto iy;
-        LE:
-        Utilities::addNameId($mO, $this->nameId);
-        iy:
-        foreach ($this->SubjectConfirmation as $rX) {
-            $rX->toXML($mO);
-            vi:
+        $Gh = $gO->ownerDocument->createElementNS("\165\162\156\72\x6f\x61\163\x69\x73\x3a\156\141\x6d\145\163\x3a\x74\143\72\123\x41\x4d\x4c\x3a\62\x2e\x30\72\141\163\163\145\x72\x74\151\157\156", "\163\x61\155\x6c\72" . "\105\x6e\143\x72\x79\160\x74\x65\144\x49\104");
+        $gO->appendChild($Gh);
+        $Gh->appendChild($gO->ownerDocument->importNode($this->encryptedNameId, TRUE));
+        goto bZ;
+        b8:
+        Utilities::addNameId($gO, $this->nameId);
+        bZ:
+        foreach ($this->SubjectConfirmation as $Gv) {
+            $Gv->toXML($gO);
+            Gf:
         }
-        M9:
+        Qd:
     }
-    private function addConditions(DOMElement $V1)
+    private function addConditions(DOMElement $QR)
     {
-        $XU = $V1->ownerDocument;
-        $De = $XU->createElementNS("\x75\162\x6e\72\x6f\141\x73\x69\163\72\156\141\155\145\163\72\x74\x63\72\123\x41\x4d\114\72\x32\56\60\x3a\x61\163\x73\145\x72\x74\x69\157\x6e", "\x73\141\x6d\154\72\103\157\156\x64\x69\x74\x69\x6f\x6e\x73");
-        $V1->appendChild($De);
+        $RJ = $QR->ownerDocument;
+        $Kh = $RJ->createElementNS("\165\x72\156\72\157\141\163\151\163\x3a\156\141\155\x65\x73\72\164\143\x3a\x53\x41\x4d\114\x3a\62\56\60\x3a\141\x73\x73\x65\x72\164\151\x6f\x6e", "\163\141\x6d\154\x3a\103\x6f\156\144\x69\x74\151\x6f\x6e\x73");
+        $QR->appendChild($Kh);
         if (!($this->notBefore !== NULL)) {
-            goto Wg;
+            goto n4;
         }
-        $De->setAttribute("\x4e\x6f\x74\102\145\x66\x6f\x72\x65", gmdate("\x59\x2d\155\55\144\134\x54\110\x3a\151\72\163\134\132", $this->notBefore));
-        Wg:
+        $Kh->setAttribute("\x4e\157\x74\102\x65\x66\157\x72\145", gmdate("\131\55\x6d\55\144\x5c\x54\110\72\x69\x3a\163\134\x5a", $this->notBefore));
+        n4:
         if (!($this->notOnOrAfter !== NULL)) {
-            goto TU;
+            goto ZP;
         }
-        $De->setAttribute("\116\x6f\x74\x4f\x6e\117\x72\101\146\x74\x65\162", gmdate("\131\55\155\55\144\134\124\x48\x3a\x69\x3a\163\134\x5a", $this->notOnOrAfter));
-        TU:
+        $Kh->setAttribute("\x4e\157\x74\x4f\156\x4f\x72\101\x66\x74\x65\162", gmdate("\131\55\x6d\x2d\144\x5c\124\110\72\151\x3a\x73\134\132", $this->notOnOrAfter));
+        ZP:
         if (!($this->validAudiences !== NULL)) {
-            goto DZ;
+            goto Fq;
         }
-        $iS = $XU->createElementNS("\165\162\x6e\72\x6f\x61\163\151\163\72\x6e\x61\155\145\x73\72\164\143\x3a\123\101\x4d\114\x3a\x32\x2e\60\x3a\x61\163\163\145\162\164\x69\x6f\156", "\x73\141\155\x6c\x3a\x41\165\x64\x69\x65\x6e\143\145\122\145\x73\164\162\151\143\x74\x69\157\156");
-        $De->appendChild($iS);
-        Utilities::addStrings($iS, "\165\162\x6e\72\x6f\141\163\151\163\72\x6e\141\x6d\x65\x73\72\x74\143\72\123\101\x4d\x4c\x3a\x32\x2e\x30\x3a\x61\x73\x73\145\x72\164\x69\x6f\156", "\x73\141\155\154\x3a\x41\165\144\151\145\x6e\143\x65", FALSE, $this->validAudiences);
-        DZ:
+        $i_ = $RJ->createElementNS("\165\162\x6e\x3a\157\x61\x73\151\163\72\x6e\x61\155\145\163\x3a\164\x63\x3a\x53\x41\x4d\x4c\72\x32\56\60\72\141\x73\x73\145\x72\164\x69\157\x6e", "\163\x61\155\154\72\101\165\x64\151\x65\156\x63\x65\x52\x65\x73\164\162\151\x63\x74\x69\157\156");
+        $Kh->appendChild($i_);
+        Utilities::addStrings($i_, "\x75\162\x6e\72\157\x61\x73\x69\x73\72\156\x61\x6d\x65\x73\x3a\x74\x63\72\123\x41\115\114\72\x32\56\60\72\x61\163\x73\x65\162\164\151\x6f\156", "\x73\141\x6d\x6c\72\101\x75\x64\x69\x65\156\x63\x65", FALSE, $this->validAudiences);
+        Fq:
     }
-    private function addAuthnStatement(DOMElement $V1)
+    private function addAuthnStatement(DOMElement $QR)
     {
         if (!($this->authnInstant === NULL || $this->authnContextClassRef === NULL && $this->authnContextDecl === NULL && $this->authnContextDeclRef === NULL)) {
-            goto Ev;
+            goto RX;
         }
         return;
-        Ev:
-        $XU = $V1->ownerDocument;
-        $uD = $XU->createElementNS("\165\x72\156\72\x6f\141\163\151\x73\72\x6e\141\155\x65\163\x3a\x74\x63\72\123\x41\x4d\114\72\62\56\x30\x3a\x61\163\163\145\162\164\151\x6f\156", "\x73\x61\155\x6c\72\x41\x75\x74\150\156\x53\x74\141\164\x65\155\x65\156\x74");
-        $V1->appendChild($uD);
-        $uD->setAttribute("\x41\x75\x74\150\156\x49\x6e\163\164\x61\x6e\164", gmdate("\x59\x2d\155\55\144\134\124\x48\72\151\x3a\163\134\x5a", $this->authnInstant));
+        RX:
+        $RJ = $QR->ownerDocument;
+        $K6 = $RJ->createElementNS("\165\162\x6e\72\157\141\163\151\163\72\156\141\x6d\145\x73\72\164\x63\72\x53\x41\115\114\x3a\62\x2e\x30\72\141\x73\163\x65\162\164\151\x6f\156", "\x73\x61\x6d\154\72\x41\165\x74\x68\156\x53\x74\x61\164\x65\x6d\x65\x6e\164");
+        $QR->appendChild($K6);
+        $K6->setAttribute("\101\x75\164\150\x6e\111\156\163\x74\141\156\x74", gmdate("\131\55\x6d\55\x64\x5c\x54\x48\x3a\151\72\163\134\132", $this->authnInstant));
         if (!($this->sessionNotOnOrAfter !== NULL)) {
-            goto Ta;
+            goto mA;
         }
-        $uD->setAttribute("\123\145\x73\163\151\x6f\x6e\116\x6f\x74\117\156\117\162\101\x66\164\x65\162", gmdate("\x59\55\x6d\55\144\x5c\124\x48\x3a\x69\x3a\163\134\x5a", $this->sessionNotOnOrAfter));
-        Ta:
+        $K6->setAttribute("\123\145\x73\163\151\x6f\156\x4e\157\x74\x4f\x6e\x4f\x72\x41\x66\164\x65\162", gmdate("\x59\x2d\x6d\x2d\144\134\x54\x48\x3a\x69\x3a\163\134\x5a", $this->sessionNotOnOrAfter));
+        mA:
         if (!($this->sessionIndex !== NULL)) {
-            goto t7;
+            goto fq;
         }
-        $uD->setAttribute("\x53\145\x73\163\x69\157\x6e\111\156\x64\x65\170", $this->sessionIndex);
-        t7:
-        $Sh = $XU->createElementNS("\165\162\x6e\x3a\x6f\x61\x73\151\163\x3a\156\x61\x6d\x65\x73\72\164\143\72\x53\x41\x4d\x4c\x3a\x32\56\60\72\x61\x73\x73\x65\x72\x74\151\157\x6e", "\163\141\155\154\x3a\101\165\164\150\156\103\157\156\x74\x65\170\164");
-        $uD->appendChild($Sh);
+        $K6->setAttribute("\123\x65\x73\x73\151\157\156\x49\156\x64\145\x78", $this->sessionIndex);
+        fq:
+        $RR = $RJ->createElementNS("\165\162\156\x3a\157\141\163\x69\x73\x3a\156\x61\x6d\145\x73\x3a\x74\143\72\123\x41\x4d\x4c\72\x32\x2e\x30\72\x61\163\x73\x65\162\x74\151\157\x6e", "\x73\x61\x6d\x6c\72\101\x75\x74\x68\156\x43\157\156\x74\x65\x78\x74");
+        $K6->appendChild($RR);
         if (empty($this->authnContextClassRef)) {
-            goto u6;
+            goto wl;
         }
-        Utilities::addString($Sh, "\165\x72\x6e\x3a\x6f\x61\163\x69\163\72\x6e\141\x6d\145\x73\x3a\x74\x63\x3a\x53\x41\x4d\114\72\x32\56\60\72\141\163\x73\x65\x72\164\151\157\x6e", "\x73\x61\x6d\154\x3a\x41\165\164\x68\x6e\x43\157\156\x74\145\170\164\103\x6c\x61\x73\x73\x52\145\146", $this->authnContextClassRef);
-        u6:
+        Utilities::addString($RR, "\x75\162\x6e\72\x6f\141\x73\151\163\72\x6e\141\155\145\163\72\x74\143\72\123\x41\x4d\x4c\72\x32\56\60\x3a\141\163\x73\145\162\x74\x69\x6f\156", "\163\x61\x6d\154\x3a\101\x75\164\x68\156\x43\x6f\156\x74\145\x78\164\103\x6c\141\x73\x73\122\145\x66", $this->authnContextClassRef);
+        wl:
         if (empty($this->authnContextDecl)) {
-            goto ZM;
+            goto pB;
         }
-        $this->authnContextDecl->toXML($Sh);
-        ZM:
+        $this->authnContextDecl->toXML($RR);
+        pB:
         if (empty($this->authnContextDeclRef)) {
-            goto rV;
+            goto Un;
         }
-        Utilities::addString($Sh, "\x75\x72\156\72\157\141\x73\151\163\x3a\x6e\141\x6d\x65\x73\72\x74\143\x3a\123\x41\115\x4c\72\62\56\x30\x3a\141\163\163\x65\162\x74\151\157\x6e", "\163\141\x6d\x6c\72\x41\x75\164\x68\x6e\103\x6f\x6e\x74\145\170\164\x44\145\143\x6c\x52\x65\146", $this->authnContextDeclRef);
-        rV:
-        Utilities::addStrings($Sh, "\165\x72\x6e\72\157\x61\x73\151\x73\x3a\x6e\x61\x6d\145\x73\72\x74\x63\x3a\x53\x41\x4d\114\x3a\62\56\60\72\x61\x73\163\x65\162\x74\151\157\156", "\x73\141\155\154\x3a\x41\165\x74\x68\145\156\164\151\x63\141\164\x69\x6e\147\x41\x75\164\150\157\162\x69\164\171", FALSE, $this->AuthenticatingAuthority);
+        Utilities::addString($RR, "\165\162\x6e\x3a\157\x61\163\x69\163\72\x6e\x61\x6d\x65\x73\72\164\143\x3a\x53\101\x4d\114\72\62\56\60\x3a\x61\163\163\145\x72\x74\151\157\x6e", "\x73\x61\x6d\x6c\x3a\101\x75\164\x68\x6e\103\157\x6e\x74\145\x78\x74\104\x65\143\x6c\122\145\146", $this->authnContextDeclRef);
+        Un:
+        Utilities::addStrings($RR, "\165\162\156\72\x6f\x61\x73\x69\163\72\x6e\141\155\145\163\72\x74\143\72\123\101\115\x4c\x3a\x32\56\x30\x3a\x61\163\x73\145\x72\x74\x69\157\x6e", "\163\x61\x6d\154\72\101\165\x74\x68\x65\x6e\164\x69\x63\x61\x74\151\x6e\147\x41\165\x74\x68\x6f\x72\x69\x74\171", FALSE, $this->AuthenticatingAuthority);
     }
-    private function addAttributeStatement(DOMElement $V1)
+    private function addAttributeStatement(DOMElement $QR)
     {
         if (!empty($this->attributes)) {
-            goto Ih;
+            goto IC;
         }
         return;
-        Ih:
-        $XU = $V1->ownerDocument;
-        $lH = $XU->createElementNS("\x75\162\x6e\x3a\157\x61\163\151\163\72\x6e\x61\155\x65\163\72\x74\143\x3a\123\x41\115\x4c\72\x32\56\60\x3a\x61\x73\163\x65\x72\164\151\157\156", "\163\141\x6d\x6c\72\x41\x74\164\162\x69\142\x75\164\145\x53\164\x61\164\145\155\145\156\x74");
-        $V1->appendChild($lH);
-        foreach ($this->attributes as $cg => $EP) {
-            $Aa = $XU->createElementNS("\x75\x72\x6e\x3a\157\141\163\x69\163\72\156\141\155\145\x73\x3a\164\x63\72\x53\x41\x4d\x4c\x3a\62\56\x30\x3a\141\163\x73\x65\x72\164\151\x6f\x6e", "\163\141\x6d\154\x3a\x41\x74\x74\162\151\x62\x75\164\x65");
-            $lH->appendChild($Aa);
-            $Aa->setAttribute("\116\141\x6d\x65", $cg);
-            if (!($this->nameFormat !== "\x75\x72\x6e\72\157\x61\x73\151\163\72\156\x61\x6d\x65\x73\x3a\x74\143\x3a\x53\x41\115\114\72\62\x2e\x30\x3a\x61\x74\x74\x72\x6e\x61\155\x65\x2d\146\x6f\162\x6d\x61\x74\72\x75\156\x73\x70\145\x63\x69\x66\151\x65\x64")) {
-                goto Jj;
+        IC:
+        $RJ = $QR->ownerDocument;
+        $hX = $RJ->createElementNS("\165\x72\x6e\x3a\x6f\x61\x73\151\x73\x3a\156\141\x6d\145\163\72\x74\x63\72\123\101\115\114\x3a\x32\x2e\x30\72\141\163\x73\145\x72\x74\x69\157\156", "\163\141\x6d\x6c\72\x41\164\x74\x72\x69\x62\165\x74\x65\x53\164\141\164\x65\x6d\145\156\164");
+        $QR->appendChild($hX);
+        foreach ($this->attributes as $wL => $nJ) {
+            $MB = $RJ->createElementNS("\x75\x72\x6e\x3a\157\x61\x73\x69\163\x3a\x6e\141\x6d\x65\x73\x3a\x74\x63\72\x53\101\x4d\114\x3a\62\x2e\60\72\x61\x73\x73\x65\x72\x74\x69\157\156", "\x73\141\155\x6c\x3a\x41\x74\x74\162\151\x62\165\164\x65");
+            $hX->appendChild($MB);
+            $MB->setAttribute("\116\x61\155\145", $wL);
+            if (!($this->nameFormat !== "\x75\x72\x6e\72\157\x61\x73\x69\x73\72\156\141\x6d\145\x73\72\164\x63\x3a\x53\x41\x4d\114\x3a\62\56\60\x3a\x61\x74\164\162\156\141\x6d\145\55\x66\x6f\x72\x6d\x61\164\x3a\165\x6e\163\x70\x65\x63\x69\x66\x69\145\144")) {
+                goto QA;
             }
-            $Aa->setAttribute("\116\141\x6d\145\106\x6f\162\x6d\141\164", $this->nameFormat);
-            Jj:
-            foreach ($EP as $qO) {
-                if (is_string($qO)) {
-                    goto gQ;
+            $MB->setAttribute("\116\141\155\x65\106\x6f\x72\155\x61\164", $this->nameFormat);
+            QA:
+            foreach ($nJ as $ar) {
+                if (is_string($ar)) {
+                    goto mm;
                 }
-                if (is_int($qO)) {
-                    goto j2;
+                if (is_int($ar)) {
+                    goto K8;
                 }
-                $dE = NULL;
-                goto eB;
-                gQ:
-                $dE = "\170\163\x3a\163\164\x72\151\x6e\147";
-                goto eB;
-                j2:
-                $dE = "\x78\163\72\x69\156\164\145\147\145\162";
-                eB:
-                $WZ = $XU->createElementNS("\x75\162\x6e\x3a\157\141\163\151\x73\x3a\156\141\155\145\163\72\x74\143\x3a\123\101\115\x4c\x3a\62\x2e\x30\x3a\x61\163\163\x65\x72\164\x69\x6f\x6e", "\x73\x61\x6d\x6c\x3a\101\164\164\x72\x69\x62\x75\164\145\x56\x61\154\165\145");
-                $Aa->appendChild($WZ);
-                if (!($dE !== NULL)) {
-                    goto px;
+                $S5 = NULL;
+                goto du;
+                mm:
+                $S5 = "\x78\x73\72\x73\x74\x72\151\156\147";
+                goto du;
+                K8:
+                $S5 = "\170\163\x3a\151\x6e\x74\145\x67\x65\162";
+                du:
+                $Kw = $RJ->createElementNS("\x75\x72\156\72\x6f\x61\x73\151\x73\x3a\156\x61\155\145\x73\72\x74\x63\x3a\x53\101\x4d\114\72\x32\56\x30\72\141\x73\163\x65\x72\164\x69\157\156", "\163\141\155\154\72\x41\164\x74\x72\151\x62\x75\164\x65\x56\141\x6c\x75\x65");
+                $MB->appendChild($Kw);
+                if (!($S5 !== NULL)) {
+                    goto Kg;
                 }
-                $WZ->setAttributeNS("\x68\164\x74\160\x3a\57\x2f\167\x77\167\x2e\167\63\56\157\162\x67\57\62\60\x30\x31\57\x58\115\x4c\123\x63\x68\x65\x6d\141\55\x69\x6e\163\x74\141\156\143\145", "\170\163\151\x3a\x74\171\x70\x65", $dE);
-                px:
-                if (!is_null($qO)) {
-                    goto Nv;
+                $Kw->setAttributeNS("\x68\164\164\160\72\x2f\57\167\167\x77\x2e\x77\63\56\x6f\162\147\57\x32\x30\x30\61\x2f\130\115\114\x53\x63\x68\x65\155\x61\55\151\156\x73\164\x61\156\x63\x65", "\170\163\x69\x3a\x74\171\x70\x65", $S5);
+                Kg:
+                if (!is_null($ar)) {
+                    goto SP;
                 }
-                $WZ->setAttributeNS("\150\164\x74\160\72\x2f\57\x77\x77\x77\x2e\x77\63\56\x6f\x72\147\57\62\60\60\61\x2f\x58\x4d\114\x53\143\x68\145\x6d\141\x2d\151\156\x73\x74\x61\x6e\143\145", "\170\x73\151\x3a\x6e\x69\154", "\x74\162\165\x65");
-                Nv:
-                if ($qO instanceof DOMNodeList) {
-                    goto GQ;
+                $Kw->setAttributeNS("\x68\x74\164\160\x3a\57\57\x77\167\x77\x2e\x77\x33\56\x6f\x72\147\57\x32\60\x30\61\57\130\x4d\x4c\123\143\150\145\x6d\141\55\x69\156\x73\164\x61\x6e\143\145", "\170\163\151\72\x6e\x69\x6c", "\x74\162\x75\145");
+                SP:
+                if ($ar instanceof DOMNodeList) {
+                    goto S1;
                 }
-                $WZ->appendChild($XU->createTextNode($qO));
-                goto m2;
-                GQ:
-                $n5 = 0;
-                rp:
-                if (!($n5 < $qO->length)) {
-                    goto ii;
+                $Kw->appendChild($RJ->createTextNode($ar));
+                goto S2;
+                S1:
+                $QP = 0;
+                w1:
+                if (!($QP < $ar->length)) {
+                    goto w4;
                 }
-                $SP = $XU->importNode($qO->item($n5), TRUE);
-                $WZ->appendChild($SP);
-                O3:
-                $n5++;
-                goto rp;
-                ii:
-                m2:
-                HI:
+                $OZ = $RJ->importNode($ar->item($QP), TRUE);
+                $Kw->appendChild($OZ);
+                Tc:
+                $QP++;
+                goto w1;
+                w4:
+                S2:
+                XY:
             }
-            Ia:
-            lR:
+            WZ:
+            f3:
         }
-        DG:
+        ev:
     }
-    private function addEncryptedAttributeStatement(DOMElement $V1)
+    private function addEncryptedAttributeStatement(DOMElement $QR)
     {
         if (!($this->requiredEncAttributes == FALSE)) {
-            goto Sy;
+            goto l0;
         }
         return;
-        Sy:
-        $XU = $V1->ownerDocument;
-        $lH = $XU->createElementNS("\x75\162\x6e\72\157\141\x73\151\x73\x3a\x6e\141\x6d\x65\163\72\164\x63\72\123\101\x4d\114\72\x32\x2e\60\72\x61\163\x73\x65\162\164\151\157\x6e", "\163\x61\155\154\72\x41\164\164\x72\151\x62\x75\x74\x65\123\164\x61\164\145\155\145\x6e\x74");
-        $V1->appendChild($lH);
-        foreach ($this->attributes as $cg => $EP) {
-            $Rl = new DOMDocument();
-            $Aa = $Rl->createElementNS("\165\x72\156\72\157\x61\x73\151\163\72\156\x61\x6d\145\x73\72\x74\143\72\123\101\x4d\114\x3a\62\x2e\60\x3a\141\163\x73\145\x72\x74\151\157\x6e", "\163\x61\155\x6c\72\x41\164\x74\x72\151\x62\x75\x74\x65");
-            $Aa->setAttribute("\116\141\x6d\x65", $cg);
-            $Rl->appendChild($Aa);
-            if (!($this->nameFormat !== "\165\x72\156\72\157\x61\163\x69\x73\x3a\156\x61\155\145\163\72\x74\x63\72\123\101\115\x4c\72\x32\56\x30\x3a\x61\x74\x74\x72\156\x61\155\x65\55\146\x6f\162\155\x61\x74\x3a\x75\156\x73\x70\145\143\151\146\151\145\x64")) {
-                goto UO;
+        l0:
+        $RJ = $QR->ownerDocument;
+        $hX = $RJ->createElementNS("\165\162\x6e\x3a\x6f\141\x73\x69\163\72\156\x61\155\x65\163\72\164\x63\72\x53\x41\115\x4c\x3a\x32\56\x30\x3a\x61\x73\163\145\x72\x74\151\x6f\x6e", "\163\x61\x6d\154\x3a\x41\x74\164\162\x69\142\165\x74\x65\x53\164\141\164\x65\155\x65\x6e\x74");
+        $QR->appendChild($hX);
+        foreach ($this->attributes as $wL => $nJ) {
+            $Vo = new DOMDocument();
+            $MB = $Vo->createElementNS("\165\x72\x6e\x3a\157\141\x73\151\163\72\x6e\141\x6d\x65\163\72\x74\143\x3a\123\101\115\114\72\x32\x2e\60\72\141\x73\163\145\x72\164\x69\157\156", "\163\141\155\154\72\x41\x74\x74\x72\151\x62\165\x74\x65");
+            $MB->setAttribute("\116\141\155\145", $wL);
+            $Vo->appendChild($MB);
+            if (!($this->nameFormat !== "\165\x72\156\72\157\141\x73\151\163\72\x6e\141\155\x65\163\72\164\x63\x3a\x53\x41\x4d\114\72\62\x2e\x30\x3a\x61\x74\x74\162\x6e\141\155\145\x2d\146\157\x72\155\141\x74\x3a\x75\156\x73\160\145\143\151\146\x69\x65\x64")) {
+                goto cM;
             }
-            $Aa->setAttribute("\116\x61\x6d\x65\x46\x6f\162\x6d\141\164", $this->nameFormat);
-            UO:
-            foreach ($EP as $qO) {
-                if (is_string($qO)) {
-                    goto Yz;
+            $MB->setAttribute("\x4e\141\155\x65\106\157\162\x6d\141\164", $this->nameFormat);
+            cM:
+            foreach ($nJ as $ar) {
+                if (is_string($ar)) {
+                    goto hO;
                 }
-                if (is_int($qO)) {
-                    goto tb;
+                if (is_int($ar)) {
+                    goto ds;
                 }
-                $dE = NULL;
-                goto l0;
-                Yz:
-                $dE = "\170\163\72\163\x74\162\x69\x6e\147";
-                goto l0;
-                tb:
-                $dE = "\x78\163\72\x69\156\164\x65\x67\145\162";
-                l0:
-                $WZ = $Rl->createElementNS("\165\x72\x6e\x3a\157\x61\x73\x69\163\72\156\141\155\x65\163\72\164\143\x3a\x53\101\115\114\72\x32\x2e\x30\x3a\141\163\163\x65\x72\x74\x69\157\156", "\x73\x61\x6d\154\72\101\x74\x74\162\x69\142\165\164\145\x56\141\154\x75\145");
-                $Aa->appendChild($WZ);
-                if (!($dE !== NULL)) {
-                    goto ad;
+                $S5 = NULL;
+                goto lL;
+                hO:
+                $S5 = "\x78\163\72\x73\x74\162\151\156\x67";
+                goto lL;
+                ds:
+                $S5 = "\170\163\x3a\x69\x6e\x74\x65\x67\145\x72";
+                lL:
+                $Kw = $Vo->createElementNS("\165\x72\156\x3a\x6f\141\x73\151\x73\72\x6e\x61\x6d\x65\x73\72\164\x63\x3a\x53\x41\115\x4c\72\62\x2e\60\72\141\163\163\145\x72\164\151\x6f\x6e", "\163\141\155\154\72\101\164\x74\162\x69\142\165\x74\x65\126\x61\154\x75\x65");
+                $MB->appendChild($Kw);
+                if (!($S5 !== NULL)) {
+                    goto fO;
                 }
-                $WZ->setAttributeNS("\x68\x74\164\160\x3a\x2f\x2f\x77\167\167\x2e\x77\63\x2e\157\162\147\x2f\62\x30\60\x31\x2f\130\115\114\x53\x63\x68\x65\155\141\55\151\x6e\x73\x74\x61\x6e\x63\145", "\170\x73\151\x3a\x74\171\x70\145", $dE);
-                ad:
-                if ($qO instanceof DOMNodeList) {
-                    goto gG;
+                $Kw->setAttributeNS("\150\x74\x74\x70\72\x2f\x2f\x77\x77\x77\56\167\63\x2e\x6f\x72\147\x2f\62\60\60\x31\57\x58\x4d\114\x53\x63\150\145\155\141\x2d\x69\156\x73\x74\141\x6e\143\x65", "\x78\x73\151\72\x74\x79\160\145", $S5);
+                fO:
+                if ($ar instanceof DOMNodeList) {
+                    goto bw;
                 }
-                $WZ->appendChild($Rl->createTextNode($qO));
-                goto CI;
-                gG:
-                $n5 = 0;
-                Lo:
-                if (!($n5 < $qO->length)) {
-                    goto Js;
+                $Kw->appendChild($Vo->createTextNode($ar));
+                goto Km;
+                bw:
+                $QP = 0;
+                hQ:
+                if (!($QP < $ar->length)) {
+                    goto ki;
                 }
-                $SP = $Rl->importNode($qO->item($n5), TRUE);
-                $WZ->appendChild($SP);
-                e2:
-                $n5++;
-                goto Lo;
-                Js:
-                CI:
-                zV:
+                $OZ = $Vo->importNode($ar->item($QP), TRUE);
+                $Kw->appendChild($OZ);
+                xm:
+                $QP++;
+                goto hQ;
+                ki:
+                Km:
+                Wq:
             }
-            Pc:
-            $O2 = new XMLSecEnc();
-            $O2->setNode($Rl->documentElement);
-            $O2->type = "\150\x74\x74\160\x3a\x2f\x2f\167\x77\167\56\167\x33\56\157\162\147\57\62\60\x30\61\x2f\x30\x34\57\170\x6d\x6c\x65\156\143\43\105\x6c\145\x6d\145\x6e\164";
-            $mI = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
-            $mI->generateSessionKey();
-            $O2->encryptKey($this->encryptionKey, $mI);
-            $lR = $O2->encryptNode($mI);
-            $KV = $XU->createElementNS("\165\162\x6e\72\x6f\x61\x73\151\163\x3a\x6e\x61\x6d\145\163\x3a\x74\x63\x3a\x53\101\x4d\114\72\62\x2e\60\72\141\163\163\x65\162\164\x69\157\x6e", "\163\141\x6d\154\x3a\105\156\143\162\171\160\x74\145\144\x41\x74\x74\x72\151\142\x75\164\x65");
-            $lH->appendChild($KV);
-            $mr = $XU->importNode($lR, TRUE);
-            $KV->appendChild($mr);
-            Qo:
+            bq:
+            $zl = new XMLSecEnc();
+            $zl->setNode($Vo->documentElement);
+            $zl->type = "\150\x74\164\160\72\57\57\167\x77\167\56\x77\x33\56\x6f\x72\x67\57\x32\x30\x30\x31\57\x30\x34\x2f\170\155\154\145\156\143\x23\105\x6c\x65\x6d\145\x6e\x74";
+            $Tl = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
+            $Tl->generateSessionKey();
+            $zl->encryptKey($this->encryptionKey, $Tl);
+            $bq = $zl->encryptNode($Tl);
+            $k3 = $RJ->createElementNS("\x75\162\156\72\x6f\x61\x73\x69\163\72\x6e\141\155\x65\163\x3a\164\143\72\123\101\115\x4c\x3a\x32\x2e\x30\x3a\141\x73\x73\145\162\164\151\x6f\156", "\163\141\x6d\x6c\72\105\x6e\143\162\x79\160\x74\x65\x64\x41\x74\164\162\x69\142\x75\164\x65");
+            $hX->appendChild($k3);
+            $d1 = $RJ->importNode($bq, TRUE);
+            $k3->appendChild($d1);
+            Pj:
         }
-        D3:
+        Os:
     }
 }

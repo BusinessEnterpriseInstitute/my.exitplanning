@@ -6,37 +6,37 @@ class MiniorangeSamlSupport
     public $email;
     public $phone;
     public $query;
-    public function __construct($Ry, $EZ, $hO)
+    public function __construct($aW, $Lh, $wu)
     {
-        $this->email = $Ry;
-        $this->phone = $EZ;
-        $this->query = $hO;
+        $this->email = $aW;
+        $this->phone = $Lh;
+        $this->query = $wu;
     }
     public function sendSupportQuery()
     {
-        $this->query = "\x5b\x44\x72\165\160\141\x6c\x2d\67\x20\x53\101\115\x4c\40\123\120\x20\105\x6e\x74\x65\x72\x70\x72\x69\163\x65\x20\x4d\x6f\x64\165\154\145\135\x20" . $this->query;
-        $If = array("\x63\157\x6d\x70\141\156\x79" => $_SERVER["\x53\x45\122\126\105\122\137\x4e\x41\115\x45"], "\145\x6d\141\151\x6c" => $this->email, "\143\143\105\155\141\x69\154" => "\x64\162\x75\160\141\154\x73\165\160\160\x6f\162\x74\x40\170\145\x63\165\x72\151\146\171\56\x63\157\155", "\x70\150\157\156\145" => $this->phone, "\161\165\x65\162\171" => $this->query, "\163\x75\142\152\145\x63\x74" => "\104\162\x75\x70\x61\x6c\x2d\67\x20\123\101\115\x4c\40\x53\120\40\105\156\x74\x65\x72\x70\162\x69\163\145\40\121\x75\145\x72\171");
-        $fQ = json_encode($If);
-        $Rq = MiniorangeSAMLConstants::BASE_URL . "\57\155\x6f\x61\163\57\162\145\x73\164\57\x63\x75\163\164\x6f\x6d\145\x72\x2f\143\157\156\x74\x61\x63\x74\x2d\x75\163";
-        $Yq = curl_init($Rq);
-        curl_setopt($Yq, CURLOPT_FOLLOWLOCATION, TRUE);
-        curl_setopt($Yq, CURLOPT_ENCODING, '');
-        curl_setopt($Yq, CURLOPT_RETURNTRANSFER, TRUE);
-        curl_setopt($Yq, CURLOPT_AUTOREFERER, TRUE);
-        curl_setopt($Yq, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt($Yq, CURLOPT_MAXREDIRS, 10);
-        curl_setopt($Yq, CURLOPT_HTTPHEADER, array("\103\x6f\x6e\x74\145\156\164\x2d\124\171\x70\145\72\40\x61\160\x70\154\x69\143\x61\164\x69\157\156\x2f\152\x73\x6f\x6e", "\x63\150\141\162\x73\x65\164\72\x20\x55\124\x46\55\70", "\101\165\x74\x68\157\x72\x69\x7a\141\164\x69\157\x6e\x3a\40\x42\x61\x73\151\x63"));
-        curl_setopt($Yq, CURLOPT_POST, TRUE);
-        curl_setopt($Yq, CURLOPT_POSTFIELDS, $fQ);
-        $Mj = curl_exec($Yq);
-        if (!curl_errno($Yq)) {
-            goto VF;
+        $this->query = "\133\x44\x72\165\x70\x61\154\55\x37\40\x53\x41\x4d\x4c\x20\123\120\40\127\x69\164\x68\x20\x4d\x75\x6c\164\x69\160\x6c\145\x20\111\x44\120\x20\115\x6f\x64\165\x6c\x65\x5d\40" . $this->query;
+        $LZ = array("\x63\x6f\x6d\x70\141\156\171" => $_SERVER["\123\x45\x52\126\x45\x52\x5f\x4e\x41\115\105"], "\145\x6d\141\x69\154" => $this->email, "\x63\x63\105\x6d\x61\x69\x6c" => "\x64\162\x75\160\141\154\163\165\160\x70\157\162\164\x40\170\145\143\x75\162\x69\146\171\56\x63\x6f\x6d", "\x70\150\x6f\156\145" => $this->phone, "\x71\165\x65\162\171" => $this->query, "\x73\x75\142\152\x65\x63\164" => "\104\x72\165\x70\x61\154\55\67\x20\123\x41\115\x4c\40\x53\120\x20\x57\151\x74\x68\40\115\x75\x6c\164\x69\x70\x6c\x65\x20\x49\x44\x50\40\121\x75\x65\x72\171");
+        $PD = json_encode($LZ);
+        $DM = MiniorangeSAMLConstants::BASE_URL . "\57\x6d\157\x61\x73\x2f\162\145\163\164\57\143\x75\x73\164\157\x6d\145\162\x2f\143\157\156\x74\141\143\164\55\x75\163";
+        $I9 = curl_init($DM);
+        curl_setopt($I9, CURLOPT_FOLLOWLOCATION, TRUE);
+        curl_setopt($I9, CURLOPT_ENCODING, '');
+        curl_setopt($I9, CURLOPT_RETURNTRANSFER, TRUE);
+        curl_setopt($I9, CURLOPT_AUTOREFERER, TRUE);
+        curl_setopt($I9, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($I9, CURLOPT_MAXREDIRS, 10);
+        curl_setopt($I9, CURLOPT_HTTPHEADER, array("\x43\157\x6e\164\145\156\164\55\x54\x79\x70\x65\72\x20\x61\x70\x70\154\x69\x63\141\164\151\157\156\x2f\152\163\x6f\156", "\143\x68\x61\x72\x73\145\x74\x3a\40\x55\124\106\x2d\70", "\x41\165\x74\x68\x6f\x72\151\172\x61\164\151\x6f\156\72\x20\102\141\163\x69\143"));
+        curl_setopt($I9, CURLOPT_POST, TRUE);
+        curl_setopt($I9, CURLOPT_POSTFIELDS, $PD);
+        $qc = curl_exec($I9);
+        if (!curl_errno($I9)) {
+            goto D5;
         }
-        $Cq = array("\x25\155\x65\x74\x68\x6f\x64" => "\163\145\156\x64\x53\165\160\160\x6f\x72\x74\x51\x75\145\162\171", "\45\x66\151\x6c\145" => "\155\151\156\x69\x6f\x72\141\x6e\147\x65\x5f\163\x61\x6d\154\x5f\x73\165\160\160\x6f\162\164\56\160\150\160", "\x25\x65\x72\x72\157\162" => curl_error($Yq));
-        watchdog("\x6d\151\156\151\x6f\x72\141\x6e\147\x65\x5f\163\141\x6d\x6c", "\143\125\x52\x4c\x20\x45\162\x72\x6f\x72\40\x61\164\x20\45\x6d\145\x74\x68\157\x64\x20\x6f\x66\x20\45\x66\x69\x6c\145\x3a\40\45\145\x72\x72\157\x72", $Cq);
+        $FK = array("\45\155\145\x74\x68\157\x64" => "\163\x65\156\x64\x53\165\160\160\x6f\162\164\x51\x75\x65\162\x79", "\x25\x66\x69\x6c\145" => "\155\x69\156\x69\157\x72\141\x6e\147\145\137\163\x61\155\x6c\137\x73\x75\160\160\x6f\162\164\x2e\160\150\160", "\x25\145\x72\x72\157\x72" => curl_error($I9));
+        watchdog("\155\x69\156\151\157\162\141\156\x67\145\137\163\x61\x6d\154", "\143\x55\x52\114\40\x45\x72\x72\x6f\x72\x20\141\x74\x20\x25\x6d\x65\x74\150\x6f\144\x20\157\x66\x20\45\146\151\x6c\x65\72\x20\45\x65\162\x72\x6f\x72", $FK);
         return FALSE;
-        VF:
-        curl_close($Yq);
+        D5:
+        curl_close($I9);
         return TRUE;
     }
 }
