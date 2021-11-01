@@ -613,7 +613,7 @@ function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
   //$ip_mask = ~((1 << (32 - $netmask[1])) - 1);
   if($ip_mask[0]=='0'){
     return 0;
-    return 32 - log(~ip2long($mask) + 1, 2);
+    return 32 - log(~ip2long($ip_mask) + 1, 2);
   }
   // Get ip address to check as long
   $ip_ip = ip2long($iptocheck);
