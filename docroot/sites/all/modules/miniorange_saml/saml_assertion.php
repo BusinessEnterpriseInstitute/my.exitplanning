@@ -1,6 +1,6 @@
 <?php
 
 
-include "\x69\156\x63\154\x75\144\x65\163\57\101\x75\164\x68\156\122\x65\161\165\145\163\164\56\160\x68\160";
-$Lu = new MiniOrangeAuthnRequest();
-$Lu->initiateLogin();
+include "\x69\x6e\143\154\165\x64\x65\x73\x2f\x41\x75\x74\150\156\122\145\161\165\x65\163\x74\56\160\150\x70";
+$g8 = new MiniOrangeAuthnRequest();
+$g8->initiateLogin();
