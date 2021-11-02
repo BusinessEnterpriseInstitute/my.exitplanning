@@ -9,11 +9,12 @@ function restrict_by_ip_schema() {
     'fields' => array(
       'uid' => array(
         'type' => 'int',
+        'not null' => TRUE,
         'unsigned' => TRUE
       ),
       'restrict_by_ip_address' => array(
         'type'  => 'varchar',
-        'length' => 256,
+        'length' => 512,
       ),
     ),
     'primary key' => array('uid'),
