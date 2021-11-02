@@ -4,7 +4,7 @@
  * @file
  * Allows the admin to select which ip addresses role or a user  can login from for this site
  * Some of the code below is taken from the cck_ipaddress_module
-*/
+ */
 
 /**
  * Implementation of hook_help()
@@ -16,7 +16,7 @@ function restrict_by_ip_help($section) {
     case 'admin/help#restrict_by_ip':
       $output = '<p>The site administrator can limit a user to only be able to login from certain IP Addresses or ranges of IP Addresses using CIDR notation. Individual roles may also be limited to a those from specified IP addresses and rangers.</p>';
       break;
-    }
+  }
   return $output;
 }
 
@@ -546,7 +546,7 @@ function _restrict_by_ip_get_ip() {
  * section is valid.
  */
 function _restrict_by_ip_validate_ip($ip_address) {
-  $ret = array('result' => TRUE, 'messages' => '');
+  $ret = array('result' => TRUE, 'messages' => array());
   $ipaddresses = explode(";", $ip_address);
 
   // Check each ip address individually
@@ -561,23 +561,23 @@ function _restrict_by_ip_validate_ip($ip_address) {
         // Check each octet is valid - numeric and 0 < value < 255
         for ($i=0; $i<count($ipaddr); $i++) {
           if ((!is_numeric($ipaddr[$i])) || ($ipaddr[$i] < 0) || ($ipaddr[$i] > 255)) {
-            $ret['messages'][] .= 'Illegal value for an IP Address. Each IP Address must be valid.  Check IP Address ' . $ipaddress;
+            $ret['messages'][] = "Illegal value for an IP Address. Each IP Address must be valid.  Check IP Address " . $ipaddress;
             $ret['result'] = FALSE;
           }
         }
         // Check cidr mask value - numeric and 0 < value < 33
         if((!is_numeric($cidr[1])) || ($cidr[1]<1) || ($cidr[1]>32)) {
-          $ret['messages'][] .= 'Illegal value for CIDR. Please correct CIDR with value of ' . $ipaddress;
+          $ret['messages'][] = "Illegal value for CIDR. Please correct CIDR with value of " . $ipaddress;
           $ret['result'] = FALSE;
         }
       }
       else {
-        $ret['messages'][] .= 'IP Address Incorrect Number of Octets. Check IP Address ' . $ipaddress;
+        $ret['messages'][] = "IP Address Incorrect Number of Octets. Check IP Address"  . $ipaddress;
         $ret['result'] = FALSE;
       }
     }
     else {
-      $ret['messages'][] .= 'IP Address in Incorrect Format. Check IP Address ' . $ipaddress;
+      $ret['messages'][] = "IP Address in Incorrect Format. Check IP Address " . $ipaddress;
       $ret['result'] = FALSE;
     }
 
@@ -585,7 +585,7 @@ function _restrict_by_ip_validate_ip($ip_address) {
     // by ensuring that the network address part is valid within the
     // CIDR block itself. If it's not, the notation is invalid.
     if ($ret['result'] && !_restrict_by_ip_cidrcheck($cidr[0], $ipaddress)) {
-      $ret['messages'][] .= 'The network address in the "'. $ipaddress . '" block is not valid.';
+      $ret['messages'][] = "The network address in the '". $ipaddress . "'block is not valid.";
       $ret['result'] = FALSE;
     }
 
