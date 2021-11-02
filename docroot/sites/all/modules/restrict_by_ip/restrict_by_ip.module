@@ -604,21 +604,24 @@ function _restrict_by_ip_validate_ip($ip_address) {
  * _restrict_by_ip_cidrcheck('192.168.10.100','192.168.10.0/24'); returns 1
  * _restrict_by_ip_cidrcheck('192.168.10.100','192.168.12.0/24'); returns 0
  */
-function _restrict_by_ip_cidrcheck($iptocheck, $ipslashcidr) {
-  // Separate ip address and cidr mask
-  $netmask = explode("/", $ipslashcidr);
-  // Get valid network as long
-  $ip_net = ip2long($netmask[0]);
-  // Get valid network mask as long
-  $ip_mask = ~((1 << (32 - $netmask[1])) - 1);
-  // Get ip address to check as long
-  $ip_ip = ip2long($iptocheck);
-  // Mask ip address to check to get subnet
-  $ip_ip_net = $ip_ip & $ip_mask;
-  // Only returns 1 if the valid network
-  //and the subnet of the ip address
-  //to check are the same
-  return ($ip_ip_net == $ip_net);
+function _restrict_by_ip_cidrcheck($cidr, $chkip=null )
+{
+  // Assign IP / mask
+  list($ip,$mask) = explode("/",$cidr);
+
+  // Sanitize IP
+  $ip1 = preg_replace( '_(\d+\.\d+\.\d+\.\d+).*$_', '$1', "$ip.0.0.0" );
+
+  // Calculate range
+  $ip2 = long2ip( ip2long( $ip1 ) - 1 + ( 1 << ( 32 - $mask) ) );
+
+  // are we cidr range checking?
+  if ( $chkip != null && ! filter_var( $chkip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4) === false )
+  {
+    return ip2long( $ip1 ) <= ip2long( $chkip ) && ip2long( $ip2 ) >= ip2long( $chkip );
+  } else {
+    return "$ip1 - $ip2";
+  }
 }
 
 /**
