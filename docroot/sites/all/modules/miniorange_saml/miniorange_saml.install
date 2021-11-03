@@ -1,54 +1,70 @@
 <?php
+/**
+ * @file
+ * Installation file for miniOrange SAML Module.
+ */
+ 
+/**
+ * Implements hook_uninstall().
+ */
+ 
+function miniorange_saml_uninstall() {
+  variable_del('miniorange_saml_status');
+  variable_del('miniorange_config_status');
+  variable_del('miniorange_saml_customer_admin_email');
+  variable_del('miniorange_saml_customer_admin_phone');
+  variable_del('miniorange_saml_customer_admin_token');
+  variable_del('miniorange_saml_customer_id');
+  variable_del('miniorange_saml_customer_api_key');
+  variable_del('miniorange_saml_idp_name');
+  variable_del('miniorange_saml_idp_issuer');
+  variable_del('miniorange_saml_idp_login_url');
+  variable_del('miniorange_saml_idp_logout_url');
+  variable_del('miniorange_saml_idp_x509_certificate');
+  variable_del('miniorange_saml_enable_login');
+  variable_del('miniorange_saml_auto_redirect_to_idp');
+  variable_del('miniorange_saml_force_auth');
+  variable_del('miniorange_saml_enable_backdoor');
+  variable_del('miniorange_saml_auto_redirect_to_idp');
+  variable_del('miniorange_saml_license_key');
+  variable_del('miniorange_saml_default_relaystate');
+  variable_del('miniorange_saml_request_signed');
+  variable_del('miniorange_saml_http_binding');
+  variable_del('miniorange_saml_attrs_list');
+  variable_del('security_signature_algorithm');
+  variable_del('miniorange_saml_sp_upgrade_url');
+  
+}
 
 
-function miniorange_saml_uninstall()
-{
-    variable_del("\155\151\x6e\151\157\x72\x61\x6e\147\145\x5f\163\x61\155\154\x5f\x73\x74\x61\164\165\x73");
-    variable_del("\155\x69\156\151\157\162\141\156\147\145\x5f\x63\x6f\x6e\x66\x69\147\x5f\x73\164\141\164\x75\163");
-    variable_del("\155\x69\x6e\151\x6f\x72\x61\156\x67\x65\137\x73\141\155\154\137\143\165\x73\x74\x6f\155\x65\162\137\141\144\x6d\151\x6e\137\x65\x6d\141\x69\154");
-    variable_del("\x6d\151\156\x69\x6f\x72\141\156\x67\x65\x5f\x73\141\x6d\x6c\137\143\x75\x73\x74\x6f\155\145\162\137\x61\144\x6d\x69\156\137\160\x68\x6f\x6e\x65");
-    variable_del("\155\x69\x6e\151\x6f\x72\x61\156\x67\145\137\163\141\x6d\154\x5f\143\165\163\164\157\x6d\x65\162\x5f\141\x64\x6d\151\156\137\x74\x6f\x6b\x65\x6e");
-    variable_del("\155\x69\156\x69\157\162\x61\156\147\145\137\163\x61\155\x6c\137\143\165\x73\164\x6f\155\x65\162\137\151\144");
-    variable_del("\155\x69\156\x69\x6f\x72\x61\x6e\x67\x65\137\163\141\x6d\x6c\x5f\143\x75\x73\x74\157\155\145\162\137\141\x70\x69\x5f\x6b\x65\x79");
-    variable_del("\x6d\151\x6e\151\157\162\x61\x6e\147\x65\137\163\141\155\x6c\x5f\151\144\160\137\156\141\155\x65");
-    variable_del("\155\x69\x6e\x69\x6f\162\x61\156\147\145\x5f\x73\x61\155\x6c\x5f\x69\x64\160\x5f\151\x73\x73\x75\145\162");
-    variable_del("\155\x69\156\x69\x6f\162\141\x6e\x67\145\x5f\x73\141\x6d\x6c\x5f\x69\x64\160\x5f\x6c\157\x67\151\156\x5f\x75\162\154");
-    variable_del("\x6d\x69\x6e\x69\157\162\141\x6e\147\x65\137\163\141\x6d\x6c\137\151\144\160\x5f\154\157\x67\157\x75\x74\x5f\x75\x72\154");
-    variable_del("\155\151\x6e\151\157\162\x61\156\x67\x65\x5f\x73\141\155\x6c\x5f\151\x64\x70\x5f\x78\65\x30\71\137\143\145\x72\164\151\146\151\x63\x61\x74\145");
-    variable_del("\x6d\x69\x6e\151\157\x72\141\156\x67\145\x5f\x73\141\155\x6c\x5f\145\156\141\x62\154\x65\x5f\154\x6f\147\151\156");
-    variable_del("\155\151\156\151\157\x72\x61\x6e\147\x65\137\x73\141\x6d\x6c\x5f\141\x75\x74\157\137\162\145\144\151\162\x65\x63\x74\137\x74\157\x5f\x69\x64\160");
-    variable_del("\x6d\151\x6e\151\x6f\162\141\x6e\x67\145\x5f\163\x61\155\154\137\146\157\x72\x63\145\x5f\141\x75\164\150");
-    variable_del("\155\151\x6e\x69\x6f\x72\141\156\147\x65\137\x73\141\155\154\x5f\145\x6e\x61\x62\154\x65\x5f\x62\141\x63\x6b\144\x6f\x6f\x72");
-    variable_del("\x6d\x69\156\151\157\x72\x61\x6e\x67\x65\x5f\163\141\155\154\137\x61\165\164\x6f\x5f\x72\145\x64\151\162\x65\143\164\x5f\x74\x6f\x5f\x69\144\160");
-    variable_del("\155\x69\x6e\x69\x6f\162\x61\156\x67\145\137\163\x61\155\154\137\154\x69\143\145\x6e\x73\145\137\x6b\x65\171");
-    variable_del("\155\x69\156\151\157\162\141\x6e\x67\x65\x5f\x73\x61\x6d\x6c\x5f\x64\x65\146\x61\x75\x6c\164\x5f\162\x65\x6c\141\x79\x73\x74\141\164\x65");
-    variable_del("\155\151\x6e\x69\157\x72\141\156\147\x65\x5f\163\141\155\154\x5f\162\145\161\165\145\x73\164\x5f\163\151\147\156\x65\x64");
-    variable_del("\x6d\151\x6e\x69\x6f\162\141\x6e\x67\145\x5f\163\141\155\x6c\x5f\x68\164\x74\x70\x5f\142\x69\156\144\151\156\147");
-    variable_del("\155\x69\x6e\x69\x6f\162\x61\x6e\x67\x65\137\x73\x61\x6d\154\x5f\141\164\x74\162\x73\137\154\x69\163\164");
-    variable_del("\x73\145\x63\165\162\151\x74\x79\x5f\163\151\147\156\141\x74\165\x72\145\x5f\x61\154\147\x6f\x72\151\x74\x68\155");
-    variable_del("\155\151\156\x69\x6f\x72\141\x6e\147\x65\137\163\x61\155\x6c\x5f\x73\x70\x5f\165\x70\x67\162\141\x64\x65\137\165\x72\154");
+/**
+ * Implements hook_install().
+ */
+
+function miniorange_saml_install() {
+  variable_set('miniorange_saml_email_attribute', 'NameID');
+  variable_set('miniorange_saml_username_attribute', 'NameID');
+  variable_set('security_signature_algorithm', 'RSA_SHA256');
+  variable_set('miniorange_saml_idp_name', 'IdentityProvider');
+
 }
-function miniorange_saml_install()
-{
-    variable_set("\x6d\151\156\x69\157\x72\x61\x6e\147\145\137\x73\141\x6d\x6c\137\x65\155\141\x69\154\x5f\141\164\x74\162\151\x62\165\164\145", "\x4e\x61\x6d\x65\x49\x44");
-    variable_set("\155\151\156\151\x6f\162\141\x6e\147\x65\137\x73\x61\x6d\x6c\137\x75\163\145\x72\x6e\x61\x6d\x65\x5f\x61\x74\x74\162\151\142\165\164\145", "\116\x61\155\145\111\104");
-    variable_set("\x73\x65\x63\x75\x72\x69\x74\171\137\x73\x69\147\x6e\x61\164\165\x72\145\137\141\154\x67\157\162\151\164\150\x6d", "\122\x53\x41\x5f\123\x48\101\62\65\x36");
-    variable_set("\x6d\x69\x6e\x69\157\162\x61\x6e\x67\x65\137\163\141\x6d\x6c\137\151\144\160\x5f\156\x61\155\145", "\111\144\145\156\164\151\x74\171\x50\x72\157\166\x69\144\x65\x72");
-}
-function miniorange_saml_disable()
-{
-    if (!(variable_get("\x6d\151\156\151\x6f\x72\141\x6e\147\145\x5f\x73\141\155\154\x5f\154\151\143\145\x6e\x73\145\x5f\153\x65\x79", NULL) != NULL)) {
-        goto go;
-    }
-    $vQ = variable_get("\155\151\x6e\151\x6f\x72\141\156\x67\x65\x5f\163\141\x6d\x6c\x5f\143\165\x73\164\x6f\155\145\x72\137\141\144\155\x69\156\x5f\145\x6d\x61\151\x6c", NULL);
-    $EZ = variable_get("\155\151\156\x69\157\x72\141\x6e\147\145\x5f\163\141\x6d\154\x5f\143\165\x73\x74\157\x6d\145\162\137\x61\x64\x6d\151\156\x5f\x70\x68\x6f\x6e\145", NULL);
-    $kA = new MiniorangeSAMLCustomer($vQ, $EZ, NULL, NULL);
-    $sE = json_decode($kA->updateStatus());
-    if (!($sE->status == "\x53\x55\x43\103\x45\123\123")) {
-        goto nd;
-    }
-    variable_del("\x6d\x69\x6e\151\157\162\x61\x6e\x67\x65\137\x73\141\x6d\x6c\137\x6c\x69\143\x65\x6e\163\145\137\x6b\x65\171");
-    nd:
-    go:
-}
-?>
+
+
+/**
+ * Implements hook_disable().
+ */
+
+ function miniorange_saml_disable() {
+  
+    if(variable_get('miniorange_saml_license_key',NULL) != NULL){
+       $username = variable_get('miniorange_saml_customer_admin_email', NULL);
+      $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);       
+      $customer = new MiniorangeSAMLCustomer($username,$phone,NULL,NULL);
+      $response = json_decode($customer->updateStatus());
+	  if($response->status == 'SUCCESS')
+		  variable_del('miniorange_saml_license_key');
+    } 
+     
+ }
+
+ ?>

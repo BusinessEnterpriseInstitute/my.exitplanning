@@ -1,11 +1,21 @@
 <?php
+/**
+ * @file
+ * Contains constants class.
+ */
 
-
+/**
+ * @file
+ * This class represents constants used throughout project.
+ */
 class MiniorangeSAMLConstants
 {
-    const BASE_URL = "\150\164\164\x70\x73\72\57\57\x6c\157\147\x69\x6e\56\170\145\x63\165\x72\x69\x66\171\x2e\143\x6f\155";
-    const DEFAULT_PUBLIC_CERT_NAME = "\163\160\55\x63\x65\x72\x74\x69\146\151\143\141\164\145\x2e\x63\162\x74";
-    const CUSTOM_PUBLIC_CERT_NAME = "\103\x75\163\164\157\155\137\x50\165\142\154\151\x63\x5f\x43\x65\162\x74\x69\146\151\143\x61\x74\145\x2e\x63\162\164";
-    const DEFAULT_PRIVATE_KEY_NAME = "\163\160\x2d\x6b\x65\x79\x2e\153\145\171";
-    const CUSTOM_PRIVATE_KEY_NAME = "\103\x75\x73\x74\157\155\137\120\x72\151\x76\x61\164\x65\x5f\103\145\162\164\x69\x66\151\x63\141\x74\145\x2e\x6b\x65\x79";
+
+    const BASE_URL = 'https://login.xecurify.com';
+    const DEFAULT_PUBLIC_CERT_NAME='sp-certificate.crt';
+    const CUSTOM_PUBLIC_CERT_NAME='Custom_Public_Certificate.crt';
+    const DEFAULT_PRIVATE_KEY_NAME='sp-key.key';
+    const CUSTOM_PRIVATE_KEY_NAME='Custom_Private_Certificate.key';
+    const LICENSE_TYPE = 'DRUPAL_SAML_SP_ENTERPRISE_MODULE';
+
 }

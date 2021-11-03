@@ -1,7 +1,23 @@
 <?php
+/**
+ * This file is part of miniOrange SAML plugin.
+ *
+ * miniOrange SAML plugin is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * miniOrange SAML plugin is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with miniOrange SAML plugin.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+include_once 'Utilities.php';
 
-include_once "\125\x74\151\154\151\164\151\145\x73\x2e\x70\x68\x70";
 class SAML2_Assertion
 {
     private $id;
@@ -29,961 +45,1332 @@ class SAML2_Assertion
     private $requiredEncAttributes;
     private $SubjectConfirmation;
     protected $wasSignedAtConstruction = FALSE;
-    public function __construct(DOMElement $L_ = NULL)
+
+    public function __construct(DOMElement $xml = NULL)
     {
         $this->id = Utilities::generateId();
         $this->issueInstant = Utilities::generateTimestamp();
         $this->issuer = '';
         $this->authnInstant = Utilities::generateTimestamp();
         $this->attributes = array();
-        $this->nameFormat = "\x75\162\x6e\72\157\x61\163\151\x73\72\156\x61\155\x65\163\x3a\164\x63\x3a\123\101\115\114\x3a\x31\56\61\x3a\156\141\155\145\151\x64\55\x66\157\162\x6d\141\164\x3a\165\x6e\163\x70\x65\143\x69\146\151\x65\144";
+        $this->nameFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified';
         $this->certificates = array();
         $this->AuthenticatingAuthority = array();
         $this->SubjectConfirmation = array();
-        if (!($L_ === NULL)) {
-            goto mY;
+
+        if ($xml === NULL) {
+            return;
         }
-        return;
-        mY:
-        if (!($L_->localName === "\105\156\143\x72\171\160\164\145\x64\x41\163\163\x65\162\x74\x69\157\156")) {
-            goto x6;
+
+        if ($xml->localName === 'EncryptedAssertion') {
+            $data = Utilities::xpQuery($xml, './xenc:EncryptedData');
+            //$encryptedMethod =  Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo');
+            //$method = $encryptedMethod[0]->firstChild->firstChild->getAttribute("Algorithm");
+            $encryptedMethod = Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey');
+            $method = '';
+            if (empty($encryptedMethod)) {
+                $encryptedMethod = Utilities::xpQuery($xml, './xenc:EncryptedKey/xenc:EncryptionMethod');
+                $method = $encryptedMethod[0]->getAttribute("Algorithm");
+            } else {
+                $method = $encryptedMethod[0]->firstChild->getAttribute("Algorithm");
+            }
+            $algo = Utilities::getEncryptionAlgorithm($method);
+            if (count($data) === 0) {
+                throw new Exception('Missing encrypted data in <saml:EncryptedAssertion>.');
+            } elseif (count($data) > 1) {
+                throw new Exception('More than one encrypted data element in <saml:EncryptedAssertion>.');
+            }
+
+            $private_cert = "";
+            $private_cert = variable_get('miniorange_saml_private_certificate');
+
+            $key = new XMLSecurityKey($algo, array('type' => 'private'));
+            $base_module_path = drupal_get_path("module", "miniorange_saml");
+
+            if ($private_cert != '') {
+                $url = $base_module_path . '/resources/Custom_Private_Certificate.key';
+            } else {
+                $url = $base_module_path . '/resources/sp-key.key';
+            }
+            $key->loadKey($url, TRUE);
+
+            $alternateKey = new XMLSecurityKey($algo, array('type' => 'private'));
+            $alternateKeyUrl = $base_module_path . '/resources/miniorange_sp_priv_key.key';
+            $alternateKey->loadKey($alternateKeyUrl, TRUE);
+
+            $blacklist = array();
+            $xml = Utilities::decryptElement($data[0], $key, $blacklist, $alternateKey);
         }
-        $HC = Utilities::xpQuery($L_, "\56\57\170\145\x6e\143\72\105\156\x63\162\171\x70\164\145\x64\104\141\x74\141");
-        $je = Utilities::xpQuery($L_, "\x2e\57\x78\x65\156\x63\72\x45\x6e\143\162\x79\160\x74\x65\x64\x44\141\x74\x61\x2f\x64\x73\x3a\113\145\171\111\156\x66\157\57\170\145\x6e\x63\x3a\x45\x6e\143\x72\171\160\164\145\144\113\145\x79");
-        $TI = '';
-        if (empty($je)) {
-            goto pl;
+        if (!$xml->hasAttribute('ID')) {
+            throw new Exception('Missing ID attribute on SAML assertion.');
         }
-        $TI = $je[0]->firstChild->getAttribute("\x41\154\x67\157\162\x69\x74\x68\155");
-        goto I_;
-        pl:
-        $je = Utilities::xpQuery($L_, "\56\57\x78\x65\x6e\x63\72\105\156\143\x72\171\x70\x74\x65\x64\x4b\x65\x79\57\x78\145\156\x63\72\x45\x6e\143\162\171\160\164\x69\x6f\156\115\x65\164\x68\157\144");
-        $TI = $je[0]->getAttribute("\101\154\x67\x6f\x72\x69\x74\x68\x6d");
-        I_:
-        $vy = Utilities::getEncryptionAlgorithm($TI);
-        if (count($HC) === 0) {
-            goto cs;
+        $this->id = $xml->getAttribute('ID');
+        if ($xml->getAttribute('Version') !== '2.0') {
+            /* Currently a very strict check. */
+            throw new Exception('Unsupported version: ' . $xml->getAttribute('Version'));
         }
-        if (count($HC) > 1) {
-            goto Eq;
+        $this->issueInstant = Utilities::xsDateTimeToTimestamp($xml->getAttribute('IssueInstant'));
+
+        $issuer = Utilities::xpQuery($xml, './saml_assertion:Issuer');
+        if (empty($issuer)) {
+            throw new Exception('Missing <saml:Issuer> in assertion.');
         }
-        goto Ke;
-        cs:
-        throw new Exception("\x4d\151\163\163\151\x6e\147\40\145\x6e\x63\x72\x79\x70\x74\x65\144\x20\144\x61\x74\x61\40\x69\x6e\40\x3c\x73\141\155\154\72\105\x6e\x63\162\171\x70\x74\x65\144\x41\163\x73\x65\x72\164\151\157\x6e\x3e\x2e");
-        goto Ke;
-        Eq:
-        throw new Exception("\115\157\x72\145\40\x74\x68\x61\156\40\157\x6e\145\x20\145\x6e\x63\162\x79\x70\164\x65\x64\40\x64\141\164\141\x20\x65\x6c\x65\x6d\x65\x6e\164\x20\151\156\40\74\x73\x61\155\154\72\105\156\x63\162\x79\160\x74\145\144\101\163\163\145\x72\164\x69\157\156\76\x2e");
-        Ke:
-        $un = '';
-        $un = variable_get("\155\x69\156\151\157\x72\x61\x6e\x67\145\x5f\x73\141\155\x6c\137\x70\x72\151\166\x61\164\145\137\x63\145\x72\x74\151\146\x69\x63\x61\x74\x65");
-        $l9 = new XMLSecurityKey($vy, array("\164\171\x70\145" => "\160\x72\x69\166\141\164\x65"));
-        $LC = drupal_get_path("\x6d\157\x64\x75\x6c\145", "\x6d\x69\156\x69\157\x72\x61\x6e\x67\x65\137\x73\x61\x6d\154");
-        if ($un != '') {
-            goto VY;
-        }
-        $Rq = $LC . "\57\162\x65\163\x6f\x75\x72\143\x65\163\57\163\160\55\x6b\x65\171\56\x6b\x65\x79";
-        goto hk;
-        VY:
-        $Rq = $LC . "\57\162\145\x73\157\x75\162\143\x65\x73\57\x43\165\163\x74\157\155\137\120\x72\151\x76\141\x74\145\137\103\x65\x72\164\x69\x66\x69\x63\141\x74\x65\x2e\x6b\145\x79";
-        hk:
-        $l9->loadKey($Rq, TRUE);
-        $jS = new XMLSecurityKey($vy, array("\x74\171\160\145" => "\x70\162\151\166\141\x74\x65"));
-        $xp = $LC . "\x2f\162\x65\x73\x6f\165\162\x63\x65\x73\57\x6d\x69\x6e\151\157\x72\x61\156\x67\x65\137\x73\x70\x5f\x70\162\x69\166\x5f\153\x65\x79\56\x6b\x65\x79";
-        $jS->loadKey($xp, TRUE);
-        $S1 = array();
-        $L_ = Utilities::decryptElement($HC[0], $l9, $S1, $jS);
-        x6:
-        if ($L_->hasAttribute("\111\x44")) {
-            goto Bg;
-        }
-        throw new Exception("\x4d\x69\x73\x73\151\156\147\x20\111\x44\x20\141\x74\164\162\x69\x62\x75\x74\145\40\157\156\40\123\x41\115\x4c\40\x61\163\x73\145\x72\x74\151\157\156\56");
-        Bg:
-        $this->id = $L_->getAttribute("\111\104");
-        if (!($L_->getAttribute("\126\145\x72\163\x69\157\x6e") !== "\62\56\60")) {
-            goto kE;
-        }
-        throw new Exception("\x55\156\x73\165\x70\160\x6f\x72\x74\145\x64\40\166\145\x72\163\151\x6f\156\72\40" . $L_->getAttribute("\x56\x65\162\163\x69\157\x6e"));
-        kE:
-        $this->issueInstant = Utilities::xsDateTimeToTimestamp($L_->getAttribute("\111\x73\x73\x75\x65\x49\x6e\163\164\x61\156\x74"));
-        $Pz = Utilities::xpQuery($L_, "\56\57\163\141\x6d\x6c\137\x61\163\x73\145\162\x74\x69\x6f\x6e\72\111\163\163\x75\x65\162");
-        if (!empty($Pz)) {
-            goto Sj;
-        }
-        throw new Exception("\115\x69\163\163\151\156\147\x20\74\x73\141\x6d\x6c\72\111\163\163\x75\145\x72\76\40\x69\156\x20\x61\163\163\145\162\164\x69\157\156\x2e");
-        Sj:
-        $this->issuer = trim($Pz[0]->textContent);
-        $this->parseConditions($L_);
-        $this->parseAuthnStatement($L_);
-        $this->parseAttributes($L_);
-        $this->parseEncryptedAttributes($L_);
-        $this->parseSignature($L_);
-        $this->parseSubject($L_);
+        $this->issuer = trim($issuer[0]->textContent);
+
+        $this->parseConditions($xml);
+        $this->parseAuthnStatement($xml);
+        $this->parseAttributes($xml);
+        $this->parseEncryptedAttributes($xml);
+        $this->parseSignature($xml);
+        $this->parseSubject($xml);
+        //echo "Signature parsed";
     }
-    private function parseSubject(DOMElement $L_)
+
+    /**
+     * Parse subject in assertion.
+     *
+     * @param DOMElement $xml The assertion XML element.
+     * @throws Exception
+     */
+    private function parseSubject(DOMElement $xml)
     {
-        $mO = Utilities::xpQuery($L_, "\x2e\x2f\163\x61\x6d\x6c\x5f\x61\x73\x73\145\162\x74\x69\x6f\156\x3a\x53\x75\x62\x6a\145\143\x74");
-        if (empty($mO)) {
-            goto vT;
+        $subject = Utilities::xpQuery($xml, './saml_assertion:Subject');
+        if (empty($subject)) {
+            /* No Subject node. */
+
+            return;
+        } elseif (count($subject) > 1) {
+            throw new Exception('More than one <saml:Subject> in <saml:Assertion>.');
         }
-        if (count($mO) > 1) {
-            goto pJ;
+
+        $subject = $subject[0];
+
+        $nameId = Utilities::xpQuery(
+            $subject,
+            './saml_assertion:NameID | ./saml_assertion:EncryptedID/xenc:EncryptedData'
+        );
+        if (empty($nameId)) {
+            throw new Exception('Missing <saml:NameID> or <saml:EncryptedID> in <saml:Subject>.');
+        } elseif (count($nameId) > 1) {
+            throw new Exception('More than one <saml:NameID> or <saml:EncryptedD> in <saml:Subject>.');
         }
-        goto Z7;
-        vT:
-        return;
-        goto Z7;
-        pJ:
-        throw new Exception("\x4d\157\162\145\40\164\x68\141\x6e\40\x6f\x6e\x65\40\74\163\141\155\154\72\x53\x75\142\x6a\145\143\164\x3e\x20\151\156\x20\74\x73\141\155\x6c\x3a\x41\x73\163\x65\162\164\151\157\156\76\x2e");
-        Z7:
-        $mO = $mO[0];
-        $PV = Utilities::xpQuery($mO, "\x2e\x2f\x73\x61\x6d\154\x5f\141\163\163\145\x72\x74\x69\x6f\156\72\116\141\155\x65\x49\104\x20\174\40\56\57\x73\x61\x6d\x6c\137\141\163\163\x65\x72\x74\151\157\x6e\x3a\105\156\143\x72\x79\160\x74\145\144\x49\104\57\x78\145\x6e\x63\72\105\x6e\x63\162\x79\160\x74\x65\x64\104\141\x74\141");
-        if (empty($PV)) {
-            goto xn;
+        $nameId = $nameId[0];
+        if ($nameId->localName === 'EncryptedData') {
+            /* The NameID element is encrypted. */
+            $this->encryptedNameId = $nameId;
+        } else {
+            $this->nameId = Utilities::parseNameId($nameId);
         }
-        if (count($PV) > 1) {
-            goto C0;
+        //echo 'AssertionNameID: '. $this->nameId['Value'];
+        /*$subjectConfirmation = Utilities::xpQuery($subject, './saml_assertion:SubjectConfirmation');
+        if (empty($subjectConfirmation)) {
+            throw new Exception('Missing <saml:SubjectConfirmation> in <saml:Subject>.');
         }
-        goto sF;
-        xn:
-        throw new Exception("\115\x69\x73\x73\x69\x6e\x67\x20\x3c\x73\x61\x6d\x6c\72\x4e\x61\155\x65\x49\x44\x3e\x20\157\162\40\x3c\163\x61\x6d\154\72\105\156\x63\162\171\x70\x74\x65\x64\x49\x44\x3e\x20\x69\x6e\40\74\x73\141\155\x6c\72\x53\165\142\152\x65\x63\x74\x3e\x2e");
-        goto sF;
-        C0:
-        throw new Exception("\115\x6f\162\145\40\164\150\x61\x6e\40\157\156\x65\40\x3c\163\141\x6d\154\x3a\116\141\x6d\x65\111\104\x3e\x20\157\x72\40\74\x73\141\155\154\x3a\105\156\143\x72\171\x70\164\145\x64\x44\x3e\40\151\156\x20\74\163\141\155\154\x3a\123\x75\x62\x6a\145\x63\164\76\56");
-        sF:
-        $PV = $PV[0];
-        if ($PV->localName === "\105\156\x63\x72\x79\160\x74\x65\x64\104\x61\164\141") {
-            goto OR1;
-        }
-        $this->nameId = Utilities::parseNameId($PV);
-        goto C8;
-        OR1:
-        $this->encryptedNameId = $PV;
-        C8:
+
+        foreach ($subjectConfirmation as $sc) {
+            $this->SubjectConfirmation[] = new SAML2_XML_saml_SubjectConfirmation($sc);
+        }*/
     }
-    private function parseConditions(DOMElement $L_)
+
+    /**
+     * Parse conditions in assertion.
+     *
+     * @param DOMElement $xml The assertion XML element.
+     * @throws Exception
+     */
+    private function parseConditions(DOMElement $xml)
     {
-        $De = Utilities::xpQuery($L_, "\56\x2f\x73\141\155\154\x5f\x61\x73\x73\145\x72\x74\151\x6f\156\x3a\x43\x6f\156\144\x69\164\151\x6f\x6e\163");
-        if (empty($De)) {
-            goto Wa;
+        $conditions = Utilities::xpQuery($xml, './saml_assertion:Conditions');
+        if (empty($conditions)) {
+            /* No <saml:Conditions> node. */
+
+            return;
+        } elseif (count($conditions) > 1) {
+            throw new Exception('More than one <saml:Conditions> in <saml:Assertion>.');
         }
-        if (count($De) > 1) {
-            goto S_;
+        $conditions = $conditions[0];
+
+        if ($conditions->hasAttribute('NotBefore')) {
+            $notBefore = Utilities::xsDateTimeToTimestamp($conditions->getAttribute('NotBefore'));
+            if ($this->notBefore === NULL || $this->notBefore < $notBefore) {
+                $this->notBefore = $notBefore;
+            }
         }
-        goto p6;
-        Wa:
-        return;
-        goto p6;
-        S_:
-        throw new Exception("\115\157\x72\x65\40\164\150\141\156\x20\x6f\156\145\x20\74\163\141\155\154\x3a\103\157\156\x64\x69\164\151\157\156\x73\76\x20\x69\x6e\x20\74\163\x61\155\154\x3a\x41\163\163\145\x72\164\151\157\156\76\x2e");
-        p6:
-        $De = $De[0];
-        if (!$De->hasAttribute("\116\x6f\164\x42\145\x66\157\x72\145")) {
-            goto Y6;
+        if ($conditions->hasAttribute('NotOnOrAfter')) {
+            $notOnOrAfter = Utilities::xsDateTimeToTimestamp($conditions->getAttribute('NotOnOrAfter'));
+            if ($this->notOnOrAfter === NULL || $this->notOnOrAfter > $notOnOrAfter) {
+                $this->notOnOrAfter = $notOnOrAfter;
+            }
         }
-        $HO = Utilities::xsDateTimeToTimestamp($De->getAttribute("\x4e\x6f\x74\x42\145\146\157\x72\x65"));
-        if (!($this->notBefore === NULL || $this->notBefore < $HO)) {
-            goto KC;
+
+        for ($node = $conditions->firstChild; $node !== NULL; $node = $node->nextSibling) {
+            if ($node instanceof DOMText) {
+                continue;
+            }
+            if ($node->namespaceURI !== 'urn:oasis:names:tc:SAML:2.0:assertion') {
+                throw new Exception('Unknown namespace of condition: ' . var_export($node->namespaceURI, TRUE));
+            }
+            switch ($node->localName) {
+                case 'AudienceRestriction':
+                    $audiences = Utilities::extractStrings($node, 'urn:oasis:names:tc:SAML:2.0:assertion', 'Audience');
+                    if ($this->validAudiences === NULL) {
+                        /* The first (and probably last) AudienceRestriction element. */
+                        $this->validAudiences = $audiences;
+
+                    } else {
+                        /*
+                         * The set of AudienceRestriction are ANDed together, so we need
+                         * the subset that are present in all of them.
+                         */
+                        $this->validAudiences = array_intersect($this->validAudiences, $audiences);
+                    }
+                    break;
+                case 'OneTimeUse':
+                    /* Currently ignored. */
+                    break;
+                case 'ProxyRestriction':
+                    /* Currently ignored. */
+                    break;
+                default:
+                    throw new Exception('Unknown condition: ' . var_export($node->localName, TRUE));
+            }
         }
-        $this->notBefore = $HO;
-        KC:
-        Y6:
-        if (!$De->hasAttribute("\x4e\157\x74\117\x6e\117\x72\x41\146\164\x65\162")) {
-            goto jH;
+
+    }
+
+    /**
+     * Parse AuthnStatement in assertion.
+     *
+     * @param DOMElement $xml The assertion XML element.
+     * @throws Exception
+     */
+    private function parseAuthnStatement(DOMElement $xml)
+    {
+        $authnStatements = Utilities::xpQuery($xml, './saml_assertion:AuthnStatement');
+        if (empty($authnStatements)) {
+            $this->authnInstant = NULL;
+
+            return;
+        } elseif (count($authnStatements) > 1) {
+            throw new Exception('More that one <saml:AuthnStatement> in <saml:Assertion> not supported.');
         }
-        $Lh = Utilities::xsDateTimeToTimestamp($De->getAttribute("\x4e\x6f\x74\x4f\156\117\x72\x41\x66\164\x65\x72"));
-        if (!($this->notOnOrAfter === NULL || $this->notOnOrAfter > $Lh)) {
-            goto aK;
+        $authnStatement = $authnStatements[0];
+
+        if (!$authnStatement->hasAttribute('AuthnInstant')) {
+            throw new Exception('Missing required AuthnInstant attribute on <saml:AuthnStatement>.');
         }
-        $this->notOnOrAfter = $Lh;
-        aK:
-        jH:
-        $SP = $De->firstChild;
-        QL:
-        if (!($SP !== NULL)) {
-            goto EG;
+        $this->authnInstant = Utilities::xsDateTimeToTimestamp($authnStatement->getAttribute('AuthnInstant'));
+
+        if ($authnStatement->hasAttribute('SessionNotOnOrAfter')) {
+            $this->sessionNotOnOrAfter = Utilities::xsDateTimeToTimestamp($authnStatement->getAttribute('SessionNotOnOrAfter'));
         }
-        if (!$SP instanceof DOMText) {
-            goto fS;
+
+        if ($authnStatement->hasAttribute('SessionIndex')) {
+            $this->sessionIndex = $authnStatement->getAttribute('SessionIndex');
         }
-        goto uw;
-        fS:
-        if (!($SP->namespaceURI !== "\165\x72\156\x3a\x6f\141\x73\x69\x73\72\156\x61\155\x65\163\72\164\x63\72\x53\x41\x4d\x4c\x3a\62\56\60\x3a\141\163\x73\x65\162\164\x69\x6f\156")) {
-            goto Ad;
+
+        $this->parseAuthnContext($authnStatement);
+    }
+
+    /**
+     * Parse AuthnContext in AuthnStatement.
+     *
+     * @param DOMElement $authnStatementEl
+     * @throws Exception
+     */
+    private function parseAuthnContext(DOMElement $authnStatementEl)
+    {
+        // Get the AuthnContext element
+        $authnContexts = Utilities::xpQuery($authnStatementEl, './saml_assertion:AuthnContext');
+        if (count($authnContexts) > 1) {
+            throw new Exception('More than one <saml:AuthnContext> in <saml:AuthnStatement>.');
+        } elseif (empty($authnContexts)) {
+            throw new Exception('Missing required <saml:AuthnContext> in <saml:AuthnStatement>.');
         }
-        throw new Exception("\x55\156\153\156\157\167\x6e\x20\156\x61\155\x65\163\160\x61\143\x65\40\x6f\x66\40\x63\157\156\144\151\164\x69\x6f\x6e\72\40" . var_export($SP->namespaceURI, TRUE));
-        Ad:
-        switch ($SP->localName) {
-            case "\x41\x75\x64\x69\x65\156\143\x65\122\145\x73\164\162\x69\143\164\x69\157\x6e":
-                $CA = Utilities::extractStrings($SP, "\x75\x72\156\x3a\157\141\x73\x69\163\x3a\x6e\x61\155\145\163\x3a\x74\x63\72\123\101\x4d\x4c\x3a\x32\x2e\x30\72\x61\163\x73\x65\x72\164\x69\x6f\156", "\x41\165\x64\151\145\156\143\145");
-                if ($this->validAudiences === NULL) {
-                    goto j9;
+        $authnContextEl = $authnContexts[0];
+
+        // Get the AuthnContextDeclRef (if available)
+        $authnContextDeclRefs = Utilities::xpQuery($authnContextEl, './saml_assertion:AuthnContextDeclRef');
+        if (count($authnContextDeclRefs) > 1) {
+            throw new Exception(
+                'More than one <saml:AuthnContextDeclRef> found?'
+            );
+        } elseif (count($authnContextDeclRefs) === 1) {
+            $this->setAuthnContextDeclRef(trim($authnContextDeclRefs[0]->textContent));
+        }
+
+        // Get the AuthnContextDecl (if available)
+        $authnContextDecls = Utilities::xpQuery($authnContextEl, './saml_assertion:AuthnContextDecl');
+        if (count($authnContextDecls) > 1) {
+            throw new Exception(
+                'More than one <saml:AuthnContextDecl> found?'
+            );
+        } elseif (count($authnContextDecls) === 1) {
+            $this->setAuthnContextDecl(new SAML2_XML_Chunk($authnContextDecls[0]));
+        }
+
+        // Get the AuthnContextClassRef (if available)
+        $authnContextClassRefs = Utilities::xpQuery($authnContextEl, './saml_assertion:AuthnContextClassRef');
+        if (count($authnContextClassRefs) > 1) {
+            throw new Exception('More than one <saml:AuthnContextClassRef> in <saml:AuthnContext>.');
+        } elseif (count($authnContextClassRefs) === 1) {
+            $this->setAuthnContextClassRef(trim($authnContextClassRefs[0]->textContent));
+        }
+
+        // Constraint from XSD: MUST have one of the three
+        if (empty($this->authnContextClassRef) && empty($this->authnContextDecl) && empty($this->authnContextDeclRef)) {
+            throw new Exception(
+                'Missing either <saml:AuthnContextClassRef> or <saml:AuthnContextDeclRef> or <saml:AuthnContextDecl>'
+            );
+        }
+
+        $this->AuthenticatingAuthority = Utilities::extractStrings(
+            $authnContextEl,
+            'urn:oasis:names:tc:SAML:2.0:assertion',
+            'AuthenticatingAuthority'
+        );
+    }
+
+    /**
+     * Parse attribute statements in assertion.
+     *
+     * @param DOMElement $xml The XML element with the assertion.
+     * @throws Exception
+     */
+    private function parseAttributes(DOMElement $xml)
+    {
+        $firstAttribute = TRUE;
+        $attributes = Utilities::xpQuery($xml, './saml_assertion:AttributeStatement/saml_assertion:Attribute');
+        foreach ($attributes as $attribute) {
+            if (!$attribute->hasAttribute('Name')) {
+                throw new Exception('Missing name on <saml:Attribute> element.');
+            }
+            $name = $attribute->getAttribute('Name');
+
+            if ($attribute->hasAttribute('NameFormat')) {
+                $nameFormat = $attribute->getAttribute('NameFormat');
+            } else {
+                $nameFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified';
+            }
+
+            if ($firstAttribute) {
+                $this->nameFormat = $nameFormat;
+                $firstAttribute = FALSE;
+            } else {
+                if ($this->nameFormat !== $nameFormat) {
+                    $this->nameFormat = 'urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified';
                 }
-                $this->validAudiences = array_intersect($this->validAudiences, $CA);
-                goto IA;
-                j9:
-                $this->validAudiences = $CA;
-                IA:
-                goto nZ;
-            case "\117\x6e\145\x54\151\x6d\x65\125\163\x65":
-                goto nZ;
-            case "\x50\x72\157\x78\171\x52\x65\163\164\162\151\x63\164\x69\157\156":
-                goto nZ;
-            default:
-                throw new Exception("\x55\x6e\x6b\x6e\x6f\167\156\x20\143\157\156\144\x69\164\x69\x6f\x6e\x3a\40" . var_export($SP->localName, TRUE));
-        }
-        RG:
-        nZ:
-        uw:
-        $SP = $SP->nextSibling;
-        goto QL;
-        EG:
-    }
-    private function parseAuthnStatement(DOMElement $L_)
-    {
-        $VQ = Utilities::xpQuery($L_, "\56\x2f\163\x61\155\x6c\137\x61\163\x73\x65\x72\x74\x69\x6f\x6e\72\x41\165\x74\x68\156\123\164\x61\x74\145\155\145\156\164");
-        if (empty($VQ)) {
-            goto Rp;
-        }
-        if (count($VQ) > 1) {
-            goto GR;
-        }
-        goto jn;
-        Rp:
-        $this->authnInstant = NULL;
-        return;
-        goto jn;
-        GR:
-        throw new Exception("\x4d\157\x72\145\40\164\150\x61\164\x20\x6f\156\x65\40\74\163\x61\155\x6c\x3a\101\165\x74\150\x6e\123\164\x61\164\145\x6d\145\156\x74\x3e\40\151\156\x20\x3c\x73\141\155\154\72\x41\163\x73\x65\162\x74\151\x6f\156\x3e\x20\156\x6f\x74\x20\x73\165\x70\160\x6f\162\164\x65\x64\x2e");
-        jn:
-        $Tx = $VQ[0];
-        if ($Tx->hasAttribute("\101\x75\164\150\x6e\x49\x6e\x73\x74\x61\156\x74")) {
-            goto U3;
-        }
-        throw new Exception("\x4d\151\163\163\x69\x6e\147\40\162\145\x71\165\x69\x72\145\x64\x20\x41\x75\164\x68\x6e\x49\156\163\164\141\156\x74\x20\x61\x74\164\162\x69\142\x75\164\145\40\x6f\156\x20\x3c\163\141\x6d\154\72\x41\165\164\150\156\x53\164\x61\164\145\155\145\x6e\x74\76\56");
-        U3:
-        $this->authnInstant = Utilities::xsDateTimeToTimestamp($Tx->getAttribute("\x41\x75\x74\150\x6e\111\x6e\x73\x74\141\x6e\164"));
-        if (!$Tx->hasAttribute("\x53\145\x73\x73\151\x6f\156\x4e\x6f\x74\117\x6e\x4f\162\x41\146\x74\145\x72")) {
-            goto vl;
-        }
-        $this->sessionNotOnOrAfter = Utilities::xsDateTimeToTimestamp($Tx->getAttribute("\x53\145\163\163\x69\x6f\x6e\x4e\x6f\164\x4f\156\117\162\101\146\x74\145\162"));
-        vl:
-        if (!$Tx->hasAttribute("\x53\145\163\x73\x69\x6f\156\x49\156\x64\x65\170")) {
-            goto sJ;
-        }
-        $this->sessionIndex = $Tx->getAttribute("\x53\145\x73\163\151\x6f\x6e\x49\x6e\x64\145\170");
-        sJ:
-        $this->parseAuthnContext($Tx);
-    }
-    private function parseAuthnContext(DOMElement $uD)
-    {
-        $wc = Utilities::xpQuery($uD, "\56\x2f\x73\141\155\154\x5f\x61\163\163\x65\162\164\x69\157\156\72\101\165\164\x68\x6e\x43\x6f\156\x74\x65\170\164");
-        if (count($wc) > 1) {
-            goto Cw;
-        }
-        if (empty($wc)) {
-            goto PQ;
-        }
-        goto Bv;
-        Cw:
-        throw new Exception("\115\x6f\162\x65\40\x74\150\141\x6e\40\x6f\156\x65\x20\74\x73\x61\155\154\72\x41\x75\x74\x68\156\x43\x6f\156\164\145\x78\164\x3e\x20\x69\156\40\74\x73\x61\155\154\x3a\101\x75\164\150\x6e\x53\164\141\164\x65\155\145\x6e\164\76\x2e");
-        goto Bv;
-        PQ:
-        throw new Exception("\x4d\x69\x73\x73\x69\x6e\147\x20\162\145\161\165\151\162\145\x64\40\74\x73\x61\x6d\x6c\x3a\x41\x75\164\x68\x6e\103\157\x6e\164\x65\170\164\x3e\x20\x69\x6e\40\x3c\163\x61\155\154\72\x41\165\164\150\156\x53\x74\x61\164\x65\155\x65\156\x74\x3e\x2e");
-        Bv:
-        $Sh = $wc[0];
-        $pv = Utilities::xpQuery($Sh, "\x2e\57\163\141\x6d\x6c\x5f\x61\163\163\x65\x72\164\x69\157\x6e\x3a\x41\x75\x74\150\156\103\x6f\156\164\x65\170\164\104\x65\143\x6c\x52\145\x66");
-        if (count($pv) > 1) {
-            goto nH;
-        }
-        if (count($pv) === 1) {
-            goto IT;
-        }
-        goto P4;
-        nH:
-        throw new Exception("\x4d\x6f\x72\145\x20\164\x68\141\156\40\157\x6e\145\x20\x3c\x73\141\x6d\154\72\101\x75\x74\x68\156\103\157\156\x74\x65\170\x74\x44\145\x63\x6c\122\145\146\x3e\40\146\x6f\165\156\x64\77");
-        goto P4;
-        IT:
-        $this->setAuthnContextDeclRef(trim($pv[0]->textContent));
-        P4:
-        $ik = Utilities::xpQuery($Sh, "\x2e\x2f\163\x61\x6d\x6c\137\141\x73\x73\x65\x72\164\151\x6f\156\72\x41\165\x74\x68\156\103\157\x6e\x74\145\x78\164\x44\x65\143\x6c");
-        if (count($ik) > 1) {
-            goto U1;
-        }
-        if (count($ik) === 1) {
-            goto OM;
-        }
-        goto yz;
-        U1:
-        throw new Exception("\x4d\x6f\162\145\x20\164\150\x61\156\x20\x6f\x6e\x65\x20\74\163\x61\x6d\154\72\x41\x75\x74\150\x6e\103\157\156\164\x65\170\x74\x44\x65\x63\154\x3e\x20\146\157\165\156\x64\77");
-        goto yz;
-        OM:
-        $this->setAuthnContextDecl(new SAML2_XML_Chunk($ik[0]));
-        yz:
-        $e3 = Utilities::xpQuery($Sh, "\56\57\x73\x61\155\154\137\141\163\x73\x65\x72\164\151\157\x6e\x3a\x41\165\164\150\156\103\157\x6e\164\x65\x78\164\x43\x6c\141\163\x73\122\x65\146");
-        if (count($e3) > 1) {
-            goto Rh;
-        }
-        if (count($e3) === 1) {
-            goto UT;
-        }
-        goto AM;
-        Rh:
-        throw new Exception("\x4d\157\162\145\x20\164\x68\x61\x6e\40\157\156\x65\x20\x3c\163\x61\x6d\x6c\72\101\165\x74\x68\x6e\103\157\x6e\x74\145\170\x74\103\x6c\x61\163\x73\122\x65\146\76\x20\151\156\x20\74\x73\x61\155\154\x3a\101\165\x74\150\x6e\x43\157\156\164\145\x78\164\76\56");
-        goto AM;
-        UT:
-        $this->setAuthnContextClassRef(trim($e3[0]->textContent));
-        AM:
-        if (!(empty($this->authnContextClassRef) && empty($this->authnContextDecl) && empty($this->authnContextDeclRef))) {
-            goto FC;
-        }
-        throw new Exception("\x4d\x69\163\163\x69\x6e\x67\40\x65\x69\x74\x68\x65\162\x20\x3c\x73\x61\x6d\x6c\72\101\165\164\150\156\x43\x6f\156\x74\x65\170\164\103\x6c\x61\x73\163\x52\x65\146\76\40\x6f\x72\x20\x3c\163\x61\x6d\x6c\x3a\101\165\x74\x68\156\x43\157\x6e\164\145\x78\x74\104\145\x63\x6c\x52\x65\146\76\x20\x6f\162\x20\74\x73\141\155\154\72\x41\x75\x74\150\x6e\103\x6f\x6e\x74\x65\x78\x74\x44\x65\x63\154\x3e");
-        FC:
-        $this->AuthenticatingAuthority = Utilities::extractStrings($Sh, "\165\162\156\72\157\x61\x73\x69\x73\72\x6e\141\155\x65\163\x3a\x74\x63\x3a\123\x41\x4d\114\72\x32\56\x30\72\141\163\163\145\162\164\x69\157\x6e", "\x41\x75\164\150\145\x6e\164\151\143\141\x74\151\x6e\x67\101\x75\x74\150\157\162\151\164\171");
-    }
-    private function parseAttributes(DOMElement $L_)
-    {
-        $q7 = TRUE;
-        $K5 = Utilities::xpQuery($L_, "\56\57\163\141\155\154\137\141\x73\163\145\x72\x74\151\x6f\x6e\72\101\164\x74\x72\x69\142\165\164\145\x53\x74\x61\x74\x65\x6d\x65\156\164\57\163\141\x6d\154\x5f\x61\x73\163\145\x72\164\151\x6f\x6e\x3a\x41\164\x74\x72\x69\x62\x75\164\145");
-        foreach ($K5 as $Aa) {
-            if ($Aa->hasAttribute("\116\141\x6d\x65")) {
-                goto uh;
             }
-            throw new Exception("\x4d\151\x73\163\x69\x6e\x67\40\x6e\141\x6d\145\x20\x6f\x6e\40\x3c\163\x61\155\x6c\x3a\x41\164\164\162\151\142\165\x74\x65\76\x20\145\x6c\145\x6d\145\x6e\164\x2e");
-            uh:
-            $cg = $Aa->getAttribute("\x4e\x61\x6d\145");
-            if ($Aa->hasAttribute("\x4e\141\x6d\145\106\x6f\162\155\141\x74")) {
-                goto va;
+
+            if (!array_key_exists($name, $this->attributes)) {
+                $this->attributes[$name] = array();
             }
-            $hJ = "\165\x72\156\x3a\x6f\141\163\151\x73\x3a\156\141\155\145\163\x3a\x74\143\72\x53\101\115\x4c\x3a\61\56\x31\72\x6e\141\155\145\151\144\55\x66\x6f\162\155\x61\x74\x3a\165\156\163\160\x65\143\x69\146\x69\x65\x64";
-            goto NJ;
-            va:
-            $hJ = $Aa->getAttribute("\116\141\155\x65\106\x6f\x72\155\141\164");
-            NJ:
-            if ($q7) {
-                goto dJ;
+
+            $values = Utilities::xpQuery($attribute, './saml_assertion:AttributeValue');
+            foreach ($values as $value) {
+                $this->attributes[$name][] = trim($value->textContent);
             }
-            if (!($this->nameFormat !== $hJ)) {
-                goto t2;
-            }
-            $this->nameFormat = "\x75\x72\x6e\x3a\157\x61\163\151\163\x3a\156\x61\x6d\145\x73\x3a\x74\x63\72\123\x41\115\x4c\x3a\x31\56\x31\x3a\x6e\x61\x6d\145\x69\144\x2d\x66\157\162\x6d\x61\164\x3a\165\x6e\x73\160\145\143\151\146\x69\145\144";
-            t2:
-            goto iW;
-            dJ:
-            $this->nameFormat = $hJ;
-            $q7 = FALSE;
-            iW:
-            if (array_key_exists($cg, $this->attributes)) {
-                goto es;
-            }
-            $this->attributes[$cg] = array();
-            es:
-            $EP = Utilities::xpQuery($Aa, "\56\x2f\163\141\x6d\154\x5f\x61\163\163\145\x72\164\x69\x6f\156\x3a\101\164\x74\x72\151\142\165\x74\x65\x56\x61\154\x75\145");
-            foreach ($EP as $qO) {
-                $this->attributes[$cg][] = trim($qO->textContent);
-                n_:
-            }
-            kd:
-            iO:
         }
-        y9:
     }
-    private function parseEncryptedAttributes(DOMElement $L_)
+
+    /**
+     * Parse encrypted attribute statements in assertion.
+     *
+     * @param DOMElement $xml The XML element with the assertion.
+     */
+    private function parseEncryptedAttributes(DOMElement $xml)
     {
-        $this->encryptedAttribute = Utilities::xpQuery($L_, "\56\x2f\x73\x61\155\x6c\x5f\x61\163\163\145\162\x74\x69\157\x6e\x3a\x41\164\164\162\x69\x62\165\x74\145\123\164\141\164\x65\155\x65\156\164\x2f\163\x61\155\x6c\x5f\x61\x73\x73\x65\x72\164\x69\157\x6e\72\105\x6e\x63\x72\x79\160\164\x65\144\101\164\164\162\151\x62\x75\164\x65");
+        $this->encryptedAttribute = Utilities::xpQuery(
+            $xml,
+            './saml_assertion:AttributeStatement/saml_assertion:EncryptedAttribute'
+        );
     }
-    private function parseSignature(DOMElement $L_)
+
+    /**
+     * Parse signature on assertion.
+     *
+     * @param DOMElement $xml The assertion XML element.
+     */
+    private function parseSignature(DOMElement $xml)
     {
-        $R3 = Utilities::validateElement($L_);
-        if (!($R3 !== FALSE)) {
-            goto oe;
+        /* Validate the signature element of the message. */
+        $sig = Utilities::validateElement($xml);
+        if ($sig !== FALSE) {
+            $this->wasSignedAtConstruction = TRUE;
+            $this->certificates = $sig['Certificates'];
+            $this->signatureData = $sig;
         }
-        $this->wasSignedAtConstruction = TRUE;
-        $this->certificates = $R3["\x43\145\x72\164\x69\146\151\143\x61\x74\x65\x73"];
-        $this->signatureData = $R3;
-        oe:
     }
-    public function validate(XMLSecurityKey $l9)
+
+    /**
+     * Validate this assertion against a public key.
+     *
+     * If no signature was present on the assertion, we will return FALSE.
+     * Otherwise, TRUE will be returned. An exception is thrown if the
+     * signature validation fails.
+     *
+     * @param XMLSecurityKey $key The key we should check against.
+     * @return boolean        TRUE if successful, FALSE if it is unsigned.
+     */
+    public function validate(XMLSecurityKey $key)
     {
-        if (!($this->signatureData === NULL)) {
-            goto mv;
+
+        if ($this->signatureData === NULL) {
+            return FALSE;
         }
-        return FALSE;
-        mv:
-        Utilities::validateSignature($this->signatureData, $l9);
+
+        Utilities::validateSignature($this->signatureData, $key);
+
         return TRUE;
     }
+
+    /**
+     * Retrieve the identifier of this assertion.
+     *
+     * @return string The identifier of this assertion.
+     */
     public function getId()
     {
         return $this->id;
     }
-    public function setId($kI)
+
+    /**
+     * Set the identifier of this assertion.
+     *
+     * @param string $id The new identifier of this assertion.
+     */
+    public function setId($id)
     {
-        $this->id = $kI;
+        $this->id = $id;
     }
+
+    /**
+     * Retrieve the issue timestamp of this assertion.
+     *
+     * @return int The issue timestamp of this assertion, as an UNIX timestamp.
+     */
     public function getIssueInstant()
     {
         return $this->issueInstant;
     }
-    public function setIssueInstant($ZY)
+
+    /**
+     * Set the issue timestamp of this assertion.
+     *
+     * @param int $issueInstant The new issue timestamp of this assertion, as an UNIX timestamp.
+     */
+    public function setIssueInstant($issueInstant)
     {
-        $this->issueInstant = $ZY;
+        $this->issueInstant = $issueInstant;
     }
+
+    /**
+     * Retrieve the issuer if this assertion.
+     *
+     * @return string The issuer of this assertion.
+     */
     public function getIssuer()
     {
         return $this->issuer;
     }
-    public function setIssuer($Pz)
+
+    /**
+     * Set the issuer of this message.
+     *
+     * @param string $issuer The new issuer of this assertion.
+     */
+    public function setIssuer($issuer)
     {
-        $this->issuer = $Pz;
+        $this->issuer = $issuer;
     }
+
+    /**
+     * Retrieve the NameId of the subject in the assertion.
+     *
+     * The returned NameId is in the format used by Utilities::addNameId().
+     *
+     * @return array|NULL The name identifier of the assertion.
+     * @throws Exception
+     * @see Utilities::addNameId()
+     */
     public function getNameId()
     {
-        if (!($this->encryptedNameId !== NULL)) {
-            goto cf;
+        if ($this->encryptedNameId !== NULL) {
+            throw new Exception('Attempted to retrieve encrypted NameID without decrypting it first.');
         }
-        throw new Exception("\x41\164\164\145\x6d\x70\164\145\144\x20\x74\157\x20\162\145\164\x72\151\x65\x76\145\40\x65\156\143\x72\171\160\x74\145\144\40\x4e\141\x6d\x65\111\x44\40\x77\151\164\x68\x6f\165\x74\x20\x64\145\143\x72\171\160\164\x69\156\x67\x20\151\x74\40\146\x69\x72\163\164\56");
-        cf:
+
         return $this->nameId;
     }
-    public function setNameId($PV)
+
+    /**
+     * Set the NameId of the subject in the assertion.
+     *
+     * The NameId must be in the format accepted by Utilities::addNameId().
+     *
+     * @param array|NULL $nameId The name identifier of the assertion.
+     * @see Utilities::addNameId()
+     */
+    public function setNameId($nameId)
     {
-        $this->nameId = $PV;
+        $this->nameId = $nameId;
     }
+
+    /**
+     * Check whether the NameId is encrypted.
+     *
+     * @return TRUE if the NameId is encrypted, FALSE if not.
+     */
     public function isNameIdEncrypted()
     {
-        if (!($this->encryptedNameId !== NULL)) {
-            goto em;
+        if ($this->encryptedNameId !== NULL) {
+            return TRUE;
         }
-        return TRUE;
-        em:
+
         return FALSE;
     }
-    public function encryptNameId(XMLSecurityKey $l9)
+
+    /**
+     * Encrypt the NameID in the Assertion.
+     *
+     * @param XMLSecurityKey $key The encryption key.
+     */
+    public function encryptNameId(XMLSecurityKey $key)
     {
-        $t0 = new DOMDocument();
-        $V1 = $t0->createElement("\162\157\x6f\164");
-        $t0->appendChild($V1);
-        Utilities::addNameId($V1, $this->nameId);
-        $PV = $V1->firstChild;
-        Utilities::getContainer()->debugMessage($PV, "\145\x6e\x63\x72\x79\160\x74");
-        $pe = new XMLSecEnc();
-        $pe->setNode($PV);
-        $pe->type = XMLSecEnc::Element;
-        $mI = new XMLSecurityKey(XMLSecurityKey::AES128_CBC);
-        $mI->generateSessionKey();
-        $pe->encryptKey($l9, $mI);
-        $this->encryptedNameId = $pe->encryptNode($mI);
+        /* First create a XML representation of the NameID. */
+        $doc = new DOMDocument();
+        $root = $doc->createElement('root');
+        $doc->appendChild($root);
+        Utilities::addNameId($root, $this->nameId);
+        $nameId = $root->firstChild;
+
+        Utilities::getContainer()->debugMessage($nameId, 'encrypt');
+
+        /* Encrypt the NameID. */
+        $enc = new XMLSecEnc();
+        $enc->setNode($nameId);
+        // @codingStandardsIgnoreStart
+        $enc->type = XMLSecEnc::Element;
+        // @codingStandardsIgnoreEnd
+
+        $symmetricKey = new XMLSecurityKey(XMLSecurityKey::AES128_CBC);
+        $symmetricKey->generateSessionKey();
+        $enc->encryptKey($key, $symmetricKey);
+
+        $this->encryptedNameId = $enc->encryptNode($symmetricKey);
         $this->nameId = NULL;
     }
-    public function decryptNameId(XMLSecurityKey $l9, array $S1 = array())
+
+    /**
+     * Decrypt the NameId of the subject in the assertion.
+     *
+     * @param XMLSecurityKey $key The decryption key.
+     * @param array $blacklist Blacklisted decryption algorithms.
+     */
+    public function decryptNameId(XMLSecurityKey $key, array $blacklist = array())
     {
-        if (!($this->encryptedNameId === NULL)) {
-            goto mX;
+        if ($this->encryptedNameId === NULL) {
+            /* No NameID to decrypt. */
+
+            return;
         }
-        return;
-        mX:
-        $PV = Utilities::decryptElement($this->encryptedNameId, $l9, $S1);
-        Utilities::getContainer()->debugMessage($PV, "\x64\145\143\x72\171\x70\x74");
-        $this->nameId = Utilities::parseNameId($PV);
+
+        $nameId = Utilities::decryptElement($this->encryptedNameId, $key, $blacklist);
+        Utilities::getContainer()->debugMessage($nameId, 'decrypt');
+        $this->nameId = Utilities::parseNameId($nameId);
+
         $this->encryptedNameId = NULL;
     }
-    public function decryptAttributes(XMLSecurityKey $l9, array $S1 = array())
+
+    /**
+     * Decrypt the assertion attributes.
+     *
+     * @param XMLSecurityKey $key
+     * @param array $blacklist
+     * @throws Exception
+     */
+    public function decryptAttributes(XMLSecurityKey $key, array $blacklist = array())
     {
-        if (!($this->encryptedAttribute === NULL)) {
-            goto T5;
+        if ($this->encryptedAttribute === NULL) {
+            return;
         }
-        return;
-        T5:
-        $q7 = TRUE;
-        $K5 = $this->encryptedAttribute;
-        foreach ($K5 as $YR) {
-            $Aa = Utilities::decryptElement($YR->getElementsByTagName("\105\x6e\143\162\171\x70\x74\x65\x64\x44\141\164\141")->item(0), $l9, $S1);
-            if ($Aa->hasAttribute("\x4e\141\155\145")) {
-                goto j5;
+        $firstAttribute = TRUE;
+        $attributes = $this->encryptedAttribute;
+        foreach ($attributes as $attributeEnc) {
+            /*Decrypt node <EncryptedAttribute>*/
+            $attribute = Utilities::decryptElement(
+                $attributeEnc->getElementsByTagName('EncryptedData')->item(0),
+                $key,
+                $blacklist
+            );
+
+            if (!$attribute->hasAttribute('Name')) {
+                throw new Exception('Missing name on <saml:Attribute> element.');
             }
-            throw new Exception("\115\151\163\163\151\156\147\x20\156\x61\155\x65\40\x6f\156\x20\74\163\141\155\154\72\101\x74\164\x72\x69\142\165\164\145\76\40\145\x6c\145\x6d\145\x6e\x74\x2e");
-            j5:
-            $cg = $Aa->getAttribute("\x4e\x61\x6d\x65");
-            if ($Aa->hasAttribute("\116\x61\x6d\x65\x46\157\162\x6d\x61\164")) {
-                goto n2;
+            $name = $attribute->getAttribute('Name');
+
+            if ($attribute->hasAttribute('NameFormat')) {
+                $nameFormat = $attribute->getAttribute('NameFormat');
+            } else {
+                $nameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified';
             }
-            $hJ = "\165\162\x6e\72\x6f\141\x73\151\163\x3a\x6e\x61\x6d\145\x73\x3a\164\143\72\123\x41\115\114\72\x32\56\60\x3a\x61\164\164\x72\x6e\141\155\x65\x2d\x66\x6f\162\x6d\141\x74\x3a\165\156\163\x70\145\143\151\x66\151\145\x64";
-            goto br;
-            n2:
-            $hJ = $Aa->getAttribute("\x4e\141\155\145\x46\157\x72\155\x61\x74");
-            br:
-            if ($q7) {
-                goto t0;
+
+            if ($firstAttribute) {
+                $this->nameFormat = $nameFormat;
+                $firstAttribute = FALSE;
+            } else {
+                if ($this->nameFormat !== $nameFormat) {
+                    $this->nameFormat = 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified';
+                }
             }
-            if (!($this->nameFormat !== $hJ)) {
-                goto sx;
+
+            if (!array_key_exists($name, $this->attributes)) {
+                $this->attributes[$name] = array();
             }
-            $this->nameFormat = "\165\162\x6e\x3a\157\141\x73\151\163\x3a\x6e\x61\155\145\x73\72\x74\x63\x3a\123\101\x4d\x4c\72\x32\56\60\72\x61\x74\x74\x72\x6e\141\x6d\x65\55\146\157\162\x6d\x61\x74\x3a\x75\x6e\x73\x70\x65\143\151\x66\x69\145\x64";
-            sx:
-            goto WN;
-            t0:
-            $this->nameFormat = $hJ;
-            $q7 = FALSE;
-            WN:
-            if (array_key_exists($cg, $this->attributes)) {
-                goto w6;
+
+            $values = Utilities::xpQuery($attribute, './saml_assertion:AttributeValue');
+            foreach ($values as $value) {
+                $this->attributes[$name][] = trim($value->textContent);
             }
-            $this->attributes[$cg] = array();
-            w6:
-            $EP = Utilities::xpQuery($Aa, "\x2e\57\163\x61\x6d\154\x5f\x61\x73\163\x65\x72\x74\x69\157\156\x3a\101\x74\x74\x72\151\x62\x75\x74\x65\126\141\154\x75\x65");
-            foreach ($EP as $qO) {
-                $this->attributes[$cg][] = trim($qO->textContent);
-                TI:
-            }
-            Es:
-            RS:
         }
-        Zw:
     }
+
+    /**
+     * Retrieve the earliest timestamp this assertion is valid.
+     *
+     * This function returns NULL if there are no restrictions on how early the
+     * assertion can be used.
+     *
+     * @return int|NULL The earliest timestamp this assertion is valid.
+     */
     public function getNotBefore()
     {
         return $this->notBefore;
     }
-    public function setNotBefore($HO)
+
+    /**
+     * Set the earliest timestamp this assertion can be used.
+     *
+     * Set this to NULL if no limit is required.
+     *
+     * @param int|NULL $notBefore The earliest timestamp this assertion is valid.
+     */
+    public function setNotBefore($notBefore)
     {
-        $this->notBefore = $HO;
+        $this->notBefore = $notBefore;
     }
+
+    /**
+     * Retrieve the expiration timestamp of this assertion.
+     *
+     * This function returns NULL if there are no restrictions on how
+     * late the assertion can be used.
+     *
+     * @return int|NULL The latest timestamp this assertion is valid.
+     */
     public function getNotOnOrAfter()
     {
         return $this->notOnOrAfter;
     }
-    public function setNotOnOrAfter($Lh)
+
+    /**
+     * Set the expiration timestamp of this assertion.
+     *
+     * Set this to NULL if no limit is required.
+     *
+     * @param int|NULL $notOnOrAfter The latest timestamp this assertion is valid.
+     */
+    public function setNotOnOrAfter($notOnOrAfter)
     {
-        $this->notOnOrAfter = $Lh;
+        $this->notOnOrAfter = $notOnOrAfter;
     }
-    public function setEncryptedAttributes($jA)
+
+    /**
+     * Set $EncryptedAttributes if attributes will send encrypted
+     *
+     * @param boolean $ea TRUE to encrypt attributes in the assertion.
+     */
+    public function setEncryptedAttributes($ea)
     {
-        $this->requiredEncAttributes = $jA;
+        $this->requiredEncAttributes = $ea;
     }
+
+    /**
+     * Retrieve the audiences that are allowed to receive this assertion.
+     *
+     * This may be NULL, in which case all audiences are allowed.
+     *
+     * @return array|NULL The allowed audiences.
+     */
     public function getValidAudiences()
     {
         return $this->validAudiences;
     }
-    public function setValidAudiences(array $t2 = NULL)
+
+    /**
+     * Set the audiences that are allowed to receive this assertion.
+     *
+     * This may be NULL, in which case all audiences are allowed.
+     *
+     * @param array|NULL $validAudiences The allowed audiences.
+     */
+    public function setValidAudiences(array $validAudiences = NULL)
     {
-        $this->validAudiences = $t2;
+        $this->validAudiences = $validAudiences;
     }
+
+    /**
+     * Retrieve the AuthnInstant of the assertion.
+     *
+     * @return int|NULL The timestamp the user was authenticated, or NULL if the user isn't authenticated.
+     */
     public function getAuthnInstant()
     {
         return $this->authnInstant;
     }
-    public function setAuthnInstant($Gl)
+
+
+    /**
+     * Set the AuthnInstant of the assertion.
+     *
+     * @param int|NULL $authnInstant Timestamp the user was authenticated, or NULL if we don't want an AuthnStatement.
+     */
+    public function setAuthnInstant($authnInstant)
     {
-        $this->authnInstant = $Gl;
+        $this->authnInstant = $authnInstant;
     }
+
+    /**
+     * Retrieve the session expiration timestamp.
+     *
+     * This function returns NULL if there are no restrictions on the
+     * session lifetime.
+     *
+     * @return int|NULL The latest timestamp this session is valid.
+     */
     public function getSessionNotOnOrAfter()
     {
         return $this->sessionNotOnOrAfter;
     }
-    public function setSessionNotOnOrAfter($HV)
+
+    /**
+     * Set the session expiration timestamp.
+     *
+     * Set this to NULL if no limit is required.
+     *
+     * @param int|NULL $sessionNotOnOrAfter The latest timestamp this session is valid.
+     */
+    public function setSessionNotOnOrAfter($sessionNotOnOrAfter)
     {
-        $this->sessionNotOnOrAfter = $HV;
+        $this->sessionNotOnOrAfter = $sessionNotOnOrAfter;
     }
+
+    /**
+     * Retrieve the session index of the user at the IdP.
+     *
+     * @return string|NULL The session index of the user at the IdP.
+     */
     public function getSessionIndex()
     {
         return $this->sessionIndex;
     }
-    public function setSessionIndex($Cn)
+
+    /**
+     * Set the session index of the user at the IdP.
+     *
+     * Note that the authentication context must be set before the
+     * session index can be inluded in the assertion.
+     *
+     * @param string|NULL $sessionIndex The session index of the user at the IdP.
+     */
+    public function setSessionIndex($sessionIndex)
     {
-        $this->sessionIndex = $Cn;
+        $this->sessionIndex = $sessionIndex;
     }
+
+    /**
+     * Retrieve the authentication method used to authenticate the user.
+     *
+     * This will return NULL if no authentication statement was
+     * included in the assertion.
+     *
+     * Note that this returns either the AuthnContextClassRef or the AuthnConextDeclRef, whose definition overlaps
+     * but is slightly different (consult the specification for more information).
+     * This was done to work around an old bug of Shibboleth ( https://bugs.internet2.edu/jira/browse/SIDP-187 ).
+     * Should no longer be required, please use either getAuthnConextClassRef or getAuthnContextDeclRef.
+     *
+     * @return string|NULL The authentication method.
+     * @deprecated use getAuthnContextClassRef
+     */
     public function getAuthnContext()
     {
-        if (empty($this->authnContextClassRef)) {
-            goto Vl;
+        if (!empty($this->authnContextClassRef)) {
+            return $this->authnContextClassRef;
         }
-        return $this->authnContextClassRef;
-        Vl:
-        if (empty($this->authnContextDeclRef)) {
-            goto sy;
+        if (!empty($this->authnContextDeclRef)) {
+            return $this->authnContextDeclRef;
         }
-        return $this->authnContextDeclRef;
-        sy:
         return NULL;
     }
-    public function setAuthnContext($T4)
+
+    /**
+     * Set the authentication method used to authenticate the user.
+     *
+     * If this is set to NULL, no authentication statement will be
+     * included in the assertion. The default is NULL.
+     *
+     * @param string|NULL $authnContext The authentication method.
+     * @deprecated use setAuthnContextClassRef
+     */
+    public function setAuthnContext($authnContext)
     {
-        $this->setAuthnContextClassRef($T4);
+        $this->setAuthnContextClassRef($authnContext);
     }
+
+    /**
+     * Retrieve the authentication method used to authenticate the user.
+     *
+     * This will return NULL if no authentication statement was
+     * included in the assertion.
+     *
+     * @return string|NULL The authentication method.
+     */
     public function getAuthnContextClassRef()
     {
         return $this->authnContextClassRef;
     }
-    public function setAuthnContextClassRef($Bq)
+
+    /**
+     * Set the authentication method used to authenticate the user.
+     *
+     * If this is set to NULL, no authentication statement will be
+     * included in the assertion. The default is NULL.
+     *
+     * @param string|NULL $authnContextClassRef The authentication method.
+     */
+    public function setAuthnContextClassRef($authnContextClassRef)
     {
-        $this->authnContextClassRef = $Bq;
+        $this->authnContextClassRef = $authnContextClassRef;
     }
-    public function setAuthnContextDecl(SAML2_XML_Chunk $B4)
+
+    /**
+     * Set the authentication context declaration.
+     *
+     * @param \SAML2_XML_Chunk $authnContextDecl
+     * @throws Exception
+     */
+    public function setAuthnContextDecl(SAML2_XML_Chunk $authnContextDecl)
     {
-        if (empty($this->authnContextDeclRef)) {
-            goto AA;
+        if (!empty($this->authnContextDeclRef)) {
+            throw new Exception(
+                'AuthnContextDeclRef is already registered! May only have either a Decl or a DeclRef, not both!'
+            );
         }
-        throw new Exception("\101\x75\164\150\x6e\103\x6f\156\x74\x65\x78\x74\x44\145\143\x6c\122\x65\x66\x20\x69\x73\40\x61\x6c\x72\x65\x61\144\x79\40\x72\145\x67\x69\163\164\x65\162\145\x64\x21\40\x4d\x61\171\40\157\x6e\154\x79\40\150\x61\166\x65\x20\x65\x69\x74\150\145\x72\x20\141\x20\x44\x65\143\x6c\40\x6f\x72\40\141\40\x44\x65\143\154\122\x65\x66\54\40\x6e\157\164\x20\142\x6f\164\x68\x21");
-        AA:
-        $this->authnContextDecl = $B4;
+
+        $this->authnContextDecl = $authnContextDecl;
     }
+
+    /**
+     * Get the authentication context declaration.
+     *
+     * See:
+     * @url http://docs.oasis-open.org/security/saml/v2.0/saml-authn-context-2.0-os.pdf
+     *
+     * @return \SAML2_XML_Chunk|NULL
+     */
     public function getAuthnContextDecl()
     {
         return $this->authnContextDecl;
     }
-    public function setAuthnContextDeclRef($Rp)
+
+    /**
+     * Set the authentication context declaration reference.
+     *
+     * @param string $authnContextDeclRef
+     * @throws Exception
+     */
+    public function setAuthnContextDeclRef($authnContextDeclRef)
     {
-        if (empty($this->authnContextDecl)) {
-            goto fK;
+        if (!empty($this->authnContextDecl)) {
+            throw new Exception(
+                'AuthnContextDecl is already registered! May only have either a Decl or a DeclRef, not both!'
+            );
         }
-        throw new Exception("\101\165\164\x68\x6e\x43\x6f\x6e\164\145\170\x74\x44\x65\143\154\40\151\x73\x20\x61\154\162\145\x61\x64\x79\x20\162\145\147\x69\163\x74\145\162\x65\144\x21\x20\x4d\x61\x79\x20\x6f\156\154\171\40\150\141\x76\145\x20\x65\x69\164\x68\x65\162\40\x61\x20\x44\x65\x63\154\x20\157\x72\x20\x61\x20\x44\145\x63\x6c\122\145\146\x2c\40\x6e\x6f\164\40\x62\x6f\164\x68\41");
-        fK:
-        $this->authnContextDeclRef = $Rp;
+
+        $this->authnContextDeclRef = $authnContextDeclRef;
     }
+
+    /**
+     * Get the authentication context declaration reference.
+     * URI reference that identifies an authentication context declaration.
+     *
+     * The URI reference MAY directly resolve into an XML document containing the referenced declaration.
+     *
+     * @return string
+     */
     public function getAuthnContextDeclRef()
     {
         return $this->authnContextDeclRef;
     }
+
+    /**
+     * Retrieve the AuthenticatingAuthority.
+     *
+     *
+     * @return array
+     */
     public function getAuthenticatingAuthority()
     {
         return $this->AuthenticatingAuthority;
     }
-    public function setAuthenticatingAuthority($AA)
+
+    /**
+     * Set the AuthenticatingAuthority
+     *
+     *
+     * @param array.
+     */
+    public function setAuthenticatingAuthority($authenticatingAuthority)
     {
-        $this->AuthenticatingAuthority = $AA;
+        $this->AuthenticatingAuthority = $authenticatingAuthority;
     }
+
+    /**
+     * Retrieve all attributes.
+     *
+     * @return array All attributes, as an associative array.
+     */
     public function getAttributes()
     {
         return $this->attributes;
     }
-    public function setAttributes(array $K5)
+
+    /**
+     * Replace all attributes.
+     *
+     * @param array $attributes All new attributes, as an associative array.
+     */
+    public function setAttributes(array $attributes)
     {
-        $this->attributes = $K5;
+        $this->attributes = $attributes;
     }
+
+    /**
+     * Retrieve the NameFormat used on all attributes.
+     *
+     * If more than one NameFormat is used in the received attributes, this
+     * returns the unspecified NameFormat.
+     *
+     * @return string The NameFormat used on all attributes.
+     */
     public function getAttributeNameFormat()
     {
         return $this->nameFormat;
     }
-    public function setAttributeNameFormat($hJ)
+
+    /**
+     * Set the NameFormat used on all attributes.
+     *
+     * @param string $nameFormat The NameFormat used on all attributes.
+     */
+    public function setAttributeNameFormat($nameFormat)
     {
-        $this->nameFormat = $hJ;
+        $this->nameFormat = $nameFormat;
     }
+
+    /**
+     * Retrieve the SubjectConfirmation elements we have in our Subject element.
+     *
+     * @return array Array of SAML2_XML_saml_SubjectConfirmation elements.
+     */
     public function getSubjectConfirmation()
     {
         return $this->SubjectConfirmation;
     }
-    public function setSubjectConfirmation(array $hE)
+
+    /**
+     * Set the SubjectConfirmation elements that should be included in the assertion.
+     *
+     * @param array $SubjectConfirmation Array of SAML2_XML_saml_SubjectConfirmation elements.
+     */
+    public function setSubjectConfirmation(array $SubjectConfirmation)
     {
-        $this->SubjectConfirmation = $hE;
+        $this->SubjectConfirmation = $SubjectConfirmation;
     }
+
+    /**
+     * Retrieve the private key we should use to sign the assertion.
+     *
+     * @return XMLSecurityKey|NULL The key, or NULL if no key is specified.
+     */
     public function getSignatureKey()
     {
         return $this->signatureKey;
     }
+
     public function getSignatureData()
     {
         return $this->signatureData;
     }
-    public function setSignatureKey(XMLsecurityKey $DO = NULL)
+
+    /**
+     * Set the private key we should use to sign the assertion.
+     *
+     * If the key is NULL, the assertion will be sent unsigned.
+     *
+     * @param XMLSecurityKey|NULL $signatureKey
+     */
+    public function setSignatureKey(XMLsecurityKey $signatureKey = NULL)
     {
-        $this->signatureKey = $DO;
+        $this->signatureKey = $signatureKey;
     }
+
+    /**
+     * Return the key we should use to encrypt the assertion.
+     *
+     * @return XMLSecurityKey|NULL The key, or NULL if no key is specified..
+     *
+     */
     public function getEncryptionKey()
     {
         return $this->encryptionKey;
     }
-    public function setEncryptionKey(XMLSecurityKey $tZ = NULL)
+
+    /**
+     * Set the private key we should use to encrypt the attributes.
+     *
+     * @param XMLSecurityKey|NULL $Key
+     */
+    public function setEncryptionKey(XMLSecurityKey $Key = NULL)
     {
-        $this->encryptionKey = $tZ;
+        $this->encryptionKey = $Key;
     }
-    public function setCertificates(array $Un)
+
+    /**
+     * Set the certificates that should be included in the assertion.
+     *
+     * The certificates should be strings with the PEM encoded data.
+     *
+     * @param array $certificates An array of certificates.
+     */
+    public function setCertificates(array $certificates)
     {
-        $this->certificates = $Un;
+        $this->certificates = $certificates;
     }
+
+    /**
+     * Retrieve the certificates that are included in the assertion.
+     *
+     * @return array An array of certificates.
+     */
     public function getCertificates()
     {
         return $this->certificates;
     }
+
+    /**
+     * @return bool
+     */
     public function getWasSignedAtConstruction()
     {
         return $this->wasSignedAtConstruction;
     }
-    public function toXML(DOMNode $s4 = NULL)
+
+    /**
+     * Convert this assertion to an XML element.
+     *
+     * @param DOMNode|NULL $parentElement The DOM node the assertion should be created in.
+     * @return DOMElement   This assertion.
+     */
+    public function toXML(DOMNode $parentElement = NULL)
     {
-        if ($s4 === NULL) {
-            goto Vk;
+        if ($parentElement === NULL) {
+            $document = new DOMDocument();
+            $parentElement = $document;
+        } else {
+            $document = $parentElement->ownerDocument;
         }
-        $XU = $s4->ownerDocument;
-        goto DD;
-        Vk:
-        $XU = new DOMDocument();
-        $s4 = $XU;
-        DD:
-        $V1 = $XU->createElementNS("\165\x72\x6e\x3a\x6f\x61\163\151\x73\72\x6e\141\155\x65\x73\72\164\x63\72\123\101\115\114\72\x32\56\60\x3a\x61\x73\163\x65\162\x74\x69\157\156", "\x73\x61\155\x6c\x3a" . "\101\163\x73\145\162\164\x69\157\156");
-        $s4->appendChild($V1);
-        $V1->setAttributeNS("\165\162\x6e\x3a\157\141\163\151\163\x3a\156\x61\155\x65\163\72\x74\143\x3a\x53\101\x4d\x4c\72\62\x2e\60\x3a\160\162\157\164\157\x63\x6f\154", "\163\141\155\154\160\72\164\155\160", "\164\x6d\160");
-        $V1->removeAttributeNS("\165\162\156\x3a\x6f\141\163\x69\x73\72\x6e\x61\155\x65\163\x3a\x74\143\x3a\x53\x41\x4d\114\72\x32\x2e\x30\72\x70\162\157\164\157\x63\x6f\x6c", "\x74\x6d\160");
-        $V1->setAttributeNS("\150\164\x74\x70\x3a\x2f\x2f\167\167\167\x2e\x77\63\56\x6f\x72\147\57\x32\60\60\x31\57\x58\x4d\x4c\123\x63\x68\145\x6d\141\55\151\156\163\x74\x61\156\x63\145", "\x78\x73\x69\x3a\x74\x6d\x70", "\x74\x6d\160");
-        $V1->removeAttributeNS("\x68\x74\164\160\x3a\x2f\x2f\x77\167\x77\x2e\167\x33\x2e\157\x72\x67\57\62\x30\60\x31\57\x58\x4d\x4c\123\x63\150\145\155\x61\x2d\151\156\163\164\141\156\143\x65", "\x74\155\x70");
-        $V1->setAttributeNS("\x68\x74\x74\160\72\x2f\57\167\167\x77\56\167\x33\56\x6f\162\x67\x2f\x32\x30\60\x31\57\x58\115\x4c\x53\143\150\x65\155\x61", "\170\163\72\164\155\160", "\x74\155\x70");
-        $V1->removeAttributeNS("\150\x74\164\x70\x3a\57\57\167\x77\167\x2e\167\63\56\x6f\x72\x67\57\62\60\60\x31\57\x58\x4d\114\123\x63\150\145\155\141", "\164\x6d\160");
-        $V1->setAttribute("\x49\x44", $this->id);
-        $V1->setAttribute("\126\145\x72\x73\151\x6f\156", "\62\56\60");
-        $V1->setAttribute("\111\x73\163\165\x65\x49\156\163\164\141\156\x74", gmdate("\x59\x2d\155\x2d\x64\x5c\124\110\x3a\151\72\x73\x5c\x5a", $this->issueInstant));
-        $Pz = Utilities::addString($V1, "\x75\162\156\72\157\x61\x73\x69\x73\x3a\156\x61\x6d\x65\x73\72\164\x63\x3a\x53\x41\x4d\x4c\72\x32\56\60\72\x61\x73\x73\145\x72\x74\151\x6f\156", "\163\x61\155\x6c\72\111\x73\163\x75\145\x72", $this->issuer);
-        $this->addSubject($V1);
-        $this->addConditions($V1);
-        $this->addAuthnStatement($V1);
+
+        $root = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:' . 'Assertion');
+        $parentElement->appendChild($root);
+
+        /* Ugly hack to add another namespace declaration to the root element. */
+        $root->setAttributeNS('urn:oasis:names:tc:SAML:2.0:protocol', 'samlp:tmp', 'tmp');
+        $root->removeAttributeNS('urn:oasis:names:tc:SAML:2.0:protocol', 'tmp');
+        $root->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:tmp', 'tmp');
+        $root->removeAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'tmp');
+        $root->setAttributeNS('http://www.w3.org/2001/XMLSchema', 'xs:tmp', 'tmp');
+        $root->removeAttributeNS('http://www.w3.org/2001/XMLSchema', 'tmp');
+
+        $root->setAttribute('ID', $this->id);
+        $root->setAttribute('Version', '2.0');
+        $root->setAttribute('IssueInstant', gmdate('Y-m-d\TH:i:s\Z', $this->issueInstant));
+
+        $issuer = Utilities::addString($root, 'urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Issuer', $this->issuer);
+
+        $this->addSubject($root);
+        $this->addConditions($root);
+        $this->addAuthnStatement($root);
         if ($this->requiredEncAttributes == FALSE) {
-            goto zf;
+            $this->addAttributeStatement($root);
+        } else {
+            $this->addEncryptedAttributeStatement($root);
         }
-        $this->addEncryptedAttributeStatement($V1);
-        goto vY;
-        zf:
-        $this->addAttributeStatement($V1);
-        vY:
-        if (!($this->signatureKey !== NULL)) {
-            goto JW;
+
+        if ($this->signatureKey !== NULL) {
+            Utilities::insertSignature($this->signatureKey, $this->certificates, $root, $issuer->nextSibling);
         }
-        Utilities::insertSignature($this->signatureKey, $this->certificates, $V1, $Pz->nextSibling);
-        JW:
-        return $V1;
+
+        return $root;
     }
-    private function addSubject(DOMElement $V1)
+
+    /**
+     * Add a Subject-node to the assertion.
+     *
+     * @param DOMElement $root The assertion element we should add the subject to.
+     */
+    private function addSubject(DOMElement $root)
     {
-        if (!($this->nameId === NULL && $this->encryptedNameId === NULL)) {
-            goto dm;
+        if ($this->nameId === NULL && $this->encryptedNameId === NULL) {
+            /* We don't have anything to create a Subject node for. */
+
+            return;
         }
-        return;
-        dm:
-        $mO = $V1->ownerDocument->createElementNS("\x75\162\x6e\72\157\x61\x73\151\163\72\156\141\155\x65\x73\x3a\164\x63\x3a\123\101\x4d\114\x3a\x32\x2e\60\72\141\163\163\x65\x72\164\151\157\x6e", "\163\141\x6d\x6c\72\x53\x75\142\x6a\x65\x63\x74");
-        $V1->appendChild($mO);
+
+        $subject = $root->ownerDocument->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Subject');
+        $root->appendChild($subject);
+
         if ($this->encryptedNameId === NULL) {
-            goto LE;
+            Utilities::addNameId($subject, $this->nameId);
+        } else {
+            $eid = $subject->ownerDocument->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:' . 'EncryptedID');
+            $subject->appendChild($eid);
+            $eid->appendChild($subject->ownerDocument->importNode($this->encryptedNameId, TRUE));
         }
-        $QC = $mO->ownerDocument->createElementNS("\165\162\x6e\72\157\141\x73\151\x73\x3a\156\141\155\145\x73\x3a\x74\143\72\x53\101\x4d\x4c\x3a\x32\56\x30\72\x61\163\x73\x65\x72\164\x69\x6f\156", "\x73\x61\x6d\x6c\72" . "\x45\156\x63\x72\x79\x70\x74\x65\144\111\x44");
-        $mO->appendChild($QC);
-        $QC->appendChild($mO->ownerDocument->importNode($this->encryptedNameId, TRUE));
-        goto iy;
-        LE:
-        Utilities::addNameId($mO, $this->nameId);
-        iy:
-        foreach ($this->SubjectConfirmation as $rX) {
-            $rX->toXML($mO);
-            vi:
+
+        foreach ($this->SubjectConfirmation as $sc) {
+            $sc->toXML($subject);
         }
-        M9:
     }
-    private function addConditions(DOMElement $V1)
+
+
+    /**
+     * Add a Conditions-node to the assertion.
+     *
+     * @param DOMElement $root The assertion element we should add the conditions to.
+     */
+    private function addConditions(DOMElement $root)
     {
-        $XU = $V1->ownerDocument;
-        $De = $XU->createElementNS("\x75\162\x6e\72\x6f\141\x73\x69\163\72\156\141\155\145\163\72\x74\x63\72\123\x41\x4d\114\72\x32\56\60\x3a\x61\163\x73\145\x72\x74\x69\157\x6e", "\x73\141\x6d\154\72\103\157\156\x64\x69\x74\x69\x6f\x6e\x73");
-        $V1->appendChild($De);
-        if (!($this->notBefore !== NULL)) {
-            goto Wg;
+        $document = $root->ownerDocument;
+
+        $conditions = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Conditions');
+        $root->appendChild($conditions);
+
+        if ($this->notBefore !== NULL) {
+            $conditions->setAttribute('NotBefore', gmdate('Y-m-d\TH:i:s\Z', $this->notBefore));
         }
-        $De->setAttribute("\x4e\x6f\x74\102\145\x66\x6f\x72\x65", gmdate("\x59\x2d\155\55\144\134\x54\110\x3a\151\72\163\134\132", $this->notBefore));
-        Wg:
-        if (!($this->notOnOrAfter !== NULL)) {
-            goto TU;
+        if ($this->notOnOrAfter !== NULL) {
+            $conditions->setAttribute('NotOnOrAfter', gmdate('Y-m-d\TH:i:s\Z', $this->notOnOrAfter));
         }
-        $De->setAttribute("\116\x6f\x74\x4f\x6e\117\x72\101\146\x74\x65\162", gmdate("\131\55\155\55\144\134\124\x48\x3a\x69\x3a\163\134\x5a", $this->notOnOrAfter));
-        TU:
-        if (!($this->validAudiences !== NULL)) {
-            goto DZ;
+
+        if ($this->validAudiences !== NULL) {
+            $ar = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AudienceRestriction');
+            $conditions->appendChild($ar);
+
+            Utilities::addStrings($ar, 'urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Audience', FALSE, $this->validAudiences);
         }
-        $iS = $XU->createElementNS("\165\162\x6e\72\x6f\x61\163\151\163\72\x6e\x61\155\145\x73\72\164\143\x3a\123\101\x4d\114\x3a\x32\x2e\60\x3a\x61\163\163\145\162\164\x69\x6f\156", "\x73\141\155\x6c\x3a\x41\165\x64\x69\x65\x6e\143\145\122\145\x73\164\162\151\143\x74\x69\157\156");
-        $De->appendChild($iS);
-        Utilities::addStrings($iS, "\165\162\x6e\72\x6f\141\163\151\163\72\x6e\141\x6d\x65\x73\72\x74\143\72\123\101\x4d\x4c\x3a\x32\x2e\x30\x3a\x61\x73\x73\145\x72\164\x69\x6f\156", "\x73\141\155\154\x3a\x41\165\144\151\145\x6e\143\x65", FALSE, $this->validAudiences);
-        DZ:
     }
-    private function addAuthnStatement(DOMElement $V1)
+
+
+    /**
+     * Add a AuthnStatement-node to the assertion.
+     *
+     * @param DOMElement $root The assertion element we should add the authentication statement to.
+     */
+    private function addAuthnStatement(DOMElement $root)
     {
-        if (!($this->authnInstant === NULL || $this->authnContextClassRef === NULL && $this->authnContextDecl === NULL && $this->authnContextDeclRef === NULL)) {
-            goto Ev;
+        if ($this->authnInstant === NULL ||
+            (
+                $this->authnContextClassRef === NULL &&
+                $this->authnContextDecl === NULL &&
+                $this->authnContextDeclRef === NULL
+            )
+        ) {
+            /* No authentication context or AuthnInstant => no authentication statement. */
+
+            return;
         }
-        return;
-        Ev:
-        $XU = $V1->ownerDocument;
-        $uD = $XU->createElementNS("\165\x72\156\72\x6f\141\163\151\x73\72\x6e\141\155\x65\163\x3a\x74\x63\72\123\x41\x4d\114\72\62\56\x30\x3a\x61\163\163\145\162\164\151\x6f\156", "\x73\x61\155\x6c\72\x41\x75\x74\150\156\x53\x74\141\164\x65\155\x65\156\x74");
-        $V1->appendChild($uD);
-        $uD->setAttribute("\x41\x75\x74\150\156\x49\x6e\163\164\x61\x6e\164", gmdate("\x59\x2d\155\55\144\134\124\x48\72\151\x3a\163\134\x5a", $this->authnInstant));
-        if (!($this->sessionNotOnOrAfter !== NULL)) {
-            goto Ta;
+
+        $document = $root->ownerDocument;
+
+        $authnStatementEl = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AuthnStatement');
+        $root->appendChild($authnStatementEl);
+
+        $authnStatementEl->setAttribute('AuthnInstant', gmdate('Y-m-d\TH:i:s\Z', $this->authnInstant));
+
+        if ($this->sessionNotOnOrAfter !== NULL) {
+            $authnStatementEl->setAttribute('SessionNotOnOrAfter', gmdate('Y-m-d\TH:i:s\Z', $this->sessionNotOnOrAfter));
         }
-        $uD->setAttribute("\123\145\x73\163\151\x6f\x6e\116\x6f\x74\117\156\117\162\101\x66\164\x65\162", gmdate("\x59\55\x6d\55\144\x5c\124\x48\x3a\x69\x3a\163\134\x5a", $this->sessionNotOnOrAfter));
-        Ta:
-        if (!($this->sessionIndex !== NULL)) {
-            goto t7;
+        if ($this->sessionIndex !== NULL) {
+            $authnStatementEl->setAttribute('SessionIndex', $this->sessionIndex);
         }
-        $uD->setAttribute("\x53\145\x73\163\x69\157\x6e\111\156\x64\x65\170", $this->sessionIndex);
-        t7:
-        $Sh = $XU->createElementNS("\165\162\x6e\x3a\x6f\x61\x73\151\163\x3a\156\x61\x6d\x65\x73\72\164\143\72\x53\x41\x4d\x4c\x3a\x32\56\60\72\x61\x73\x73\x65\x72\x74\151\157\x6e", "\163\141\155\154\x3a\101\165\164\150\156\103\157\156\x74\x65\170\164");
-        $uD->appendChild($Sh);
-        if (empty($this->authnContextClassRef)) {
-            goto u6;
+
+        $authnContextEl = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AuthnContext');
+        $authnStatementEl->appendChild($authnContextEl);
+
+        if (!empty($this->authnContextClassRef)) {
+            Utilities::addString(
+                $authnContextEl,
+                'urn:oasis:names:tc:SAML:2.0:assertion',
+                'saml:AuthnContextClassRef',
+                $this->authnContextClassRef
+            );
         }
-        Utilities::addString($Sh, "\165\x72\x6e\x3a\x6f\x61\163\x69\163\72\x6e\141\x6d\145\x73\x3a\x74\x63\x3a\x53\x41\x4d\114\72\x32\56\60\72\141\163\x73\x65\x72\164\151\157\x6e", "\x73\x61\x6d\154\x3a\x41\165\164\x68\x6e\x43\157\156\x74\145\170\164\103\x6c\x61\x73\x73\x52\145\146", $this->authnContextClassRef);
-        u6:
-        if (empty($this->authnContextDecl)) {
-            goto ZM;
+        if (!empty($this->authnContextDecl)) {
+            $this->authnContextDecl->toXML($authnContextEl);
         }
-        $this->authnContextDecl->toXML($Sh);
-        ZM:
-        if (empty($this->authnContextDeclRef)) {
-            goto rV;
+        if (!empty($this->authnContextDeclRef)) {
+            Utilities::addString(
+                $authnContextEl,
+                'urn:oasis:names:tc:SAML:2.0:assertion',
+                'saml:AuthnContextDeclRef',
+                $this->authnContextDeclRef
+            );
         }
-        Utilities::addString($Sh, "\x75\x72\156\72\157\141\x73\151\163\x3a\x6e\141\x6d\x65\x73\72\x74\143\x3a\123\x41\115\x4c\72\62\56\x30\x3a\141\163\163\x65\162\x74\151\157\x6e", "\163\141\x6d\x6c\72\x41\x75\164\x68\x6e\103\x6f\x6e\x74\145\170\164\x44\145\143\x6c\x52\x65\146", $this->authnContextDeclRef);
-        rV:
-        Utilities::addStrings($Sh, "\165\x72\x6e\72\157\x61\x73\151\x73\x3a\x6e\x61\x6d\145\x73\72\x74\x63\x3a\x53\x41\x4d\114\x3a\62\56\60\72\x61\x73\163\x65\162\x74\151\157\156", "\x73\141\155\154\x3a\x41\165\x74\x68\145\156\164\151\x63\141\164\x69\x6e\147\x41\x75\164\150\157\162\x69\164\171", FALSE, $this->AuthenticatingAuthority);
+
+        Utilities::addStrings(
+            $authnContextEl,
+            'urn:oasis:names:tc:SAML:2.0:assertion',
+            'saml:AuthenticatingAuthority',
+            FALSE,
+            $this->AuthenticatingAuthority
+        );
     }
-    private function addAttributeStatement(DOMElement $V1)
+
+
+    /**
+     * Add an AttributeStatement-node to the assertion.
+     *
+     * @param DOMElement $root The assertion element we should add the subject to.
+     */
+    private function addAttributeStatement(DOMElement $root)
     {
-        if (!empty($this->attributes)) {
-            goto Ih;
+        if (empty($this->attributes)) {
+            return;
         }
-        return;
-        Ih:
-        $XU = $V1->ownerDocument;
-        $lH = $XU->createElementNS("\x75\162\x6e\x3a\157\x61\163\151\163\72\x6e\x61\155\x65\163\72\x74\143\x3a\123\x41\115\x4c\72\x32\56\60\x3a\x61\x73\163\x65\x72\164\151\157\156", "\163\141\x6d\x6c\72\x41\x74\164\162\x69\142\x75\164\145\x53\164\x61\164\145\155\145\156\x74");
-        $V1->appendChild($lH);
-        foreach ($this->attributes as $cg => $EP) {
-            $Aa = $XU->createElementNS("\x75\x72\x6e\x3a\157\141\163\x69\163\72\156\141\155\145\x73\x3a\164\x63\72\x53\x41\x4d\x4c\x3a\62\56\x30\x3a\141\163\x73\x65\x72\164\151\x6f\x6e", "\163\141\x6d\154\x3a\x41\x74\x74\162\151\x62\x75\164\x65");
-            $lH->appendChild($Aa);
-            $Aa->setAttribute("\116\141\x6d\x65", $cg);
-            if (!($this->nameFormat !== "\x75\x72\x6e\72\157\x61\x73\151\163\72\156\x61\x6d\x65\x73\x3a\x74\143\x3a\x53\x41\115\114\72\62\x2e\x30\x3a\x61\x74\x74\x72\x6e\x61\155\x65\x2d\146\x6f\162\x6d\x61\x74\72\x75\156\x73\x70\145\x63\x69\x66\151\x65\x64")) {
-                goto Jj;
+
+        $document = $root->ownerDocument;
+
+        $attributeStatement = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AttributeStatement');
+        $root->appendChild($attributeStatement);
+
+        foreach ($this->attributes as $name => $values) {
+            $attribute = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Attribute');
+            $attributeStatement->appendChild($attribute);
+            $attribute->setAttribute('Name', $name);
+
+            if ($this->nameFormat !== 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified') {
+                $attribute->setAttribute('NameFormat', $this->nameFormat);
             }
-            $Aa->setAttribute("\116\141\x6d\145\106\x6f\162\x6d\141\164", $this->nameFormat);
-            Jj:
-            foreach ($EP as $qO) {
-                if (is_string($qO)) {
-                    goto gQ;
+
+            foreach ($values as $value) {
+                if (is_string($value)) {
+                    $type = 'xs:string';
+                } elseif (is_int($value)) {
+                    $type = 'xs:integer';
+                } else {
+                    $type = NULL;
                 }
-                if (is_int($qO)) {
-                    goto j2;
+
+                $attributeValue = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AttributeValue');
+                $attribute->appendChild($attributeValue);
+                if ($type !== NULL) {
+                    $attributeValue->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $type);
                 }
-                $dE = NULL;
-                goto eB;
-                gQ:
-                $dE = "\170\163\x3a\163\164\x72\151\x6e\147";
-                goto eB;
-                j2:
-                $dE = "\x78\163\72\x69\156\164\145\147\145\162";
-                eB:
-                $WZ = $XU->createElementNS("\x75\162\x6e\x3a\157\141\163\151\x73\x3a\156\141\155\145\163\72\x74\143\x3a\123\101\115\x4c\x3a\62\x2e\x30\x3a\x61\163\163\x65\x72\164\x69\x6f\x6e", "\x73\x61\x6d\x6c\x3a\101\164\164\x72\x69\x62\x75\164\145\x56\x61\154\165\145");
-                $Aa->appendChild($WZ);
-                if (!($dE !== NULL)) {
-                    goto px;
+                if (is_null($value)) {
+                    $attributeValue->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:nil', 'true');
                 }
-                $WZ->setAttributeNS("\x68\164\x74\160\x3a\57\x2f\167\x77\167\x2e\167\63\56\157\162\x67\57\62\60\x30\x31\57\x58\115\x4c\123\x63\x68\x65\x6d\141\55\x69\x6e\163\x74\141\156\143\145", "\170\163\151\x3a\x74\171\x70\x65", $dE);
-                px:
-                if (!is_null($qO)) {
-                    goto Nv;
+
+                if ($value instanceof DOMNodeList) {
+                    for ($i = 0; $i < $value->length; $i++) {
+                        $node = $document->importNode($value->item($i), TRUE);
+                        $attributeValue->appendChild($node);
+                    }
+                } else {
+                    $attributeValue->appendChild($document->createTextNode($value));
                 }
-                $WZ->setAttributeNS("\150\164\x74\160\72\x2f\57\x77\x77\x77\x2e\x77\63\56\x6f\x72\147\57\62\60\60\61\x2f\x58\x4d\114\x53\143\x68\145\x6d\141\x2d\151\156\x73\x74\x61\x6e\143\145", "\170\x73\151\x3a\x6e\x69\154", "\x74\162\165\x65");
-                Nv:
-                if ($qO instanceof DOMNodeList) {
-                    goto GQ;
-                }
-                $WZ->appendChild($XU->createTextNode($qO));
-                goto m2;
-                GQ:
-                $n5 = 0;
-                rp:
-                if (!($n5 < $qO->length)) {
-                    goto ii;
-                }
-                $SP = $XU->importNode($qO->item($n5), TRUE);
-                $WZ->appendChild($SP);
-                O3:
-                $n5++;
-                goto rp;
-                ii:
-                m2:
-                HI:
             }
-            Ia:
-            lR:
         }
-        DG:
     }
-    private function addEncryptedAttributeStatement(DOMElement $V1)
+
+
+    /**
+     * Add an EncryptedAttribute Statement-node to the assertion.
+     *
+     * @param DOMElement $root The assertion element we should add the Encrypted Attribute Statement to.
+     */
+    private function addEncryptedAttributeStatement(DOMElement $root)
     {
-        if (!($this->requiredEncAttributes == FALSE)) {
-            goto Sy;
+        if ($this->requiredEncAttributes == FALSE) {
+            return;
         }
-        return;
-        Sy:
-        $XU = $V1->ownerDocument;
-        $lH = $XU->createElementNS("\x75\162\x6e\72\157\141\x73\151\x73\x3a\x6e\141\x6d\x65\163\72\164\x63\72\123\101\x4d\114\72\x32\x2e\60\72\x61\163\x73\x65\162\164\151\157\x6e", "\163\x61\155\154\72\x41\164\164\x72\151\x62\x75\x74\x65\123\164\x61\164\145\155\145\x6e\x74");
-        $V1->appendChild($lH);
-        foreach ($this->attributes as $cg => $EP) {
-            $Rl = new DOMDocument();
-            $Aa = $Rl->createElementNS("\165\x72\156\72\157\x61\x73\151\163\72\156\x61\x6d\145\x73\72\x74\143\72\123\101\x4d\114\x3a\62\x2e\60\x3a\141\163\x73\145\x72\x74\151\157\x6e", "\163\x61\155\x6c\72\x41\164\x74\x72\151\x62\x75\x74\x65");
-            $Aa->setAttribute("\116\141\x6d\x65", $cg);
-            $Rl->appendChild($Aa);
-            if (!($this->nameFormat !== "\165\x72\156\72\157\x61\163\x69\x73\x3a\156\x61\155\145\163\72\x74\x63\72\123\101\115\x4c\72\x32\56\x30\x3a\x61\x74\x74\x72\156\x61\155\x65\55\146\x6f\162\155\x61\x74\x3a\x75\156\x73\x70\145\143\151\146\151\145\x64")) {
-                goto UO;
+
+        $document = $root->ownerDocument;
+
+        $attributeStatement = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AttributeStatement');
+        $root->appendChild($attributeStatement);
+
+        foreach ($this->attributes as $name => $values) {
+            $document2 = new DOMDocument();
+            $attribute = $document2->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:Attribute');
+            $attribute->setAttribute('Name', $name);
+            $document2->appendChild($attribute);
+
+            if ($this->nameFormat !== 'urn:oasis:names:tc:SAML:2.0:attrname-format:unspecified') {
+                $attribute->setAttribute('NameFormat', $this->nameFormat);
             }
-            $Aa->setAttribute("\116\x61\x6d\x65\x46\x6f\162\x6d\141\164", $this->nameFormat);
-            UO:
-            foreach ($EP as $qO) {
-                if (is_string($qO)) {
-                    goto Yz;
+
+            foreach ($values as $value) {
+                if (is_string($value)) {
+                    $type = 'xs:string';
+                } elseif (is_int($value)) {
+                    $type = 'xs:integer';
+                } else {
+                    $type = NULL;
                 }
-                if (is_int($qO)) {
-                    goto tb;
+
+                $attributeValue = $document2->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:AttributeValue');
+                $attribute->appendChild($attributeValue);
+                if ($type !== NULL) {
+                    $attributeValue->setAttributeNS('http://www.w3.org/2001/XMLSchema-instance', 'xsi:type', $type);
                 }
-                $dE = NULL;
-                goto l0;
-                Yz:
-                $dE = "\170\163\72\163\x74\162\x69\x6e\147";
-                goto l0;
-                tb:
-                $dE = "\x78\163\72\x69\156\164\x65\x67\145\162";
-                l0:
-                $WZ = $Rl->createElementNS("\165\x72\x6e\x3a\157\x61\x73\x69\163\72\156\141\155\x65\163\72\164\143\x3a\x53\101\115\114\72\x32\x2e\x30\x3a\141\163\163\x65\x72\x74\x69\157\156", "\x73\x61\x6d\154\72\101\x74\x74\162\x69\142\165\164\145\x56\141\154\x75\145");
-                $Aa->appendChild($WZ);
-                if (!($dE !== NULL)) {
-                    goto ad;
+
+                if ($value instanceof DOMNodeList) {
+                    for ($i = 0; $i < $value->length; $i++) {
+                        $node = $document2->importNode($value->item($i), TRUE);
+                        $attributeValue->appendChild($node);
+                    }
+                } else {
+                    $attributeValue->appendChild($document2->createTextNode($value));
                 }
-                $WZ->setAttributeNS("\x68\x74\164\160\x3a\x2f\x2f\x77\167\167\x2e\x77\63\x2e\157\162\147\x2f\62\x30\60\x31\x2f\130\115\114\x53\x63\x68\x65\155\141\55\151\x6e\x73\x74\x61\x6e\x63\145", "\170\x73\151\x3a\x74\171\x70\145", $dE);
-                ad:
-                if ($qO instanceof DOMNodeList) {
-                    goto gG;
-                }
-                $WZ->appendChild($Rl->createTextNode($qO));
-                goto CI;
-                gG:
-                $n5 = 0;
-                Lo:
-                if (!($n5 < $qO->length)) {
-                    goto Js;
-                }
-                $SP = $Rl->importNode($qO->item($n5), TRUE);
-                $WZ->appendChild($SP);
-                e2:
-                $n5++;
-                goto Lo;
-                Js:
-                CI:
-                zV:
             }
-            Pc:
-            $O2 = new XMLSecEnc();
-            $O2->setNode($Rl->documentElement);
-            $O2->type = "\150\x74\x74\160\x3a\x2f\x2f\167\x77\167\56\167\x33\56\157\162\147\57\62\60\x30\61\x2f\x30\x34\57\170\x6d\x6c\x65\156\143\43\105\x6c\145\x6d\145\x6e\164";
-            $mI = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
-            $mI->generateSessionKey();
-            $O2->encryptKey($this->encryptionKey, $mI);
-            $lR = $O2->encryptNode($mI);
-            $KV = $XU->createElementNS("\165\162\x6e\72\x6f\x61\x73\151\163\x3a\x6e\x61\x6d\145\163\x3a\x74\x63\x3a\x53\101\x4d\114\72\62\x2e\60\72\141\163\163\x65\162\164\x69\157\x6e", "\163\141\x6d\154\x3a\105\156\143\162\171\160\x74\145\144\x41\x74\x74\x72\151\142\x75\164\x65");
-            $lH->appendChild($KV);
-            $mr = $XU->importNode($lR, TRUE);
-            $KV->appendChild($mr);
-            Qo:
+            /*Once the attribute nodes are built, the are encrypted*/
+            $EncAssert = new XMLSecEnc();
+            $EncAssert->setNode($document2->documentElement);
+            $EncAssert->type = 'http://www.w3.org/2001/04/xmlenc#Element';
+            /*
+             * Attributes are encrypted with a session key and this one with
+             * $EncryptionKey
+             */
+            $symmetricKey = new XMLSecurityKey(XMLSecurityKey::AES256_CBC);
+            $symmetricKey->generateSessionKey();
+            $EncAssert->encryptKey($this->encryptionKey, $symmetricKey);
+            $EncrNode = $EncAssert->encryptNode($symmetricKey);
+
+            $EncAttribute = $document->createElementNS('urn:oasis:names:tc:SAML:2.0:assertion', 'saml:EncryptedAttribute');
+            $attributeStatement->appendChild($EncAttribute);
+            $n = $document->importNode($EncrNode, TRUE);
+            $EncAttribute->appendChild($n);
         }
-        D3:
     }
+
 }
