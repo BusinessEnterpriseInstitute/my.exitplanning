@@ -1,0 +1,36 @@
+diff --git a/restrict_by_ip.module b/restrict_by_ip.module
+index 20749c1..35e3349 100644
+--- a/restrict_by_ip.module
++++ b/restrict_by_ip.module
+@@ -85,6 +85,11 @@ function restrict_by_ip_permission() {
+       'description' => t('Create, edit and delete rules for restricted IP login.'),
+       'restrict access' => TRUE,
+     ),
++    'bypass restrict by ip' => array(
++      'title' => t('Bypass restrict by ip'),
++      'description' => t('Bypass every restricted IP.'),
++      'restrict access' => TRUE,
++    ),
+   );
+ }
+ 
+@@ -552,6 +557,19 @@ function _restrict_by_ip_login(&$user) {
+  * Handles actions associated with logging out a user based on IP restrictions.
+  */
+ function _restrict_by_ip_logout($ip2check, $user) {
++  // don't end session if masquerade module is active and masqing user has access to bypass any ip restriction
++  if (module_exists('masquerade')) {
++    global $user;
++    $uid = db_query("SELECT m.uid_from FROM {masquerade} m WHERE m.sid = :sid AND m.uid_as = :uid_as ", array(
++      ':sid' => session_id(),
++      ':uid_as' => $user->uid,
++    ))->fetchField();
++    $masq_user = user_load($uid);
++    if (user_access('bypass restrict by ip', $masq_user)) {
++      return TRUE;
++    }
++  }
++
+   // Logs the error with the IP address.
+   watchdog('user', t('Session closed for %name - Invalid IP. @ip', array(
+     '%name' => $user->name,

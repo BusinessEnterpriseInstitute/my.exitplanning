@@ -85,11 +85,6 @@ function restrict_by_ip_permission() {
       'description' => t('Create, edit and delete rules for restricted IP login.'),
       'restrict access' => TRUE,
     ),
-    'bypass restrict by ip' => array(
-      'title' => t('Bypass restrict by ip'),
-      'description' => t('Bypass every restricted IP.'),
-      'restrict access' => TRUE,
-    ),
   );
 }
 

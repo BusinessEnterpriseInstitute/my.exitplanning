@@ -1,0 +1,22 @@
+diff --git a/restrict_by_ip.module b/restrict_by_ip.module
+index 8a04765..0a84936 100644
+--- a/restrict_by_ip.module
++++ b/restrict_by_ip.module
+@@ -479,7 +479,7 @@ function _restrict_by_ip_login(&$user) {
+       }
+       if (!$valid) {
+         // Log the error with the ip address
+-        watchdog('user', t('Session closed for %name - Invalid IP. '.$ip2check, array('%name' => $user->name)));
++        watchdog('user', 'Session closed for %name - Invalid IP: %ip_address', array('%name' => $user->name, '%ip_address' => $ip2check));
+         // Destroy the current session
+         session_destroy();
+         module_invoke_all('user', 'logout', NULL, $user);
+@@ -510,7 +510,7 @@ function _restrict_by_ip_login(&$user) {
+       // Restrict by ip address is set and no addresses match users ip address
+       if (!$logonvalid) {
+         // Log the error with the ip address
+-        watchdog('user', t('Session closed for %name - Invalid IP. '.$ip2check, array('%name' => $user->name)));
++        watchdog('user', 'Session closed for %name - Invalid IP: %ip_address', array('%name' => $user->name, '%ip_address' => $ip2check));
+         // Destroy the current session
+         session_destroy();
+         module_invoke_all('user', 'logout', NULL, $user);
