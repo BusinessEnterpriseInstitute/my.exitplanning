@@ -22,6 +22,7 @@ class MiniOrangeAcs
      */
     public function processSamlResponse($post, $acs_url, $cert_fingerprint, $issuer, $base_url, $spEntityId, $username_attribute, $custom_attributes, $custom_roles)
     {
+      var_dump($post);exit;
         if (array_key_exists('SAMLResponse', $post)) {
             $saml_response = $post['SAMLResponse'];
         } else {
@@ -257,20 +258,20 @@ class MiniOrangeAcs
         echo '<div style="margin:3%;display:block;text-align:center;">
             <input style="padding:1%;width:37%;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;
                 border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;
-                box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Configure Attribute/Role Mapping" 
+                box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Configure Attribute/Role Mapping"
                 onClick="close_and_redirect();">
-                
+
                 <input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;
                     border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;
                     box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();">
-            
+
           </div>
-          <script>               
+          <script>
               function close_and_redirect(){
                    window.opener.redirect_to_attribute_mapping();
                    self.close();
-              }  
-              
+              }
+
           </script>';
         exit;
     }
