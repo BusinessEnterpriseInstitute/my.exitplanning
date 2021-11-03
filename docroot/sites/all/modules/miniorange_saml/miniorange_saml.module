@@ -504,6 +504,9 @@ function saml_logout(){
  * Validate SAML Response and authenticate user.
  */
 function saml_response() {
+  var_dump($_GET);
+  echo "<hr>";
+  var_dump($_POST);exit;
     global $user;
     $base_site_url = Utilities::miniorange_get_baseURL();
     $acs_url = $base_site_url . '/?q=samlassertion';
@@ -591,7 +594,7 @@ function saml_response() {
         $current_path_domain = $current_path . $current_domain;
         $License_key = variable_get('miniorange_saml_license_key', NULL);
         if ((($current_path_domain == AESEncryption::decrypt_data($fraud_check,$key)) || ($current_path_domain == AESEncryption::decrypt_data($fraud_check,$key,'AES-128-ECB'))) && $username != null && $username != '' && $License_key != Null && $License_key != '') {
-          var_dump($_POST);exit;
+
             $response = $response_obj->processSamlResponse($_POST, $acs_url, $cert_fingerprint, $issuer, $base_site_url, $sp_entity_id, $username_attribute, $attrs, $role);
         } else {
             if ($License_key != null && $License_key != '') {

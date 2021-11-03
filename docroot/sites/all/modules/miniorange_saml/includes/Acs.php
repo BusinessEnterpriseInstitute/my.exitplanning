@@ -22,7 +22,7 @@ class MiniOrangeAcs
      */
     public function processSamlResponse($post, $acs_url, $cert_fingerprint, $issuer, $base_url, $spEntityId, $username_attribute, $custom_attributes, $custom_roles)
     {
-      var_dump($post);exit;
+
         if (array_key_exists('SAMLResponse', $post)) {
             $saml_response = $post['SAMLResponse'];
         } else {
