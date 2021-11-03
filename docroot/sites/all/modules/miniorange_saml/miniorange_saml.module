@@ -504,9 +504,9 @@ function saml_logout(){
  * Validate SAML Response and authenticate user.
  */
 function saml_response() {
-  var_dump($_GET);
+  /**var_dump($_GET);
   echo "<hr>";
-  var_dump($_POST);exit;
+  var_dump($_POST);exit;**/
     global $user;
     $base_site_url = Utilities::miniorange_get_baseURL();
     $acs_url = $base_site_url . '/?q=samlassertion';
