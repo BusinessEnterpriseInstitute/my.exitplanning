@@ -399,9 +399,9 @@ function miniorange_saml_form_alter(&$form, &$form_state, $form_id)
 
             $saml_login_url = $base_site_url . '/?q=samllogin';
             $idp_name = variable_get('miniorange_saml_idp_name', '');
-            $form['loginurl'] = array(array(
+           /** $form['loginurl'] = array(array(
                 '#markup' => '<a href="' . $saml_login_url . '">Login using ' . $idp_name . '</a>'
-            ));
+            ));**/
         }
     }
 }
