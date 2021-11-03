@@ -53,6 +53,7 @@ class SAML2_Response
         }
 
         $sig = Utilities::validateElement($xml);
+
         if ($sig !== FALSE) {
             $this->certificates = $sig['Certificates'];
             $this->signatureData = $sig;
@@ -69,9 +70,10 @@ class SAML2_Response
             }
 
             if ($node->localName === 'Assertion' || $node->localName === 'EncryptedAssertion') {
-                $this->assertions[] = new SAML2_Assertion($node);
-            }
 
+                $this->assertions[] = new SAML2_Assertion($node);
+
+            }
         }
     }
 

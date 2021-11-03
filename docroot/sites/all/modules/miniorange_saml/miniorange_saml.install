@@ -3,11 +3,11 @@
  * @file
  * Installation file for miniOrange SAML Module.
  */
- 
+
 /**
  * Implements hook_uninstall().
  */
- 
+
 function miniorange_saml_uninstall() {
   variable_del('miniorange_saml_status');
   variable_del('miniorange_config_status');
@@ -17,6 +17,7 @@ function miniorange_saml_uninstall() {
   variable_del('miniorange_saml_customer_id');
   variable_del('miniorange_saml_customer_api_key');
   variable_del('miniorange_saml_idp_name');
+  variable_del('miniorange_saml_sp_issuer');
   variable_del('miniorange_saml_idp_issuer');
   variable_del('miniorange_saml_idp_login_url');
   variable_del('miniorange_saml_idp_logout_url');
@@ -25,15 +26,20 @@ function miniorange_saml_uninstall() {
   variable_del('miniorange_saml_auto_redirect_to_idp');
   variable_del('miniorange_saml_force_auth');
   variable_del('miniorange_saml_enable_backdoor');
-  variable_del('miniorange_saml_auto_redirect_to_idp');
   variable_del('miniorange_saml_license_key');
   variable_del('miniorange_saml_default_relaystate');
   variable_del('miniorange_saml_request_signed');
   variable_del('miniorange_saml_http_binding');
   variable_del('miniorange_saml_attrs_list');
+  variable_del('miniorange_saml_fetch_metadata_time_intervals');
   variable_del('security_signature_algorithm');
-  variable_del('miniorange_saml_sp_upgrade_url');
-  
+  variable_del('miniorange_saml_meta_data_url');
+  variable_del('miniorange_saml_sp_role_names');
+  variable_del('miniorange_saml_log_url_class');
+
+  if(db_table_exists('miniorange_saml_idp_list')){
+      drupal_uninstall_schema('miniorange_saml_idp_list');
+  }
 }
 
 
@@ -45,8 +51,93 @@ function miniorange_saml_install() {
   variable_set('miniorange_saml_email_attribute', 'NameID');
   variable_set('miniorange_saml_username_attribute', 'NameID');
   variable_set('security_signature_algorithm', 'RSA_SHA256');
-  variable_set('miniorange_saml_idp_name', 'IdentityProvider');
+  if(!db_table_exists('miniorange_saml_idp_list')){
+      drupal_install_schema('miniorange_saml');
+  }
+}
 
+function miniorange_saml_schema() {
+  $schema['miniorange_saml_idp_list'] = array(
+    'description' => t('SP Configuration Storage'),
+    'fields' => array(
+	    'id' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+	    ),
+	    'mo_idp_name' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+      ),
+	    'mo_idp_issuer' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => TRUE,
+      ),
+	    'mo_idp_sso_url' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => TRUE,
+      ),
+	    'mo_idp_cert' => array(
+        'type' => 'varchar',
+        'length' => 4096,
+		    'default' => 'FALSE',
+        'not null' => NULL,
+      ),
+	    'mo_idp_nameid_format' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => TRUE,
+      ),
+	    // 'mo_idp_default_relayState' => array(
+      // 'type' => 'varchar',
+      // 'length' => 254,
+      // 'not null' => TRUE,
+      // ),
+  	  'mo_idp_request_signed' => array(
+        'type' => 'varchar',
+        'length' => 20,
+		    'default' => 'FALSE',
+		    'not null' => TRUE,
+	    ),
+	    'mo_idp_http_binding_sso' => array(
+        'type' => 'varchar',
+        'length' => 20,
+		    'default' => 'FALSE',
+		    'not null' => TRUE,
+	    ),
+	    'mo_idp_http_binding_slo' => array(
+        'type' => 'varchar',
+        'length' => 20,
+		    'default' => 'FALSE',
+		    'not null' => TRUE,
+	    ),
+	    'mo_idp_slo_url' => array(
+        'type' => 'varchar',
+        'length' => 254,
+        'not null' => TRUE,
+		  ),
+		  'miniorange_saml_fetch_metadata_time_intervals' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'default' => 'FALSE',
+ 		    'not null' => TRUE,
+      ),
+	    'miniorange_saml_meta_data_url' => array(
+	      'type' => 'varchar',
+        'length' => 254,
+        'not null' => TRUE,
+      ),
+      'security_signature_algorithm' => array(
+      	 'type' => 'varchar',
+         'length' => 20,
+         'not null' => TRUE,
+      ),
+	  ),
+	  'primary key' => array('id'),
+  );
+  return $schema;
 }
 
 
@@ -55,16 +146,14 @@ function miniorange_saml_install() {
  */
 
  function miniorange_saml_disable() {
-  
     if(variable_get('miniorange_saml_license_key',NULL) != NULL){
-       $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-      $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);       
-      $customer = new MiniorangeSAMLCustomer($username,$phone,NULL,NULL);
-      $response = json_decode($customer->updateStatus());
-	  if($response->status == 'SUCCESS')
-		  variable_del('miniorange_saml_license_key');
-    } 
-     
- }
+        $username = variable_get('miniorange_saml_customer_admin_email', NULL);
+        $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
+        $customer = new MiniorangeSAMLCustomer($username,$phone,NULL,NULL);
+        $response = json_decode($customer->updateStatus());
 
- ?>
+	      if($response->status == 'SUCCESS')
+		      variable_del('miniorange_saml_license_key');
+    }
+ }
+?>
