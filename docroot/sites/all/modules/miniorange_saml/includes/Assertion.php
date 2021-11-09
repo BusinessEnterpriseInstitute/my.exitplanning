@@ -17,7 +17,6 @@
  */
 
 include_once 'Utilities.php';
-
 class SAML2_Assertion
 {
     private $id;
@@ -62,45 +61,51 @@ class SAML2_Assertion
             return;
         }
 
-        if ($xml->localName === 'EncryptedAssertion') {
-            $data = Utilities::xpQuery($xml, './xenc:EncryptedData');
-            //$encryptedMethod =  Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo');
-            //$method = $encryptedMethod[0]->firstChild->firstChild->getAttribute("Algorithm");
-            $encryptedMethod = Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey');
-            $method = '';
-            if (empty($encryptedMethod)) {
-                $encryptedMethod = Utilities::xpQuery($xml, './xenc:EncryptedKey/xenc:EncryptionMethod');
-                $method = $encryptedMethod[0]->getAttribute("Algorithm");
-            } else {
-                $method = $encryptedMethod[0]->firstChild->getAttribute("Algorithm");
-            }
-            $algo = Utilities::getEncryptionAlgorithm($method);
-            if (count($data) === 0) {
-                throw new Exception('Missing encrypted data in <saml:EncryptedAssertion>.');
-            } elseif (count($data) > 1) {
-                throw new Exception('More than one encrypted data element in <saml:EncryptedAssertion>.');
-            }
+        if($xml->localName === 'EncryptedAssertion'){
+				    $data = Utilities::xpQuery($xml, './xenc:EncryptedData');
+			      //$encryptedMethod =  Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo');
+			      //$method = $encryptedMethod[0]->firstChild->firstChild->getAttribute("Algorithm");
+			      $encryptedMethod =  Utilities::xpQuery($xml, './xenc:EncryptedData/ds:KeyInfo/xenc:EncryptedKey');
+			      $method = '';
+			      if(empty($encryptedMethod)){
+				        $encryptedMethod =  Utilities::xpQuery($xml, './xenc:EncryptedKey/xenc:EncryptionMethod');
+				        $method = $encryptedMethod[0]->getAttribute("Algorithm");
+			      }else{
+				        $method = $encryptedMethod[0]->firstChild->getAttribute("Algorithm");
+			      }
+				    $algo = Utilities::getEncryptionAlgorithm($method);
+				    if (count($data) === 0) {
+					      throw new Exception('Missing encrypted data in <saml:EncryptedAssertion>.');
+				    } elseif (count($data) > 1) {
+					      throw new Exception('More than one encrypted data element in <saml:EncryptedAssertion>.');
+				    }
 
-            $private_cert = "";
-            $private_cert = variable_get('miniorange_saml_private_certificate');
+				    $private_cert = "";
+				    $private_cert = variable_get( 'miniorange_saml_private_certificate' );
 
-            $key = new XMLSecurityKey($algo, array('type' => 'private'));
-            $base_module_path = drupal_get_path("module", "miniorange_saml");
+				    $key = new XMLSecurityKey($algo, array('type'=>'private'));
+				    $base_module_path = drupal_get_path("module", "miniorange_saml");
 
-            if ($private_cert != '') {
-                $url = $base_module_path . '/resources/Custom_Private_Certificate.key';
-            } else {
-                $url = $base_module_path . '/resources/sp-key.key';
-            }
-            $key->loadKey($url, TRUE);
+				    if($private_cert != ''){
+				        $url = $base_module_path . '/resources/Custom_Private_Certificate.key';
+				    }else {
+				        $url = $base_module_path . '/resources/sp-key.key';
+				    }
+				    $key->loadKey($url,TRUE);
 
-            $alternateKey = new XMLSecurityKey($algo, array('type' => 'private'));
-            $alternateKeyUrl = $base_module_path . '/resources/miniorange_sp_priv_key.key';
-            $alternateKey->loadKey($alternateKeyUrl, TRUE);
+				    $alternateKey = new XMLSecurityKey($algo, array('type' => 'private'));
+				    $alternateKeyUrl = $base_module_path . '/resources/miniorange_sp_priv_key.key';
+				    $alternateKey->loadKey($alternateKeyUrl,TRUE);
 
-            $blacklist = array();
-            $xml = Utilities::decryptElement($data[0], $key, $blacklist, $alternateKey);
-        }
+				    $blacklist = array();
+
+				    /*echo "data=>";print_r($data);echo "<hr>";
+				    echo "key=>";print_r($key);echo "<hr>";
+				    echo "backlist=>";print_r($blacklist);echo "<hr>";
+				    echo "alternatekey=>";print_r($alternateKey);echo "<hr>";exit;*/
+				    $xml = Utilities::decryptElement($data[0], $key, $blacklist, $alternateKey);
+				  // echo "assetion.php==>"; print_r($xml);exit;
+		    }
         if (!$xml->hasAttribute('ID')) {
             throw new Exception('Missing ID attribute on SAML assertion.');
         }
@@ -123,7 +128,7 @@ class SAML2_Assertion
         $this->parseEncryptedAttributes($xml);
         $this->parseSignature($xml);
         $this->parseSubject($xml);
-        //echo "Signature parsed";
+		//echo "Signature parsed";
     }
 
     /**
@@ -161,7 +166,7 @@ class SAML2_Assertion
         } else {
             $this->nameId = Utilities::parseNameId($nameId);
         }
-        //echo 'AssertionNameID: '. $this->nameId['Value'];
+		//echo 'AssertionNameID: '. $this->nameId['Value'];
         /*$subjectConfirmation = Utilities::xpQuery($subject, './saml_assertion:SubjectConfirmation');
         if (empty($subjectConfirmation)) {
             throw new Exception('Missing <saml:SubjectConfirmation> in <saml:Subject>.');
@@ -409,7 +414,7 @@ class SAML2_Assertion
      * Otherwise, TRUE will be returned. An exception is thrown if the
      * signature validation fails.
      *
-     * @param XMLSecurityKey $key The key we should check against.
+     * @param  XMLSecurityKey $key The key we should check against.
      * @return boolean        TRUE if successful, FALSE if it is unsigned.
      */
     public function validate(XMLSecurityKey $key)
@@ -489,9 +494,9 @@ class SAML2_Assertion
      *
      * The returned NameId is in the format used by Utilities::addNameId().
      *
+     * @see Utilities::addNameId()
      * @return array|NULL The name identifier of the assertion.
      * @throws Exception
-     * @see Utilities::addNameId()
      */
     public function getNameId()
     {
@@ -507,8 +512,8 @@ class SAML2_Assertion
      *
      * The NameId must be in the format accepted by Utilities::addNameId().
      *
-     * @param array|NULL $nameId The name identifier of the assertion.
      * @see Utilities::addNameId()
+     * @param array|NULL $nameId The name identifier of the assertion.
      */
     public function setNameId($nameId)
     {
@@ -563,8 +568,8 @@ class SAML2_Assertion
     /**
      * Decrypt the NameId of the subject in the assertion.
      *
-     * @param XMLSecurityKey $key The decryption key.
-     * @param array $blacklist Blacklisted decryption algorithms.
+     * @param XMLSecurityKey $key       The decryption key.
+     * @param array          $blacklist Blacklisted decryption algorithms.
      */
     public function decryptNameId(XMLSecurityKey $key, array $blacklist = array())
     {
@@ -798,8 +803,8 @@ class SAML2_Assertion
      * This was done to work around an old bug of Shibboleth ( https://bugs.internet2.edu/jira/browse/SIDP-187 ).
      * Should no longer be required, please use either getAuthnConextClassRef or getAuthnContextDeclRef.
      *
-     * @return string|NULL The authentication method.
      * @deprecated use getAuthnContextClassRef
+     * @return string|NULL The authentication method.
      */
     public function getAuthnContext()
     {
@@ -818,8 +823,8 @@ class SAML2_Assertion
      * If this is set to NULL, no authentication statement will be
      * included in the assertion. The default is NULL.
      *
-     * @param string|NULL $authnContext The authentication method.
      * @deprecated use setAuthnContextClassRef
+     * @param string|NULL $authnContext The authentication method.
      */
     public function setAuthnContext($authnContext)
     {
@@ -1078,7 +1083,7 @@ class SAML2_Assertion
     /**
      * Convert this assertion to an XML element.
      *
-     * @param DOMNode|NULL $parentElement The DOM node the assertion should be created in.
+     * @param  DOMNode|NULL $parentElement The DOM node the assertion should be created in.
      * @return DOMElement   This assertion.
      */
     public function toXML(DOMNode $parentElement = NULL)

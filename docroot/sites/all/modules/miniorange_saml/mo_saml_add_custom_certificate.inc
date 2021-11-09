@@ -1,22 +1,22 @@
 <?php function mo_saml_add_custom_certificate($form, &$form_state)
-{   
-
+{
     global $base_url;
-    drupal_add_css(drupal_get_path('module', 'miniorange_saml') . '/css/bootstrap.min.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-    drupal_add_css(drupal_get_path('module', 'miniorange_saml') . '/css/style_settings.css', array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
+
+    $disabled = Utilities::isCustomerRegistered($form, $form_state);
 
     $form['header_top_style_1'] = array('#markup' => '<div class="mo_saml_table_layout_1"><div class="mo_saml_table_layout mo_saml_container">');
 
     $form['miniorange_saml_generate_metadata'] = array(
         '#markup' => '<div id="mo_gen_tab"></div>',
     );
-    $disabled = Utilities::isCustomerRegistered($form, $form_state);
 
     $form['mo_saml_metadata'] = array(
-        '#markup' => '<div border="1" id="generate_certificate_form" style="background-color:#FFFFFF; border:0px solid #CCCCCC; padding:1px 1px 1px 10px; display:none;" >
+        '#markup' =>'<div border="1" id="generate_certificate_form" style="background-color:#FFFFFF; border:0px solid #CCCCCC; padding:1px 1px 1px 10px; display:none;" >
                     <table style="width:100%;">
                         <h4>GENERATE CUSTOM CERTIFICATE<span style="float:right;margin-right:25px;">
-            				<input type="button" class="mo_saml_btn mo_saml_btn-sm mo_saml_btn-danger" value="Back" onclick = "hide_gen_cert_form()"/></a><br>
+            				<input type="button" class="btn btn-sm btn-danger" value="Back" onclick = "hide_gen_cert_form()"/></a><br>
            				    </span><br><br><b><hr></b><br>',
     );
 
@@ -27,10 +27,9 @@
 
     $form['mo_saml_country_code_text'] = array(
         '#type' => 'textfield',
-        '#attributes' => array('style' => 'width:80%', 'placeholder' => 'Enter Country code:'),
+        '#attributes' => array('style' => 'width:80%','placeholder' => 'Enter Country code:'),
         '#description' => t('<b>NOTE: </b>Check your country code <a href="https://www.digicert.com/kb/ssl-certificate-country-codes.htm" target="_blank">here.</a>'),
         '#default_value' => variable_get('mo_saml_country_code_text', ''),
-        '#disabled'=>$disabled
     );
     $form['mo_saml_certificate_state'] = array(
         '#markup' => '<tr>
@@ -40,9 +39,8 @@
 
     $form['mo_saml_certificate_state_name'] = array(
         '#type' => 'textfield',
-        '#attributes' => array('style' => 'width:80%', 'placeholder' => 'State Name:'),
+        '#attributes' => array('style' => 'width:80%','placeholder' => 'State Name:'),
         '#default_value' => variable_get('mo_saml_certificate_state_name', ''),
-        '#disabled'=>$disabled
     );
 
     $form['mo_saml_certificate_company'] = array(
@@ -52,9 +50,8 @@
 
     $form['mo_saml_certificate_company_name'] = array(
         '#type' => 'textfield',
-        '#attributes' => array('style' => 'width:80%', 'placeholder' => 'Company Name:'),
+        '#attributes' => array('style' => 'width:80%','placeholder' => 'Company Name:'),
         '#default_value' => variable_get('mo_saml_certificate_company_name', ''),
-        '#disabled'=>$disabled
     );
 
     $form['metadata_unit'] = array(
@@ -64,9 +61,8 @@
 
     $form['miniorange_saml_unit_name'] = array(
         '#type' => 'textfield',
-        '#attributes' => array('style' => 'width:80%', 'placeholder' => 'Unit name'),
+        '#attributes' => array('style' => 'width:80%','placeholder' => 'Unit name'),
         '#default_value' => variable_get('miniorange_saml_unit_name', ''),
-        '#disabled'=>$disabled
     );
 
     $form['mo_saml_certificate_common'] = array(
@@ -77,9 +73,8 @@
 
     $form['mo_saml_certificate_common_name'] = array(
         '#type' => 'textfield',
-        '#attributes' => array('style' => 'width:80%', 'placeholder' => 'Common Name:'),
+        '#attributes' => array('style' => 'width:80%','placeholder' => 'Common Name:'),
         '#default_value' => variable_get('mo_saml_certificate_common_name', ''),
-        '#disabled'=>$disabled
     );
 
     $form['mo_saml_digest_algo'] = array(
@@ -150,8 +145,10 @@
         '#prefix' => '<td>',
         '#suffix' => '</td>',
         '#submit' => array('miniorange_saml_generate_custom_certificate'),
-        '#disabled'=>$disabled
+        '#attributes' => array('style' => 'display:block;margin-left:auto;margin-right:auto;border-radius:4px;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
+        '#disabled' => $disabled,
     );
+
 
 
     $form['metadata_i'] = array(
@@ -162,11 +159,12 @@
     $form['markup_1'] = array(
         '#markup' => '<h3>ADD CUSTOM CERTIFICATE </h3><hr><br/>',
     );
-   
-    if (variable_get('miniorange_saml_license_key', NULL) == NULL &&
-        variable_get('miniorange_saml_customer_admin_email', NULL) != NULL) {
-        return $form;
-    }
+    
+    // if(variable_get('miniorange_saml_license_key', NULL) == NULL &&
+    //     variable_get('miniorange_saml_customer_admin_email', NULL) != NULL)
+    // {
+    //     return $form;
+    // }
 
     $form['miniorange_saml_private_certificate'] = array(
         '#type' => 'textarea',
@@ -174,11 +172,14 @@
         '#cols' => 5,
         '#rows' => 5,
         '#default_value' => variable_get('miniorange_saml_private_certificate', ''),
-        '#attributes' => array('style' => 'width:77%', 'placeholder' => "Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=signing) in IdP-Metadata XML file."),
+        '#attributes' => array('style' => 'width:77%','placeholder' =>"Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=signing) in IdP-Metadata XML file."),
         '#resizable' => False,
-        '#description' => '<strong>NOTE :</strong> Format of the certificate:<br /><strong>-----BEGIN PRIVATE KEY-----<br />'
-            . 'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br />-----END PRIVATE KEY-----</strong><br /><br /><br />',
         '#disabled' => $disabled,
+    );
+
+    $form['miniorange_saml_idp_cert_format1'] = array(
+        '#markup' => '<strong>NOTE :</strong> Format of the certificate:<br /><strong>-----BEGIN PRIVATE KEY-----<br />'
+            . 'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br />-----END PRIVATE KEY-----</strong><br /><br /><br />',
     );
 
     $form['miniorange_saml_publ_certificate'] = array(
@@ -187,22 +188,25 @@
         '#cols' => 5,
         '#rows' => 5,
         '#default_value' => variable_get('miniorange_saml_publ_certificate', ''),
-        '#attributes' => array('style' => 'width:77%', 'placeholder' => "Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=signing) in IdP-Metadata XML file."),
+        '#attributes' => array('style' => 'width:77%','placeholder' =>"Copy and Paste the content from the downloaded certificate or copy the content enclosed in X509Certificate tag (has parent tag KeyDescriptor use=signing) in IdP-Metadata XML file."),
         '#resizable' => False,
-        '#description' => '<strong>NOTE :</strong> Format of the certificate:<br /><strong>-----BEGIN PRIVATE KEY-----<br />'
-            . 'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br />-----END PRIVATE KEY-----</strong><br /><br /><br />',
         '#disabled' => $disabled,
+    );
+
+    $form['miniorange_saml_idp_cert_format'] = array(
+        '#markup' => '<strong>NOTE :</strong> Format of the certificate:<br /><strong>-----BEGIN CERTIFICATE-----<br />'
+            . 'XXXXXXXXXXXXXXXXXXXXXXXXXXX<br />-----END CERTIFICATE-----</strong><br /><br /><br /><br />',
     );
 
     $form['save_config_elements'] = array(
         '#type' => 'submit',
-        '#name' => 'submit',
+        '#name'=>'submit',
         '#value' => t('Upload'),
         '#prefix' => '<td>',
         '#suffix' => '</td>',
         '#submit' => array('miniorange_saml_upload_custom_certificate'),
         '#disabled' => $disabled,
-       
+        '#attributes' => array('style' => 'border-radius: 4px;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
     );
 
     $form['save_config_elements1'] = array(
@@ -212,14 +216,19 @@
         '#suffix' => '</td>',
         '#submit' => array('miniorange_saml_reset_custom_certificate'),
         '#disabled' => $disabled,
+        '#attributes' => array('style' => 'border-radius: 4px;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
     );
 
     $form['miniorange_saml_generate_metadata_button'] = array(
-        '#markup' => '<a class="mo_saml_btn mo_saml_btn-success mo_saml_btn-large" id="mosaml_upload" style="padding:3px 7px;" onclick="show_gen_cert_form()">'
-            . 'Generate</a><br><br></div></div>',
+        '#markup' => '<a class="btn btn-primary btn-large" id="mosaml_upload" style="padding:3px 7px;" onclick="show_gen_cert_form()">'
+            . 'Generate</a><br><br>',
     );
 
-    Utilities::AddsupportTab($form, $form_state);
+    $form['miniorange_saml_support_div_end'] = array(
+        '#markup' => '</div></div>',
+    );
+
+    Utilities::AddsupportTab( $form, $form_state);
 
     return $form;
 }
@@ -227,16 +236,15 @@
 function miniorange_saml_upload_custom_certificate($form, &$form_state)
 {
     $public_cert = $form['miniorange_saml_publ_certificate']['#value'];
-    if ( !empty( $public_cert ) ) {
+    if(!empty($public_cert)) {
         $public_cert = Utilities::sanitize_certificate($form['miniorange_saml_publ_certificate']['#value']);
     }
-
     $private_cert = $form['miniorange_saml_private_certificate']['#value'];
-    if ( !empty($private_cert ) ) {
+    if(!empty($private_cert)) {
         $private_cert = Utilities::sanitize_private_key($form['miniorange_saml_private_certificate']['#value']);
     }
 
-    if ( empty( $public_cert ) || empty( $private_cert ) ) {
+    if(empty($public_cert) || empty($private_cert)){
         drupal_set_message(t('The <b><u>X.509 Private Certificate</u></b> and <b><u>X.509 Public Certificate</u></b> fields are mandatory.'), 'error');
         return;
     }
@@ -246,11 +254,11 @@ function miniorange_saml_upload_custom_certificate($form, &$form_state)
 
     //write certificate data in Custom_Public_Certificate.crt file.
     $pblc_filename = drupal_get_path('module', 'miniorange_saml') . '/resources/Custom_Public_Certificate.crt';
-    file_put_contents($pblc_filename, $public_cert);
+    file_put_contents ($pblc_filename ,$public_cert);
 
     //write certificate data in Custom_Private_Certificate.key file.
     $prvt_filename = drupal_get_path('module', 'miniorange_saml') . '/resources/Custom_Private_Certificate.key';
-    file_put_contents($prvt_filename, $private_cert);
+    file_put_contents ($prvt_filename ,$private_cert);
 
     drupal_set_message(t('Custom Certificate updated successfully.'));
 }
@@ -260,19 +268,18 @@ function miniorange_saml_reset_custom_certificate($form, &$form_state)
     variable_del('miniorange_saml_publ_certificate');
     variable_del('miniorange_saml_private_certificate');
 
-    variable_set('mo_saml_country_code_text', '');
-    variable_set('mo_saml_certificate_state_name', '');
-    variable_set('mo_saml_certificate_company_name', '');
-    variable_set('miniorange_saml_unit_name', '');
-    variable_set('mo_saml_certificate_common_name', '');
-    variable_set('mo_saml_select_digest_algo', '');
-    variable_set('mo_saml_select_private_key_bit', '');
-    variable_set('mo_saml_select_valid_days', '');
+    variable_set('mo_saml_country_code_text','');
+    variable_set('mo_saml_certificate_state_name','');
+    variable_set('mo_saml_certificate_company_name','');
+    variable_set('miniorange_saml_unit_name','');
+    variable_set('mo_saml_certificate_common_name','');
+    variable_set('mo_saml_select_digest_algo','');
+    variable_set('mo_saml_select_private_key_bit','');
+    variable_set('mo_saml_select_valid_days','');
     drupal_set_message(t('Reset Certificate successfully.'));
 }
 
-function miniorange_saml_generate_custom_certificate($form, &$form_state)
-{
+function miniorange_saml_generate_custom_certificate($form, &$form_state){
     $country_code = $form['mo_saml_country_code_text']['#value'];
     $state_name = $form['mo_saml_certificate_state_name']['#value'];
     $company_name = $form['mo_saml_certificate_company_name']['#value'];
@@ -282,19 +289,19 @@ function miniorange_saml_generate_custom_certificate($form, &$form_state)
     $private_key_bits = $form['mo_saml_select_private_key_bit']['#value'];
     $valid_days = $form['mo_saml_select_valid_days']['#value'];
 
-    if (empty($country_code) || empty($state_name) || empty($company_name) || empty($unit_name) || empty($common_name)) {
+    if(empty($country_code) || empty($state_name) || empty($company_name) || empty($unit_name) || empty($common_name)){
         drupal_set_message(t('The <b><u>Country code </u></b>, <b><u>State name</u></b> , <u><b>Company name</b></u> , <u><b> Unit name</b></u> and <u><b>Common name</b></u> fields are mandatory.'), 'error');
         return;
     }
 
-    variable_set('mo_saml_country_code_text', $country_code);
-    variable_set('mo_saml_certificate_state_name', $state_name);
-    variable_set('mo_saml_certificate_company_name', $company_name);
-    variable_set('miniorange_saml_unit_name', $unit_name);
-    variable_set('mo_saml_certificate_common_name', $common_name);
-    variable_set('mo_saml_select_digest_algo', $digest_algo);
-    variable_set('mo_saml_select_private_key_bit', $private_key_bits);
-    variable_set('mo_saml_select_valid_days', $valid_days);
+    variable_set('mo_saml_country_code_text',$country_code);
+    variable_set('mo_saml_certificate_state_name',$state_name);
+    variable_set('mo_saml_certificate_company_name',$company_name);
+    variable_set('miniorange_saml_unit_name',$unit_name);
+    variable_set('mo_saml_certificate_common_name',$common_name);
+    variable_set('mo_saml_select_digest_algo',$digest_algo);
+    variable_set('mo_saml_select_private_key_bit',$private_key_bits);
+    variable_set('mo_saml_select_valid_days',$valid_days);
 
     $Registered_email = variable_get('miniorange_saml_customer_admin_email', '');
     $RegisteredEmail = isset($Registered_email) ? $Registered_email : '';
@@ -308,10 +315,18 @@ function miniorange_saml_generate_custom_certificate($form, &$form_state)
         "emailAddress" => $RegisteredEmail,
     );
 
-    if(Utilities::generateCertificate($dn, $digest_algo, $private_key_bits, $valid_days))
-    {
-        drupal_set_message(t('Successfully genertated new certificates. Please update your service provider configuration with new metadata file.'));
-    }
-    
+    Utilities::generateCertificate($dn,$digest_algo,$private_key_bits,$valid_days);
+
+    drupal_set_message(t('Successfully genertated new certificates. Please update your service provider configuration with new metadata file.'));
 }
 
+/**
+ * Send support query.
+ */
+function miniorange_saml_idp_send_query(&$form, $form_state)
+{
+    $email = $form['miniorange_saml_email_address']['#value'];
+    $phone = $form['miniorange_saml_phone_number']['#value'];
+    $query = $form['miniorange_saml_support_query']['#value'];
+    Utilities::send_query($email, $phone, $query);
+}

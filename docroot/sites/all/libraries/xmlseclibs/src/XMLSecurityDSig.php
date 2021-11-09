@@ -1,17 +1,13 @@
 <?php
-namespace RobRichards\XMLSecLibs;
+//namespace RobRichards\XMLSecLibs;
 
-use DOMDocument;
-use DOMElement;
-use DOMNode;
-use DOMXPath;
-use Exception;
+
 use RobRichards\XMLSecLibs\Utils\XPath as XPath;
 
 /**
  * xmlseclibs.php
  *
- * Copyright (c) 2007-2020, Robert Richards <rrichards@cdatazone.org>.
+ * Copyright (c) 2007-2019, Robert Richards <rrichards@cdatazone.org>.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +40,7 @@ use RobRichards\XMLSecLibs\Utils\XPath as XPath;
  * POSSIBILITY OF SUCH DAMAGE.
  *
  * @author    Robert Richards <rrichards@cdatazone.org>
- * @copyright 2007-2020 Robert Richards <rrichards@cdatazone.org>
+ * @copyright 2007-2019 Robert Richards <rrichards@cdatazone.org>
  * @license   http://www.opensource.org/licenses/bsd-license.php  BSD License
  */
 
@@ -194,11 +190,6 @@ class XMLSecurityDSig
             $query = ".//secdsig:Signature";
             $nodeset = $xpath->query($query, $objDoc);
             $this->sigNode = $nodeset->item($pos);
-            $query = "./secdsig:SignedInfo";
-            $nodeset = $xpath->query($query, $this->sigNode);
-            if ($nodeset->length > 1) {
-                throw new Exception("Invalid structure - Too many SignedInfo elements found");
-            }
             return $this->sigNode;
         }
         return null;
@@ -308,28 +299,13 @@ class XMLSecurityDSig
             $xpath = $this->getXPathObj();
             $query = "./secdsig:SignedInfo";
             $nodeset = $xpath->query($query, $this->sigNode);
-            if ($nodeset->length > 1) {
-                throw new Exception("Invalid structure - Too many SignedInfo elements found");
-            }
             if ($signInfoNode = $nodeset->item(0)) {
                 $query = "./secdsig:CanonicalizationMethod";
                 $nodeset = $xpath->query($query, $signInfoNode);
-                $prefixList = null;
                 if ($canonNode = $nodeset->item(0)) {
                     $canonicalmethod = $canonNode->getAttribute('Algorithm');
-                    foreach ($canonNode->childNodes as $node)
-                    {
-                        if ($node->localName == 'InclusiveNamespaces') {
-                            if ($pfx = $node->getAttribute('PrefixList')) {
-                                $arpfx = array_filter(explode(' ', $pfx));
-                                if (count($arpfx) > 0) {
-                                    $prefixList = array_merge($prefixList ? $prefixList : array(), $arpfx);
-                                }
-                            }
-                        }
-                    }
                 }
-                $this->signedInfo = $this->canonicalizeData($signInfoNode, $canonicalmethod, null, $prefixList);
+                $this->signedInfo = $this->canonicalizeData($signInfoNode, $canonicalmethod);
                 return $this->signedInfo;
             }
         }
@@ -460,7 +436,7 @@ class XMLSecurityDSig
                         if ($node->localName == 'XPath') {
                             $arXPath = array();
                             $arXPath['query'] = '(.//. | .//@* | .//namespace::*)['.$node->nodeValue.']';
-                            $arXPath['namespaces'] = array();
+                            $arXpath['namespaces'] = array();
                             $nslist = $xpath->query('./namespace::*', $node);
                             foreach ($nslist AS $nsnode) {
                                 if ($nsnode->localName != "xml") {
@@ -574,7 +550,7 @@ class XMLSecurityDSig
         $refids = array();
 
         $xpath = $this->getXPathObj();
-        $query = "./secdsig:SignedInfo[1]/secdsig:Reference";
+        $query = "./secdsig:SignedInfo/secdsig:Reference";
         $nodeset = $xpath->query($query, $this->sigNode);
         if ($nodeset->length == 0) {
             throw new Exception("Reference nodes not found");
@@ -598,7 +574,7 @@ class XMLSecurityDSig
             }
         }
         $xpath = $this->getXPathObj();
-        $query = "./secdsig:SignedInfo[1]/secdsig:Reference";
+        $query = "./secdsig:SignedInfo/secdsig:Reference";
         $nodeset = $xpath->query($query, $this->sigNode);
         if ($nodeset->length == 0) {
             throw new Exception("Reference nodes not found");
@@ -1050,7 +1026,7 @@ class XMLSecurityDSig
                             }
                             $subjectNameValue = implode(',', $parts);
                         } else {
-                            $subjectNameValue = $certData['subject'];
+                            $subjectNameValue = $certData['issuer'];
                         }
                         $x509SubjectNode = $baseDoc->createElementNS(self::XMLDSIGNS, $dsig_pfx.'X509SubjectName', $subjectNameValue);
                         $x509DataNode->appendChild($x509SubjectNode);
