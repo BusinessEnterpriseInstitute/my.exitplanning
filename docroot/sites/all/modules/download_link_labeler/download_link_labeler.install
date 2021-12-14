@@ -1,0 +1,13 @@
+<?php
+/**
+ * @file
+ * Update and install functions for Download Link Labeler.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function download_link_labeler_install() {
+  // Filter needs to load after Insert module.
+  db_query("UPDATE {system} SET weight = 20 WHERE type = 'module' AND name = 'download_link_labeler'");
+}

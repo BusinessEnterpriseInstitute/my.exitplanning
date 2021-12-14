@@ -1,0 +1,10 @@
+name = Download Link Labeler
+description = Filter to parse links in content and add the proper file type and file size information.
+core = 7.x
+package = Input filters
+version = "7.x-1.0"
+; Information added by Drupal.org packaging script on 2019-03-26
+version = "7.x-1.0-beta3"
+core = "7.x"
+project = "download_link_labeler"
+datestamp = "1553569689"
