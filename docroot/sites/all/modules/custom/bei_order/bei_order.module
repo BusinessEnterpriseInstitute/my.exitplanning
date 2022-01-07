@@ -849,7 +849,7 @@ function bei_order_form_rules_panes_render_form_alter(&$form, &$form_state, $for
       '#required' => FALSE,
       '#description' => t('Enter a single valid email address to blind carbon copy to.'),
       '#element_validate' => array('bei_order_send_email_validation'),
-      '#default_value' => t('support@exitplanning.com'),
+      '#default_value' => t('beisupportteam@exitplanning.com'),
     );
     $form['parameter']['message']['settings']['message'] = array(
       '#type' => 'textarea',
