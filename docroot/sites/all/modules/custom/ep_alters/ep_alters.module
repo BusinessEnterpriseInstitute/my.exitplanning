@@ -330,7 +330,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
     elseif (($form_id == $wizard2 && $current_page == 3)) {
       $suggestion = 'Associate';
       $membership_markup = '<h3>The Associate Membership is perfect for you!</h3>
-      <p>Thank you for your submission! Based on your answers, BEI\'s Associate Membership is a great fit for you. Associate Membership is best for advisors who want to learn the foundational aspects of Exit Planning and who want to take the first steps toward broadening the scope of their work with their clients.</p>';        
+      <p>Thank you for your submission! Based on your answers, BEI\'s Associate Membership is a great fit for you. Associate Membership is best for advisors who want to learn the foundational aspects of Exit Planning and who want to take the first steps toward broadening the scope of their work with their clients.</p>';
       $marketing = $form_state['storage']['marketing'];
       $planning = $form_state['storage']['planning'];
       if ($marketing && !$planning) {
@@ -349,7 +349,7 @@ function ep_alters_form_alter(&$form, $form_state, $form_id) {
         <p>Thank you for your submission! BEI\'s Full Service License is best for advisors who are looking to implement new or enhance existing Exit Planning services. Whether you are an experienced Exit Planner or an advisor looking to differentiate yourself in a crowded market, BEI\'s Full Membership will give you the tools to set your firm apart through proven marketing resources, a process to simplify the complex for your owners, and the implementation of actionable steps to help those owners accomplish their unique objectives without recreating the wheel.</p>';
       }
       $form['submitted']['suggested_membership']['#value'] = $suggestion;
-      
+
       $form['submitted']['membership_markup'] = array(
         '#type' => 'markup',
         '#markup' => '<div class="panel" style="background-color:#fff;">' . $membership_markup . '</div>',
@@ -443,7 +443,7 @@ function ep_alters_webform_wizard_submit(&$form, &$form_state) {
       $redirect = 'membership/full';
     }
     $form_state['redirect'] = $redirect;
-    
+
   }
 }
 /**
@@ -1001,8 +1001,8 @@ function ep_alters_entity_property_info() {
   $series_article_properties = &$info['node']['bundles']['series_article']['properties'];
   if (module_exists('tfa_basic')) {
     $user_properties['tfa_enabled'] = array(
-      'label' => t('TFA Enabled'), 
-      'type' => 'boolean', 
+      'label' => t('TFA Enabled'),
+      'type' => 'boolean',
       'description' => t('Two-Factor Authentication is enabled for this account.'),
       'getter callback' => 'ep_alters_entity_property_tfa_enabled',
       'computed' => TRUE,
