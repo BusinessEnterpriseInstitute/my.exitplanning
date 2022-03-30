@@ -98,9 +98,9 @@ class AcquiaSearchSolrService extends DrupalApacheSolrService {
       $url_components['query'] = '';
     }
 
-    $query_pieces = drupal_get_query_array($url_components['query']);
+    $query_pieces = $this->parseQuery($url_components['query']);
     $query_pieces['request_id'] = uniqid();
-    $query_string = drupal_http_build_query($query_pieces);
+    $query_string = $this->httpBuildQuery($query_pieces);
 
     $url_components['query'] = sprintf('?%s', $query_string);
 
@@ -306,6 +306,39 @@ class AcquiaSearchSolrService extends DrupalApacheSolrService {
     }
 
     return ($hmac === hash_hmac('sha1', $nonce . $string, $derived_key));
+  }
+
+  /**
+   * Parse a query string into an associative array.
+   *
+   * Creates an array for multiple values with the same key.
+   *
+   * @param string $query
+   *   Query string to parse.
+   *
+   * @return array
+   *   An array of URL decoded couples $param_name => $value.
+   */
+  protected function parseQuery($query) {
+    $result = [];
+    if (!empty($query)) {
+      foreach (explode('&', $query) as $param) {
+        $parts = explode('=', $param, 2);
+        $key = rawurldecode($parts[0]);
+        $value = isset($parts[1]) ? rawurldecode($parts[1]) : NULL;
+        if (!isset($result[$key])) {
+          $result[$key] = $value;
+        }
+        else {
+          if (!is_array($result[$key])) {
+            $result[$key] = [$result[$key]];
+          }
+          $result[$key][] = $value;
+        }
+      }
+    }
+
+    return $result;
   }
 
 }
