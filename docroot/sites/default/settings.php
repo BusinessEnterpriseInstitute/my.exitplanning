@@ -680,8 +680,8 @@ if (getenv('AH_SITE_ENVIRONMENT') &&
   // bins.
   'cache_path',
   'cache_rules',
-)
-  #Solr version selection through the Drupal admin UI is disabled by default so following these instructions requires you to add the following
+);
+  #Solr version selection through the Drupal admin UI is disabled by default so following these instructions requires you to add the following to
   $conf['acquia_search_disable_version_select'] = FALSE;
 
 # Move semaphore out of the database and into memory for performance purposes
