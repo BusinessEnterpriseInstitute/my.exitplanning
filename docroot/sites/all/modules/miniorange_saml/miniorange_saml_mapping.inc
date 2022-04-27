@@ -1,485 +1,260 @@
- <?php
-/**
- * @file
- * Contains Attribute and Role Mapping for miniOrange SAML Login Module.
- */
+<?php
 
- /**
- * Showing Settings form.
- */
- function miniorange_saml_mapping($form, &$form_state)
- {
-     global $base_url;
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
 
-     drupal_add_js(drupal_get_path('module', 'miniorange_saml') . '/js/addAttribute.js', 'file');
-
-     $disabled = Utilities::isCustomerRegistered($form, $form_state); 
-
-     $form['header_top_style_1'] = array('#markup' => '<div class="mo_saml_table_layout_1">');
-
-     $form['markup_1'] = array(
-           '#markup' => '<div class="mo_saml_table_layout mo_saml_container"><h3>ATTRIBUTE MAPPING</h3><hr><br/>',
-     );
-
-    $form['miniorange_saml_account_username_by'] = array(
-        '#type' => 'select',
-        '#title' => t('Login/Create Drupal account by'),
-        '#options' => array(
-            1 => t('Username'),
-            2 => t('Email'),
-        ),
-        '#default_value' => variable_get('miniorange_saml_login_by'),
-        '#attributes' => array('style' => 'width:73%'),
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_username_attribute'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Username Attribute'),
-        '#default_value' => variable_get('miniorange_saml_username_attribute', 'NameID'),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Username attribute'),
-        '#required' => TRUE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_email_attribute'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Email Attribute'),
-        '#default_value' => variable_get('miniorange_saml_email_attribute', 'NameID'),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Email attribute'),
-        '#required' => TRUE,
-    );
-
-    $form['miniorange_saml_idp_attr1_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Role'),
-        '#default_value' => variable_get('miniorange_saml_idp_attr1_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Role Attribute'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['markup_cam_top_head'] = array(
-         '#markup' => '<br><h3>CUSTOM ATTRIBUTE MAPPING</h3><hr><br>',
-    );
-
-    $form['markup_cam'] = array(
-        '#markup' => '<div class="mo_saml_highlight_background_note_1"><p>Add the Drupal field attributes in the Attribute Name textfield 
-           and add the IdP attibutes that you need to map with the drupal attributes in the 
-           IdP Attribute Name textfield. Drupal Field Attributes will be of type text. 
-           Add the machine name of the attribute in the Drupal Attribute textfield.</p>
-           <p>For example: If the attribute name in the drupal is name then its machine name will be field_name.</p></div><br>',
-    );
-
-    $form['miniorange_saml_attr5_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Attribute Name 1'),
-        '#default_value' => variable_get('miniorange_saml_attr5_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_idp_attr5_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('IdP Attribute Name 1'),
-        '#default_value' => variable_get('miniorange_saml_idp_attr5_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter IdP Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_attr2_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Attribute Name 2'),
-        '#default_value' => variable_get('miniorange_saml_attr2_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_idp_attr2_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('IdP Attribute Name 2'),
-        '#default_value' => variable_get('miniorange_saml_idp_attr2_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter IdP Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_attr3_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Attribute Name 3'),
-        '#default_value' => variable_get('miniorange_saml_attr3_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_idp_attr3_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('IdP Attribute Name 3'),
-        '#default_value' => variable_get('miniorange_saml_idp_attr3_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter IdP Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_attr4_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Attribute Name 4'),
-        '#default_value' => variable_get('miniorange_saml_attr4_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_idp_attr4_name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('IdP Attribute Name 4'),
-        '#default_value' => variable_get('miniorange_saml_idp_attr4_name', ''),
-        '#attributes' => array('style' => 'width:73%','placeholder' => 'Enter IdP Attribute Name'),
-        '#required' => FALSE,
-        '#disabled' => $disabled,
-    );
-
-    $form['markup_idp_user_attr_header'] = array(
-        '#markup' => '<br /><h3> Additional User Attributes(Optional)<input type="button" id="add_user" class="btn btn-primary" style="width:3%;margin-left:2%;margin-right:2%;" value="+" onclick="add_user_attribute();"/> <input type="button" class="btn btn-danger" style="width:3%;" onclick="remove_user_attribute();" value="-" /></h3>',
-    );
-
-    $form['markup_idp_user_attr_note'] = array(
-        '#markup' => '<div class="messages status">Attribute Name: It is the user attribute (machine name) whose value you want to set in site.<br />
-            IdP Attribute Name: It is the name which you want to get from your IDP. It should be unique.</div>',
-    );
-
-    $form['markup_idp_user_attr_header1'] = array(
-        '#markup' => '<div id="userProfileAttrDiv"><div class="row" id="before_attr_list_upa">'
-        . ' <div style="width:20%;display:inline-block;"><b>Attribute Name</b></div><div style="width:30%;display:inline-block;">'
-        . ' <b>IdP Attribute Name</b></div></div>'
-    );
-
-    $counter = 0;
-    $userProfileAttribues = variable_get('miniorange_saml_sp_user_attributes', '');
-    if(isset($userProfileAttribues) && !empty($userProfileAttribues)){
-        $userProfileAttribues = json_decode($userProfileAttribues, true);
-        
-        foreach($userProfileAttribues as $attr_name => $attr_value){
-            $form['markup_idp_user_attr_list_' . $counter] = array(
-                '#markup' => '<div class="row userAttr" style="padding-bottom:1%;" id="uparow_' . $counter . '" >
-                       <div style="width:20%;display:inline-block;">
-                             <input type="text" name="user_profile_attr_name[' . $counter . ']" value="' . $attr_name .'" class="form-text" />
-                       </div>
-                       <div style="width:30%;display:inline-block;">
-                           <input type="text" name="user_profile_attr_value[' . $counter . ']" value="' . $attr_value .'" class="form-text" />
-                       </div>
-                     </div>'
-                );
-            $counter+=1;
-        }
+echo "\40";
+function miniorange_saml_mapping($form, &$form_state)
+{
+    global $base_url;
+    drupal_add_css(drupal_get_path("\155\x6f\144\165\x6c\145", "\x6d\151\156\x69\x6f\x72\141\x6e\147\145\x5f\x73\141\155\x6c") . "\57\143\x73\x73\x2f\x62\157\157\x74\163\x74\162\x61\x70\x2e\155\x69\156\56\x63\x73\x73", array("\x67\x72\157\165\160" => CSS_DEFAULT, "\145\166\x65\162\171\137\160\141\147\145" => TRUE));
+    drupal_add_css(drupal_get_path("\x6d\x6f\x64\165\x6c\x65", "\x6d\151\156\x69\x6f\x72\x61\x6e\x67\145\137\x73\141\155\154") . "\x2f\x63\x73\x73\57\163\164\x79\x6c\145\137\163\145\164\x74\151\x6e\x67\x73\56\143\x73\163", array("\x67\162\x6f\165\x70" => CSS_DEFAULT, "\145\x76\x65\x72\171\137\x70\141\147\145" => TRUE));
+    drupal_add_js(drupal_get_path("\155\157\144\165\x6c\145", "\x6d\151\156\x69\x6f\x72\141\156\x67\145\x5f\x73\x61\x6d\154") . "\57\152\x73\x2f\x61\x64\x64\x41\164\164\162\x69\x62\x75\164\x65\56\152\163", "\146\151\x6c\x65");
+    $rE = Utilities::isCustomerRegistered($form, $form_state);
+    $form["\x68\x65\x61\x64\145\162\137\164\x6f\x70\x5f\163\x74\171\154\145\x5f\x31"] = array("\x23\155\x61\x72\x6b\165\x70" => "\x3c\x64\151\x76\x20\x63\154\141\x73\x73\75\42\x6d\157\x5f\x73\x61\155\x6c\137\x74\141\x62\154\x65\137\x6c\x61\x79\x6f\x75\x74\137\61\x22\x3e");
+    $form["\155\141\162\153\x75\x70\137\x31"] = array("\43\155\141\162\153\165\x70" => "\x3c\144\x69\166\x20\143\x6c\x61\x73\x73\75\42\x6d\x6f\x5f\163\141\x6d\154\137\x74\x61\142\x6c\145\x5f\x6c\141\171\157\x75\164\40\155\157\137\x73\141\155\x6c\137\x63\157\x6e\x74\x61\151\156\145\x72\42\76\x3c\x68\x33\x3e\x41\x54\124\122\x49\102\125\x54\x45\x20\x4d\101\x50\120\x49\x4e\x47\74\x2f\150\x33\x3e\74\150\x72\76\x3c\x62\162\57\x3e");
+    $form["\x6d\x69\x6e\151\x6f\x72\141\x6e\147\x65\x5f\163\141\x6d\154\137\141\x63\x63\x6f\x75\x6e\164\137\165\x73\x65\162\156\141\x6d\x65\137\x62\171"] = array("\43\164\x79\x70\145" => "\x73\145\154\x65\x63\164", "\43\x74\151\164\154\145" => t("\114\157\147\x69\156\x2f\x43\162\x65\141\164\x65\40\x44\x72\x75\160\141\154\40\x61\143\143\x6f\165\156\164\x20\142\x79"), "\43\x6f\x70\164\x69\157\156\163" => array(1 => t("\125\x73\x65\162\x6e\x61\x6d\x65"), 2 => t("\x45\155\x61\x69\x6c")), "\43\144\x65\146\141\x75\154\164\137\x76\141\154\x75\145" => variable_get("\155\151\x6e\x69\x6f\x72\141\156\x67\145\x5f\163\x61\155\154\137\154\x6f\x67\x69\156\137\142\x79"), "\x23\x61\x74\x74\x72\x69\x62\x75\164\x65\163" => array("\x73\x74\x79\x6c\145" => "\x77\151\144\x74\x68\72\67\x33\x25"), "\43\x64\x69\x73\x61\142\154\x65\144" => $rE);
+    $form["\155\x69\156\151\157\x72\x61\x6e\x67\x65\137\x73\x61\x6d\x6c\x5f\x75\163\145\x72\156\x61\x6d\145\x5f\141\x74\164\162\x69\142\165\x74\x65"] = array("\43\x74\x79\x70\x65" => "\164\x65\x78\164\x66\151\x65\154\144", "\x23\x74\151\164\x6c\x65" => t("\x55\x73\x65\162\156\141\x6d\x65\40\101\164\164\162\151\x62\165\164\145"), "\43\x64\145\146\x61\165\154\x74\137\x76\141\154\165\x65" => variable_get("\155\x69\x6e\151\x6f\x72\141\x6e\147\145\137\x73\141\155\154\137\x75\x73\x65\162\156\141\155\x65\137\141\x74\x74\162\x69\142\x75\x74\x65", "\x4e\x61\155\145\x49\x44"), "\43\141\x74\x74\162\151\142\165\164\x65\x73" => array("\163\x74\171\154\x65" => "\167\151\x64\x74\150\72\x37\x33\45", "\160\x6c\141\x63\145\150\x6f\154\x64\145\162" => "\105\156\x74\145\162\40\x55\163\145\x72\x6e\x61\155\145\x20\x61\164\x74\162\151\x62\x75\164\x65"), "\x23\162\x65\x71\165\x69\x72\x65\x64" => TRUE, "\43\x64\x69\163\x61\x62\x6c\x65\144" => $rE);
+    $form["\155\x69\156\x69\x6f\162\x61\156\147\145\137\x73\141\155\x6c\x5f\145\x6d\141\x69\x6c\x5f\141\x74\164\162\x69\x62\x75\164\x65"] = array("\x23\164\x79\x70\145" => "\x74\x65\170\164\x66\151\145\154\x64", "\43\164\151\164\x6c\145" => t("\105\x6d\141\151\154\40\x41\x74\x74\162\151\x62\165\x74\x65"), "\43\x64\x65\x66\141\165\154\164\x5f\166\x61\154\165\145" => variable_get("\x6d\x69\x6e\x69\x6f\162\x61\156\x67\x65\x5f\163\141\155\x6c\137\x65\x6d\x61\151\154\137\x61\x74\164\x72\x69\142\165\164\x65", "\116\141\155\x65\x49\x44"), "\43\141\x74\164\162\151\142\165\x74\145\x73" => array("\x73\164\x79\154\x65" => "\x77\x69\144\164\x68\72\67\63\45", "\x70\154\141\x63\145\x68\157\x6c\x64\x65\162" => "\105\156\164\145\x72\40\105\x6d\x61\151\154\x20\x61\x74\x74\x72\151\142\x75\164\145"), "\x23\162\x65\x71\x75\x69\162\145\x64" => TRUE);
+    $form["\155\151\x6e\151\x6f\162\x61\x6e\147\145\137\x73\141\x6d\154\137\151\144\160\x5f\141\164\164\162\61\137\156\141\155\x65"] = array("\x23\164\171\160\145" => "\164\145\170\x74\x66\x69\145\154\144", "\43\x74\151\x74\x6c\x65" => t("\x52\x6f\x6c\145"), "\43\144\x65\x66\x61\x75\154\164\x5f\x76\x61\x6c\x75\145" => variable_get("\x6d\151\x6e\x69\x6f\162\141\156\147\x65\x5f\x73\x61\x6d\x6c\x5f\151\x64\160\137\141\164\164\162\61\137\x6e\x61\x6d\145", ''), "\43\x61\x74\164\162\151\142\x75\x74\145\x73" => array("\x73\164\171\154\145" => "\167\151\144\x74\x68\x3a\x37\63\45", "\160\x6c\x61\x63\145\150\157\154\x64\145\162" => "\x45\156\x74\x65\162\40\122\157\x6c\x65\x20\x41\164\164\162\x69\x62\165\x74\x65"), "\x23\162\145\161\x75\x69\x72\x65\x64" => FALSE, "\43\x64\x69\x73\x61\x62\154\145\x64" => $rE);
+    $form["\155\x61\162\x6b\165\x70\x5f\x63\x61\x6d\x5f\x74\157\160\137\150\145\141\x64"] = array("\43\155\x61\x72\x6b\165\x70" => "\x3c\x62\x72\x3e\x3c\x68\63\x3e\x43\125\x53\124\x4f\115\x20\101\124\x54\x52\111\x42\x55\124\105\x20\x4d\101\120\x50\111\116\x47\x3c\57\150\x33\76\74\x68\x72\76\x3c\x62\162\x3e");
+    $form["\x6d\x61\x72\153\x75\160\137\x63\x61\155"] = array("\43\155\x61\x72\x6b\x75\x70" => "\74\144\x69\166\x20\x63\154\141\163\163\x3d\42\x6d\157\137\x73\x61\x6d\154\137\x68\x69\147\x68\154\x69\x67\x68\164\137\142\x61\143\x6b\x67\x72\157\x75\x6e\144\x5f\156\x6f\164\145\137\61\x22\x3e\74\x70\x3e\x41\x64\144\x20\x74\150\145\x20\x44\162\165\160\141\x6c\x20\x66\151\145\154\x64\40\x61\164\164\162\x69\142\x75\x74\x65\163\40\x69\156\40\x74\150\145\x20\101\164\164\x72\151\x62\x75\164\x65\40\x4e\141\x6d\145\x20\164\145\170\164\146\151\145\x6c\x64\x20\15\xa\40\40\x20\40\x20\40\x20\40\x20\x20\x20\x61\x6e\144\40\x61\x64\x64\x20\164\150\x65\40\111\144\x50\40\x61\164\x74\x69\x62\x75\x74\x65\163\40\x74\x68\141\x74\40\171\157\x75\x20\156\x65\x65\x64\x20\x74\157\x20\x6d\x61\160\40\167\151\164\150\x20\x74\x68\145\x20\144\162\165\160\x61\154\40\141\x74\164\x72\151\142\x75\164\x65\163\40\151\x6e\x20\164\150\x65\x20\xd\12\x20\40\x20\x20\x20\x20\40\x20\40\x20\40\111\x64\120\x20\x41\x74\x74\162\x69\142\x75\x74\145\40\x4e\x61\x6d\145\40\x74\145\170\x74\146\x69\145\154\x64\56\40\104\162\x75\160\141\x6c\40\106\151\145\154\x64\40\x41\x74\x74\162\151\x62\165\164\x65\163\x20\x77\151\x6c\x6c\x20\142\x65\x20\157\x66\x20\164\171\160\x65\40\164\145\170\x74\x2e\x20\15\xa\40\x20\x20\x20\40\40\x20\x20\40\40\x20\101\144\144\40\164\x68\145\40\155\x61\143\x68\x69\156\x65\40\x6e\141\155\145\x20\x6f\x66\40\164\x68\145\40\141\164\x74\x72\151\x62\x75\164\x65\x20\x69\x6e\40\164\x68\145\x20\x44\x72\165\x70\141\x6c\x20\x41\164\164\x72\151\x62\x75\164\145\40\164\x65\170\164\146\151\x65\154\144\x2e\x3c\57\160\76\15\xa\40\x20\x20\40\40\40\40\40\x20\40\x20\x3c\160\x3e\106\x6f\x72\x20\145\x78\x61\155\x70\x6c\x65\x3a\x20\x49\x66\x20\164\x68\145\40\x61\x74\164\x72\151\x62\165\x74\x65\40\x6e\x61\155\x65\x20\x69\156\x20\164\150\145\x20\144\x72\165\x70\x61\x6c\x20\151\163\x20\156\141\155\145\x20\x74\x68\145\156\x20\151\164\x73\x20\155\x61\143\x68\x69\156\145\x20\x6e\x61\155\x65\x20\167\x69\x6c\x6c\40\142\145\x20\146\x69\x65\x6c\x64\x5f\x6e\141\155\x65\56\74\57\x70\76\74\x2f\x64\151\166\76\x3c\x62\162\x3e");
+    $form["\x6d\x69\156\151\157\162\x61\156\x67\x65\x5f\x73\141\155\x6c\x5f\x61\164\164\162\65\x5f\x6e\141\x6d\x65"] = array("\43\164\x79\x70\x65" => "\x74\x65\x78\x74\146\151\x65\x6c\x64", "\43\x74\151\164\154\145" => t("\x41\164\x74\162\x69\142\165\164\x65\x20\x4e\x61\155\x65\x20\61"), "\x23\144\x65\x66\x61\165\154\164\137\166\141\154\x75\145" => variable_get("\155\x69\156\x69\157\x72\x61\x6e\147\x65\x5f\x73\x61\x6d\x6c\137\x61\164\x74\x72\65\137\x6e\x61\x6d\x65", ''), "\43\141\x74\x74\x72\x69\142\165\164\x65\163" => array("\163\x74\171\154\145" => "\x77\x69\144\x74\x68\72\67\63\45", "\x70\x6c\x61\143\x65\x68\x6f\x6c\x64\145\162" => "\x45\156\x74\145\x72\40\x41\164\164\x72\151\142\165\x74\145\x20\x4e\x61\155\145"), "\43\162\145\x71\x75\x69\x72\x65\x64" => FALSE, "\43\144\151\x73\141\x62\x6c\x65\144" => $rE);
+    $form["\x6d\x69\156\x69\157\x72\x61\156\x67\x65\137\x73\x61\x6d\154\x5f\151\x64\160\x5f\x61\x74\x74\x72\x35\137\156\141\x6d\145"] = array("\x23\164\x79\160\145" => "\x74\x65\x78\164\x66\x69\x65\x6c\144", "\43\x74\x69\x74\x6c\x65" => t("\111\144\x50\x20\101\x74\164\x72\x69\x62\x75\x74\145\40\x4e\141\x6d\x65\40\61"), "\x23\x64\145\x66\141\165\x6c\x74\137\166\x61\x6c\x75\145" => variable_get("\155\151\156\x69\157\162\x61\156\x67\x65\137\163\141\x6d\154\137\x69\144\160\x5f\141\164\x74\x72\65\137\156\141\x6d\145", ''), "\x23\x61\164\x74\162\151\142\165\164\145\163" => array("\163\164\171\x6c\x65" => "\167\151\x64\x74\x68\72\67\63\x25", "\x70\x6c\141\x63\x65\x68\x6f\x6c\x64\145\x72" => "\x45\x6e\164\x65\x72\x20\111\x64\120\40\101\164\x74\162\151\142\165\164\145\40\x4e\141\x6d\x65"), "\43\x72\x65\x71\x75\151\x72\145\144" => FALSE, "\x23\x64\x69\x73\141\142\x6c\145\144" => $rE);
+    $form["\x6d\151\x6e\x69\157\162\x61\x6e\x67\x65\137\x73\141\155\x6c\x5f\141\164\x74\162\62\x5f\x6e\x61\155\x65"] = array("\43\x74\171\160\x65" => "\164\x65\x78\164\146\x69\x65\154\x64", "\x23\164\151\164\154\145" => t("\x41\x74\164\x72\x69\x62\x75\164\145\40\116\141\x6d\x65\40\62"), "\x23\x64\x65\146\x61\165\154\164\x5f\x76\x61\154\165\145" => variable_get("\155\151\x6e\151\x6f\x72\141\x6e\147\145\137\x73\x61\x6d\154\137\x61\x74\164\x72\x32\x5f\x6e\141\155\x65", ''), "\x23\141\x74\164\x72\x69\142\165\x74\145\163" => array("\163\x74\171\154\x65" => "\x77\151\x64\x74\150\x3a\67\x33\45", "\160\154\x61\143\x65\x68\x6f\x6c\x64\x65\162" => "\105\x6e\164\x65\x72\x20\x41\164\164\x72\x69\142\x75\x74\145\40\x4e\141\x6d\145"), "\43\162\145\161\165\x69\162\145\144" => FALSE, "\x23\x64\151\x73\141\142\154\145\144" => $rE);
+    $form["\155\151\x6e\x69\x6f\x72\141\156\x67\145\137\163\141\155\154\x5f\x69\x64\160\137\x61\x74\164\x72\62\x5f\x6e\x61\x6d\145"] = array("\43\164\171\160\x65" => "\x74\145\170\164\x66\x69\145\x6c\x64", "\43\164\151\164\x6c\145" => t("\x49\144\x50\40\101\x74\x74\162\151\142\165\164\145\x20\x4e\141\x6d\145\x20\x32"), "\43\x64\x65\x66\x61\165\154\164\137\166\141\x6c\165\145" => variable_get("\x6d\x69\x6e\x69\157\162\x61\x6e\147\x65\137\x73\141\x6d\154\137\151\x64\160\137\141\x74\x74\x72\x32\x5f\156\141\x6d\x65", ''), "\43\x61\x74\x74\162\151\x62\x75\164\145\163" => array("\x73\164\171\154\145" => "\x77\151\144\164\150\x3a\x37\x33\45", "\160\154\141\x63\145\x68\x6f\154\x64\145\x72" => "\x45\x6e\x74\x65\162\x20\111\144\120\40\x41\164\x74\162\151\142\x75\164\145\40\x4e\141\x6d\x65"), "\43\x72\x65\161\x75\151\162\x65\144" => FALSE, "\43\x64\x69\163\141\142\x6c\x65\x64" => $rE);
+    $form["\155\151\156\151\x6f\x72\x61\156\x67\x65\x5f\163\x61\x6d\x6c\137\x61\164\x74\162\x33\x5f\156\x61\155\x65"] = array("\x23\164\171\160\145" => "\164\x65\x78\164\x66\x69\145\x6c\x64", "\43\x74\151\x74\154\145" => t("\101\x74\x74\162\x69\x62\x75\x74\145\40\116\x61\155\145\x20\x33"), "\43\144\x65\x66\x61\165\154\x74\x5f\x76\141\154\165\145" => variable_get("\x6d\x69\156\x69\157\162\141\156\147\x65\137\163\x61\155\x6c\137\x61\x74\x74\x72\63\137\156\141\155\145", ''), "\43\141\x74\164\162\151\x62\x75\164\145\x73" => array("\x73\164\x79\x6c\x65" => "\167\151\144\164\150\x3a\67\x33\x25", "\160\154\x61\143\x65\x68\x6f\x6c\x64\145\162" => "\x45\156\x74\x65\x72\40\x41\x74\164\x72\151\142\x75\164\x65\40\116\141\x6d\x65"), "\x23\x72\x65\161\x75\151\x72\145\x64" => FALSE, "\43\x64\151\163\141\x62\x6c\x65\144" => $rE);
+    $form["\x6d\151\156\x69\157\162\x61\156\147\145\x5f\163\x61\x6d\x6c\137\151\144\160\x5f\x61\164\164\162\63\137\156\x61\155\x65"] = array("\x23\164\x79\160\145" => "\164\145\x78\x74\x66\x69\145\x6c\x64", "\43\164\151\x74\154\x65" => t("\111\x64\120\x20\101\x74\x74\x72\151\142\x75\x74\x65\x20\116\x61\155\x65\40\x33"), "\x23\x64\145\x66\141\x75\x6c\x74\x5f\166\141\x6c\165\145" => variable_get("\155\x69\x6e\x69\x6f\x72\x61\x6e\147\145\x5f\163\141\155\154\137\x69\x64\160\x5f\141\164\164\x72\63\137\x6e\141\x6d\x65", ''), "\43\x61\x74\164\162\151\142\x75\x74\145\163" => array("\163\164\x79\x6c\x65" => "\x77\151\x64\164\x68\72\67\x33\45", "\160\154\141\x63\x65\x68\x6f\x6c\144\145\162" => "\x45\156\164\x65\162\x20\x49\144\x50\40\x41\164\x74\162\x69\142\165\x74\x65\x20\116\141\x6d\x65"), "\43\x72\x65\x71\x75\x69\x72\145\x64" => FALSE, "\43\144\x69\x73\x61\142\154\145\x64" => $rE);
+    $form["\155\151\156\x69\157\x72\x61\x6e\147\x65\x5f\x73\x61\x6d\154\137\x61\x74\164\x72\64\x5f\156\x61\155\x65"] = array("\x23\x74\x79\160\145" => "\164\145\x78\x74\x66\x69\145\154\144", "\43\164\151\164\154\145" => t("\x41\164\164\162\151\142\x75\164\x65\x20\116\141\x6d\145\x20\x34"), "\43\x64\x65\x66\x61\165\x6c\x74\x5f\166\141\x6c\165\145" => variable_get("\x6d\151\156\151\x6f\x72\141\156\147\145\x5f\x73\x61\x6d\154\x5f\x61\164\164\162\64\x5f\156\x61\x6d\x65", ''), "\x23\141\164\164\162\x69\142\165\164\145\163" => array("\163\x74\171\x6c\145" => "\x77\x69\x64\x74\x68\72\67\x33\x25", "\x70\x6c\x61\143\145\150\x6f\154\144\x65\x72" => "\105\x6e\x74\x65\x72\x20\101\164\164\162\x69\142\x75\164\145\x20\116\141\x6d\145"), "\x23\x72\x65\x71\165\151\162\145\144" => FALSE, "\x23\x64\x69\163\x61\142\154\x65\x64" => $rE);
+    $form["\x6d\x69\x6e\151\157\162\x61\x6e\x67\x65\137\x73\141\155\154\x5f\x69\144\x70\137\x61\x74\164\162\x34\x5f\x6e\141\155\x65"] = array("\x23\164\x79\160\145" => "\x74\145\x78\164\x66\151\145\x6c\x64", "\43\x74\151\164\x6c\x65" => t("\x49\144\x50\x20\101\164\164\162\x69\142\165\164\x65\40\116\141\x6d\x65\40\64"), "\x23\x64\145\x66\141\165\x6c\164\137\166\141\154\165\x65" => variable_get("\x6d\151\156\x69\x6f\162\141\x6e\x67\145\x5f\163\141\x6d\x6c\x5f\x69\144\x70\137\x61\x74\164\x72\x34\x5f\156\x61\x6d\145", ''), "\43\141\164\164\162\x69\x62\x75\164\x65\163" => array("\x73\164\x79\x6c\x65" => "\167\151\x64\164\150\x3a\x37\63\45", "\x70\154\141\143\145\150\x6f\x6c\144\x65\x72" => "\x45\x6e\x74\x65\x72\x20\x49\x64\x50\40\x41\x74\x74\x72\x69\142\x75\164\145\x20\116\141\x6d\x65"), "\x23\x72\x65\x71\x75\151\162\x65\144" => FALSE, "\x23\x64\x69\163\141\142\154\145\x64" => $rE);
+    $form["\x6d\141\x72\153\165\x70\x5f\x69\144\160\x5f\165\x73\x65\162\x5f\141\164\164\162\x5f\150\145\x61\144\145\162"] = array("\43\155\141\162\153\165\x70" => "\74\142\162\40\x2f\x3e\x3c\x68\63\76\x20\x41\x64\x64\151\164\x69\x6f\x6e\141\154\40\125\163\145\162\x20\x41\164\x74\162\x69\x62\165\164\145\163\50\x4f\160\x74\x69\157\156\x61\154\51\x3c\x69\x6e\x70\165\164\x20\164\x79\x70\x65\75\x22\142\165\x74\x74\x6f\156\42\40\x69\144\x3d\42\141\144\144\137\x75\163\x65\x72\x22\x20\143\154\141\x73\163\x3d\42\142\164\156\x20\142\x74\x6e\55\x70\162\x69\x6d\x61\x72\171\x22\40\163\x74\x79\x6c\x65\75\42\167\x69\x64\164\150\72\63\x25\73\155\141\x72\x67\151\156\55\154\145\x66\x74\72\62\45\73\x6d\x61\162\x67\x69\x6e\x2d\x72\151\x67\x68\x74\72\62\45\73\42\x20\x76\x61\154\165\x65\x3d\x22\53\x22\40\157\x6e\x63\x6c\x69\143\153\x3d\x22\x61\144\144\137\165\163\x65\162\137\x61\x74\164\x72\x69\x62\165\164\145\x28\x29\73\42\x2f\76\40\74\151\x6e\160\165\x74\x20\164\x79\160\145\x3d\x22\142\x75\164\x74\157\156\42\40\x63\154\141\x73\163\x3d\42\142\164\156\x20\x62\x74\156\55\x64\x61\x6e\x67\x65\x72\x22\x20\163\x74\171\x6c\x65\75\42\x77\x69\144\164\x68\72\63\45\x3b\x22\x20\x6f\x6e\x63\154\151\143\153\x3d\42\162\x65\x6d\x6f\166\x65\137\165\163\x65\x72\x5f\141\164\164\162\151\x62\x75\164\x65\x28\x29\73\42\x20\x76\141\154\165\x65\x3d\x22\x2d\42\40\x2f\x3e\x3c\57\x68\63\x3e");
+    $form["\155\141\162\x6b\x75\160\137\151\144\160\x5f\x75\x73\x65\162\x5f\x61\164\164\x72\137\x6e\157\x74\145"] = array("\43\155\x61\162\x6b\x75\x70" => "\x3c\144\x69\166\40\x63\x6c\141\x73\163\75\x22\155\x65\x73\x73\x61\x67\x65\x73\40\163\x74\x61\x74\165\x73\x22\76\x41\164\x74\162\151\x62\x75\164\145\40\x4e\x61\155\x65\72\40\x49\x74\x20\151\x73\x20\164\x68\x65\x20\x75\x73\145\x72\x20\x61\x74\164\162\x69\x62\165\164\x65\x20\x28\155\141\x63\x68\151\156\x65\40\156\x61\x6d\x65\51\40\167\x68\x6f\x73\145\40\x76\x61\x6c\165\145\x20\171\x6f\165\x20\x77\x61\156\x74\40\x74\x6f\x20\x73\145\164\x20\151\x6e\40\x73\151\x74\x65\56\x3c\142\x72\x20\x2f\76\xd\xa\x20\x20\x20\40\x20\40\x20\x20\40\x20\40\x20\111\144\120\x20\101\164\164\x72\x69\x62\x75\x74\145\x20\x4e\x61\x6d\x65\72\x20\x49\x74\40\x69\163\x20\164\150\145\x20\x6e\141\155\145\x20\167\x68\151\143\x68\x20\x79\157\165\40\x77\x61\x6e\x74\40\x74\x6f\x20\x67\x65\x74\x20\146\x72\157\155\40\171\157\x75\x72\40\x49\x44\x50\x2e\x20\x49\x74\40\x73\150\157\x75\x6c\x64\x20\x62\145\40\x75\156\x69\161\165\x65\56\74\x2f\x64\151\x76\x3e");
+    $form["\x6d\141\162\x6b\x75\160\137\151\x64\160\x5f\165\163\145\x72\137\x61\164\x74\162\x5f\150\x65\x61\x64\145\162\x31"] = array("\x23\155\141\162\153\x75\160" => "\74\x64\x69\x76\x20\x69\144\x3d\42\x75\163\145\162\120\162\157\x66\x69\154\145\101\x74\164\x72\x44\151\166\42\x3e\x3c\144\x69\166\40\143\x6c\141\163\x73\x3d\42\162\x6f\x77\42\40\151\144\x3d\x22\x62\145\x66\157\162\145\137\x61\164\x74\x72\x5f\154\x69\163\164\137\165\160\x61\42\76" . "\x20\74\144\x69\x76\x20\163\164\x79\x6c\x65\75\x22\x77\151\144\x74\150\72\x32\60\45\73\x64\x69\x73\160\x6c\141\x79\x3a\x69\156\x6c\151\156\x65\x2d\x62\x6c\157\x63\153\x3b\42\76\x3c\142\x3e\101\x74\x74\x72\151\142\165\164\x65\x20\116\x61\x6d\145\x3c\57\x62\x3e\x3c\57\144\x69\166\76\74\x64\x69\166\40\x73\164\171\154\x65\x3d\x22\x77\x69\144\x74\150\72\x33\60\x25\73\144\x69\163\160\154\x61\x79\72\x69\x6e\154\151\156\145\x2d\x62\x6c\x6f\x63\153\73\42\x3e" . "\x20\74\142\76\111\144\x50\40\x41\164\x74\162\151\x62\165\164\x65\40\116\x61\x6d\x65\74\x2f\142\76\x3c\57\x64\151\166\76\74\57\x64\151\x76\x3e");
+    $Jr = 0;
+    $t_ = variable_get("\x6d\151\156\x69\157\162\x61\x6e\147\x65\137\x73\x61\155\154\x5f\x73\x70\137\x75\163\x65\x72\137\x61\164\164\162\151\142\x75\164\145\x73", '');
+    if (!(isset($t_) && !empty($t_))) {
+        goto tV;
     }
-
-    $form['markup_idp_user_attr_header2'] = array(
-      '#markup' => '<br />',
-    );
-
-    $form['markup_role_1'] = array(
-        '#markup' => '<h3>Custom Role Mapping</h3>',
-    );
-
-    $form['miniorange_saml_enable_rolemapping'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Check this option if you want to <b>enable Role Mapping</b>'),
-        '#default_value' => variable_get('miniorange_saml_enable_rolemapping'),
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_disable_role_update'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Check this option if you do not want to update user role if roles not mapped'),
-        '#default_value' => variable_get('miniorange_saml_disable_role_update'),
-        '#disabled' => $disabled,
-    );
-
-    $form['miniorange_saml_disable_autocreate_users'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Check this option if you want to disable <b>auto creation</b> of users if user does not exist.'),
-        '#default_value' => variable_get('miniorange_saml_disable_autocreate_users', ''),
-        '#disabled' => $disabled,
-    );
-
-    $mrole= user_roles($membersonly = TRUE);
-    $drole = array_search(variable_get('miniorange_saml_default_role',''),$mrole);
-    $str = '';
-   
-    foreach ($mrole as $value) {
-      $str .= '<option value='.$value.'>'.$value.'</option>';                                            
+    $t_ = json_decode($t_, true);
+    foreach ($t_ as $dY => $lf) {
+        $form["\x6d\141\162\x6b\x75\x70\x5f\x69\x64\160\137\165\x73\x65\x72\x5f\141\164\164\162\137\154\x69\x73\164\x5f" . $Jr] = array("\x23\155\141\162\153\165\x70" => "\74\144\151\x76\x20\x63\x6c\x61\163\x73\x3d\x22\x72\x6f\x77\x20\x75\163\145\x72\101\x74\x74\x72\x22\40\x73\164\x79\x6c\145\75\x22\160\x61\x64\144\151\156\x67\x2d\x62\157\164\x74\x6f\x6d\72\61\x25\73\x22\x20\151\144\75\42\165\x70\x61\162\157\167\137" . $Jr . "\x22\x20\76\xd\xa\x20\x20\40\40\40\x20\40\x20\40\40\x20\40\x20\x20\40\x20\40\x20\x20\x20\40\x20\x20\74\x64\151\x76\40\x73\x74\x79\154\x65\x3d\42\167\x69\144\x74\150\72\x32\x30\45\x3b\x64\151\163\160\x6c\x61\x79\x3a\x69\156\x6c\151\156\x65\55\x62\154\x6f\x63\x6b\73\42\x3e\15\xa\40\40\40\x20\40\40\40\x20\x20\40\x20\40\40\40\x20\x20\x20\40\x20\x20\40\x20\x20\40\40\x20\x20\40\x20\74\151\x6e\160\x75\164\40\x74\171\x70\145\75\x22\164\x65\x78\164\42\x20\x6e\x61\x6d\145\75\x22\x75\163\145\162\137\x70\162\x6f\x66\x69\154\145\x5f\141\x74\164\x72\137\156\x61\x6d\145\133" . $Jr . "\135\42\x20\x76\x61\x6c\x75\145\x3d\42" . $dY . "\42\40\143\154\141\x73\163\75\x22\x66\157\162\155\55\x74\145\170\x74\x22\x20\57\x3e\15\12\x20\x20\x20\x20\40\x20\40\x20\40\40\40\x20\40\40\40\40\x20\40\40\40\x20\x20\x20\x3c\57\144\151\x76\76\15\12\40\x20\x20\40\x20\40\x20\x20\x20\40\40\x20\x20\40\x20\x20\40\40\x20\x20\x20\x20\x20\74\144\151\x76\x20\x73\164\x79\154\145\75\x22\x77\x69\x64\164\150\x3a\x33\x30\45\x3b\x64\x69\x73\x70\x6c\x61\171\x3a\151\156\x6c\151\x6e\145\55\x62\154\x6f\x63\153\x3b\42\76\xd\12\40\x20\x20\x20\40\40\40\40\x20\40\40\x20\40\x20\x20\x20\40\x20\40\40\x20\40\x20\x20\40\x20\40\74\151\x6e\x70\x75\x74\x20\x74\x79\160\145\75\x22\164\x65\x78\x74\x22\40\156\141\x6d\145\75\x22\165\163\x65\162\137\160\162\x6f\146\x69\x6c\145\137\x61\x74\164\162\137\166\x61\x6c\165\145\133" . $Jr . "\x5d\42\40\166\x61\x6c\165\x65\75\x22" . $lf . "\42\x20\x63\x6c\141\x73\x73\x3d\42\x66\157\162\155\x2d\x74\x65\x78\x74\42\40\57\76\xd\12\40\40\x20\40\x20\x20\x20\40\x20\x20\40\x20\x20\x20\40\40\40\40\x20\x20\40\40\x20\74\x2f\x64\151\166\76\15\xa\40\x20\x20\x20\x20\x20\40\x20\40\40\x20\x20\40\40\40\40\40\40\x20\40\x20\x3c\x2f\x64\x69\x76\76");
+        $Jr += 1;
+        Qi:
     }
-
-    $form['miniorange_saml_default_mapping'] = array(
-       '#type' => 'select',
-       '#title' => t('Select default group for the new users'),
-       '#options' => $mrole,
-       '#default_value' => $drole,
-       '#attributes' => array('style' => 'width:73%'),
-       '#disabled' => $disabled,
-    );
-
-    $form['role_option_string'] = array(
-      '#markup' => '<p  id="role_string" hidden>'.$str.'</p>'
-    );
-    
-    $form['markup_idp_user_role_header'] = array(
-        '#markup' => '</br><h3> Role Attributes<input type="button" class="btn btn-primary" style="width:3%;margin-left:2%;margin-right:2%;" value="+" onclick="add_role();" /> </h3>',
-    );
-
-    $form['markup_idp_user_role_header1'] = array(
-        '#markup' => '<div id="userSpRoleDiv"><div class="row" id="before_role_list_upa">'
-        . ' <div style="width:25%;display:inline-block;"><b>SP Role</b></div><div style="width:30%;display:inline-block;">'
-        . ' <b>&nbsp;IdP Role</b></div></div>'
-    );
-
-    $role_counter = 0;
-    $userSpRoles = variable_get('miniorange_saml_sp_role_names', '');
-    if(isset($userSpRoles) && !empty($userSpRoles)){
-        $userSpRoles = json_decode($userSpRoles, true); 
-        foreach($userSpRoles as $sp_role){
-            $selected_string = '';
-            foreach ($mrole as $value) {
-            
-              if($sp_role == $value)
-                $selected_string .= '<option value='.$value.' selected>'.$value.'</option>';
-              else
-                $selected_string .= '<option value='.$value.'>'.$value.'</option>';                                            
+    c5:
+    tV:
+    $form["\x6d\x61\x72\153\x75\x70\x5f\151\x64\160\x5f\x75\x73\145\162\137\x61\164\164\x72\x5f\150\145\141\144\145\162\x32"] = array("\x23\x6d\141\x72\x6b\x75\160" => "\x3c\142\x72\40\x2f\x3e");
+    $form["\155\x61\x72\153\x75\160\137\162\157\x6c\x65\137\x31"] = array("\43\155\141\x72\153\165\x70" => "\x3c\x68\x33\76\103\x75\163\x74\x6f\x6d\40\x52\x6f\154\x65\40\115\141\x70\x70\151\156\x67\x3c\x2f\150\63\76");
+    $form["\155\x69\x6e\151\x6f\162\141\x6e\x67\x65\x5f\163\x61\155\154\x5f\145\156\x61\x62\154\145\x5f\x72\x6f\x6c\x65\x6d\x61\x70\x70\151\x6e\x67"] = array("\x23\164\x79\x70\145" => "\x63\x68\x65\143\x6b\142\157\x78", "\43\x74\x69\164\x6c\145" => t("\x43\x68\x65\x63\x6b\40\x74\x68\x69\163\40\157\160\x74\x69\157\x6e\x20\151\x66\x20\171\x6f\165\x20\x77\141\156\164\x20\164\x6f\x20\x3c\x62\x3e\145\156\x61\142\154\x65\40\122\x6f\x6c\x65\x20\115\141\x70\x70\x69\156\147\x3c\x2f\x62\x3e"), "\43\144\145\146\141\165\x6c\164\137\x76\x61\x6c\x75\145" => variable_get("\x6d\x69\x6e\x69\157\162\x61\156\147\x65\x5f\x73\x61\155\x6c\x5f\x65\x6e\x61\x62\x6c\x65\137\162\157\x6c\145\155\141\160\160\x69\156\147"), "\43\144\x69\163\141\x62\x6c\x65\x64" => $rE);
+    $form["\x6d\x69\x6e\x69\157\x72\141\x6e\x67\x65\x5f\163\x61\x6d\154\x5f\144\151\163\x61\x62\154\x65\137\x72\157\x6c\x65\137\165\160\x64\x61\164\x65"] = array("\x23\x74\171\160\x65" => "\x63\x68\145\x63\153\142\x6f\170", "\x23\x74\x69\x74\154\x65" => t("\103\150\x65\x63\x6b\40\x74\150\x69\x73\x20\x6f\x70\x74\x69\x6f\x6e\x20\151\146\40\x79\157\165\x20\144\157\40\156\x6f\164\40\x77\141\x6e\x74\x20\164\157\x20\165\x70\x64\141\x74\145\x20\x75\x73\145\162\40\162\x6f\x6c\x65\x20\151\x66\x20\162\157\x6c\x65\163\40\x6e\157\164\40\155\x61\x70\x70\145\x64"), "\x23\x64\145\x66\141\165\x6c\x74\x5f\166\141\x6c\x75\145" => variable_get("\x6d\151\156\x69\x6f\162\x61\x6e\x67\x65\x5f\x73\141\x6d\x6c\137\144\x69\163\141\x62\x6c\145\x5f\x72\157\154\145\x5f\x75\x70\x64\141\x74\x65"), "\x23\x64\151\x73\141\142\154\x65\x64" => $rE);
+    $form["\155\x69\x6e\151\157\x72\141\156\147\x65\137\163\x61\x6d\x6c\x5f\144\x69\163\x61\x62\x6c\145\137\141\165\x74\x6f\x63\162\145\141\x74\145\137\x75\163\145\162\163"] = array("\43\x74\171\x70\145" => "\x63\x68\145\x63\x6b\142\157\170", "\43\x74\x69\164\x6c\145" => t("\x43\150\x65\x63\x6b\40\164\x68\151\x73\40\157\160\164\151\157\156\40\x69\146\x20\171\157\x75\40\167\x61\x6e\164\40\164\x6f\40\144\x69\163\141\142\154\145\40\74\142\x3e\141\165\164\x6f\40\x63\162\x65\141\x74\151\157\x6e\x3c\57\142\x3e\40\x6f\146\x20\x75\163\145\162\163\x20\151\x66\40\165\163\x65\162\40\144\x6f\145\x73\x20\156\x6f\164\x20\x65\x78\x69\163\164\x2e"), "\43\144\x65\146\x61\165\154\164\x5f\166\x61\154\x75\x65" => variable_get("\x6d\151\156\151\157\x72\141\156\x67\x65\137\163\141\x6d\x6c\x5f\x64\151\163\x61\x62\x6c\x65\x5f\141\x75\164\x6f\x63\x72\145\x61\x74\145\x5f\165\163\x65\162\x73", ''), "\x23\x64\151\x73\141\142\154\x65\x64" => $rE);
+    $fy = user_roles($TQ = TRUE);
+    $Yo = array_search(variable_get("\x6d\151\156\x69\157\162\141\x6e\147\x65\x5f\x73\x61\x6d\154\137\144\145\x66\x61\165\154\164\137\162\x6f\x6c\145", ''), $fy);
+    $Q2 = '';
+    foreach ($fy as $uo) {
+        $Q2 .= "\74\x6f\160\164\x69\157\x6e\x20\166\x61\x6c\165\145\75" . $uo . "\x3e" . $uo . "\x3c\x2f\x6f\x70\164\151\x6f\156\x3e";
+        JH:
+    }
+    SV:
+    $form["\155\x69\x6e\x69\x6f\x72\x61\156\x67\x65\137\x73\x61\155\154\137\x64\145\x66\x61\165\154\x74\137\x6d\x61\160\160\x69\x6e\x67"] = array("\43\164\x79\160\x65" => "\x73\145\154\145\143\x74", "\43\164\151\x74\154\x65" => t("\123\145\154\145\143\164\40\x64\145\x66\x61\x75\154\164\40\x67\162\157\x75\x70\x20\x66\157\162\40\x74\x68\145\x20\156\x65\x77\x20\x75\x73\145\x72\x73"), "\x23\x6f\x70\x74\x69\x6f\x6e\x73" => $fy, "\x23\x64\145\146\x61\x75\x6c\x74\137\166\x61\154\165\x65" => $Yo, "\43\141\x74\164\162\151\142\x75\x74\145\163" => array("\x73\x74\171\x6c\x65" => "\x77\x69\144\x74\x68\72\x37\x33\x25"), "\x23\x64\151\163\141\x62\154\145\144" => $rE);
+    $form["\x72\x6f\x6c\145\x5f\x6f\160\164\151\x6f\156\x5f\x73\164\x72\151\x6e\147"] = array("\x23\x6d\141\162\x6b\165\160" => "\74\x70\x20\x20\x69\144\75\x22\x72\x6f\154\x65\x5f\163\x74\162\x69\156\x67\42\x20\x68\x69\x64\x64\145\x6e\76" . $Q2 . "\x3c\57\x70\x3e");
+    $form["\x6d\141\162\153\x75\160\x5f\151\144\160\x5f\x75\x73\x65\162\137\x72\x6f\154\x65\137\150\x65\141\x64\145\162"] = array("\x23\x6d\141\162\x6b\x75\x70" => "\x3c\57\x62\162\x3e\74\x68\x33\76\x20\x52\157\154\x65\x20\101\164\x74\162\x69\142\165\x74\145\163\74\x69\x6e\160\x75\164\40\x74\171\160\x65\x3d\42\142\165\x74\164\157\156\x22\40\x63\x6c\x61\163\x73\x3d\x22\142\x74\156\40\142\x74\x6e\x2d\x70\162\151\155\141\162\x79\x22\40\x73\164\x79\154\145\x3d\42\x77\x69\x64\x74\x68\72\x33\x25\x3b\x6d\x61\x72\147\x69\x6e\55\154\x65\x66\164\72\x32\45\x3b\155\141\x72\x67\151\156\55\x72\x69\x67\x68\164\72\62\x25\x3b\42\x20\166\141\x6c\165\x65\x3d\x22\53\x22\40\157\156\x63\x6c\x69\x63\153\x3d\x22\x61\144\144\x5f\162\157\x6c\145\x28\51\73\42\40\57\x3e\40\x3c\57\x68\63\76");
+    $form["\x6d\141\x72\x6b\x75\160\x5f\151\144\x70\137\165\x73\x65\162\x5f\x72\157\154\145\x5f\x68\145\141\x64\145\162\x31"] = array("\x23\155\x61\x72\x6b\165\160" => "\74\144\x69\166\40\151\x64\x3d\x22\x75\163\x65\162\123\x70\x52\x6f\x6c\x65\104\151\x76\42\x3e\74\144\151\x76\x20\x63\154\141\163\x73\75\x22\x72\157\167\42\x20\x69\144\75\x22\142\145\x66\157\x72\145\x5f\x72\157\x6c\145\137\154\x69\163\164\x5f\x75\160\141\x22\x3e" . "\x20\x3c\144\x69\x76\x20\163\164\171\x6c\x65\75\42\167\151\144\x74\x68\72\62\x35\x25\x3b\x64\x69\x73\x70\x6c\x61\171\x3a\151\156\154\151\x6e\145\55\142\x6c\157\143\x6b\x3b\x22\x3e\x3c\x62\x3e\x53\120\40\122\x6f\x6c\x65\x3c\57\142\x3e\x3c\x2f\x64\151\x76\x3e\74\144\x69\x76\40\x73\164\171\x6c\145\x3d\42\x77\151\x64\164\x68\72\x33\60\45\73\x64\151\x73\x70\x6c\141\x79\72\x69\x6e\154\151\156\x65\x2d\142\154\157\x63\153\73\x22\x3e" . "\x20\x3c\x62\76\46\x6e\142\x73\x70\73\111\x64\x50\x20\x52\x6f\x6c\145\74\57\x62\76\x3c\x2f\x64\151\x76\x3e\x3c\x2f\x64\x69\x76\76");
+    $yz = 0;
+    $Nd = variable_get("\155\151\156\151\157\162\x61\156\x67\145\137\x73\141\x6d\154\x5f\x73\160\x5f\162\x6f\154\145\137\x6e\x61\x6d\x65\x73", '');
+    if (!(isset($Nd) && !empty($Nd))) {
+        goto f4;
+    }
+    $Nd = json_decode($Nd, true);
+    foreach ($Nd as $lW) {
+        $E1 = '';
+        foreach ($fy as $uo) {
+            if ($lW == $uo) {
+                goto m7;
             }
-            $rolelabel = str_replace(' ','',$sp_role);
-            $idp_roles = variable_get('miniorange_saml_role_' . $rolelabel,'');
-
-            $form['markup_idp_user_role_list_' . $role_counter] = array(
-                '#markup' => '<div class="row userRole" style="padding-bottom:1%;" id="role_' . $role_counter . '" >
-                       <div style="width:25%;display:inline-block;">
-                             <select name="user_sp_role_name[' . $role_counter . ']" class="form-control sp_role_class">'.$selected_string.'</select>
-                       </div>
-                       <div style="width:45%;display:inline-block;">
-                           <input type="text" name="user_idp_role_name[' . $role_counter . ']" value="' . $idp_roles .'" class="form-text" placeholder="semi-colon(;) separated"/>
-                       </div>
-                       <div style="width:25%;display:inline-block;">
-                           <input type="button" id="'.$role_counter.'" class="btn btn-danger" style="width:10%;" value="-" onclick="remove_role(this.id);" />
-                       </div>
-                     </div>'
-                );
-            $role_counter+=1;
+            $E1 .= "\74\x6f\x70\164\x69\x6f\156\40\x76\141\154\165\145\75" . $uo . "\x3e" . $uo . "\74\x2f\157\x70\x74\151\157\156\x3e";
+            goto xY;
+            m7:
+            $E1 .= "\x3c\157\x70\164\151\157\156\40\166\141\154\165\145\x3d" . $uo . "\x20\163\x65\x6c\145\x63\x74\x65\x64\x3e" . $uo . "\x3c\57\157\160\x74\x69\157\x6e\76";
+            xY:
+            IG:
         }
+        vT:
+        $zU = str_replace("\40", '', $lW);
+        $w_ = variable_get("\155\x69\156\x69\157\x72\141\x6e\x67\145\137\x73\141\x6d\x6c\x5f\x72\x6f\x6c\145\x5f" . $zU, '');
+        $form["\x6d\x61\162\x6b\x75\160\137\151\x64\x70\x5f\165\163\145\162\137\x72\x6f\x6c\x65\x5f\x6c\x69\163\x74\x5f" . $yz] = array("\x23\x6d\141\162\x6b\165\160" => "\x3c\x64\x69\x76\x20\143\154\x61\163\163\75\x22\162\x6f\x77\40\165\x73\x65\x72\x52\157\154\145\42\40\163\164\171\154\x65\75\x22\x70\141\x64\x64\151\x6e\x67\55\142\x6f\164\164\x6f\155\x3a\x31\45\73\x22\40\x69\x64\75\x22\x72\x6f\x6c\145\137" . $yz . "\x22\40\x3e\15\12\40\40\40\40\x20\40\x20\40\x20\x20\40\40\x20\x20\x20\x20\x20\40\40\x20\x20\x20\x20\x3c\144\151\166\40\163\x74\171\x6c\145\x3d\x22\x77\151\x64\x74\150\x3a\x32\65\45\x3b\144\x69\x73\x70\154\141\x79\72\151\x6e\x6c\x69\156\145\x2d\x62\154\157\x63\x6b\73\42\x3e\xd\12\x20\40\40\x20\40\40\40\40\x20\x20\40\x20\40\x20\x20\40\40\x20\40\x20\x20\x20\40\x20\40\40\40\x20\x20\x3c\x73\x65\x6c\x65\143\x74\x20\156\x61\x6d\x65\75\42\165\163\145\162\137\163\x70\137\x72\x6f\154\x65\137\x6e\x61\155\x65\133" . $yz . "\135\42\40\143\x6c\141\163\163\x3d\42\146\157\162\155\55\143\157\156\164\162\x6f\x6c\40\163\160\137\162\x6f\x6c\x65\x5f\x63\154\141\163\163\x22\76" . $E1 . "\74\57\x73\145\154\145\x63\164\x3e\xd\xa\40\x20\40\40\x20\x20\x20\x20\x20\x20\x20\40\40\40\x20\40\x20\x20\40\x20\40\x20\40\x3c\x2f\x64\x69\x76\76\15\12\40\x20\x20\40\40\40\40\x20\40\40\x20\x20\40\40\40\x20\40\x20\40\x20\x20\x20\x20\74\144\x69\x76\x20\163\164\171\x6c\x65\75\x22\x77\x69\144\164\x68\x3a\x34\65\45\73\144\151\x73\160\x6c\141\x79\x3a\x69\156\x6c\x69\x6e\x65\55\142\x6c\157\x63\x6b\x3b\42\76\15\12\x20\x20\x20\40\x20\x20\40\40\x20\x20\x20\40\x20\x20\40\x20\40\40\x20\40\x20\40\40\40\40\40\40\x3c\151\x6e\x70\165\164\40\164\171\x70\x65\x3d\x22\164\145\x78\164\x22\x20\x6e\141\155\x65\x3d\x22\165\163\145\x72\x5f\x69\x64\160\x5f\162\x6f\154\145\x5f\x6e\141\x6d\145\x5b" . $yz . "\x5d\42\x20\x76\141\154\165\145\x3d\42" . $w_ . "\42\40\x63\x6c\141\x73\163\x3d\42\x66\x6f\x72\155\55\164\145\x78\164\x22\x20\x70\154\141\143\x65\x68\x6f\x6c\x64\145\162\x3d\42\x73\145\155\151\55\x63\x6f\x6c\157\x6e\x28\x3b\51\x20\163\x65\x70\x61\x72\141\x74\x65\144\42\57\76\15\xa\x20\x20\x20\x20\40\x20\x20\x20\x20\x20\40\x20\x20\40\40\40\40\x20\x20\x20\40\x20\40\x3c\x2f\144\151\x76\x3e\15\xa\40\40\x20\x20\40\x20\x20\40\x20\40\40\40\x20\40\40\40\40\40\x20\x20\x20\x20\x20\x3c\144\151\166\x20\x73\x74\171\154\145\75\42\x77\151\144\164\x68\x3a\62\x35\45\x3b\144\x69\x73\x70\x6c\141\x79\x3a\x69\x6e\x6c\x69\x6e\145\x2d\142\x6c\157\x63\153\x3b\42\x3e\xd\xa\x20\x20\x20\x20\40\40\40\40\40\40\x20\40\x20\x20\x20\40\40\40\x20\40\40\40\40\x20\x20\x20\40\x3c\151\x6e\160\165\x74\x20\164\171\x70\x65\x3d\x22\142\x75\x74\x74\x6f\x6e\x22\x20\x69\144\x3d\x22" . $yz . "\42\x20\x63\154\141\163\163\75\x22\x62\x74\156\40\142\164\x6e\55\144\141\x6e\x67\145\162\42\x20\163\164\171\154\x65\75\42\x77\151\x64\164\x68\x3a\61\x30\45\73\x22\40\x76\141\x6c\x75\x65\x3d\x22\x2d\42\40\x6f\156\143\x6c\151\143\x6b\75\x22\x72\x65\x6d\157\x76\x65\x5f\162\157\154\x65\x28\164\150\x69\163\x2e\x69\x64\x29\73\42\40\x2f\76\xd\xa\x20\40\x20\40\40\40\40\x20\x20\40\40\40\x20\40\40\x20\x20\40\40\40\x20\40\x20\74\57\x64\x69\x76\x3e\15\xa\x20\40\x20\x20\40\x20\x20\x20\x20\40\x20\x20\40\40\x20\40\40\40\x20\40\40\x3c\57\x64\151\166\76");
+        $yz += 1;
+        dz:
     }
-
-    $form['markup_idp_user_role_header2'] = array(
-      '#markup' => '<br />',
-    );
-
-    $form['markup_idp_user_attr_header2'] = array(
-      '#markup' => '<br />',
-    );
-
-     $form['markup_idp_log_url_header'] = array(
-        '#markup' => '<div id="logUrlDiv"><div class="row" id="before_log_url_upa"><h3>Custom Login/Logout (Optional)<input type="button" class="btn btn-primary" style="width:3%;margin-left:2%;margin-right:2%;" value="+" onclick="add_url();" /> </h3></div>',
-    );
-
-    $log_url_counter = 0;
-    $logUrlClass = variable_get('miniorange_saml_log_url_class','');
-  
-    if(isset($logUrlClass) && !empty($logUrlClass)){
-        $logUrlClass = json_decode($logUrlClass, true); 
-        foreach($logUrlClass as $sp_role){
-            $selected_string = '';
-            foreach ($mrole as $value) {
-            
-              if($value == $sp_role){
-                $selected_string .= '<option value='.$value.' selected>'.$value.'</option>';
-              }
-              else
-                $selected_string .= '<option value='.$value.'>'.$value.'</option>';                                            
+    Bu:
+    f4:
+    $form["\155\x61\x72\x6b\165\x70\x5f\151\144\x70\x5f\165\163\x65\x72\x5f\162\157\154\145\137\150\x65\141\x64\x65\x72\x32"] = array("\x23\x6d\141\x72\x6b\x75\160" => "\74\x62\x72\x20\57\x3e");
+    $form["\155\x61\x72\153\x75\160\137\x69\144\160\x5f\165\163\145\162\137\x61\x74\164\162\137\150\145\x61\144\x65\162\x32"] = array("\x23\155\x61\x72\153\x75\160" => "\x3c\x62\162\x20\57\x3e");
+    $form["\155\x61\162\153\165\x70\x5f\151\144\160\137\154\157\147\137\x75\162\x6c\137\150\x65\141\144\145\162"] = array("\x23\x6d\x61\162\x6b\165\160" => "\x3c\x64\151\x76\x20\x69\x64\x3d\x22\x6c\x6f\147\125\x72\154\x44\151\166\x22\76\x3c\144\151\166\x20\143\x6c\141\163\163\x3d\42\162\157\x77\42\x20\x69\144\x3d\42\142\x65\146\x6f\x72\x65\x5f\154\157\147\137\165\x72\x6c\137\x75\x70\141\x22\x3e\x3c\150\63\76\x43\x75\163\164\x6f\155\40\114\157\x67\151\156\x2f\114\x6f\147\157\x75\164\x20\x28\x4f\160\x74\x69\x6f\x6e\141\x6c\51\x3c\x69\156\160\x75\164\x20\x74\171\x70\145\75\x22\142\x75\164\164\x6f\x6e\x22\40\143\154\x61\163\163\x3d\x22\142\x74\x6e\40\142\164\156\55\x70\162\x69\155\x61\x72\171\42\40\163\164\x79\154\145\75\42\x77\151\144\x74\x68\72\63\45\x3b\x6d\x61\162\147\151\x6e\x2d\x6c\145\x66\x74\72\x32\x25\73\155\141\162\x67\151\x6e\x2d\162\x69\147\x68\x74\72\x32\x25\x3b\42\40\x76\x61\x6c\x75\x65\75\42\x2b\x22\x20\157\156\143\x6c\151\x63\153\x3d\42\141\x64\144\137\x75\162\x6c\50\x29\x3b\x22\40\x2f\76\40\74\57\x68\63\x3e\x3c\57\144\151\x76\76");
+    $ng = 0;
+    $il = variable_get("\x6d\x69\156\151\157\x72\141\156\x67\x65\137\163\x61\155\x6c\137\154\157\x67\137\x75\x72\x6c\x5f\x63\154\141\163\x73", '');
+    if (!(isset($il) && !empty($il))) {
+        goto v6;
+    }
+    $il = json_decode($il, true);
+    foreach ($il as $lW) {
+        $E1 = '';
+        foreach ($fy as $uo) {
+            if ($uo == $lW) {
+                goto Vz;
             }
-            
-            $login_url = variable_get(str_replace(' ','',$sp_role . '_sin'),'');
-            $logout_url = variable_get(str_replace(' ','',$sp_role . '_sout'),'');
-
-            $form['markup_idp_log_url_list_' . $log_url_counter] = array(
-                '#markup' => '<div class="row logUrl" style="padding-bottom:1%;" id="url_' . $log_url_counter . '" >
-                       <div style="width:68%;display:inline-block;">
-                          <select name="role_class[' . $log_url_counter . ']" class="form-control sp_role_class">'.$selected_string.'</select>
-                       </div>
-                       <div style="width:25%;display:inline-block;margin-left:22px;">
-                           <input type="button" id="'.$log_url_counter.'" class="btn btn-danger" style="width:10%;" value="-" onclick="remove_url(this.id);" />
-                       </div></br></br>
-                       <div style="width:76%;display:inline-block;">
-                           <input type="text" name="login_url[' . $log_url_counter . ']" value="' . $login_url .'" class="form-text" placeholder="Enter Custom Login Url"/>
-                       </div></br></br>
-                       <div style="width:76%;display:inline-block;">
-                           <input type="text" name="logout_url[' . $log_url_counter . ']" value="' . $logout_url .'" class="form-text" placeholder="Enter Custom Logout Url"/>
-                       </div>
-                     </div>'
-                );
-            $log_url_counter+=1;
+            $E1 .= "\x3c\x6f\x70\164\x69\157\156\x20\x76\x61\x6c\165\145\75" . $uo . "\76" . $uo . "\x3c\57\157\x70\x74\151\157\x6e\x3e";
+            goto iA;
+            Vz:
+            $E1 .= "\x3c\x6f\x70\x74\x69\157\x6e\40\166\141\154\165\x65\75" . $uo . "\x20\163\x65\x6c\x65\143\x74\x65\144\76" . $uo . "\74\x2f\157\160\x74\151\x6f\156\x3e";
+            iA:
+            z2:
         }
+        x4:
+        $Lb = variable_get(str_replace("\40", '', $lW . "\137\163\x69\156"), '');
+        $WJ = variable_get(str_replace("\x20", '', $lW . "\x5f\163\157\x75\164"), '');
+        $form["\x6d\x61\x72\153\x75\x70\x5f\151\144\160\x5f\154\x6f\x67\137\x75\162\154\137\x6c\151\x73\164\x5f" . $ng] = array("\x23\x6d\x61\x72\x6b\165\x70" => "\74\144\151\166\x20\x63\154\141\163\x73\75\42\162\157\x77\x20\x6c\157\147\x55\x72\154\x22\x20\x73\164\171\154\145\75\42\160\x61\144\x64\151\156\x67\x2d\142\x6f\x74\x74\157\155\72\x31\45\x3b\42\40\x69\x64\75\x22\165\x72\154\137" . $ng . "\x22\x20\x3e\15\xa\x20\x20\x20\40\40\x20\x20\40\40\x20\40\40\x20\x20\40\40\40\40\40\x20\40\x20\40\x3c\144\x69\166\x20\163\x74\x79\154\x65\x3d\42\167\151\x64\x74\x68\x3a\x36\70\45\x3b\x64\x69\x73\160\x6c\141\171\x3a\151\156\x6c\x69\x6e\x65\x2d\x62\154\x6f\x63\x6b\x3b\x22\76\xd\xa\x20\x20\40\x20\x20\x20\40\40\x20\x20\40\40\x20\40\40\x20\40\x20\x20\40\x20\40\40\40\40\40\x3c\x73\145\154\x65\143\x74\40\x6e\141\x6d\145\x3d\x22\162\157\x6c\x65\x5f\x63\x6c\141\163\x73\x5b" . $ng . "\135\x22\x20\143\x6c\x61\x73\163\x3d\42\x66\x6f\162\x6d\55\x63\157\156\x74\162\157\x6c\x20\x73\160\x5f\x72\157\x6c\x65\x5f\x63\154\141\163\x73\x22\x3e" . $E1 . "\74\x2f\x73\x65\154\145\x63\164\x3e\xd\xa\40\x20\40\x20\x20\x20\40\x20\40\40\40\40\x20\40\x20\x20\x20\40\x20\x20\40\40\40\74\x2f\x64\151\166\x3e\xd\12\40\x20\x20\40\x20\x20\40\x20\40\x20\40\40\x20\x20\x20\x20\x20\x20\x20\40\40\x20\40\74\144\x69\166\40\x73\x74\171\x6c\145\x3d\42\167\x69\x64\164\150\x3a\62\65\45\x3b\144\x69\x73\160\154\141\x79\x3a\151\156\x6c\151\156\x65\x2d\142\154\157\x63\x6b\x3b\x6d\x61\x72\x67\x69\156\x2d\x6c\x65\x66\x74\72\62\x32\160\x78\x3b\x22\76\xd\12\40\40\40\40\40\x20\40\x20\x20\x20\x20\x20\x20\x20\40\x20\40\x20\x20\x20\x20\x20\x20\40\x20\x20\x20\74\x69\x6e\x70\x75\x74\40\164\x79\x70\x65\75\x22\x62\165\164\164\157\x6e\42\x20\151\144\75\x22" . $ng . "\42\x20\x63\x6c\141\x73\x73\75\42\x62\164\x6e\40\142\x74\156\55\x64\x61\x6e\147\x65\162\x22\x20\x73\x74\171\154\x65\x3d\42\167\151\144\164\150\x3a\x31\60\x25\x3b\42\x20\x76\141\x6c\165\x65\x3d\x22\55\x22\x20\157\x6e\x63\x6c\151\143\153\x3d\42\162\145\155\x6f\x76\x65\x5f\x75\x72\x6c\x28\164\150\x69\x73\56\x69\x64\51\x3b\x22\40\57\76\15\12\40\40\x20\40\40\40\x20\x20\40\x20\x20\x20\x20\40\40\x20\40\40\40\40\40\x20\40\x3c\x2f\x64\x69\x76\x3e\x3c\57\142\x72\76\x3c\57\142\x72\x3e\15\12\x20\40\40\x20\x20\40\40\40\x20\40\x20\40\40\x20\x20\40\40\40\40\x20\40\40\40\x3c\x64\x69\x76\40\163\x74\x79\154\x65\x3d\42\x77\x69\144\164\150\72\x37\x36\45\x3b\144\x69\163\160\x6c\141\x79\72\151\156\x6c\x69\156\145\55\x62\154\x6f\143\x6b\73\x22\76\xd\xa\40\40\40\40\x20\40\40\x20\x20\x20\x20\x20\x20\x20\x20\40\x20\x20\x20\40\40\x20\40\x20\40\x20\40\x3c\x69\156\160\165\164\x20\164\x79\160\145\75\x22\164\x65\170\x74\x22\x20\x6e\x61\155\x65\75\x22\x6c\x6f\x67\151\156\137\165\162\x6c\133" . $ng . "\135\42\40\x76\141\154\165\x65\75\42" . $Lb . "\x22\x20\x63\154\x61\x73\163\x3d\42\146\157\x72\155\55\164\145\170\x74\42\x20\160\154\x61\x63\145\150\157\154\144\x65\162\75\42\105\x6e\164\145\162\x20\x43\165\163\164\157\x6d\x20\114\x6f\x67\x69\156\x20\x55\162\x6c\x22\57\76\xd\xa\x20\x20\x20\40\40\40\x20\40\x20\40\40\40\40\x20\40\40\40\40\40\x20\40\x20\40\x3c\x2f\144\151\166\76\74\x2f\x62\162\76\74\x2f\142\162\76\xd\xa\x20\x20\x20\x20\40\x20\40\40\40\x20\x20\x20\x20\x20\x20\40\x20\40\40\x20\x20\40\x20\74\144\x69\166\40\163\164\x79\154\x65\75\42\167\151\144\164\150\72\67\66\45\x3b\x64\x69\163\160\154\x61\171\x3a\151\156\x6c\x69\156\x65\x2d\x62\154\157\143\153\73\42\x3e\xd\12\40\x20\40\40\40\40\x20\x20\x20\40\40\x20\x20\40\40\40\40\x20\x20\x20\40\40\x20\x20\40\x20\x20\74\x69\x6e\160\165\164\x20\164\171\x70\145\x3d\42\164\x65\x78\x74\42\x20\156\141\x6d\x65\x3d\x22\154\157\x67\157\165\164\x5f\x75\162\x6c\x5b" . $ng . "\135\42\x20\166\x61\154\x75\x65\x3d\42" . $WJ . "\42\40\143\154\x61\x73\x73\75\x22\146\x6f\162\155\55\164\x65\170\164\42\x20\x70\154\x61\143\x65\x68\157\154\144\145\x72\75\42\x45\156\164\x65\x72\40\103\165\163\164\157\155\40\x4c\x6f\147\157\x75\x74\40\125\162\x6c\x22\57\76\xd\12\x20\40\40\40\x20\x20\40\40\x20\40\x20\40\40\40\40\40\x20\x20\40\x20\x20\x20\x20\x3c\x2f\144\151\166\76\15\12\40\x20\40\40\40\40\x20\40\40\x20\x20\x20\40\x20\x20\40\40\40\40\40\x20\x3c\x2f\x64\151\x76\x3e");
+        $ng += 1;
+        Ai:
     }
-
-    $form['miniorange_saml_div_end'] = array(
-        '#markup' => '<br>',
-    );
-
-    $form['miniorange_saml_gateway_config_submit'] = array(
-        '#type' => 'submit',
-        '#value' => t('Save Configuration'),
-        '#submit' => array('miniorange_saml_save_mapping_settings'),
-        '#disabled' => $disabled,
-        '#attributes' => array('style' => 'display:block;margin-left:auto;margin-right:auto;border-radius: 4px;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
-    );
-
-    $form['miniorange_saml_support_srart'] = array(
-        '#markup' => '</div></div></div></div>'
-    );
-
-     Utilities::show_attr_list_from_idp($form, $form_state);
-
+    JO:
+    v6:
+    $form["\155\151\156\x69\x6f\x72\x61\156\147\x65\x5f\x73\x61\155\x6c\x5f\144\151\166\x5f\x65\156\x64"] = array("\x23\155\141\x72\x6b\165\160" => "\74\x62\162\76");
+    $form["\x6d\151\x6e\151\157\x72\x61\156\147\x65\137\163\x61\x6d\x6c\x5f\147\141\164\x65\x77\x61\x79\x5f\x63\157\156\146\x69\x67\x5f\x73\165\142\x6d\151\164"] = array("\x23\164\171\160\x65" => "\x73\x75\x62\x6d\x69\x74", "\x23\x76\141\x6c\165\x65" => t("\x53\141\x76\145\x20\x43\x6f\156\x66\151\147\x75\x72\x61\164\151\x6f\156"), "\x23\x73\165\142\155\151\164" => array("\155\151\156\151\157\x72\x61\156\147\145\x5f\163\141\155\x6c\137\163\141\166\x65\x5f\x6d\x61\x70\x70\151\x6e\x67\x5f\163\x65\164\x74\151\x6e\147\163"), "\43\x64\x69\163\141\x62\x6c\x65\144" => $rE, "\x23\141\164\164\162\151\142\x75\x74\145\x73" => array("\163\x74\x79\154\x65" => "\x64\x69\163\x70\154\141\x79\x3a\x62\154\x6f\143\x6b\73\155\x61\162\147\x69\x6e\55\154\x65\x66\x74\x3a\141\x75\x74\157\73\x6d\141\162\x67\x69\x6e\x2d\x72\x69\147\150\164\72\x61\165\164\157\73\x62\x6f\x72\144\145\x72\55\x72\141\x64\151\165\x73\72\40\x34\x70\x78\x3b\x62\x61\143\x6b\147\x72\x6f\165\156\x64\72\40\x23\63\x33\x37\141\142\67\x3b\143\157\154\x6f\162\x3a\40\x23\x66\x66\x66\x66\x66\146\73\x74\x65\x78\x74\55\163\x68\141\x64\157\x77\72\x20\60\x20\55\x31\160\x78\x20\61\160\170\40\x23\x33\x33\67\141\x62\67\x2c\40\x31\x70\x78\40\60\x20\x31\160\x78\x20\43\x33\x33\x37\141\x62\67\54\40\x30\40\61\160\170\40\x31\160\170\40\x23\63\x33\67\141\x62\67\54\40\55\61\x70\170\40\60\40\61\x70\170\40\x23\63\x33\67\141\142\67\x3b\142\x6f\x78\55\163\x68\x61\144\157\x77\x3a\x20\x30\x20\61\160\x78\x20\x30\x20\43\63\x33\67\141\x62\67\73\142\x6f\162\144\x65\162\55\143\x6f\x6c\157\x72\x3a\40\x23\x33\x33\x37\141\142\x37\x20\x23\x33\x33\67\141\x62\67\x20\43\63\63\x37\x61\x62\67\x3b"));
+    $form["\x6d\151\x6e\151\x6f\x72\141\x6e\x67\145\137\163\x61\x6d\x6c\x5f\x73\165\x70\160\x6f\162\164\137\x73\x72\141\x72\164"] = array("\x23\155\141\162\153\x75\x70" => "\74\57\x64\151\166\x3e\x3c\x2f\x64\151\166\76\74\57\144\151\166\76\74\x2f\144\x69\166\x3e");
+    Utilities::show_attr_list_from_idp($form, $form_state);
     return $form;
-
- }
-
-  function miniorange_saml_save_mapping_settings($form, &$form_state) {
-
-      $enable_rolemapping = $form['miniorange_saml_enable_rolemapping']['#value'];
-      $idp_attribute1_name = $form['miniorange_saml_idp_attr1_name']['#value'];
-      $sp_attribute2_name = $form['miniorange_saml_attr2_name']['#value'];
-      $idp_attribute2_name = $form['miniorange_saml_idp_attr2_name']['#value'];
-      $sp_attribute3_name = $form['miniorange_saml_attr3_name']['#value'];
-      $idp_attribute3_name = $form['miniorange_saml_idp_attr3_name']['#value'];
-      $sp_attribute4_name = $form['miniorange_saml_attr4_name']['#value'];
-      $idp_attribute4_name = $form['miniorange_saml_idp_attr4_name']['#value'];
-      $sp_attribute5_name = $form['miniorange_saml_attr5_name']['#value'];
-      $idp_attribute5_name = $form['miniorange_saml_idp_attr5_name']['#value'];
-      $mrole= user_roles($membersonly = TRUE);
-      
-      $login_by = $form['miniorange_saml_account_username_by']['#value'];
-      $username_attribute = $form['miniorange_saml_username_attribute']['#value'];
-      $email_attribute = $form['miniorange_saml_email_attribute']['#value'];
-      $disable_role_update = $form['miniorange_saml_disable_role_update']['#value'];
-      $enable_autocreate_users = $form['miniorange_saml_disable_autocreate_users']['#value'];
-      $default_mapping= $form['miniorange_saml_default_mapping']['#value'];
-
-     /* Updated User Profile Attributes*/
-      $user_profile_attr_names = array_key_exists('user_profile_attr_name', $_POST) ? $_POST['user_profile_attr_name'] : array();
-      $user_profile_attr_values   = array_key_exists('user_profile_attr_value', $_POST) ? $_POST['user_profile_attr_value'] : array();
-      $attribute_mapping = array();
-      foreach($user_profile_attr_names as $key => $value){
-          if(!empty(trim($value)) && !empty(trim($user_profile_attr_values[$key]))){
-                  $attr_name = trim($value);;
-                  $attr_value = trim($user_profile_attr_values[$key]);
-                  $attribute_mapping[$attr_name] = $attr_value;
-          }
-      }
-      $attribute_mapping = json_encode($attribute_mapping);
-
-      if($enable_rolemapping == 1) {
-        $enable_rolemapping = TRUE;
-      }
-      else {
-        $enable_rolemapping = FALSE;
-      }
-
-      if ($enable_autocreate_users == 1) {
-        $enable_autocreate_users = TRUE;
-      }
-      else {
-        $enable_autocreate_users = FALSE;
-      }
-
-      if ($disable_role_update == 1) {
-        $disable_role_update = TRUE;
-      }
-      else {
-        $disable_role_update = FALSE;
-      }
-
-      variable_set('miniorange_saml_enable_rolemapping', $enable_rolemapping);
-      variable_set('miniorange_saml_idp_attr1_name', $idp_attribute1_name);
-      variable_set('miniorange_saml_attr2_name', $sp_attribute2_name);
-      variable_set('miniorange_saml_idp_attr2_name', $idp_attribute2_name);
-      variable_set('miniorange_saml_attr3_name', $sp_attribute3_name);
-      variable_set('miniorange_saml_idp_attr3_name', $idp_attribute3_name);
-      variable_set('miniorange_saml_attr4_name', $sp_attribute4_name);
-      variable_set('miniorange_saml_idp_attr4_name', $idp_attribute4_name);
-      variable_set('miniorange_saml_attr5_name', $sp_attribute5_name);
-      variable_set('miniorange_saml_idp_attr5_name', $idp_attribute5_name);
-      variable_set('miniorange_saml_sp_user_attributes', $attribute_mapping);
-
-      if($enable_rolemapping) {
-        $rolemap = array();
-        //array to store data entered by user and to show after saving 
-        $user_sp_role_names = array_key_exists('user_sp_role_name', $_POST) ? $_POST['user_sp_role_name'] : array();
-        $user_idp_role_names = array_key_exists('user_idp_role_name', $_POST) ? $_POST['user_idp_role_name'] : array();
-      
-        foreach($user_sp_role_names as $key => $value){
-            $rolelabel = str_replace(' ','',$value);
-            $temp = $user_idp_role_names[$key];
-            variable_set('miniorange_saml_role_' . $rolelabel,$temp);
-            $arr= explode(";",$temp);
-            foreach($arr as $val)
-              $rolemap[$val] = $value;
+}
+function miniorange_saml_save_mapping_settings($form, &$form_state)
+{
+    $hc = $form["\x6d\151\156\x69\157\162\x61\x6e\147\145\137\x73\141\x6d\154\137\145\156\141\142\154\145\137\x72\x6f\154\145\155\x61\x70\x70\151\x6e\147"]["\x23\x76\141\x6c\x75\x65"];
+    $ux = $form["\155\151\x6e\x69\157\162\x61\x6e\147\x65\137\x73\141\155\154\137\x69\144\x70\137\x61\164\164\162\61\137\156\141\x6d\x65"]["\43\x76\x61\x6c\x75\x65"];
+    $lK = $form["\x6d\x69\x6e\151\x6f\162\141\156\147\145\x5f\x73\x61\x6d\154\x5f\141\x74\164\x72\62\x5f\x6e\141\155\145"]["\x23\166\x61\154\165\145"];
+    $Sq = $form["\x6d\151\x6e\x69\x6f\162\x61\x6e\147\145\137\x73\x61\155\x6c\x5f\x69\x64\160\x5f\141\x74\164\162\x32\137\156\x61\x6d\145"]["\x23\x76\x61\154\x75\145"];
+    $QC = $form["\x6d\151\x6e\151\157\162\141\x6e\147\145\x5f\163\141\155\x6c\x5f\141\164\x74\162\63\x5f\156\141\x6d\145"]["\43\x76\141\x6c\165\145"];
+    $rl = $form["\155\x69\156\151\x6f\x72\141\156\x67\x65\137\x73\x61\155\x6c\x5f\x69\x64\x70\137\141\164\x74\x72\x33\137\156\141\155\145"]["\x23\166\141\154\165\x65"];
+    $WY = $form["\155\151\x6e\x69\157\162\x61\x6e\x67\145\137\163\141\155\x6c\137\141\x74\164\162\x34\x5f\156\141\x6d\x65"]["\x23\x76\141\x6c\x75\x65"];
+    $yq = $form["\155\151\156\x69\x6f\162\141\156\147\145\137\163\141\x6d\154\137\x69\x64\160\x5f\141\x74\x74\162\64\x5f\156\x61\x6d\x65"]["\43\166\141\x6c\165\x65"];
+    $Sd = $form["\x6d\x69\156\x69\157\162\141\x6e\x67\x65\137\x73\141\x6d\154\x5f\x61\x74\164\162\65\137\156\141\155\145"]["\43\x76\x61\154\165\145"];
+    $gt = $form["\155\x69\156\151\157\162\141\156\147\145\137\163\x61\x6d\154\137\151\x64\160\137\x61\164\x74\x72\x35\x5f\156\141\155\145"]["\43\x76\141\154\x75\x65"];
+    $fy = user_roles($TQ = TRUE);
+    $bG = $form["\x6d\151\x6e\151\x6f\162\x61\156\147\x65\x5f\x73\x61\155\154\137\141\143\x63\157\x75\x6e\x74\137\165\x73\145\162\x6e\x61\155\145\x5f\142\x79"]["\43\166\141\154\x75\145"];
+    $Kz = $form["\155\x69\156\151\x6f\x72\x61\156\147\145\x5f\163\141\155\154\x5f\165\163\x65\x72\156\x61\155\145\137\141\x74\x74\162\151\x62\x75\164\x65"]["\43\x76\x61\154\165\145"];
+    $fa = $form["\155\151\156\x69\157\x72\x61\156\x67\145\137\163\141\155\154\x5f\x65\155\141\151\154\x5f\x61\164\164\162\151\x62\x75\x74\x65"]["\43\x76\x61\x6c\x75\145"];
+    $HW = $form["\155\x69\x6e\151\x6f\162\141\x6e\147\145\137\163\141\155\x6c\137\x64\151\x73\141\x62\x6c\145\x5f\162\x6f\x6c\x65\137\x75\160\144\x61\x74\145"]["\43\x76\141\154\165\145"];
+    $XU = $form["\155\151\156\x69\157\162\141\x6e\x67\x65\x5f\x73\x61\155\x6c\x5f\x64\x69\163\141\x62\154\145\x5f\141\165\x74\157\143\162\145\x61\164\x65\137\x75\163\x65\162\163"]["\x23\x76\141\x6c\165\x65"];
+    $zr = $form["\x6d\x69\x6e\151\x6f\162\x61\x6e\x67\x65\137\163\x61\x6d\154\x5f\x64\145\x66\141\x75\154\x74\x5f\x6d\141\x70\160\151\156\x67"]["\43\x76\141\x6c\x75\x65"];
+    $Ha = array_key_exists("\x75\163\x65\x72\137\160\162\157\146\x69\154\x65\x5f\x61\164\164\x72\137\156\x61\155\x65", $_POST) ? $_POST["\x75\x73\x65\x72\137\160\162\157\x66\151\x6c\145\x5f\x61\164\x74\x72\x5f\x6e\x61\155\x65"] : array();
+    $I7 = array_key_exists("\x75\163\x65\162\137\x70\x72\x6f\x66\151\x6c\145\137\x61\164\x74\162\137\x76\141\154\165\145", $_POST) ? $_POST["\x75\163\145\x72\x5f\160\x72\157\x66\151\x6c\145\137\x61\x74\164\x72\x5f\166\141\154\165\145"] : array();
+    $p1 = array();
+    foreach ($Ha as $aC => $uo) {
+        if (!(!empty(trim($uo)) && !empty(trim($I7[$aC])))) {
+            goto i_;
         }
-            
-            $user_sp_role_names = json_encode($user_sp_role_names);
-            variable_set('miniorange_saml_sp_role_names',$user_sp_role_names);
-
-            variable_set('rolemap',$rolemap);
-
-            variable_set('miniorange_saml_default_role', $mrole[$default_mapping]);
-      }
-      else
-      {
-          foreach($mrole as $key => $value)
-          {
-              $rolelabel = str_replace(' ','',$value);
-              variable_set('miniorange_saml_role_' . $rolelabel,'');
-          }
-          variable_set('rolemap','');
-          variable_set('miniorange_saml_default_role', $mrole[2]);
-      }
-
-      //Custom Login/Logout Url
-        $url_array = array();
-        $role_class = array_key_exists('role_class', $_POST) ? $_POST['role_class'] : array();
-        $login_url = array_key_exists('login_url', $_POST) ? $_POST['login_url'] : array();
-        $logout_url = array_key_exists('logout_url', $_POST) ? $_POST['logout_url'] : array();
-
-        foreach($login_url as $key => $value){
-          variable_set(str_replace(' ','',$role_class[$key] . '_sin'),$value);
-          variable_set(str_replace(' ','',$role_class[$key] . '_sout') ,$logout_url[$key]);
+        $dY = trim($uo);
+        $lf = trim($I7[$aC]);
+        $p1[$dY] = $lf;
+        i_:
+        Wg:
+    }
+    Gi:
+    $p1 = json_encode($p1);
+    if ($hc == 1) {
+        goto J7;
+    }
+    $hc = FALSE;
+    goto VQ;
+    J7:
+    $hc = TRUE;
+    VQ:
+    if ($XU == 1) {
+        goto K0;
+    }
+    $XU = FALSE;
+    goto s7;
+    K0:
+    $XU = TRUE;
+    s7:
+    if ($HW == 1) {
+        goto Oq;
+    }
+    $HW = FALSE;
+    goto kT;
+    Oq:
+    $HW = TRUE;
+    kT:
+    variable_set("\155\x69\156\151\x6f\162\141\x6e\147\145\137\163\141\155\154\137\x65\x6e\x61\142\154\x65\x5f\x72\x6f\154\x65\x6d\141\160\x70\151\156\x67", $hc);
+    variable_set("\x6d\x69\156\151\x6f\x72\x61\x6e\x67\x65\x5f\163\x61\155\x6c\137\x69\x64\160\137\x61\164\x74\x72\x31\x5f\x6e\x61\155\x65", $ux);
+    variable_set("\155\151\x6e\x69\x6f\162\141\156\147\145\137\163\x61\155\x6c\137\x61\x74\x74\162\62\x5f\x6e\x61\x6d\x65", $lK);
+    variable_set("\155\x69\156\x69\x6f\x72\x61\156\x67\145\x5f\163\x61\x6d\x6c\137\151\144\x70\x5f\141\x74\164\162\62\x5f\156\x61\155\145", $Sq);
+    variable_set("\x6d\x69\156\151\x6f\162\141\x6e\147\x65\137\163\x61\155\x6c\137\141\164\164\x72\x33\x5f\156\141\x6d\x65", $QC);
+    variable_set("\155\151\x6e\x69\x6f\x72\141\x6e\147\145\137\x73\x61\155\154\137\151\x64\x70\x5f\x61\x74\164\x72\63\137\x6e\x61\155\145", $rl);
+    variable_set("\x6d\151\156\x69\157\162\141\156\147\145\x5f\x73\141\155\x6c\137\141\x74\164\x72\64\x5f\x6e\141\155\x65", $WY);
+    variable_set("\155\151\x6e\x69\x6f\x72\141\156\147\145\137\x73\x61\155\154\137\x69\144\x70\x5f\141\x74\x74\162\x34\137\156\x61\x6d\x65", $yq);
+    variable_set("\155\151\x6e\x69\157\162\141\x6e\147\145\x5f\x73\x61\155\154\137\x61\164\164\162\x35\x5f\156\x61\x6d\145", $Sd);
+    variable_set("\155\151\156\x69\x6f\x72\141\156\x67\x65\x5f\163\x61\155\154\137\151\144\160\x5f\141\x74\164\x72\65\137\x6e\x61\x6d\x65", $gt);
+    variable_set("\155\x69\x6e\151\157\x72\141\x6e\x67\x65\x5f\x73\141\x6d\154\x5f\163\x70\x5f\x75\163\145\x72\137\141\x74\x74\162\151\x62\x75\164\145\x73", $p1);
+    if ($hc) {
+        goto hs;
+    }
+    foreach ($fy as $aC => $uo) {
+        $zU = str_replace("\x20", '', $uo);
+        variable_set("\155\151\156\151\x6f\162\141\x6e\x67\145\x5f\163\141\x6d\x6c\137\162\x6f\x6c\x65\x5f" . $zU, '');
+        tz:
+    }
+    DI:
+    variable_set("\162\157\x6c\145\x6d\x61\160", '');
+    variable_set("\x6d\151\x6e\151\157\162\x61\156\147\145\x5f\163\141\x6d\x6c\x5f\x64\145\x66\x61\165\x6c\164\x5f\162\x6f\154\145", $fy[2]);
+    goto LK;
+    hs:
+    $gw = array();
+    $Z1 = array_key_exists("\165\163\145\x72\137\x73\160\137\x72\157\x6c\145\137\x6e\x61\155\x65", $_POST) ? $_POST["\165\163\145\162\x5f\163\160\x5f\x72\157\x6c\145\137\x6e\141\x6d\145"] : array();
+    $lr = array_key_exists("\x75\x73\145\x72\137\151\144\160\x5f\x72\x6f\x6c\145\x5f\x6e\141\155\x65", $_POST) ? $_POST["\x75\163\145\162\x5f\x69\144\x70\x5f\x72\x6f\x6c\145\137\x6e\141\x6d\x65"] : array();
+    foreach ($Z1 as $aC => $uo) {
+        $zU = str_replace("\40", '', $uo);
+        $sP = $lr[$aC];
+        variable_set("\155\151\156\151\x6f\162\141\156\x67\x65\x5f\x73\x61\x6d\x6c\x5f\x72\x6f\x6c\145\x5f" . $zU, $sP);
+        $Gy = explode("\x3b", $sP);
+        foreach ($Gy as $Gn) {
+            $gw[$Gn] = $uo;
+            TT:
         }
-          $role_class = json_encode($role_class);
-          variable_set('miniorange_saml_log_url_class',$role_class);
-
-          variable_set('miniorange_saml_login_by', $login_by);
-          variable_set('miniorange_saml_username_attribute', $username_attribute);
-          variable_set('miniorange_saml_email_attribute', $email_attribute);
-          variable_set('miniorange_saml_disable_autocreate_users', $enable_autocreate_users);
-          variable_set('miniorange_saml_disable_role_update',$disable_role_update);
-
-          drupal_set_message(t('Signin Settings successfully saved'));
-  }
-
-/**
- * Send support query.
- */
+        oj:
+        X3:
+    }
+    Oc:
+    $Z1 = json_encode($Z1);
+    variable_set("\x6d\151\156\151\157\x72\141\156\147\x65\137\163\x61\155\154\x5f\x73\x70\137\162\157\x6c\145\x5f\x6e\141\x6d\145\x73", $Z1);
+    variable_set("\162\157\154\145\155\x61\160", $gw);
+    variable_set("\155\x69\156\x69\157\x72\x61\156\x67\x65\137\163\x61\155\154\137\x64\x65\x66\x61\165\154\164\137\162\157\x6c\145", $fy[$zr]);
+    LK:
+    $o7 = array();
+    $pw = array_key_exists("\x72\157\154\x65\x5f\143\154\141\x73\163", $_POST) ? $_POST["\162\x6f\x6c\145\137\143\154\x61\163\163"] : array();
+    $Lb = array_key_exists("\x6c\157\x67\x69\x6e\x5f\x75\162\154", $_POST) ? $_POST["\x6c\157\x67\x69\x6e\x5f\x75\162\x6c"] : array();
+    $WJ = array_key_exists("\x6c\157\x67\x6f\165\x74\137\x75\x72\x6c", $_POST) ? $_POST["\154\x6f\x67\x6f\x75\164\x5f\165\162\x6c"] : array();
+    foreach ($Lb as $aC => $uo) {
+        variable_set(str_replace("\x20", '', $pw[$aC] . "\x5f\163\151\156"), $uo);
+        variable_set(str_replace("\40", '', $pw[$aC] . "\x5f\163\157\x75\164"), $WJ[$aC]);
+        DK:
+    }
+    bW:
+    $pw = json_encode($pw);
+    variable_set("\x6d\x69\x6e\x69\x6f\x72\141\x6e\x67\x65\x5f\163\141\155\x6c\x5f\x6c\157\x67\x5f\x75\162\x6c\137\x63\x6c\141\163\x73", $pw);
+    variable_set("\155\x69\156\x69\157\x72\141\x6e\147\x65\x5f\x73\x61\155\x6c\137\154\x6f\147\151\156\x5f\x62\x79", $bG);
+    variable_set("\155\x69\156\151\157\x72\x61\156\147\x65\137\163\141\x6d\x6c\x5f\x75\x73\145\162\x6e\x61\155\x65\137\141\164\164\162\151\142\165\x74\x65", $Kz);
+    variable_set("\x6d\x69\156\x69\x6f\x72\141\x6e\147\145\x5f\163\141\155\154\137\145\x6d\141\x69\x6c\137\141\164\x74\x72\151\x62\x75\164\145", $fa);
+    variable_set("\155\x69\156\x69\x6f\162\x61\156\x67\145\137\163\x61\x6d\x6c\x5f\x64\x69\163\x61\x62\x6c\145\137\141\x75\164\x6f\143\162\x65\x61\164\145\137\165\163\x65\162\163", $XU);
+    variable_set("\x6d\x69\156\x69\157\x72\141\156\147\145\137\x73\x61\155\x6c\137\144\151\x73\x61\142\154\x65\137\162\x6f\x6c\x65\137\x75\x70\144\x61\164\145", $HW);
+    drupal_set_message(t("\x53\x69\147\156\x69\156\x20\x53\x65\x74\x74\x69\156\x67\x73\x20\x73\x75\x63\143\145\163\x73\146\165\154\x6c\171\x20\163\x61\x76\x65\x64"));
+}
 function miniorange_saml_idp_send_query(&$form, $form_state)
 {
-    $email = $form['miniorange_saml_email_address']['#value'];
-    $phone = $form['miniorange_saml_phone_number']['#value'];
-    $query = $form['miniorange_saml_support_query']['#value'];
-    Utilities::send_query($email, $phone, $query);
+    $k6 = $form["\155\151\x6e\x69\157\x72\141\x6e\x67\x65\x5f\163\141\155\154\137\x65\155\x61\x69\x6c\137\x61\x64\144\x72\x65\163\163"]["\x23\x76\x61\154\165\x65"];
+    $GC = $form["\x6d\x69\156\x69\157\162\x61\156\147\x65\x5f\163\x61\x6d\154\137\160\x68\x6f\156\x65\137\x6e\x75\x6d\x62\x65\x72"]["\43\x76\141\154\165\145"];
+    $rD = $form["\x6d\151\x6e\151\x6f\x72\x61\x6e\x67\x65\x5f\x73\x61\155\x6c\137\163\x75\x70\x70\x6f\162\x74\x5f\161\165\145\162\x79"]["\43\x76\141\x6c\165\145"];
+    Utilities::send_query($k6, $GC, $rD);
 }
-function clear_attr_list(&$form,$form_state){
-    variable_del('miniorange_saml_attrs_list');
-    variable_del('miniorange_saml_email_id_value');
+function clear_attr_list(&$form, $form_state)
+{
+    variable_del("\155\x69\156\x69\157\162\141\x6e\x67\145\137\163\141\x6d\x6c\137\141\164\164\x72\163\137\x6c\x69\x73\164");
+    variable_del("\x6d\151\156\x69\157\x72\141\x6e\147\x65\x5f\163\x61\x6d\154\137\145\155\x61\x69\x6c\x5f\151\x64\137\166\x61\x6c\165\x65");
     Utilities::show_attr_list_from_idp($form, $form_state);
 }

@@ -1,159 +1,70 @@
 <?php
-/**
- * @file
- * Installation file for miniOrange SAML Module.
- */
-
-/**
- * Implements hook_uninstall().
- */
-
-function miniorange_saml_uninstall() {
-  variable_del('miniorange_saml_status');
-  variable_del('miniorange_config_status');
-  variable_del('miniorange_saml_customer_admin_email');
-  variable_del('miniorange_saml_customer_admin_phone');
-  variable_del('miniorange_saml_customer_admin_token');
-  variable_del('miniorange_saml_customer_id');
-  variable_del('miniorange_saml_customer_api_key');
-  variable_del('miniorange_saml_idp_name');
-  variable_del('miniorange_saml_sp_issuer');
-  variable_del('miniorange_saml_idp_issuer');
-  variable_del('miniorange_saml_idp_login_url');
-  variable_del('miniorange_saml_idp_logout_url');
-  variable_del('miniorange_saml_idp_x509_certificate');
-  variable_del('miniorange_saml_enable_login');
-  variable_del('miniorange_saml_auto_redirect_to_idp');
-  variable_del('miniorange_saml_force_auth');
-  variable_del('miniorange_saml_enable_backdoor');
-  variable_del('miniorange_saml_license_key');
-  variable_del('miniorange_saml_default_relaystate');
-  variable_del('miniorange_saml_request_signed');
-  variable_del('miniorange_saml_http_binding');
-  variable_del('miniorange_saml_attrs_list');
-  variable_del('miniorange_saml_fetch_metadata_time_intervals');
-  variable_del('security_signature_algorithm');
-  variable_del('miniorange_saml_meta_data_url');
-  variable_del('miniorange_saml_sp_role_names');
-  variable_del('miniorange_saml_log_url_class');
-
-  if(db_table_exists('miniorange_saml_idp_list')){
-      drupal_uninstall_schema('miniorange_saml_idp_list');
-  }
-}
 
 
-/**
- * Implements hook_install().
- */
-
-function miniorange_saml_install() {
-  variable_set('miniorange_saml_email_attribute', 'NameID');
-  variable_set('miniorange_saml_username_attribute', 'NameID');
-  variable_set('security_signature_algorithm', 'RSA_SHA256');
-  if(!db_table_exists('miniorange_saml_idp_list')){
-      drupal_install_schema('miniorange_saml');
-  }
-}
-
-function miniorange_saml_schema() {
-  $schema['miniorange_saml_idp_list'] = array(
-    'description' => t('SP Configuration Storage'),
-    'fields' => array(
-	    'id' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-	    ),
-	    'mo_idp_name' => array(
-        'type' => 'text',
-        'not null' => TRUE,
-      ),
-	    'mo_idp_issuer' => array(
-        'type' => 'varchar',
-        'length' => 254,
-        'not null' => TRUE,
-      ),
-	    'mo_idp_sso_url' => array(
-        'type' => 'varchar',
-        'length' => 254,
-        'not null' => TRUE,
-      ),
-	    'mo_idp_cert' => array(
-        'type' => 'varchar',
-        'length' => 4096,
-		    'default' => 'FALSE',
-        'not null' => NULL,
-      ),
-	    'mo_idp_nameid_format' => array(
-        'type' => 'varchar',
-        'length' => 254,
-        'not null' => TRUE,
-      ),
-	    // 'mo_idp_default_relayState' => array(
-      // 'type' => 'varchar',
-      // 'length' => 254,
-      // 'not null' => TRUE,
-      // ),
-  	  'mo_idp_request_signed' => array(
-        'type' => 'varchar',
-        'length' => 20,
-		    'default' => 'FALSE',
-		    'not null' => TRUE,
-	    ),
-	    'mo_idp_http_binding_sso' => array(
-        'type' => 'varchar',
-        'length' => 20,
-		    'default' => 'FALSE',
-		    'not null' => TRUE,
-	    ),
-	    'mo_idp_http_binding_slo' => array(
-        'type' => 'varchar',
-        'length' => 20,
-		    'default' => 'FALSE',
-		    'not null' => TRUE,
-	    ),
-	    'mo_idp_slo_url' => array(
-        'type' => 'varchar',
-        'length' => 254,
-        'not null' => TRUE,
-		  ),
-		  'miniorange_saml_fetch_metadata_time_intervals' => array(
-        'type' => 'varchar',
-        'length' => 20,
-        'default' => 'FALSE',
- 		    'not null' => TRUE,
-      ),
-	    'miniorange_saml_meta_data_url' => array(
-	      'type' => 'varchar',
-        'length' => 254,
-        'not null' => TRUE,
-      ),
-      'security_signature_algorithm' => array(
-      	 'type' => 'varchar',
-         'length' => 20,
-         'not null' => TRUE,
-      ),
-	  ),
-	  'primary key' => array('id'),
-  );
-  return $schema;
-}
-
-
-/**
- * Implements hook_disable().
- */
-
- function miniorange_saml_disable() {
-    if(variable_get('miniorange_saml_license_key',NULL) != NULL){
-        $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-        $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
-        $customer = new MiniorangeSAMLCustomer($username,$phone,NULL,NULL);
-        $response = json_decode($customer->updateStatus());
-
-	      if($response->status == 'SUCCESS')
-		      variable_del('miniorange_saml_license_key');
+function miniorange_saml_uninstall()
+{
+    variable_del("\155\x69\x6e\x69\x6f\162\x61\x6e\x67\x65\x5f\163\141\x6d\x6c\x5f\163\x74\x61\x74\x75\163");
+    variable_del("\x6d\151\x6e\x69\157\x72\141\x6e\x67\145\137\143\157\156\x66\151\x67\137\163\x74\141\x74\165\163");
+    variable_del("\155\x69\x6e\x69\x6f\162\141\156\147\x65\x5f\163\141\x6d\154\x5f\x63\165\163\x74\157\x6d\145\x72\x5f\x61\144\x6d\151\156\x5f\145\x6d\141\x69\154");
+    variable_del("\x6d\151\x6e\151\x6f\x72\x61\156\x67\145\x5f\163\141\x6d\154\137\x63\165\163\164\x6f\x6d\x65\x72\137\141\x64\155\151\156\137\160\150\157\156\x65");
+    variable_del("\155\151\156\x69\157\162\141\x6e\147\x65\137\163\x61\155\154\x5f\x63\165\x73\x74\x6f\x6d\x65\162\x5f\x61\144\155\151\x6e\137\x74\x6f\x6b\x65\x6e");
+    variable_del("\155\151\x6e\x69\157\x72\141\156\x67\145\137\163\x61\155\x6c\137\143\x75\163\164\x6f\x6d\145\162\x5f\151\144");
+    variable_del("\x6d\x69\156\151\157\x72\x61\x6e\x67\x65\137\163\x61\x6d\x6c\x5f\143\x75\163\164\157\155\x65\162\137\141\x70\151\x5f\x6b\x65\171");
+    variable_del("\x6d\151\x6e\x69\157\x72\x61\x6e\147\145\137\x73\x61\x6d\154\x5f\151\144\x70\x5f\x6e\x61\155\145");
+    variable_del("\155\151\156\x69\157\162\141\156\147\145\x5f\x73\x61\155\x6c\x5f\x73\160\x5f\151\163\x73\x75\145\162");
+    variable_del("\x6d\x69\156\x69\x6f\x72\141\156\x67\145\x5f\x73\141\x6d\154\137\151\144\160\137\x69\163\x73\x75\145\162");
+    variable_del("\155\151\156\151\157\162\141\x6e\x67\145\x5f\x73\141\155\x6c\x5f\151\144\160\x5f\x6c\x6f\x67\151\x6e\x5f\x75\162\x6c");
+    variable_del("\155\151\156\x69\157\x72\x61\156\147\x65\137\x73\x61\x6d\154\x5f\x69\144\160\137\x6c\157\147\x6f\165\164\137\x75\x72\154");
+    variable_del("\155\x69\x6e\x69\157\162\x61\x6e\147\x65\x5f\163\x61\155\154\x5f\x69\x64\160\x5f\170\65\x30\71\x5f\143\x65\x72\164\151\146\151\x63\141\164\145");
+    variable_del("\155\151\156\151\157\x72\141\156\147\145\x5f\163\x61\155\x6c\x5f\145\156\141\x62\154\145\x5f\x6c\157\x67\x69\x6e");
+    variable_del("\155\151\156\x69\157\162\141\x6e\x67\x65\137\x73\x61\x6d\154\x5f\141\165\164\157\x5f\162\x65\x64\x69\x72\x65\143\164\x5f\164\157\137\x69\x64\x70");
+    variable_del("\x6d\151\x6e\x69\x6f\x72\141\x6e\147\145\137\163\x61\x6d\x6c\x5f\x66\157\x72\143\x65\x5f\141\165\164\150");
+    variable_del("\x6d\x69\156\151\x6f\162\x61\156\x67\145\x5f\x73\141\x6d\154\x5f\x65\156\x61\142\x6c\x65\x5f\x62\x61\143\153\144\157\x6f\162");
+    variable_del("\155\151\x6e\151\x6f\162\141\156\147\145\x5f\x73\x61\x6d\x6c\137\154\x69\x63\145\x6e\163\x65\137\x6b\145\x79");
+    variable_del("\x6d\151\x6e\x69\157\162\x61\156\147\145\x5f\163\x61\x6d\x6c\x5f\x64\145\x66\141\x75\154\164\x5f\x72\145\x6c\x61\171\x73\164\141\x74\x65");
+    variable_del("\155\x69\156\x69\157\162\141\156\147\145\137\163\x61\x6d\x6c\x5f\162\x65\x71\165\145\x73\x74\x5f\163\x69\147\x6e\x65\x64");
+    variable_del("\x6d\151\156\151\x6f\162\141\156\x67\x65\x5f\163\141\155\x6c\137\150\164\164\x70\x5f\x62\x69\156\x64\151\156\x67");
+    variable_del("\155\151\156\151\x6f\x72\141\x6e\147\x65\137\x73\141\155\x6c\137\141\164\164\x72\163\137\154\151\163\x74");
+    variable_del("\x6d\x69\x6e\151\x6f\x72\141\x6e\147\x65\137\163\141\155\x6c\x5f\x66\145\164\x63\x68\x5f\x6d\x65\164\x61\x64\141\164\141\x5f\x74\x69\155\x65\137\151\x6e\164\145\x72\x76\141\x6c\x73");
+    variable_del("\163\x65\143\x75\162\x69\164\x79\137\163\151\147\x6e\141\x74\165\x72\x65\137\x61\154\147\157\x72\151\164\x68\155");
+    variable_del("\155\151\156\151\157\162\x61\x6e\147\145\137\163\x61\155\x6c\x5f\x6d\145\x74\x61\x5f\144\141\x74\x61\x5f\165\162\154");
+    variable_del("\155\151\156\x69\157\x72\x61\x6e\x67\145\137\163\141\155\154\x5f\x73\x70\x5f\162\157\x6c\x65\x5f\156\x61\x6d\145\x73");
+    variable_del("\155\151\156\x69\157\x72\x61\156\147\x65\x5f\163\141\x6d\154\x5f\x6c\x6f\x67\137\165\x72\x6c\x5f\143\x6c\x61\163\x73");
+    if (!db_table_exists("\155\151\x6e\151\157\162\x61\156\147\x65\137\x73\x61\155\154\137\x69\x64\x70\137\154\151\x73\164")) {
+        goto l0;
     }
- }
-?>
+    drupal_uninstall_schema("\155\x69\156\x69\x6f\162\x61\156\147\x65\x5f\163\141\x6d\154\x5f\151\x64\x70\x5f\x6c\x69\x73\164");
+    l0:
+}
+function miniorange_saml_install()
+{
+    variable_set("\155\151\x6e\151\157\162\x61\156\x67\x65\x5f\163\x61\x6d\154\137\145\x6d\x61\151\154\x5f\x61\164\164\162\151\142\x75\164\145", "\116\141\x6d\x65\111\x44");
+    variable_set("\155\x69\x6e\151\157\x72\141\x6e\147\145\137\x73\141\x6d\154\137\165\x73\x65\162\x6e\141\155\x65\137\141\164\164\162\151\142\165\x74\145", "\x4e\141\x6d\145\111\x44");
+    variable_set("\x73\145\143\x75\162\x69\x74\171\137\x73\151\147\x6e\x61\x74\x75\162\x65\137\x61\x6c\147\157\162\x69\x74\x68\x6d", "\122\x53\101\x5f\123\x48\x41\62\x35\66");
+    if (db_table_exists("\155\151\x6e\x69\157\162\141\156\147\145\137\163\141\x6d\154\x5f\151\144\x70\x5f\154\151\x73\164")) {
+        goto VX;
+    }
+    drupal_install_schema("\x6d\x69\x6e\x69\x6f\162\141\156\x67\x65\137\x73\141\x6d\154");
+    VX:
+}
+function miniorange_saml_schema()
+{
+    $LI["\x6d\x69\156\151\157\162\141\156\x67\x65\x5f\163\141\155\x6c\x5f\x69\144\160\137\x6c\151\x73\164"] = array("\x64\145\x73\x63\x72\x69\x70\164\x69\157\x6e" => t("\123\120\x20\x43\x6f\156\146\151\x67\x75\x72\x61\x74\x69\157\156\40\x53\164\x6f\162\x61\x67\x65"), "\x66\x69\x65\x6c\144\163" => array("\151\144" => array("\164\x79\x70\x65" => "\x73\145\162\x69\141\154", "\x75\156\x73\151\x67\x6e\145\144" => TRUE, "\156\x6f\164\40\156\165\x6c\x6c" => TRUE), "\155\x6f\137\151\x64\x70\x5f\x6e\x61\155\145" => array("\164\x79\160\145" => "\x74\145\170\164", "\x6e\157\164\x20\x6e\165\x6c\154" => TRUE), "\x6d\157\x5f\151\144\160\x5f\151\x73\x73\x75\x65\162" => array("\164\x79\160\145" => "\166\141\x72\x63\150\141\x72", "\x6c\145\x6e\x67\x74\x68" => 254, "\x6e\157\x74\x20\x6e\165\x6c\x6c" => TRUE), "\155\x6f\x5f\x69\x64\x70\137\x73\x73\x6f\137\x75\162\154" => array("\x74\x79\160\145" => "\x76\x61\162\x63\x68\x61\x72", "\x6c\145\x6e\147\x74\x68" => 254, "\x6e\x6f\x74\x20\156\x75\x6c\x6c" => TRUE), "\155\157\137\x69\x64\x70\137\x63\x65\162\164" => array("\164\x79\160\x65" => "\166\x61\162\x63\x68\141\162", "\154\x65\156\147\x74\150" => 4096, "\144\145\x66\x61\x75\x6c\x74" => "\106\101\114\123\x45", "\x6e\157\164\x20\156\x75\154\154" => NULL), "\x6d\x6f\x5f\x69\144\160\137\x6e\x61\x6d\145\151\144\x5f\146\x6f\x72\155\141\164" => array("\164\171\x70\x65" => "\166\x61\x72\x63\150\x61\x72", "\x6c\145\x6e\147\x74\x68" => 254, "\156\x6f\164\40\x6e\165\x6c\154" => TRUE), "\x6d\x6f\137\x69\144\x70\137\162\x65\x71\165\x65\x73\x74\x5f\x73\x69\147\x6e\x65\x64" => array("\164\x79\160\x65" => "\x76\141\x72\143\x68\x61\x72", "\x6c\145\x6e\147\x74\150" => 20, "\144\x65\x66\141\165\x6c\164" => "\x46\x41\114\x53\x45", "\156\x6f\x74\x20\156\165\x6c\154" => TRUE), "\x6d\157\x5f\151\x64\160\137\x68\164\x74\160\137\x62\x69\156\x64\x69\156\x67\137\163\163\157" => array("\x74\171\x70\x65" => "\x76\141\162\143\x68\141\162", "\x6c\x65\x6e\x67\x74\x68" => 20, "\144\x65\146\x61\x75\154\x74" => "\x46\x41\114\x53\105", "\156\x6f\x74\x20\x6e\x75\154\x6c" => TRUE), "\155\157\x5f\x69\144\x70\137\x68\x74\164\160\x5f\x62\151\x6e\144\x69\156\147\x5f\x73\x6c\157" => array("\x74\171\160\x65" => "\166\141\162\x63\x68\x61\x72", "\x6c\145\x6e\x67\164\x68" => 20, "\144\145\146\x61\165\154\164" => "\106\x41\x4c\x53\x45", "\x6e\157\x74\40\x6e\x75\154\x6c" => TRUE), "\155\x6f\x5f\151\144\160\x5f\163\154\157\137\165\162\154" => array("\164\171\x70\145" => "\166\x61\x72\x63\x68\141\x72", "\154\145\x6e\x67\x74\150" => 254, "\x6e\x6f\x74\x20\156\165\154\154" => TRUE), "\155\151\x6e\x69\157\162\141\x6e\147\145\x5f\x73\x61\x6d\154\x5f\146\145\x74\x63\150\x5f\x6d\x65\164\141\144\x61\164\x61\137\164\151\x6d\x65\137\151\x6e\164\x65\162\166\141\154\163" => array("\164\x79\x70\145" => "\166\x61\162\x63\x68\x61\x72", "\x6c\145\156\147\164\x68" => 20, "\x64\145\146\141\x75\x6c\x74" => "\x46\101\x4c\123\105", "\x6e\x6f\164\x20\x6e\x75\154\x6c" => TRUE), "\155\x69\x6e\151\157\x72\x61\x6e\x67\145\x5f\163\141\x6d\154\137\x6d\x65\164\141\137\x64\x61\x74\141\x5f\x75\162\154" => array("\x74\171\x70\145" => "\166\141\x72\x63\x68\x61\x72", "\154\x65\x6e\147\x74\150" => 254, "\156\x6f\x74\40\156\165\x6c\x6c" => TRUE), "\x73\145\x63\165\x72\151\164\171\137\x73\151\x67\x6e\141\164\x75\x72\145\x5f\x61\x6c\x67\x6f\x72\x69\164\x68\155" => array("\164\x79\x70\145" => "\166\x61\x72\143\x68\x61\x72", "\154\145\x6e\x67\164\150" => 20, "\156\157\164\x20\x6e\165\154\154" => TRUE)), "\160\162\151\155\141\162\x79\40\153\x65\x79" => array("\x69\x64"));
+    return $LI;
+}
+function miniorange_saml_disable()
+{
+    if (!(variable_get("\x6d\x69\156\151\157\162\141\156\147\145\137\163\141\x6d\154\x5f\x6c\151\x63\145\x6e\163\x65\137\x6b\x65\x79", NULL) != NULL)) {
+        goto MF;
+    }
+    $vy = variable_get("\155\x69\156\x69\x6f\x72\x61\156\x67\x65\137\x73\141\155\x6c\137\x63\165\x73\x74\157\x6d\145\x72\137\x61\144\155\x69\x6e\137\145\x6d\x61\x69\x6c", NULL);
+    $GC = variable_get("\155\x69\156\151\157\x72\141\x6e\147\145\x5f\x73\x61\155\154\x5f\x63\x75\163\x74\x6f\x6d\145\162\137\x61\x64\x6d\x69\156\137\x70\150\157\156\145", NULL);
+    $rZ = new MiniorangeSAMLCustomer($vy, $GC, NULL, NULL);
+    $bz = json_decode($rZ->updateStatus());
+    if (!($bz->status == "\123\x55\103\103\x45\x53\123")) {
+        goto NW;
+    }
+    variable_del("\155\x69\x6e\151\157\x72\x61\156\x67\x65\137\x73\141\155\x6c\137\154\151\143\145\x6e\x73\145\x5f\153\x65\171");
+    NW:
+    MF:
+}

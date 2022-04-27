@@ -1,77 +1,32 @@
 <?php
-/**
- * @file
- * Contains support form for miniOrange SAML Login Module.
- */
 
- /**
- * Showing Support form info.
- */
- function miniorange_saml_support($form, &$form_state)
- {
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-     drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
 
-     $form['header_top_style_2'] = array(
-         '#markup' => '<div class="mo_saml_table_layout_1">
-                       <div class="mo_saml_table_layout mo_saml_container">'
-     );
-
-     $form['markup_1'] = array(
-         '#markup' => '<h3>Support</h3><hr><div><br/>Need any help? Just send us a query so we can help you.<br /><br /></div>',
-  );
-
-  $form['miniorange_saml_email_address'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Email Address'),
-    '#attributes' => array('style' => 'width:65%','placeholder' => 'Enter your email'),
-    '#required' => TRUE,
-  );
-
-  $form['miniorange_saml_phone_number'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Phone number'),
-    '#attributes' => array('style' => 'width:65%','placeholder' => 'Enter your phone number'),
-  );
-
-  $form['miniorange_saml_support_query'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Query'),
-    '#cols' => '10',
-    '#rows' => '5',
-    '#attributes' => array(
-        'style' => 'width:65%',
-        'placeholder' => 'Write your query here'
-    ),
-    '#required' => TRUE,
-    '#resizable' => False,
-  );
-
-  $form['miniorange_saml_support_submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Submit Query'),
-    '#submit' => array('miniorange_saml_send_query'),
-  );
-
-     $form['miniorange_saml_support_note'] = array(
-         '#markup' => '<div>If you want custom features in the module, just drop an email to <a href="mailto:info@xecurify.com">info@xecurify.com</a></div></div></div>'
-     );
-
-  return $form;
-
- }
-
- /* Send support query.*/
-
- function miniorange_saml_send_query($form, &$form_state) {
-    $email = $form['miniorange_saml_email_address']['#value'];
-    $phone = $form['miniorange_saml_phone_number']['#value'];
-    $query = $form['miniorange_saml_support_query']['#value'];
-    $support = new MiniOrangeSamlSupport($email, $phone, $query);
-    $support_response = $support->sendSupportQuery();
-    if($support_response) {
-      drupal_set_message(t('Support query successfully sent'));
-    }else {
-    	drupal_set_message(t('Error sending support query'), 'error');
+function miniorange_saml_support($form, &$form_state)
+{
+    drupal_add_css(drupal_get_path("\x6d\157\144\x75\x6c\x65", "\155\x69\156\151\x6f\162\x61\156\x67\145\137\163\141\x6d\x6c") . "\57\x63\163\x73\x2f\x62\x6f\157\164\163\x74\162\x61\160\56\x6d\151\156\x2e\x63\163\x73", array("\x67\162\x6f\165\160" => CSS_DEFAULT, "\x65\166\145\162\x79\x5f\160\141\147\145" => TRUE));
+    drupal_add_css(drupal_get_path("\155\x6f\x64\x75\x6c\x65", "\155\151\x6e\151\x6f\x72\x61\156\x67\x65\x5f\163\141\155\154") . "\x2f\x63\163\163\57\163\x74\x79\154\x65\x5f\163\145\x74\164\151\x6e\147\163\56\x63\x73\x73", array("\x67\162\157\165\160" => CSS_DEFAULT, "\145\x76\x65\162\x79\x5f\160\x61\147\x65" => TRUE));
+    $form["\150\x65\x61\x64\x65\162\x5f\x74\x6f\x70\x5f\163\x74\x79\154\145\137\x32"] = array("\43\155\x61\162\x6b\x75\x70" => "\x3c\x64\x69\166\40\143\x6c\x61\x73\x73\75\x22\155\x6f\x5f\x73\x61\x6d\154\x5f\164\x61\142\x6c\x65\x5f\154\x61\x79\x6f\165\x74\x5f\x31\x22\76\xd\xa\x20\40\x20\x20\40\x20\x20\40\x20\40\x20\40\x20\40\x20\40\x20\40\x20\x20\x20\x20\40\74\144\x69\x76\x20\x63\x6c\x61\x73\163\x3d\x22\155\157\137\163\141\155\x6c\137\x74\141\x62\x6c\145\137\x6c\141\171\157\165\164\x20\155\x6f\137\x73\141\x6d\154\137\143\157\x6e\164\x61\x69\x6e\145\x72\x22\76");
+    $form["\x6d\x61\162\153\165\x70\x5f\61"] = array("\43\x6d\141\162\x6b\165\160" => "\74\150\63\76\123\165\160\160\157\x72\x74\x3c\x2f\x68\x33\x3e\x3c\150\162\x3e\x3c\144\x69\x76\x3e\74\x62\x72\57\76\116\145\145\144\40\141\x6e\x79\40\x68\x65\x6c\x70\x3f\x20\112\x75\163\x74\40\x73\x65\x6e\x64\40\x75\x73\x20\141\40\161\165\x65\x72\x79\x20\163\x6f\x20\x77\145\x20\143\141\x6e\x20\150\x65\154\160\x20\171\157\165\56\74\142\x72\40\x2f\76\74\142\x72\x20\57\x3e\74\57\144\151\166\76");
+    $form["\155\x69\156\151\x6f\x72\141\x6e\x67\145\137\163\141\x6d\154\x5f\x65\x6d\x61\151\154\137\141\144\x64\x72\145\163\163"] = array("\x23\164\171\x70\145" => "\164\x65\x78\x74\146\151\145\x6c\144", "\43\x74\151\x74\154\x65" => t("\x45\155\x61\151\x6c\40\x41\x64\x64\x72\x65\163\x73"), "\43\141\164\164\162\x69\142\165\164\145\163" => array("\x73\x74\171\x6c\145" => "\x77\x69\144\164\150\72\66\65\45", "\160\x6c\141\x63\145\x68\157\x6c\144\145\162" => "\x45\156\x74\145\162\40\x79\x6f\x75\162\40\x65\155\x61\151\154"), "\x23\162\145\x71\x75\151\x72\145\144" => TRUE);
+    $form["\155\151\x6e\x69\157\x72\141\x6e\x67\x65\x5f\163\141\x6d\154\x5f\x70\150\x6f\x6e\145\137\x6e\165\155\142\x65\x72"] = array("\43\x74\171\160\x65" => "\x74\x65\170\x74\146\x69\145\x6c\x64", "\43\x74\x69\x74\154\145" => t("\x50\150\x6f\x6e\x65\40\x6e\165\x6d\142\145\162"), "\43\x61\x74\x74\x72\151\142\x75\164\145\x73" => array("\x73\x74\171\x6c\x65" => "\167\x69\x64\x74\150\x3a\x36\x35\45", "\160\x6c\x61\143\x65\150\157\x6c\144\145\162" => "\x45\x6e\164\145\162\40\171\157\x75\162\40\x70\150\x6f\x6e\x65\x20\156\165\x6d\142\x65\162"));
+    $form["\x6d\151\x6e\x69\x6f\x72\x61\156\x67\145\x5f\x73\x61\155\x6c\x5f\x73\x75\160\x70\157\162\164\x5f\x71\165\x65\162\x79"] = array("\43\x74\x79\x70\x65" => "\164\145\x78\164\x61\x72\x65\x61", "\x23\164\151\164\x6c\145" => t("\x51\165\x65\162\x79"), "\x23\143\157\x6c\x73" => "\61\x30", "\43\x72\157\167\163" => "\65", "\43\x61\x74\164\162\x69\x62\x75\164\x65\x73" => array("\163\164\171\x6c\145" => "\x77\x69\144\164\150\x3a\x36\x35\45", "\x70\154\141\x63\x65\150\157\x6c\144\x65\x72" => "\127\162\x69\x74\x65\40\x79\157\165\x72\x20\161\x75\x65\162\x79\x20\150\x65\162\x65"), "\x23\162\145\x71\165\x69\162\145\x64" => TRUE, "\x23\x72\145\163\x69\172\141\x62\154\145" => False);
+    $form["\155\x69\x6e\151\x6f\162\141\x6e\147\x65\137\x73\x61\155\154\137\x73\165\x70\160\x6f\x72\x74\137\163\x75\142\x6d\151\164"] = array("\43\x74\x79\160\145" => "\x73\x75\142\155\x69\x74", "\x23\166\141\154\x75\x65" => t("\123\x75\142\x6d\151\x74\x20\121\165\145\162\171"), "\x23\163\x75\x62\x6d\x69\x74" => array("\155\x69\x6e\x69\157\162\x61\x6e\x67\145\x5f\x73\141\x6d\x6c\137\163\145\156\x64\x5f\x71\165\145\162\171"));
+    $form["\x6d\151\x6e\x69\x6f\162\141\x6e\x67\145\x5f\163\x61\155\154\x5f\x73\x75\x70\x70\157\162\164\137\156\157\164\x65"] = array("\x23\x6d\141\162\153\x75\x70" => "\x3c\x64\x69\x76\x3e\x49\146\40\171\157\165\x20\167\141\x6e\164\40\x63\165\163\164\157\155\40\x66\145\141\x74\165\x72\145\x73\40\x69\x6e\40\x74\x68\145\40\x6d\x6f\x64\x75\x6c\x65\x2c\x20\x6a\x75\163\164\40\x64\162\x6f\x70\40\x61\x6e\x20\x65\x6d\x61\151\x6c\x20\164\x6f\40\74\141\x20\x68\162\x65\146\x3d\42\x6d\x61\x69\x6c\x74\157\x3a\x69\x6e\x66\x6f\100\170\x65\x63\165\x72\x69\x66\x79\56\x63\x6f\155\x22\76\x69\x6e\x66\157\100\x78\x65\143\165\162\151\x66\x79\x2e\x63\157\155\74\57\141\76\74\57\x64\x69\166\76\x3c\x2f\144\151\166\x3e\x3c\x2f\144\x69\x76\76");
+    return $form;
+}
+function miniorange_saml_send_query($form, &$form_state)
+{
+    $k6 = $form["\155\x69\x6e\x69\157\162\141\156\x67\x65\137\163\141\155\x6c\x5f\x65\x6d\141\x69\154\137\141\144\144\162\145\x73\x73"]["\43\x76\x61\154\165\145"];
+    $GC = $form["\155\151\x6e\151\157\162\141\156\147\x65\x5f\163\141\x6d\154\x5f\160\x68\x6f\156\x65\137\156\165\x6d\142\x65\162"]["\43\166\x61\154\x75\x65"];
+    $rD = $form["\x6d\151\x6e\151\x6f\162\141\x6e\147\145\137\x73\x61\155\154\x5f\x73\x75\160\x70\157\162\164\137\161\x75\145\162\x79"]["\43\x76\141\154\x75\145"];
+    $xu = new MiniOrangeSamlSupport($k6, $GC, $rD);
+    $eS = $xu->sendSupportQuery();
+    if ($eS) {
+        goto wu;
     }
- }
+    drupal_set_message(t("\105\x72\162\x6f\x72\x20\x73\145\156\144\151\156\147\x20\163\165\160\x70\x6f\x72\164\40\161\x75\x65\162\x79"), "\145\x72\x72\x6f\162");
+    goto v0;
+    wu:
+    drupal_set_message(t("\x53\165\160\x70\157\162\x74\40\161\x75\145\x72\171\x20\x73\165\143\x63\145\x73\163\146\165\154\x6c\171\40\x73\x65\156\x74"));
+    v0:
+}

@@ -1,43 +1,25 @@
 <?php
-/**
- * @package    miniOrange
- * @author	   miniOrange Security Software Pvt. Ltd.
- * @license    GNU/GPLv3
- * @copyright  Copyright 2015 miniOrange. All Rights Reserved.
- *
- *
- * This file is part of miniOrange SAML plugin.
- */
-
-class AESEncryption {
-	/**
-	* @param string $data - the key=value pairs separated with & 
-	* @return string
-	*/
-	public static function encrypt_data($data, $key) {
-		$key    = openssl_digest($key, 'sha256');
-		$method = 'AES-128-CBC';
-		$ivSize = openssl_cipher_iv_length($method);
-		$iv     = openssl_random_pseudo_bytes($ivSize);
-		$strCrypt = openssl_encrypt ($data, $method, $key,OPENSSL_RAW_DATA||OPENSSL_ZERO_PADDING, $iv);
-		return base64_encode($iv.$strCrypt);
-	}
 
 
-	/**
-	* @param string $data - crypt response from Sagepay
-	* @return string
-	*/
-	public static function decrypt_data($data, $key, $method = 'AES-128-CBC') {
-		$strIn = base64_decode($data);
-		$key    = openssl_digest($key, 'sha256');
-		$ivSize = openssl_cipher_iv_length($method);
-		$iv     = substr($strIn,0,$ivSize);
-		$data   = substr($strIn,$ivSize);
-		$clear  = openssl_decrypt ($data, $method, $key, OPENSSL_RAW_DATA||OPENSSL_ZERO_PADDING, $iv);
-
-		return $clear;
-	}
-
+class AESEncryption
+{
+    public static function encrypt_data($TG, $aC)
+    {
+        $aC = openssl_digest($aC, "\x73\150\141\x32\x35\66");
+        $Ub = "\101\105\123\55\x31\62\x38\x2d\103\x42\x43";
+        $IK = openssl_cipher_iv_length($Ub);
+        $VV = openssl_random_pseudo_bytes($IK);
+        $SS = openssl_encrypt($TG, $Ub, $aC, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $VV);
+        return base64_encode($VV . $SS);
+    }
+    public static function decrypt_data($TG, $aC, $Ub = "\x41\x45\123\55\61\62\x38\x2d\x43\102\x43")
+    {
+        $Lw = base64_decode($TG);
+        $aC = openssl_digest($aC, "\x73\x68\x61\62\x35\x36");
+        $IK = openssl_cipher_iv_length($Ub);
+        $VV = substr($Lw, 0, $IK);
+        $TG = substr($Lw, $IK);
+        $Ch = openssl_decrypt($TG, $Ub, $aC, OPENSSL_RAW_DATA || OPENSSL_ZERO_PADDING, $VV);
+        return $Ch;
+    }
 }
-?>

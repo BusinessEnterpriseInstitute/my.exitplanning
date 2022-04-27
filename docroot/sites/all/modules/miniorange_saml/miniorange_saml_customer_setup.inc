@@ -1,514 +1,334 @@
 <?php
-/**
- * @file
- * Contains form for customer setup.
- */
-/**
- * Customer setup form().
- */
+
+
 function miniorange_saml_customer_setup($form, &$form_state)
 {
     global $base_url;
-    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-
-    $current_status = variable_get('miniorange_saml_status', '');
-
-  if ($current_status == 'PLUGIN_CONFIGURATION' && variable_get('miniorange_saml_license_key',NULL) == NULL)
-  {
-
-      $form['header_top_style_2'] = array(
-	  	'#markup' => '<div class="mo_saml_table_layout_1">
-	  					<div class="mo_saml_table_layout mo_saml_container">'
-	  );
-
-    $form['miniorange_saml_license_key'] = array(
-      '#type' => 'textfield',
-      '#title' => t('License Key'),
-        '#attributes' => array('style' => 'width:55%','placeholder' => 'Enter your license key to activate the module'),
-    );
-
-    $form['miniorange_saml_customer_validate_license_button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Activate License'),
-      '#submit' => array('miniorange_saml_validate_license_submit'),
-    );
-
-	$form['miniorange_saml_customer_setup_back'] = array(
-      '#type' => 'submit',
-      '#value' => t('Back'),
-      '#submit' => array('miniorange_saml_back'),
-    );
-
-      $form['miniorange_saml_support_div_end'] = array(
-          '#markup' => '</div>',
-      );
-
-      Utilities::AddsupportTab( $form, $form_state);
-
+    drupal_add_css(drupal_get_path("\155\x6f\x64\165\x6c\145", "\155\151\x6e\151\x6f\x72\x61\156\x67\x65\x5f\x73\141\x6d\154") . "\x2f\143\163\163\57\x62\157\157\164\x73\x74\162\141\160\56\155\x69\156\56\x63\163\x73", array("\147\162\x6f\x75\x70" => CSS_DEFAULT, "\x65\x76\x65\162\x79\x5f\x70\x61\147\x65" => TRUE));
+    drupal_add_css(drupal_get_path("\155\x6f\144\165\154\145", "\x6d\151\156\151\157\x72\141\x6e\x67\145\x5f\163\x61\155\x6c") . "\x2f\143\x73\163\57\163\x74\x79\x6c\145\x5f\x73\x65\x74\164\x69\156\x67\x73\x2e\143\163\x73", array("\x67\162\x6f\x75\160" => CSS_DEFAULT, "\x65\x76\x65\162\x79\137\x70\141\x67\x65" => TRUE));
+    $lB = variable_get("\x6d\x69\x6e\x69\157\x72\x61\156\147\x65\137\x73\141\155\154\137\163\x74\141\x74\165\x73", '');
+    if ($lB == "\x50\114\x55\107\x49\x4e\x5f\x43\x4f\116\x46\111\107\x55\122\101\x54\111\117\x4e" && variable_get("\155\151\156\151\157\162\x61\156\x67\x65\137\163\141\x6d\x6c\137\x6c\x69\x63\x65\x6e\163\145\x5f\153\x65\171", NULL) == NULL) {
+        goto Qt;
+    }
+    if ($lB == "\x56\x41\114\x49\x44\101\124\105\137\117\x54\120") {
+        goto tp;
+    }
+    if ($lB == "\120\114\125\x47\x49\116\137\103\x4f\116\106\x49\x47\125\122\101\x54\x49\x4f\x4e") {
+        goto sN;
+    }
+    goto u0;
+    tp:
+    $form["\150\x65\x61\144\145\162\x5f\x74\x6f\x70\137\163\x74\x79\154\145\137\61"] = array("\x23\155\141\162\x6b\165\x70" => "\74\144\151\x76\40\143\x6c\141\163\x73\75\42\155\157\137\x73\141\155\x6c\137\x74\141\142\154\x65\x5f\154\141\x79\157\165\x74\x5f\x31\42\76");
+    $form["\150\145\x61\144\145\x72\x5f\164\x6f\160\137\163\164\171\x6c\145\x5f\62"] = array("\43\x6d\x61\162\153\x75\160" => "\74\x64\151\x76\40\143\x6c\141\163\163\x3d\42\x6d\x6f\137\163\x61\x6d\x6c\137\164\x61\x62\154\x65\137\154\141\171\157\x75\164\x20\155\157\137\163\x61\x6d\x6c\x5f\143\157\x6e\164\141\x69\x6e\x65\x72\x22\76");
+    $form["\155\151\x6e\x69\x6f\162\x61\156\147\x65\137\163\x61\x6d\154\137\x63\x75\x73\164\157\155\145\162\x5f\x6f\x74\160\x5f\x74\157\x6b\145\156"] = array("\x23\x74\171\x70\x65" => "\x74\145\170\164\x66\x69\145\x6c\144", "\x23\164\151\164\154\x65" => t("\x4f\124\x50"), "\43\x61\x74\164\162\x69\x62\x75\x74\x65\163" => array("\163\x74\171\x6c\145" => "\x77\x69\x64\x74\x68\x3a\x35\x35\x25"));
+    $form["\x6d\151\156\151\x6f\162\141\156\x67\x65\137\x73\x61\x6d\x6c\x5f\143\x75\163\x74\157\x6d\x65\162\x5f\x76\x61\x6c\x69\x64\141\x74\145\137\157\164\x70\137\x62\165\164\164\157\x6e"] = array("\x23\164\x79\160\145" => "\163\x75\x62\x6d\151\x74", "\43\166\x61\154\165\x65" => t("\126\x61\154\151\144\x61\164\x65\x20\x4f\124\x50"), "\x23\x73\x75\142\x6d\151\x74" => array("\x6d\151\x6e\151\x6f\x72\x61\x6e\x67\145\137\x73\x61\155\x6c\x5f\x76\141\x6c\x69\x64\141\x74\x65\x5f\157\164\x70\137\163\x75\x62\x6d\151\164"));
+    $form["\155\151\156\x69\x6f\x72\141\156\x67\145\x5f\x73\x61\155\154\137\x63\165\x73\x74\157\155\x65\162\137\163\145\164\165\160\137\162\145\x73\145\x6e\144\157\x74\x70"] = array("\43\x74\x79\x70\145" => "\x73\165\142\155\151\x74", "\43\166\141\x6c\x75\145" => t("\122\145\x73\x65\156\x64\40\x4f\124\120"), "\x23\x73\165\142\155\x69\x74" => array("\155\151\156\x69\157\162\x61\x6e\x67\x65\x5f\x73\141\155\154\x5f\x72\x65\x73\x65\x6e\x64\x5f\157\x74\x70"));
+    $form["\155\x69\156\151\x6f\162\141\x6e\x67\x65\137\163\141\x6d\x6c\137\x63\x75\163\x74\157\155\x65\x72\137\x73\145\x74\x75\160\x5f\x62\x61\143\153"] = array("\x23\164\171\x70\x65" => "\x73\x75\142\155\151\164", "\x23\166\141\x6c\165\x65" => t("\102\141\x63\153"), "\43\x73\x75\142\x6d\151\x74" => array("\155\x69\x6e\151\x6f\162\141\156\x67\x65\x5f\163\x61\x6d\x6c\137\142\x61\143\x6b"));
+    $form["\155\151\x6e\151\x6f\x72\141\x6e\147\x65\x5f\163\x61\155\x6c\137\163\x75\x70\x70\157\162\x74\x5f\x64\151\166\x5f\x65\156\144"] = array("\43\x6d\141\x72\x6b\x75\160" => "\74\x2f\x64\151\x76\x3e");
+    Utilities::AddsupportTab($form, $form_state);
     return $form;
-  }
-  else if ($current_status == 'VALIDATE_OTP')
-  {
-    $form['header_top_style_1'] = array('#markup' => '<div class="mo_saml_table_layout_1">');
-
-    $form['header_top_style_2'] = array('#markup' => '<div class="mo_saml_table_layout mo_saml_container">');
-
-    $form['miniorange_saml_customer_otp_token'] = array(
-      '#type' => 'textfield',
-      '#title' => t('OTP'),
-      '#attributes' => array(
-	  	  'style' => 'width:55%'
-	   ),
-    );
-
-    $form['miniorange_saml_customer_validate_otp_button'] = array(
-      '#type' => 'submit',
-      '#value' => t('Validate OTP'),
-      '#submit' => array('miniorange_saml_validate_otp_submit'),
-    );
-
-    $form['miniorange_saml_customer_setup_resendotp'] = array(
-      '#type' => 'submit',
-      '#value' => t('Resend OTP'),
-      '#submit' => array('miniorange_saml_resend_otp'),
-    );
-
-    $form['miniorange_saml_customer_setup_back'] = array(
-      '#type' => 'submit',
-      '#value' => t('Back'),
-      '#submit' => array('miniorange_saml_back'),
-    );
-
-      $form['miniorange_saml_support_div_end'] = array(
-          '#markup' => '</div>',
-      );
-
-      Utilities::AddsupportTab( $form, $form_state);
-
+    goto u0;
+    sN:
+    global $base_url;
+    $form["\150\145\x61\x64\145\x72\x5f\x74\157\x70\x5f\x73\164\171\154\x65\137\x32"] = array("\43\x6d\141\x72\x6b\x75\x70" => "\x3c\144\151\166\x20\x63\x6c\141\163\163\x3d\42\155\x6f\x5f\163\141\155\x6c\x5f\x74\x61\x62\x6c\145\x5f\154\x61\171\x6f\165\x74\137\61\42\x3e\15\12\x9\x9\x20\x20\11\x9\x9\x9\74\144\x69\x76\40\143\154\x61\x73\163\x3d\x22\155\157\137\163\x61\155\154\137\164\x61\x62\x6c\x65\137\x6c\x61\x79\157\165\164\40\155\x6f\137\x73\141\x6d\154\137\143\x6f\156\x74\x61\x69\156\145\x72\x22\x3e");
+    $da = abs(floor((strtotime(variable_get("\155\x69\x6e\x69\x6f\162\x61\x6e\x67\x65\137\x73\141\155\x6c\137\154\x69\x63\145\x6e\163\145\x45\x78\160\x69\162\x79", '')) - time()) / (3600 * 24)));
+    if (strtotime(variable_get("\x6d\x69\x6e\x69\157\162\x61\156\x67\x65\x5f\x73\141\155\x6c\x5f\154\151\x63\x65\156\163\x65\x45\170\x70\151\162\x79", '')) < time()) {
+        goto JE;
+    }
+    if (strtotime(variable_get("\155\151\156\x69\157\162\x61\156\x67\x65\137\x73\141\155\154\137\x6c\151\x63\145\x6e\163\x65\105\x78\x70\151\162\x79", '')) - 30 * 24 * 60 * 60 < time()) {
+        goto Fs;
+    }
+    $form["\x6d\141\162\x6b\x75\160\x5f\164\x6f\x70"] = array("\x23\x6d\141\x72\153\165\160" => "\x3c\144\x69\x76\40\143\154\x61\x73\x73\75\42\155\x6f\137\163\141\155\154\x5f\167\x65\154\x63\x6f\155\145\137\155\x65\x73\x73\141\x67\145\x22\x3e\x54\150\x61\156\153\x20\171\x6f\x75\40\x66\157\x72\40\x6c\157\147\x69\156\40\167\151\164\x68\40\x6d\x69\x6e\x69\x4f\162\141\156\147\x65\74\57\x64\151\x76\x3e\74\x62\162\57\76" . "\74\x68\x34\76\131\157\x75\162\40\120\162\x6f\146\151\x6c\x65\x3a\x20\74\57\x68\64\x3e");
+    goto dT;
+    JE:
+    $form["\155\141\x72\153\x75\160\x5f\164\157\x70"] = array("\x23\155\x61\162\x6b\165\160" => "\x3c\x64\x69\x76\40\143\154\x61\163\163\75\x22\155\157\137\163\141\x6d\x6c\x5f\x6c\x69\x63\145\156\x73\x65\x5f\x65\x78\160\x69\162\x79\42\x3e\x59\x6f\165\162\40\x6d\141\x69\156\x74\x65\156\x61\156\x63\145\x20\163\x75\160\x70\157\x72\164\40\x68\141\163\40\145\170\x70\x69\162\x65\144\40" . $da . "\x20\144\141\171\163\40\x65\x61\x72\x6c\151\x65\162\54\40\143\x6c\151\143\153\x20\157\x6e\40\x74\x68\x65\x20\x52\x65\x6e\145\167\40\115\141\x69\x6e\x74\145\156\x61\x6e\x63\145\40\154\151\156\153\x20\142\145\x6c\157\x77\x20\x74\x6f\40\x75\160\147\162\x61\x64\x65\x2e\x3c\x2f\144\151\x76\76\x3c\x62\x72\x2f\x3e" . "\74\150\64\x3e\x59\x6f\165\162\x20\120\x72\157\146\x69\154\145\x3a\x20\x3c\x2f\x68\64\76");
+    goto dT;
+    Fs:
+    $form["\155\x61\162\153\x75\160\137\x74\x6f\x70"] = array("\x23\x6d\x61\x72\x6b\x75\160" => "\x3c\x64\151\166\40\143\x6c\x61\x73\x73\x3d\42\155\x6f\137\163\x61\155\x6c\x5f\x6c\151\143\x65\156\163\145\x5f\x65\x78\160\151\x72\x79\42\76\131\157\165\162\x20\x6d\141\x69\x6e\164\x65\156\141\156\x63\x65\40\x73\x75\160\160\x6f\x72\x74\40\x69\x73\40\x67\x6f\x69\x6e\x67\x20\164\157\40\145\x78\x70\151\162\x65\40\151\156\x20" . $da . "\x20\144\x61\171\163\x2c\x20\x63\x6c\151\143\153\x20\157\x6e\40\164\x68\x65\40\122\x65\156\145\167\x20\115\x61\x69\156\164\x65\156\141\156\143\x65\x20\154\151\156\153\x20\142\x65\x6c\157\x77\40\x74\x6f\40\165\160\147\162\x61\144\x65\56\x3c\57\144\151\x76\x3e\74\142\162\x2f\x3e" . "\74\x68\64\76\x59\x6f\165\162\40\x50\162\157\x66\151\154\145\x3a\x20\74\x2f\x68\64\x3e");
+    dT:
+    $vY = array(t("\x41\124\124\x52\x49\x42\125\x54\x45\40\x4e\101\115\x45"), t("\x41\124\124\122\x49\x42\x55\x54\x45\x20\x56\x41\114\x55\x45"));
+    $as = array();
+    $Sn = variable_get("\x6d\x69\x6e\x69\157\162\141\156\x67\145\137\163\x61\155\x6c\137\143\165\x73\164\157\x6d\x65\162\x5f\141\144\x6d\x69\156\137\x65\155\x61\x69\x6c", '');
+    $as[0] = array("\x43\165\x73\x74\x6f\x6d\x65\x72\x20\x45\155\x61\x69\154" => "\x43\x75\x73\164\x6f\155\145\162\x20\x45\155\x61\x69\x6c", "\145\x6d\x61\x69\154" => $Sn);
+    $as[1] = array("\x43\x75\163\x74\157\155\145\162\x20\x49\x44" => "\103\165\x73\x74\157\x6d\145\x72\40\111\x44", "\x63\x75\163\164\157\x6d\145\x72\151\144" => variable_get("\155\x69\156\151\x6f\x72\x61\x6e\x67\x65\x5f\163\141\155\x6c\x5f\143\x75\163\164\157\155\x65\162\x5f\151\144", ''));
+    $xb = drupal_get_path("\x6d\157\x64\165\154\145", "\155\x69\x6e\151\157\x72\141\156\x67\x65\137\163\x61\x6d\x6c");
+    if (strtotime(variable_get("\155\151\x6e\x69\157\162\141\x6e\x67\145\137\163\141\155\154\x5f\x6c\151\x63\x65\156\x73\x65\105\170\x70\151\162\x79", '')) < time()) {
+        goto iz;
+    }
+    $as[2] = array("\x4d\x61\x69\156\x74\145\x6e\x61\156\143\145\x20\105\x78\160\151\162\x79" => "\115\x61\151\x6e\164\x65\156\x61\156\x63\x65\40\105\x78\x70\x69\x72\171", "\x6d\x61\x69\x6e\x74\145\x6e\141\x6e\143\x65\137\145\x78\160\x69\x72\171" => date("\106\x20\152\x2c\40\131\x2c\40\147\72\x69\40\x61", strtotime(variable_get("\155\x69\156\x69\157\x72\141\156\x67\145\x5f\x73\141\155\x6c\137\154\151\x63\145\156\x73\x65\x45\170\160\151\x72\x79", ''))));
+    goto zH;
+    iz:
+    $as[2] = array("\x4d\141\151\156\164\145\x6e\141\156\143\x65\40\105\x78\160\x69\x72\171" => "\115\141\x69\x6e\164\145\x6e\x61\x6e\143\145\40\x45\x78\160\151\162\171", "\155\141\x69\156\x74\x65\x6e\x61\156\143\x65\x5f\x65\x78\x70\x69\x72\171" => "\x3c\x64\151\x76\x20\x73\164\x79\154\145\75\42\x63\157\x6c\x6f\162\72\x20\x72\x65\144\x22\x3e\x3c\165\40\163\x74\x79\154\145\x3d\42\x63\x75\162\x73\157\162\x3a\x20\x70\x6f\x69\156\x74\145\x72\x22\76" . date("\106\x20\152\54\40\131\54\x20\x67\x3a\x69\40\x61", strtotime(variable_get("\155\151\156\x69\157\x72\x61\156\x67\x65\137\x73\x61\x6d\154\137\154\151\x63\x65\x6e\163\145\105\170\160\151\162\x79", ''))) . "\x3c\x2f\165\76\x3c\163\x75\x62\x3e\x3c\x69\155\x67\40\x73\x74\x79\x6c\145\75\42\167\x69\x64\x74\x68\72\x31\65\x70\170\x3b\40\x68\x65\x69\147\150\x74\x3a\x31\x35\x70\x78\x3b\x20\160\141\144\x64\151\x6e\x67\x3a\65\x70\x78\x3b\x20\x6d\141\x72\x67\x69\x6e\55\x6c\145\x66\x74\x3a\61\60\x70\x78\x3b\143\157\154\157\162\x3a\x72\x65\x64\73\42\40\163\x72\x63\75\x22" . $base_url . "\x2f" . $xb . "\57\151\156\143\154\x75\x64\145\163\57\151\x6d\x61\x67\x65\163\x2f\x77\141\162\x6e\151\156\147\x2e\x73\x76\x67\x22\x3e\74\x2f\163\x75\142\x3e\x3c\x2f\144\x69\166\x3e");
+    zH:
+    $as[3] = array("\123\x75\x70\x70\x6f\162\x74\40\x45\170\160\151\x72\171" => "\x53\x75\160\160\157\x72\x74\x20\105\x78\160\151\162\171", "\163\165\x70\x70\x6f\162\x74\x5f\x65\170\160\x69\162\x79" => date("\x46\x20\152\x2c\40\131\x2c\40\x67\72\x69\40\x61", strtotime(variable_get("\155\x69\156\x69\x6f\162\x61\156\x67\145\137\163\141\155\154\x5f\163\165\160\x70\x6f\162\164\105\170\160\151\162\x79", ''))));
+    $yi = "\x3c\141\x20\150\162\x65\x66\x3d\42" . $base_url . "\77\x71\x3d\155\157\114\x69\143\145\x6e\x73\x65\x46\145\164\143\150\42\76\x46\145\x74\143\150\x3c\x2f\141\76";
+    $as[4] = array("\122\145\146\145\164\143\x68\40\114\151\143\145\156\163\145\x20\104\x65\x74\x61\x69\x6c\x73" => "\x52\145\146\x65\164\143\x68\x20\114\x69\x63\145\x6e\163\x65\x20\104\145\164\141\x69\154\x73", "\x72\x65\x66\145\x74\143\x68\x5f\x6c\x69\x63\145\x6e\x73\145\x5f\144\145\164\x61\151\x6c\163" => $yi);
+    if (!(strtotime(variable_get("\155\x69\x6e\x69\157\x72\141\156\x67\x65\x5f\163\141\x6d\x6c\137\154\151\143\145\x6e\x73\x65\105\x78\x70\151\162\x79", '')) - 30 * 24 * 60 * 60 < time())) {
+        goto gN;
+    }
+    $as[5] = array("\x52\145\156\x65\167\x20\x4d\x61\x69\156\x74\145\156\141\156\x63\145" => "\122\145\156\145\x77\40\115\x61\x69\156\x74\145\156\141\156\143\x65", "\x72\145\156\x65\167\x5f\155\x61\x69\x6e\x74\145\x6e\x61\x6e\x63\145" => "\x3c\141\40\164\141\162\147\x65\164\x3d\42\137\142\x6c\141\156\153\42\40\x68\x72\x65\146\75\x22" . MiniorangeSAMLConstants::BASE_URL . "\x2f\155\157\141\x73\57\154\x6f\147\151\156\77\x75\x73\x65\x72\156\141\x6d\145\x3d" . $Sn . "\x26\162\145\x64\x69\x72\145\143\x74\125\162\154\x3d" . MiniorangeSAMLConstants::BASE_URL . "\57\155\x6f\141\163\x2f\141\144\x6d\151\156\57\x63\x75\x73\164\x6f\155\145\162\57\x6c\x69\x63\x65\x6e\163\145\162\x65\x6e\145\167\141\x6c\x73\x3f\162\x65\x6e\x65\x77\141\154\x72\145\161\x75\x65\x73\x74\x3d" . MiniorangeSAMLConstants::LICENSE_TYPE . "\x22\76\x52\x65\x6e\x65\167\40\115\x61\x69\156\x74\145\156\x61\x6e\x63\x65\x3c\57\141\76");
+    gN:
+    $form["\x66\151\x65\154\144\163\145\x74"]["\x63\x75\163\164\x6f\x6d\145\x72\151\x6e\x66\157"] = array("\43\x74\150\145\x6d\x65" => "\x74\141\142\154\x65", "\x23\150\x65\141\144\x65\162" => $vY, "\43\162\157\x77\163" => $as);
+    $form["\x6d\x69\156\151\x6f\162\x61\x6e\x67\145\137\x73\141\x6d\x6c\x5f\x63\x75\163\164\x6f\155\x65\162\137\122\145\x6d\x6f\x76\x65\137\101\143\143\x6f\x75\156\x74\x5f\x69\x6e\x66\x6f"] = array("\43\x6d\x61\x72\153\x75\x70" => "\74\142\x72\x2f\76\x3c\x62\x72\x2f\76\x3c\x62\162\57\x3e\74\x62\162\57\76\74\x62\162\x2f\x3e" . "\x3c\x68\x34\x3e\122\145\x6d\x6f\166\145\x20\101\143\x63\157\x75\x6e\164\72\74\57\150\64\x3e" . "\x3c\160\76\x54\150\x69\x73\40\x73\x65\x63\x74\151\x6f\x6e\40\x77\151\x6c\154\x20\x68\x65\154\160\x20\171\x6f\165\x20\x74\157\40\162\x65\155\157\166\x65\x20\x79\157\x75\162\40\143\165\162\x72\145\156\x74\x20\154\x6f\147\x67\x65\144\40\x69\156\40\141\x63\x63\157\165\156\x74\40\167\x69\164\150\x6f\165\164\40\154\157\x73\151\156\x67\40\171\x6f\165\162\40\x63\165\162\x72\x65\x6e\x74\x20\143\157\156\146\151\x67\x75\x72\x61\x74\151\157\156\163\x2e\74\57\160\76");
+    $form["\155\x69\156\151\x6f\162\141\156\x67\x65\x5f\x73\x61\155\x6c\x5f\x72\x65\x6d\157\x76\x65\137\141\143\143\157\x75\156\x74\x5f\142\x75\164\x74\157\x6e"] = array("\43\164\171\x70\x65" => "\x73\165\x62\155\151\164", "\43\x76\141\x6c\x75\x65" => t("\x52\x65\x6d\x6f\166\145\40\x41\x63\x63\x6f\165\156\164"), "\43\163\x75\142\155\x69\x74" => array("\x6d\x69\156\x69\x6f\x72\x61\156\x67\145\x5f\x73\x61\x6d\x6c\x5f\x72\145\155\157\166\x65\137\x61\x63\x63\157\x75\x6e\164"), "\43\141\164\x74\x72\151\x62\165\x74\145\x73" => array("\163\164\x79\154\x65" => "\x64\x69\x73\160\x6c\x61\171\x3a\142\154\157\143\153\x3b\155\x61\162\x67\151\156\x2d\x6c\145\x66\x74\72\141\x75\x74\x6f\x3b\x6d\x61\162\147\x69\156\55\162\x69\147\150\164\72\x61\x75\164\x6f\73\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x3a\x20\x23\x33\x33\x37\141\x62\67\x3b\143\157\154\157\x72\72\40\43\x66\146\x66\x66\146\x66\x3b\164\x65\x78\164\x2d\x73\x68\141\144\157\x77\x3a\x20\60\x20\55\x31\160\x78\x20\x31\x70\x78\x20\x23\63\x33\x37\141\x62\x37\54\40\x31\x70\x78\40\x30\x20\61\160\170\x20\43\63\63\67\141\x62\x37\x2c\x20\x30\x20\61\160\170\40\61\160\170\40\x23\63\x33\67\141\142\67\54\40\x2d\x31\160\170\40\x30\x20\61\160\170\40\x23\x33\x33\67\141\x62\67\73\142\157\x78\x2d\163\150\x61\x64\157\167\72\x20\60\40\61\160\170\40\60\40\x23\x33\x33\x37\141\142\x37\x3b\142\157\162\144\145\162\x2d\x63\157\x6c\x6f\x72\x3a\x20\x23\63\x33\67\141\142\67\x20\43\x33\x33\67\x61\142\x37\40\43\x33\x33\x37\x61\142\x37\x3b"));
+    $form["\x6d\151\156\x69\x6f\x72\141\x6e\147\x65\137\x73\141\x6d\x6c\137\163\x75\160\160\x6f\162\x74\137\x64\151\x76\137\145\156\144"] = array("\x23\x6d\x61\162\153\x75\160" => "\x3c\57\144\x69\x76\x3e");
+    Utilities::AddsupportTab($form, $form_state);
     return $form;
-  }
-  elseif ($current_status == 'PLUGIN_CONFIGURATION')
-  {
-      global $base_url;
-      $form['header_top_style_2'] = array(
-	  	  '#markup' => '<div class="mo_saml_table_layout_1">
-		  				<div class="mo_saml_table_layout mo_saml_container">'
-	  );
-
-    // Show customer configuration here.
-    $mo_saml_days_remaining = abs( floor((strtotime( variable_get('miniorange_saml_licenseExpiry','')) - time()) / (3600*24)) );
-    if ( strtotime( variable_get('miniorange_saml_licenseExpiry','')) < time() ){
-      $form['markup_top'] = array(
-        '#markup' => '<div class="mo_saml_license_expiry">Your maintenance support has expired '. $mo_saml_days_remaining .' days earlier, click on the Renew Maintenance link below to upgrade.</div><br/>'
-          . '<h4>Your Profile: </h4>',
-      );
-    }
-    elseif ( ( strtotime( variable_get('miniorange_saml_licenseExpiry','')) - 30*24*60*60) < time()   ){
-      $form['markup_top'] = array(
-        '#markup' => '<div class="mo_saml_license_expiry">Your maintenance support is going to expire in '. $mo_saml_days_remaining .' days, click on the Renew Maintenance link below to upgrade.</div><br/>'
-          . '<h4>Your Profile: </h4>',
-      );
-    }
-    else {
-      $form['markup_top'] = array(
-        '#markup' => '<div class="mo_saml_welcome_message">Thank you for login with miniOrange</div><br/>'
-          . '<h4>Your Profile: </h4>',
-      );
-    }
-
-    $header = array( t('ATTRIBUTE NAME'), t('ATTRIBUTE VALUE'), );
-
-    $options = array();
-
-    $mo_saml_customer_admin_email = variable_get('miniorange_saml_customer_admin_email', '');
-    $options[0] = array(
-      'Customer Email' => 'Customer Email',
-      'email'          => $mo_saml_customer_admin_email,
-    );
-
-    $options[1] = array(
-      'Customer ID' => 'Customer ID',
-      'customerid'  => variable_get('miniorange_saml_customer_id', ''),
-    );
-
-    $module_path = drupal_get_path('module', 'miniorange_saml');
-    if ( strtotime( variable_get('miniorange_saml_licenseExpiry','')) < time() ) {
-      $options[2] = array(
-        'Maintenance Expiry' => 'Maintenance Expiry',
-        'maintenance_expiry' => '<div style="color: red"><u style="cursor: pointer">'. date("F j, Y, g:i a", strtotime( variable_get('miniorange_saml_licenseExpiry',''))). '</u><sub><img style="width:15px; height:15px; padding:5px; margin-left:10px;color:red;" src="'. $base_url.'/'.$module_path . '/includes/images/warning.svg"></sub></div>',
-      );
-    }
-    else{
-      $options[2] = array(
-        'Maintenance Expiry' => 'Maintenance Expiry',
-        'maintenance_expiry' =>  date("F j, Y, g:i a", strtotime( variable_get('miniorange_saml_licenseExpiry',''))),
-      );
-    }
-
-    $options[3] = array(
-      'Support Expiry' => 'Support Expiry',
-      'support_expiry' =>  date("F j, Y, g:i a", strtotime( variable_get('miniorange_saml_supportExpiry',''))),
-    );
-
-    $refetchOrUpdate = '<a href="'.$base_url.'?q=moLicenseFetch">Fetch</a>';
-    $options[4] = array(
-      'Refetch License Details' => 'Refetch License Details',
-      'refetch_license_details' => $refetchOrUpdate
-    );
-
-    if ( ( strtotime( variable_get('miniorange_saml_licenseExpiry','')) - 30*24*60*60) < time() ){
-      $options[5] = array(
-        'Renew Maintenance' => 'Renew Maintenance',
-        'renew_maintenance' => '<a target="_blank" href="'. MiniorangeSAMLConstants::BASE_URL . '/moas/login?username=' . $mo_saml_customer_admin_email . '&redirectUrl=' . MiniorangeSAMLConstants::BASE_URL .'/moas/admin/customer/licenserenewals?renewalrequest='. MiniorangeSAMLConstants::LICENSE_TYPE .'">Renew Maintenance</a>'
-      );
-    }
-
-    $form['fieldset']['customerinfo'] = array(
-      '#theme' => 'table',
-      '#header' => $header,
-      '#rows' => $options,
-    );
-
-    $form['miniorange_saml_customer_Remove_Account_info'] = array('#markup' => '<br/><br/><br/><br/><br/>'.'<h4>Remove Account:</h4>'.'<p>This section will help you to remove your current logged in account without losing your current configurations.</p>');
-
-    $form['miniorange_saml_remove_account_button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Remove Account'),
-        '#submit' => array('miniorange_saml_remove_account'),
-        '#attributes' => array('style' => 'display:block;margin-left:auto;margin-right:auto;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
-    );
-
-      $form['miniorange_saml_support_div_end'] = array(
-          '#markup' => '</div>',
-      );
-
-      Utilities::AddsupportTab( $form, $form_state);
-
+    u0:
+    goto Ks;
+    Qt:
+    $form["\150\x65\x61\144\145\x72\x5f\x74\x6f\160\137\163\164\x79\154\145\137\62"] = array("\43\x6d\141\x72\x6b\x75\x70" => "\x3c\144\x69\166\40\143\x6c\x61\163\x73\75\42\155\157\x5f\x73\x61\155\x6c\x5f\x74\x61\x62\154\x65\137\x6c\x61\171\157\x75\x74\x5f\x31\42\76\xd\12\x9\x20\40\11\11\x9\11\x9\x3c\x64\x69\x76\x20\143\154\x61\x73\163\x3d\x22\x6d\x6f\137\163\x61\x6d\x6c\x5f\x74\x61\x62\154\x65\x5f\x6c\x61\171\157\165\164\x20\x6d\x6f\137\163\x61\155\x6c\x5f\x63\x6f\x6e\164\141\151\156\145\162\42\x3e");
+    $form["\155\x69\x6e\151\157\162\x61\x6e\147\x65\137\x73\141\x6d\x6c\137\154\x69\x63\x65\x6e\163\x65\x5f\153\145\171"] = array("\x23\164\171\x70\145" => "\x74\145\170\x74\146\151\x65\154\144", "\x23\164\151\164\x6c\145" => t("\x4c\x69\143\x65\x6e\x73\145\40\113\x65\171"), "\x23\141\x74\164\x72\151\x62\165\164\145\163" => array("\x73\x74\x79\154\145" => "\x77\151\x64\164\150\x3a\65\65\45", "\x70\x6c\x61\143\145\150\x6f\154\x64\145\162" => "\105\156\x74\145\162\40\x79\157\165\x72\x20\x6c\151\143\145\156\163\145\x20\x6b\145\x79\x20\164\x6f\x20\x61\143\164\x69\166\x61\164\145\x20\164\x68\145\40\x6d\157\144\x75\x6c\x65"));
+    $form["\155\151\x6e\x69\x6f\x72\x61\156\x67\145\137\x73\x61\155\x6c\x5f\143\165\163\x74\x6f\x6d\x65\162\x5f\x76\141\x6c\x69\144\141\164\x65\137\154\151\143\145\156\163\x65\x5f\142\x75\x74\164\x6f\x6e"] = array("\43\x74\x79\x70\145" => "\163\x75\142\155\151\x74", "\x23\x76\141\x6c\x75\x65" => t("\x41\143\164\x69\x76\x61\164\x65\40\x4c\x69\x63\x65\x6e\x73\x65"), "\43\x73\165\142\x6d\151\x74" => array("\x6d\x69\156\151\x6f\x72\141\x6e\147\145\x5f\163\x61\x6d\x6c\137\x76\141\x6c\x69\144\x61\x74\145\137\154\x69\143\x65\x6e\163\x65\x5f\163\x75\x62\155\151\x74"));
+    $form["\155\x69\x6e\151\157\x72\141\x6e\147\x65\x5f\163\141\155\x6c\x5f\x63\165\x73\164\x6f\155\145\x72\137\x73\x65\164\165\160\137\x62\x61\143\153"] = array("\43\x74\171\160\145" => "\x73\165\x62\x6d\x69\164", "\x23\166\x61\154\165\x65" => t("\102\x61\x63\x6b"), "\43\163\165\142\x6d\x69\164" => array("\x6d\151\x6e\151\157\162\x61\156\x67\x65\x5f\x73\x61\155\154\x5f\x62\x61\143\x6b"));
+    $form["\155\151\x6e\151\157\162\141\156\x67\145\137\x73\141\155\154\137\163\165\x70\x70\x6f\x72\164\x5f\144\151\x76\137\145\x6e\144"] = array("\x23\x6d\141\162\x6b\165\x70" => "\74\x2f\x64\151\166\x3e");
+    Utilities::AddsupportTab($form, $form_state);
     return $form;
-  }
-
-    $form['header_top_style_1'] = array('#markup' => '<div class="mo_saml_table_layout_1">');
-
-  $form['markup_14'] = array(
-    '#markup' => '<div class="mo_saml_table_layout mo_saml_container"><h3>Register/Login with miniOrange</h3><hr><br/>',
-  );
-
-  $form['markup_15'] = array(
-    '#markup' => '<div class="mo_saml_highlight_background_note_1">Just complete the short registration below to configure the SAML Module. Please enter a valid email id that you have access to. You will be able to move forward after verifying an OTP that we will send to this email.</div>',
-  );
-
-  $form['miniorange_saml_customer_setup_username'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Email<span class = "red_color_star">*</span>'),
-    '#attributes' => array(
-	    'style' => 'width:61%'
-	 ),
-    '#required' => FALSE,
-  );
-
-  $form['miniorange_saml_customer_setup_phone'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Phone'),
-    '#attributes' => array(
-	   'style' => 'width:61%'
-	 ),
-  );
-
-  $form['markup_16'] = array(
-    '#markup' => '<b>NOTE:</b> We will only call if you need support.',
-  );
-
-  $form['miniorange_saml_customer_setup_password'] = array(
-    '#type' => 'password_confirm',
-    '#required' => FALSE,
-  );
-
-  $form['miniorange_saml_customer_setup_button'] = array(
-    '#type' => 'submit',
-    '#value' => t('Register'),
-    '#submit' => array('miniorange_saml_customer_setup_submit'),
-    '#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),  );
-
-    $form['miniorange_saml_support_div_end'] = array(
-        '#markup' => '</div>',
-    );
-
-    Utilities::AddsupportTab( $form, $form_state);
-
-  return $form;
-
+    Ks:
+    $form["\x68\145\x61\144\145\x72\137\164\157\160\x5f\x73\164\171\x6c\x65\137\61"] = array("\43\x6d\x61\162\x6b\165\160" => "\x3c\x64\151\x76\40\143\x6c\x61\163\x73\x3d\x22\155\x6f\x5f\x73\x61\155\x6c\137\164\141\x62\154\145\137\154\141\171\x6f\x75\x74\x5f\61\42\76");
+    $form["\x6d\141\x72\x6b\x75\x70\137\61\x34"] = array("\43\x6d\141\162\x6b\x75\x70" => "\x3c\144\151\x76\40\143\x6c\141\x73\163\75\42\155\157\x5f\163\141\155\x6c\x5f\164\x61\142\154\x65\x5f\x6c\x61\171\x6f\165\x74\x20\155\x6f\x5f\163\141\x6d\154\137\143\157\x6e\164\x61\x69\156\145\162\x22\76\74\150\x33\76\x52\145\x67\x69\163\164\x65\162\x2f\114\x6f\147\151\x6e\x20\167\151\164\x68\x20\155\151\x6e\x69\117\162\x61\x6e\147\145\74\x2f\x68\x33\x3e\x3c\x68\x72\x3e\x3c\x62\162\x2f\x3e");
+    $form["\x6d\141\x72\x6b\x75\x70\x5f\61\x35"] = array("\x23\x6d\x61\162\x6b\165\160" => "\x3c\144\151\166\x20\143\x6c\141\x73\163\x3d\x22\x6d\x6f\137\163\x61\x6d\154\x5f\x68\151\x67\150\154\x69\147\x68\x74\x5f\142\141\x63\x6b\x67\162\157\165\156\144\137\156\x6f\164\x65\x5f\x31\x22\x3e\x4a\x75\163\164\40\x63\157\x6d\160\154\145\164\x65\x20\164\x68\145\40\163\x68\x6f\x72\x74\40\x72\x65\147\x69\163\x74\162\x61\164\151\x6f\156\x20\x62\145\154\157\x77\40\x74\x6f\40\143\157\x6e\x66\151\147\165\x72\x65\x20\x74\x68\x65\40\123\x41\115\x4c\x20\115\x6f\x64\165\x6c\145\x2e\40\x50\154\145\x61\163\x65\40\x65\156\164\145\x72\40\141\40\166\x61\x6c\x69\144\40\145\x6d\141\x69\x6c\40\151\x64\x20\164\x68\141\164\40\171\x6f\165\x20\150\141\166\145\x20\x61\143\143\145\163\163\x20\x74\157\56\x20\x59\x6f\x75\x20\167\x69\x6c\x6c\x20\x62\x65\x20\x61\142\154\x65\x20\164\x6f\x20\155\x6f\166\x65\x20\x66\157\x72\167\x61\x72\x64\40\141\x66\x74\x65\x72\40\166\145\162\x69\146\171\151\x6e\x67\40\141\x6e\x20\x4f\x54\120\x20\x74\x68\141\164\x20\167\x65\x20\x77\151\x6c\154\x20\x73\x65\x6e\x64\x20\164\x6f\40\164\x68\151\163\40\x65\x6d\x61\151\154\x2e\74\x2f\x64\151\166\x3e");
+    $form["\x6d\x69\x6e\x69\x6f\x72\x61\x6e\147\x65\137\x73\141\x6d\154\137\143\165\x73\164\157\x6d\x65\x72\137\x73\145\x74\x75\160\137\165\163\x65\x72\x6e\x61\x6d\145"] = array("\x23\164\x79\160\x65" => "\164\145\170\x74\x66\151\145\x6c\x64", "\43\164\x69\x74\x6c\x65" => t("\105\155\x61\151\154\x3c\163\160\141\x6e\40\143\154\x61\163\x73\x20\75\x20\x22\162\145\x64\x5f\x63\x6f\154\157\162\137\163\x74\x61\162\x22\76\52\74\57\x73\160\141\x6e\x3e"), "\x23\141\x74\x74\x72\x69\x62\165\x74\145\163" => array("\x73\164\171\x6c\145" => "\167\151\x64\x74\150\x3a\66\x31\x25"), "\43\162\145\161\165\151\x72\145\x64" => FALSE);
+    $form["\x6d\151\x6e\151\157\x72\x61\x6e\x67\145\x5f\x73\141\x6d\x6c\137\143\165\x73\164\x6f\155\x65\162\137\x73\145\x74\165\x70\x5f\160\x68\x6f\156\x65"] = array("\43\164\171\x70\x65" => "\164\x65\170\164\x66\x69\145\154\x64", "\x23\164\x69\164\154\145" => t("\x50\150\157\x6e\x65"), "\x23\141\164\164\162\151\x62\165\x74\145\163" => array("\x73\164\171\x6c\145" => "\x77\x69\144\164\150\x3a\66\61\45"));
+    $form["\x6d\x61\x72\x6b\x75\x70\137\x31\66"] = array("\x23\x6d\x61\162\153\165\x70" => "\74\x62\76\116\x4f\x54\x45\x3a\x3c\x2f\142\x3e\x20\x57\145\x20\167\x69\154\x6c\40\157\156\x6c\171\x20\x63\x61\154\x6c\x20\x69\146\x20\171\x6f\x75\x20\x6e\145\145\144\40\x73\x75\160\160\157\x72\164\56");
+    $form["\155\151\156\x69\157\162\141\156\x67\x65\x5f\163\x61\x6d\154\x5f\x63\x75\163\x74\157\x6d\145\162\137\163\x65\164\165\x70\137\x70\141\x73\163\167\157\x72\144"] = array("\x23\164\171\x70\x65" => "\160\x61\x73\x73\x77\x6f\162\144\x5f\143\x6f\x6e\x66\151\x72\155", "\x23\162\145\x71\x75\151\x72\x65\x64" => FALSE);
+    $form["\155\x69\156\151\x6f\162\141\x6e\147\145\x5f\163\x61\x6d\154\x5f\143\165\163\x74\x6f\x6d\x65\162\137\x73\145\164\165\x70\x5f\142\165\164\164\x6f\x6e"] = array("\x23\x74\x79\160\x65" => "\x73\x75\142\155\x69\x74", "\x23\166\141\154\x75\145" => t("\122\145\x67\x69\163\164\145\x72"), "\x23\x73\165\142\x6d\x69\x74" => array("\x6d\x69\x6e\x69\x6f\162\x61\x6e\x67\145\137\x73\x61\x6d\154\x5f\x63\165\163\164\157\x6d\145\162\137\x73\x65\x74\x75\160\x5f\163\x75\142\x6d\151\164"), "\x23\141\x74\x74\162\151\x62\165\164\145\x73" => array("\163\x74\171\x6c\x65" => "\142\141\143\x6b\147\162\x6f\x75\156\x64\x3a\40\43\63\x33\67\141\x62\67\73\143\x6f\x6c\157\x72\72\x20\x23\146\x66\146\146\x66\x66\73\x74\x65\170\x74\55\163\x68\141\x64\157\167\72\x20\60\x20\55\61\x70\x78\40\61\160\170\x20\x23\x33\63\x37\x61\x62\67\54\x20\x31\160\x78\40\x30\x20\61\x70\170\40\x23\x33\x33\x37\141\142\x37\x2c\x20\x30\40\61\x70\170\x20\61\x70\170\40\x23\x33\63\x37\141\142\67\54\40\x2d\x31\x70\170\40\60\40\x31\160\170\x20\x23\63\x33\x37\141\142\x37\73\x62\157\170\55\x73\x68\141\x64\x6f\167\x3a\x20\60\x20\x31\x70\170\x20\60\40\43\63\x33\x37\141\x62\x37\x3b\142\157\x72\144\145\162\x2d\143\x6f\x6c\x6f\x72\72\40\x23\x33\x33\x37\x61\x62\x37\x20\43\63\x33\x37\141\142\x37\x20\x23\x33\63\67\x61\x62\67\73"));
+    $form["\155\x69\156\151\157\x72\141\156\147\x65\137\163\141\x6d\154\x5f\163\165\x70\160\157\162\164\x5f\x64\x69\166\x5f\145\x6e\x64"] = array("\x23\155\x61\162\153\x75\160" => "\74\x2f\144\151\166\76");
+    Utilities::AddsupportTab($form, $form_state);
+    return $form;
 }
-
-/**
- * Validate OTP.
- */
-function miniorange_saml_validate_otp_submit(&$form, $form_state) {
-
-  $otp_token = $form['miniorange_saml_customer_otp_token']['#value'];
-  $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-  $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
-  $tx_id = variable_get('miniorange_saml_tx_id', NULL);
-  $customer_config = new MiniorangeSAMLCustomer($username, $phone, NULL, $otp_token);
-
-  // Validate OTP.
-  $validate_otp_response = json_decode($customer_config->validateOtp($tx_id));
-  if ($validate_otp_response->status == 'SUCCESS') {
-    // OTP Validated. Show Configuration page.
-    $current_status = 'PLUGIN_CONFIGURATION';
-    variable_set('miniorange_saml_status', $current_status);
-    variable_del('miniorange_saml_tx_id');
-
-    // OTP Validated. Create customer.
-    $password = variable_get('miniorange_saml_customer_admin_password', '');
-    $customer_config = new MiniorangeSAMLCustomer($username, $phone, $password, NULL);
-    $create_customer_response = json_decode($customer_config->createCustomer());
-
-    if ($create_customer_response->status == 'SUCCESS') {
-      // Customer created.
-       $current_status = 'PLUGIN_CONFIGURATION';
-      variable_set('miniorange_saml_status', $current_status);
-      variable_set('miniorange_saml_customer_admin_email', $username);
-      variable_set('miniorange_saml_customer_admin_phone', $phone);
-      variable_set('miniorange_saml_customer_admin_token', $create_customer_response->token);
-      variable_set('miniorange_saml_customer_id', $create_customer_response->id);
-      variable_set('miniorange_saml_customer_api_key', $create_customer_response->apiKey);
-
-      drupal_set_message(t('Customer account created. Please verify your license key to activate module'));
+function miniorange_saml_validate_otp_submit(&$form, $form_state)
+{
+    $BF = $form["\155\x69\156\151\157\x72\x61\x6e\x67\x65\137\x73\x61\x6d\x6c\137\x63\165\163\164\x6f\155\x65\162\x5f\157\x74\x70\137\x74\x6f\x6b\145\x6e"]["\x23\166\141\154\165\x65"];
+    $vy = variable_get("\x6d\151\x6e\x69\157\162\x61\x6e\147\x65\137\x73\x61\x6d\154\137\x63\x75\163\x74\157\x6d\145\162\x5f\x61\144\155\x69\x6e\x5f\x65\x6d\141\x69\x6c", NULL);
+    $GC = variable_get("\155\x69\156\x69\157\x72\x61\156\x67\x65\x5f\x73\x61\x6d\x6c\x5f\143\x75\163\164\157\155\x65\x72\x5f\141\144\x6d\x69\x6e\137\160\150\157\156\x65", NULL);
+    $t9 = variable_get("\155\151\156\151\157\x72\x61\x6e\147\x65\x5f\163\141\x6d\x6c\x5f\x74\x78\x5f\x69\x64", NULL);
+    $nI = new MiniorangeSAMLCustomer($vy, $GC, NULL, $BF);
+    $mz = json_decode($nI->validateOtp($t9));
+    if ($mz->status == "\123\x55\103\x43\x45\x53\123") {
+        goto ci;
     }
-    else {
-      drupal_set_message(t('Error creating customer'), 'error');
+    drupal_set_message(t("\x45\x72\x72\157\162\40\166\x61\x6c\x69\x64\141\164\151\156\x67\x20\117\x54\120"), "\x65\162\162\x6f\x72");
+    goto C9;
+    ci:
+    $lB = "\x50\x4c\x55\107\x49\x4e\137\103\x4f\116\x46\111\107\x55\122\101\124\x49\117\x4e";
+    variable_set("\155\x69\x6e\x69\x6f\162\x61\x6e\x67\x65\x5f\x73\141\155\154\137\163\164\x61\x74\x75\x73", $lB);
+    variable_del("\155\151\x6e\151\157\162\141\156\147\145\137\163\x61\155\154\137\164\170\137\x69\144");
+    $YP = variable_get("\155\151\x6e\x69\157\162\141\156\147\145\137\x73\141\155\154\x5f\143\165\163\164\x6f\x6d\145\162\137\x61\144\155\x69\x6e\137\160\141\163\163\167\x6f\x72\x64", '');
+    $nI = new MiniorangeSAMLCustomer($vy, $GC, $YP, NULL);
+    $PS = json_decode($nI->createCustomer());
+    if ($PS->status == "\x53\125\103\x43\105\x53\123") {
+        goto cA;
     }
-  }
-  else {
-    drupal_set_message(t('Error validating OTP'), 'error');
-  }
-
+    drupal_set_message(t("\x45\x72\x72\x6f\162\40\143\x72\145\x61\164\x69\x6e\147\40\143\165\x73\164\157\155\145\x72"), "\x65\162\x72\157\x72");
+    goto QF;
+    cA:
+    $lB = "\x50\114\x55\x47\111\116\137\103\x4f\116\x46\111\x47\x55\x52\101\124\x49\117\116";
+    variable_set("\x6d\151\x6e\x69\x6f\162\x61\156\147\145\137\163\141\x6d\x6c\x5f\x73\164\141\164\x75\x73", $lB);
+    variable_set("\155\151\x6e\151\157\162\x61\156\x67\x65\137\163\x61\155\x6c\137\143\x75\x73\164\x6f\155\x65\162\x5f\141\x64\x6d\151\x6e\137\x65\x6d\x61\151\x6c", $vy);
+    variable_set("\155\x69\x6e\151\157\x72\x61\x6e\147\x65\x5f\x73\x61\155\x6c\137\x63\165\163\164\157\x6d\x65\162\137\141\x64\x6d\151\x6e\x5f\160\x68\157\x6e\x65", $GC);
+    variable_set("\x6d\151\156\x69\x6f\x72\141\x6e\x67\145\x5f\163\x61\155\x6c\x5f\x63\165\x73\x74\x6f\x6d\145\x72\x5f\x61\144\155\151\x6e\137\164\x6f\153\145\x6e", $PS->token);
+    variable_set("\x6d\x69\x6e\151\157\162\141\x6e\147\x65\137\163\x61\x6d\x6c\137\143\x75\x73\x74\x6f\155\x65\162\x5f\x69\144", $PS->id);
+    variable_set("\155\151\156\151\x6f\x72\141\156\147\x65\x5f\x73\x61\155\154\x5f\x63\165\163\x74\x6f\155\145\x72\x5f\141\x70\x69\137\153\x65\x79", $PS->apiKey);
+    drupal_set_message(t("\103\165\163\164\x6f\155\145\162\x20\141\x63\x63\157\165\156\164\x20\x63\162\x65\141\164\145\x64\x2e\x20\x50\x6c\145\x61\163\145\x20\166\x65\x72\151\x66\171\x20\x79\157\x75\162\x20\x6c\x69\x63\145\x6e\x73\145\x20\x6b\145\171\x20\164\x6f\x20\141\143\x74\x69\166\x61\x74\145\40\x6d\x6f\144\165\x6c\x65"));
+    QF:
+    C9:
 }
-
-/**
- * Resend OTP.
- */
-function miniorange_saml_resend_otp(&$form, $form_state) {
-
-  variable_del('miniorange_saml_tx_id');
-  $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-  $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
-  $customer_config = new MiniorangeSAMLCustomer($username, $phone, NULL, NULL);
-  $send_otp_response = json_decode($customer_config->sendOtp());
-  if ($send_otp_response->status == 'SUCCESS') {
-    // Store txID.
-    variable_set('miniorange_saml_tx_id', $send_otp_response->txId);
-    $current_status = 'VALIDATE_OTP';
-    variable_set('miniorange_saml_status', $current_status);
-    drupal_set_message(t('Verify email address by entering the passcode sent to @username', array('@username' => $username)));
-  }
+function miniorange_saml_resend_otp(&$form, $form_state)
+{
+    variable_del("\155\151\156\x69\157\x72\141\x6e\x67\x65\x5f\163\141\x6d\x6c\137\164\170\137\151\144");
+    $vy = variable_get("\x6d\151\x6e\151\157\162\x61\156\x67\x65\137\163\x61\155\x6c\x5f\x63\x75\x73\x74\x6f\x6d\x65\x72\137\141\144\155\x69\x6e\x5f\145\x6d\x61\x69\x6c", NULL);
+    $GC = variable_get("\155\x69\156\151\157\x72\141\x6e\147\x65\137\x73\141\155\x6c\137\143\x75\163\164\157\155\145\x72\x5f\141\144\x6d\x69\156\x5f\x70\x68\x6f\156\x65", NULL);
+    $nI = new MiniorangeSAMLCustomer($vy, $GC, NULL, NULL);
+    $ym = json_decode($nI->sendOtp());
+    if (!($ym->status == "\123\125\103\103\105\x53\x53")) {
+        goto y6;
+    }
+    variable_set("\x6d\151\156\151\x6f\162\141\x6e\147\x65\137\x73\x61\155\154\x5f\164\x78\x5f\151\144", $ym->txId);
+    $lB = "\126\x41\x4c\x49\x44\101\124\105\137\x4f\x54\120";
+    variable_set("\x6d\151\x6e\x69\157\x72\x61\x6e\x67\x65\x5f\x73\141\155\x6c\x5f\163\x74\141\x74\165\163", $lB);
+    drupal_set_message(t("\126\x65\162\x69\146\x79\x20\x65\155\141\x69\154\40\x61\x64\x64\x72\145\163\x73\x20\x62\x79\x20\145\x6e\x74\145\x72\151\x6e\x67\x20\x74\x68\x65\40\160\x61\163\x73\x63\157\x64\145\x20\163\x65\156\x74\40\164\x6f\40\100\x75\x73\x65\x72\156\x61\155\145", array("\x40\x75\x73\x65\x72\x6e\141\x6d\145" => $vy)));
+    y6:
 }
-
-/**
- * Handle submit for customer setup.
- */
-function miniorange_saml_customer_setup_submit(&$form, $form_state) {
-
-    $username = $form['miniorange_saml_customer_setup_username']['#value'];
-    $phone = $form['miniorange_saml_customer_setup_phone']['#value'];
-    $password = $form['miniorange_saml_customer_setup_password']['#value']['pass1'];
-
-    if(empty($username)||empty($password)){
-        drupal_set_message(t('The <b><u>Email</u></b> and <b><u>Password</u></b> fields are required.'), 'error');
-        return;
-    } elseif(!valid_email_address($username)) {
-        drupal_set_message(t('The email address <b><i>' . $username . '</i></b> is not valid.'), 'error');
-        return;
+function miniorange_saml_customer_setup_submit(&$form, $form_state)
+{
+    $vy = $form["\x6d\151\156\x69\157\x72\141\x6e\x67\x65\x5f\x73\141\155\154\x5f\x63\x75\163\x74\157\155\x65\162\x5f\x73\145\x74\x75\160\137\165\163\145\x72\156\x61\155\x65"]["\43\166\141\154\x75\145"];
+    $GC = $form["\155\151\156\x69\x6f\x72\x61\x6e\147\145\137\163\141\x6d\x6c\137\x63\165\163\164\x6f\155\145\162\x5f\163\x65\164\x75\x70\137\x70\150\x6f\156\145"]["\x23\166\x61\x6c\165\145"];
+    $YP = $form["\x6d\151\x6e\151\157\x72\x61\156\x67\145\137\163\x61\x6d\154\x5f\x63\x75\163\x74\157\x6d\145\x72\x5f\x73\x65\164\x75\x70\x5f\160\x61\163\163\x77\157\x72\144"]["\x23\166\x61\x6c\x75\145"]["\x70\141\x73\163\61"];
+    if (empty($vy) || empty($YP)) {
+        goto eu;
     }
-
-    $customer_config = new MiniorangeSAMLCustomer($username, $phone, $password, NULL);
-    $check_customer_response = json_decode($customer_config->checkCustomer());
-    if ($check_customer_response->status == 'CUSTOMER_NOT_FOUND') {
-        // Create customer.
-        // Store email and phone.
-        variable_set('miniorange_saml_customer_admin_email', $username);
-        //variable_set('miniorange_saml_customer_admin_email', $fname);
-        variable_set('miniorange_saml_customer_admin_phone', $phone);
-        variable_set('miniorange_saml_customer_admin_password', $password);
-
-        $send_otp_response = json_decode($customer_config->sendOtp());
-        if ($send_otp_response->status == 'SUCCESS') {
-            // Store txID.
-            variable_set('miniorange_saml_tx_id', $send_otp_response->txId);
-            $current_status = 'VALIDATE_OTP';
-            variable_set('miniorange_saml_status', $current_status);
-            drupal_set_message(t('Verify email address by entering the passcode sent to @username', array('@username' => $username)));
-        }
+    if (!valid_email_address($vy)) {
+        goto lU;
     }
-    elseif ($check_customer_response->status == 'CURL_ERROR') {
-        drupal_set_message(t('cURL is not enabled. Please enable cURL'), 'error');
+    goto U7;
+    eu:
+    drupal_set_message(t("\x54\x68\145\x20\74\x62\x3e\x3c\x75\76\105\x6d\x61\151\x6c\x3c\57\x75\76\x3c\57\x62\x3e\x20\141\156\144\x20\x3c\x62\x3e\x3c\165\76\120\x61\x73\163\167\x6f\162\144\x3c\x2f\x75\x3e\74\57\x62\x3e\40\146\x69\x65\x6c\144\163\x20\141\162\145\40\x72\145\x71\x75\x69\x72\145\144\56"), "\x65\x72\x72\157\x72");
+    return;
+    goto U7;
+    lU:
+    drupal_set_message(t("\x54\150\145\x20\145\155\x61\x69\x6c\x20\x61\x64\144\x72\145\163\163\x20\74\x62\76\x3c\151\x3e" . $vy . "\x3c\57\x69\x3e\74\57\142\76\40\151\163\x20\x6e\157\164\x20\x76\x61\154\x69\x64\56"), "\x65\162\x72\157\162");
+    return;
+    U7:
+    $nI = new MiniorangeSAMLCustomer($vy, $GC, $YP, NULL);
+    $BE = json_decode($nI->checkCustomer());
+    if ($BE->status == "\x43\x55\x53\x54\x4f\115\105\x52\137\x4e\117\124\x5f\x46\117\x55\116\104") {
+        goto ar;
     }
-    else {
-        // Customer exists. Retrieve keys.
-        $customer_keys_response = json_decode($customer_config->getCustomerKeys());
-        if (json_last_error() == JSON_ERROR_NONE) {
-          variable_set('miniorange_saml_customer_id', $customer_keys_response->id);
-          variable_set('miniorange_saml_customer_admin_token', $customer_keys_response->token);
-          variable_set('miniorange_saml_customer_admin_email', $username);
-          variable_set('miniorange_saml_customer_admin_phone', $phone);
-          variable_set('miniorange_saml_customer_api_key', $customer_keys_response->apiKey);
-          $current_status = 'PLUGIN_CONFIGURATION';
-          variable_set('miniorange_saml_status', $current_status);
-          drupal_set_message(t('Successfully retrieved your account.'));
-
+    if ($BE->status == "\x43\125\x52\114\137\105\122\122\117\x52") {
+        goto N6;
     }
-    else {
-      drupal_set_message(t('Invalid credentials'), 'error');
+    $DS = json_decode($nI->getCustomerKeys());
+    if (json_last_error() == JSON_ERROR_NONE) {
+        goto Xu;
     }
-  }
+    drupal_set_message(t("\111\156\166\x61\x6c\151\144\40\143\162\x65\144\x65\156\164\x69\x61\x6c\x73"), "\145\162\162\157\x72");
+    goto kQ;
+    Xu:
+    variable_set("\x6d\x69\x6e\x69\157\162\141\156\147\x65\x5f\x73\x61\x6d\154\137\x63\x75\163\x74\x6f\x6d\x65\x72\x5f\151\144", $DS->id);
+    variable_set("\x6d\151\x6e\x69\x6f\162\x61\x6e\x67\x65\137\x73\141\155\x6c\x5f\x63\x75\163\x74\x6f\155\x65\x72\x5f\141\x64\155\x69\x6e\x5f\164\157\153\145\x6e", $DS->token);
+    variable_set("\x6d\x69\x6e\151\x6f\x72\x61\x6e\147\x65\x5f\163\x61\x6d\154\x5f\143\165\163\x74\157\x6d\x65\162\137\x61\144\155\x69\x6e\x5f\x65\x6d\x61\x69\x6c", $vy);
+    variable_set("\155\x69\x6e\151\157\162\x61\156\147\x65\137\163\141\155\154\x5f\143\x75\163\x74\x6f\155\145\162\137\x61\144\155\x69\x6e\137\x70\150\x6f\x6e\145", $GC);
+    variable_set("\x6d\x69\156\x69\x6f\162\141\156\147\145\137\x73\x61\155\154\x5f\143\165\x73\x74\x6f\155\x65\162\137\141\160\x69\137\153\145\x79", $DS->apiKey);
+    $lB = "\120\114\x55\107\x49\116\x5f\x43\x4f\116\x46\111\x47\x55\122\x41\124\111\x4f\116";
+    variable_set("\x6d\x69\156\x69\x6f\x72\x61\156\x67\145\x5f\x73\x61\x6d\x6c\x5f\163\x74\x61\x74\x75\x73", $lB);
+    drupal_set_message(t("\123\x75\143\x63\145\x73\x73\x66\x75\x6c\x6c\x79\x20\x72\145\164\x72\151\x65\x76\x65\x64\x20\x79\x6f\165\162\40\141\x63\143\x6f\165\156\x74\56"));
+    kQ:
+    goto UP;
+    ar:
+    variable_set("\155\x69\x6e\x69\x6f\x72\141\156\147\145\137\x73\x61\155\154\x5f\x63\x75\163\x74\157\x6d\145\162\137\x61\144\155\x69\x6e\x5f\145\x6d\141\151\154", $vy);
+    variable_set("\x6d\151\156\x69\157\162\x61\156\x67\145\137\x73\141\155\154\137\x63\165\x73\164\x6f\x6d\x65\x72\x5f\x61\x64\155\151\156\137\x70\x68\157\156\145", $GC);
+    variable_set("\155\x69\x6e\151\x6f\162\141\156\147\145\x5f\163\x61\x6d\154\137\143\x75\163\164\x6f\155\145\x72\x5f\141\144\155\151\x6e\x5f\x70\x61\163\163\167\x6f\x72\x64", $YP);
+    $ym = json_decode($nI->sendOtp());
+    if (!($ym->status == "\123\125\x43\103\105\x53\x53")) {
+        goto bo;
+    }
+    variable_set("\x6d\x69\156\151\x6f\162\x61\x6e\x67\x65\137\x73\141\x6d\x6c\137\164\x78\137\x69\144", $ym->txId);
+    $lB = "\126\101\114\111\x44\101\x54\105\137\x4f\x54\x50";
+    variable_set("\155\x69\x6e\x69\x6f\x72\141\156\x67\x65\x5f\163\x61\x6d\154\x5f\x73\164\141\x74\165\163", $lB);
+    drupal_set_message(t("\x56\x65\x72\151\146\x79\x20\x65\155\141\x69\154\40\x61\x64\x64\162\145\163\163\40\142\171\40\x65\156\164\x65\x72\151\x6e\147\40\x74\150\x65\x20\x70\141\x73\163\x63\157\x64\145\x20\163\145\x6e\x74\40\x74\x6f\40\x40\165\x73\145\x72\x6e\x61\x6d\145", array("\100\x75\x73\145\162\x6e\x61\x6d\x65" => $vy)));
+    bo:
+    goto UP;
+    N6:
+    drupal_set_message(t("\143\125\x52\x4c\40\x69\163\40\x6e\x6f\164\40\145\156\141\142\x6c\x65\x64\x2e\40\120\x6c\145\x61\163\x65\40\145\x6e\141\142\x6c\x65\x20\143\125\122\x4c"), "\x65\x72\x72\x6f\x72");
+    UP:
 }
-
-/**
- * Handle back button submit for customer setup.
- */
-function miniorange_saml_back(&$form, $form_state) {
-  $current_status = 'CUSTOMER_SETUP';
-  variable_set('miniorange_saml_status', $current_status);
-  variable_del('miniorange_saml_customer_admin_email');
-  variable_del('miniorange_saml_customer_admin_phone');
-  variable_del('miniorange_saml_tx_id');
-  drupal_set_message(t('Register/Login with your miniOrange Account'));
+function miniorange_saml_back(&$form, $form_state)
+{
+    $lB = "\x43\125\123\x54\117\x4d\x45\x52\137\x53\105\124\125\120";
+    variable_set("\x6d\151\x6e\151\157\162\x61\156\147\145\137\163\x61\155\x6c\137\163\164\x61\x74\x75\163", $lB);
+    variable_del("\x6d\x69\156\x69\x6f\x72\x61\x6e\147\x65\137\163\x61\155\x6c\x5f\x63\165\163\164\x6f\155\145\162\137\141\144\x6d\x69\156\137\145\x6d\x61\151\154");
+    variable_del("\155\151\x6e\x69\x6f\162\141\156\x67\145\x5f\x73\141\155\154\x5f\143\x75\x73\164\x6f\x6d\145\162\137\141\144\x6d\x69\x6e\x5f\x70\x68\157\x6e\x65");
+    variable_del("\x6d\151\156\151\x6f\x72\x61\x6e\x67\x65\137\163\x61\155\154\x5f\x74\170\x5f\x69\x64");
+    drupal_set_message(t("\122\x65\147\151\163\164\145\x72\x2f\x4c\157\147\151\156\x20\167\151\164\x68\40\171\x6f\x75\x72\40\x6d\x69\156\x69\117\162\x61\156\147\x65\x20\101\x63\143\x6f\x75\x6e\x74"));
 }
-
-/**
-* Handle submit for license submit.
-*/
 function miniorange_saml_validate_license_submit(&$form, $form_state)
 {
-    $code = trim($form['miniorange_saml_license_key']['#value']);
-    $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-    $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
-    $customer = new MiniorangeSAMLCustomer($username, $phone,NULL,NULL);
-
-    $license_status = json_decode( $customer->ccl(), true );
-
-    if( !isset( $license_status['status'] ) || $license_status['status'] != 'SUCCESS' || $license_status['licensePlan'] != MiniorangeSAMLConstants::PLAN_NAME ) {
-      drupal_set_message(t('Invalid license! Please use a valid license to activate the module.'),'error');
-      return;
+    $yk = trim($form["\x6d\151\156\x69\x6f\162\x61\156\x67\145\137\163\x61\155\x6c\137\154\x69\x63\x65\156\x73\x65\x5f\x6b\145\x79"]["\x23\x76\x61\x6c\x75\145"]);
+    $vy = variable_get("\x6d\151\x6e\151\x6f\162\141\156\x67\145\137\163\141\x6d\154\x5f\x63\x75\x73\x74\157\155\x65\162\x5f\141\144\155\x69\156\137\x65\x6d\x61\151\154", NULL);
+    $GC = variable_get("\x6d\151\x6e\x69\x6f\162\x61\x6e\147\x65\137\163\x61\155\x6c\137\143\165\x73\x74\157\x6d\145\x72\137\141\x64\x6d\x69\x6e\137\x70\x68\x6f\156\145", NULL);
+    $rZ = new MiniorangeSAMLCustomer($vy, $GC, NULL, NULL);
+    $XC = json_decode($rZ->ccl(), true);
+    if (!(!isset($XC["\163\x74\141\x74\165\x73"]) || $XC["\163\164\141\x74\x75\163"] != "\123\x55\x43\103\105\123\123" || $XC["\x6c\151\x63\x65\156\163\145\x50\154\x61\x6e"] != MiniorangeSAMLConstants::PLAN_NAME)) {
+        goto Fg;
     }
-
-
-    $content = json_decode($customer->verifyLicense($code),true);
-    if(strcasecmp($content['status'], 'SUCCESS') == 0) {
-        variable_set('miniorange_saml_licenseExpiry',$license_status['licenseExpiry']);
-        variable_set('miniorange_saml_supportExpiry',$license_status['supportExpiry']);
-        $key = variable_get('miniorange_saml_customer_admin_token');
-        variable_set('miniorange_saml_license_key',AESEncryption::encrypt_data($code,$key));
-        variable_set('t_site_status',AESEncryption::encrypt_data("false",$key));
-        variable_set('site_ck_l',AESEncryption::encrypt_data("true",$key));
-        drupal_set_message(t('Your license is verified. You can now setup the module.'));
-
-        /**
-		*	Encrypting domain and install paths and storing in database
-		*/
-
-		global $base_url;
-		global $base_path;
-		$inst_path= $_SERVER['DOCUMENT_ROOT'].$base_path;
-		$home_url = trim($base_url, '/');
-		if (!preg_match('#^http(s)?://#', $home_url)) {
-			$home_url = 'http://' . $home_url;
-			}
-		$urlParts = parse_url($home_url);
-		$domain = preg_replace('/^www\./', '', $urlParts['host'].$urlParts['path']);
-        $fraud_check = $inst_path . $domain;
-		variable_set('minorange_saml_customer_admin_fraud_check',AESEncryption::encrypt_data($fraud_check,$key));
-	}else if(strcasecmp($content['status'], 'FAILED') == 0)
-	{
-		if(strcasecmp($content['message'], 'Code has Expired') == 0) {
-				drupal_set_message(t('License key you have entered has already been used. Please enter a key which has not been used before on any other instance or if you have exausted all your keys then buy more license from Licensing'), 'error');
-		}else {
-				drupal_set_message(t('You have entered an invalid license key. Please enter a valid license key.'), 'error');
-		}
-	}else {
-		drupal_set_message(t('An error occured while processing your request. Please Try again.'), 'error');
-	}
+    drupal_set_message(t("\111\x6e\x76\141\x6c\151\144\x20\x6c\x69\143\145\156\x73\x65\x21\x20\x50\154\145\141\x73\x65\40\x75\163\145\40\141\x20\166\x61\154\151\x64\40\154\x69\x63\145\x6e\x73\145\x20\164\157\x20\x61\x63\x74\151\x76\141\x74\x65\x20\x74\150\x65\40\155\157\x64\x75\154\145\x2e"), "\x65\162\x72\157\x72");
+    return;
+    Fg:
+    $Ez = json_decode($rZ->verifyLicense($yk), true);
+    if (strcasecmp($Ez["\163\x74\x61\164\x75\x73"], "\123\x55\103\x43\105\123\x53") == 0) {
+        goto SG;
+    }
+    if (strcasecmp($Ez["\163\164\141\x74\165\x73"], "\106\101\111\114\x45\104") == 0) {
+        goto z6;
+    }
+    drupal_set_message(t("\x41\x6e\x20\145\x72\x72\x6f\x72\x20\x6f\x63\143\x75\162\x65\144\40\x77\x68\x69\x6c\x65\40\160\162\x6f\143\x65\x73\x73\151\x6e\x67\40\171\157\x75\x72\x20\x72\x65\x71\x75\x65\163\164\56\x20\x50\154\x65\x61\163\145\40\124\162\x79\40\141\x67\141\x69\x6e\56"), "\145\162\x72\x6f\162");
+    goto Sq;
+    z6:
+    if (strcasecmp($Ez["\x6d\x65\163\x73\141\x67\145"], "\x43\x6f\x64\145\40\150\x61\x73\x20\x45\170\x70\151\162\x65\x64") == 0) {
+        goto Ua;
+    }
+    drupal_set_message(t("\x59\x6f\x75\x20\x68\141\166\x65\x20\145\156\164\145\x72\145\144\40\x61\x6e\x20\x69\156\x76\x61\154\151\144\40\x6c\151\143\145\156\163\145\x20\x6b\145\171\x2e\x20\x50\154\x65\141\x73\x65\40\145\x6e\x74\145\162\x20\x61\x20\x76\x61\154\151\x64\40\154\151\x63\x65\156\x73\x65\x20\x6b\x65\x79\56"), "\x65\162\x72\x6f\162");
+    goto Hb;
+    Ua:
+    drupal_set_message(t("\x4c\x69\143\145\x6e\163\145\x20\x6b\145\x79\x20\x79\157\165\40\150\141\x76\x65\x20\145\156\164\145\x72\x65\x64\40\x68\x61\163\40\141\154\x72\145\x61\144\171\40\x62\x65\145\156\x20\165\163\x65\x64\x2e\40\120\154\145\x61\x73\x65\40\145\x6e\164\145\x72\40\x61\x20\x6b\145\x79\40\x77\x68\151\143\150\x20\x68\141\x73\x20\x6e\157\x74\x20\x62\145\145\156\x20\x75\x73\145\x64\x20\142\x65\146\157\162\145\x20\x6f\156\40\x61\x6e\171\x20\x6f\x74\150\x65\x72\40\x69\x6e\x73\164\141\156\143\x65\x20\x6f\162\x20\x69\x66\x20\x79\x6f\165\40\x68\141\166\145\40\x65\x78\141\165\163\x74\145\x64\x20\141\154\x6c\40\x79\157\165\162\40\x6b\145\171\x73\x20\x74\150\x65\x6e\x20\142\165\x79\x20\x6d\x6f\162\145\x20\154\x69\x63\145\156\163\145\x20\146\162\x6f\x6d\x20\114\151\x63\x65\x6e\163\x69\x6e\x67"), "\145\x72\x72\157\162");
+    Hb:
+    Sq:
+    goto mI;
+    SG:
+    variable_set("\x6d\151\156\151\157\x72\x61\x6e\147\x65\137\163\141\155\154\x5f\154\151\143\x65\156\x73\145\105\x78\x70\151\x72\x79", $XC["\154\151\143\145\x6e\163\x65\x45\x78\160\151\x72\x79"]);
+    variable_set("\155\151\156\151\157\162\x61\156\147\x65\x5f\163\x61\155\x6c\137\x73\165\160\160\x6f\x72\x74\105\170\160\x69\162\171", $XC["\163\x75\160\x70\157\x72\x74\x45\170\160\x69\162\x79"]);
+    $aC = variable_get("\x6d\x69\x6e\x69\x6f\162\x61\156\x67\145\x5f\163\x61\x6d\154\137\143\x75\163\x74\x6f\155\x65\162\137\141\144\x6d\151\156\137\164\x6f\153\145\x6e");
+    variable_set("\x6d\x69\156\x69\x6f\162\x61\156\x67\x65\x5f\163\x61\155\x6c\137\154\151\x63\x65\x6e\163\145\137\153\145\171", AESEncryption::encrypt_data($yk, $aC));
+    variable_set("\x74\137\163\151\x74\x65\x5f\163\164\x61\164\x75\x73", AESEncryption::encrypt_data("\x66\x61\154\163\x65", $aC));
+    variable_set("\x73\151\x74\x65\137\143\153\137\x6c", AESEncryption::encrypt_data("\164\x72\x75\145", $aC));
+    drupal_set_message(t("\131\157\165\162\40\x6c\x69\x63\145\156\x73\x65\40\x69\163\40\x76\145\x72\151\x66\x69\x65\x64\56\40\x59\x6f\165\40\x63\x61\156\40\x6e\x6f\x77\x20\x73\145\x74\x75\x70\x20\164\150\145\x20\155\x6f\144\165\154\x65\56"));
+    global $base_url;
+    global $ZK;
+    $sW = $_SERVER["\x44\117\103\x55\x4d\x45\116\x54\x5f\122\117\117\x54"] . $ZK;
+    $sk = trim($base_url, "\x2f");
+    if (preg_match("\x23\136\150\x74\x74\x70\x28\x73\x29\77\72\57\57\43", $sk)) {
+        goto aE;
+    }
+    $sk = "\150\164\164\160\72\x2f\57" . $sk;
+    aE:
+    $Dm = parse_url($sk);
+    $d_ = preg_replace("\57\136\167\x77\167\134\x2e\57", '', $Dm["\150\x6f\x73\x74"] . $Dm["\x70\141\164\x68"]);
+    $xl = $sW . $d_;
+    variable_set("\155\x69\156\157\162\141\x6e\147\145\137\163\141\x6d\154\x5f\143\165\x73\x74\x6f\x6d\145\162\137\141\x64\x6d\x69\x6e\137\146\162\x61\x75\x64\137\143\x68\145\x63\153", AESEncryption::encrypt_data($xl, $aC));
+    mI:
 }
-
-
-/**
- * Send support query.
- */
 function miniorange_saml_idp_send_query(&$form, $form_state)
 {
-    $email = $form['miniorange_saml_email_address_support']['#value'];
-    $phone = $form['miniorange_saml_phone_number_support']['#value'];
-    $query = $form['miniorange_saml_support_query_support']['#value'];
-    Utilities::send_query($email, $phone, $query);
+    $k6 = $form["\x6d\151\156\x69\157\x72\141\x6e\147\145\137\x73\141\x6d\x6c\x5f\x65\155\141\151\154\x5f\141\x64\144\162\145\x73\163\x5f\x73\165\160\160\157\x72\164"]["\43\x76\x61\154\165\145"];
+    $GC = $form["\x6d\x69\x6e\x69\x6f\x72\x61\156\x67\145\x5f\x73\141\x6d\154\137\x70\150\x6f\x6e\x65\x5f\x6e\x75\x6d\x62\x65\162\137\163\165\x70\160\x6f\x72\x74"]["\x23\x76\x61\x6c\x75\145"];
+    $rD = $form["\155\151\x6e\x69\x6f\162\141\x6e\x67\145\x5f\x73\x61\155\154\137\x73\x75\160\160\157\162\164\x5f\x71\165\x65\162\171\137\x73\165\x70\x70\x6f\x72\164"]["\x23\x76\x61\x6c\x75\145"];
+    Utilities::send_query($k6, $GC, $rD);
 }
-
 function miniorange_saml_remove_account(&$form, $form_state)
 {
-    if (isset($_POST['value_check']) && $_POST['value_check'] == 'True')
-    {
-        if(variable_get('miniorange_saml_license_key',NULL) != NULL) {
-
-            $username = variable_get('miniorange_saml_customer_admin_email', NULL);
-            $phone = variable_get('miniorange_saml_customer_admin_phone', NULL);
-            $customer = new MiniorangeSAMLCustomer($username,$phone,NULL,NULL);
-            $response = json_decode($customer->updateStatus());
-
-            if($response->status == 'SUCCESS') {
-
-                variable_del('miniorange_saml_license_key');
-                variable_del('miniorange_saml_customer_admin_email');
-                variable_del('miniorange_saml_customer_admin_phone');
-                variable_del('miniorange_saml_customer_api_key');
-                variable_del('miniorange_saml_customer_admin_token');
-                variable_del('miniorange_saml_customer_setup_password[pass1]');
-                variable_del('miniorange_saml_customer_setup_password[pass2]');
-
-                variable_set('miniorange_saml_status', 'CUSTOMER_SETUP');
-                drupal_set_message(t('Your Account Has Been Removed Successfully!'),'status');
-                $_POST['value_check'] = 'False';
-            }
-        }
+    if (isset($_POST["\x76\141\x6c\x75\145\x5f\x63\x68\x65\143\153"]) && $_POST["\166\141\x6c\x75\x65\x5f\143\x68\145\x63\x6b"] == "\x54\x72\165\145") {
+        goto ZW;
     }
-    else
-    {
-        $myArray = array();
-        $myArray = $_POST;
-        $form_id = $_POST['form_id'];
-        $form_token = $_POST['form_token'];
-        $op = $_POST['op'];
-        $build_id = $_POST['form_build_id'];
-        ?>
-
-        <html>
-        <head>
-            <title>Confirmation</title>
-            <link href="https://fonts.googleapis.com/css?family=PT+Serif" rel="stylesheet">
-        </head>
-
-        <body style="font-family: 'PT Serif', serif;">
-        <div style="margin: 15% auto; height:35%; width: 40%; background-color: #eaebed; text-align: center; box-shadow: 10px 5px 5px darkgray; border-radius: 2%;">
-            <div style="color: #a94442; background-color:#f2dede; padding: 15px; margin-bottom: 20px; text-align:center; border:1px solid #E6B3B2; font-size:16pt; border-radius: 2%;">
-                <strong>Are you sure you want to remove account..!!</strong>
-            </div>
-            <p style="font-size:14px; margin-left: 8%; margin-right: 8%"><strong>Warning </strong>: If you remove your account, you will have to enter licence Key Again after login/sign in with the new account.</p>
-                <br/>
-                <form name="f" method="post" action="" id="mo_remove_account">
-                    <div>
-                            <input type="hidden" name="op" value=<?php echo $op;?>>
-                            <input type="hidden" name="form_build_id" value= <?php echo $build_id;?>>
-                            <input type="hidden" name="form_token" value=<?php echo $form_token;?>>
-                            <input type="hidden" name="form_id" value= <?php echo $form_id;?>>
-                            <input type="hidden" name="value_check" value= 'True'>
-                    </div>
-                    <div  style="margin: auto; text-align: center;"   class="mo2f_modal-footer">
-                        <input type="submit" style=" padding:1%; width:100px; background: #0091CD none repeat scroll 0% 0%; cursor: pointer; font-size:15px; border-width: 1px; border-style: solid; border-radius: 3px; white-space: nowrap; box-sizing: border-box;border-color: #0073AA; box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset; color: #FFF;" name="miniorange_confirm_submit" class="button button-danger button-large" value="Confirm"/>
-                    </div>
-                </form>
-        </div>
-        </body>
-        </html>
-        <?php
-        exit;
+    $Kf = array();
+    $Kf = $_POST;
+    $nV = $_POST["\x66\x6f\162\x6d\137\x69\x64"];
+    $Rz = $_POST["\x66\157\162\x6d\137\x74\157\153\145\x6e"];
+    $mA = $_POST["\x6f\160"];
+    $jB = $_POST["\146\157\x72\155\137\x62\x75\151\154\x64\x5f\151\144"];
+    echo "\xd\12\40\40\40\x20\40\x20\40\40\x3c\x68\164\155\154\76\xd\xa\x20\40\40\40\40\x20\x20\40\74\x68\145\141\x64\x3e\xd\xa\40\40\40\x20\x20\40\40\x20\x20\x20\x20\x20\74\x74\151\x74\154\145\76\103\x6f\x6e\146\151\162\x6d\141\x74\151\x6f\156\74\x2f\164\151\164\x6c\145\x3e\xd\xa\40\40\x20\40\x20\x20\40\40\40\x20\x20\40\x3c\x6c\151\x6e\153\x20\x68\162\145\x66\75\42\150\164\x74\160\163\72\x2f\x2f\146\x6f\x6e\x74\x73\x2e\147\x6f\x6f\x67\x6c\145\141\x70\x69\163\x2e\x63\x6f\x6d\57\x63\x73\x73\77\146\141\x6d\x69\x6c\171\x3d\x50\124\53\x53\145\162\x69\x66\x22\x20\162\x65\154\75\42\163\x74\171\154\145\163\x68\x65\x65\164\42\x3e\15\12\40\x20\40\x20\x20\40\40\40\x3c\x2f\x68\145\x61\x64\x3e\xd\xa\15\xa\x20\40\40\x20\x20\40\x20\40\74\x62\x6f\144\x79\40\163\x74\x79\154\x65\x3d\42\x66\x6f\156\x74\55\x66\141\155\151\x6c\171\72\40\x27\120\124\40\123\145\162\x69\146\47\54\x20\163\x65\162\x69\146\x3b\x22\76\xd\xa\40\40\40\x20\40\x20\x20\40\x3c\144\151\x76\40\x73\x74\x79\154\145\x3d\42\x6d\x61\x72\x67\x69\156\x3a\x20\61\x35\x25\40\x61\x75\x74\157\73\40\150\x65\x69\147\150\x74\72\x33\x35\x25\x3b\40\x77\151\144\164\150\x3a\40\x34\x30\45\x3b\x20\142\141\x63\x6b\147\162\x6f\165\156\144\x2d\x63\157\x6c\157\x72\72\x20\43\145\141\x65\x62\145\144\x3b\40\x74\x65\170\x74\55\141\154\151\x67\x6e\x3a\x20\x63\x65\156\x74\x65\162\x3b\40\142\157\170\x2d\163\150\x61\144\x6f\167\x3a\40\x31\60\x70\x78\40\65\160\x78\x20\65\160\x78\x20\144\x61\162\x6b\147\162\x61\x79\73\x20\x62\x6f\162\x64\x65\162\55\162\141\144\x69\x75\163\72\40\x32\x25\x3b\42\x3e\15\12\x20\x20\40\40\40\x20\40\40\x20\x20\x20\x20\74\x64\x69\166\x20\163\x74\x79\x6c\x65\x3d\42\x63\x6f\154\157\x72\72\x20\x23\141\x39\64\x34\64\x32\73\40\x62\x61\x63\153\x67\162\x6f\165\x6e\144\x2d\x63\157\x6c\157\162\x3a\43\146\x32\144\x65\x64\x65\x3b\x20\160\x61\144\x64\x69\156\147\72\40\61\x35\160\170\73\40\155\141\162\147\151\156\x2d\x62\157\164\x74\x6f\x6d\72\x20\x32\60\x70\170\73\40\x74\145\x78\164\55\141\154\x69\147\x6e\72\143\145\156\x74\145\162\73\40\x62\x6f\162\144\x65\x72\72\x31\x70\x78\x20\x73\157\154\x69\144\x20\43\x45\x36\x42\x33\102\62\73\40\x66\157\x6e\164\x2d\x73\151\x7a\145\x3a\61\66\x70\164\x3b\x20\x62\157\x72\144\145\x72\x2d\x72\141\x64\x69\x75\163\x3a\40\x32\x25\x3b\x22\x3e\15\xa\x20\40\40\x20\40\x20\40\40\x20\x20\40\40\40\40\x20\40\x3c\x73\x74\162\157\x6e\x67\x3e\101\162\x65\x20\x79\157\x75\40\163\165\x72\145\x20\x79\157\165\40\x77\x61\x6e\x74\40\164\157\40\162\145\155\157\x76\x65\40\141\x63\143\157\x75\156\x74\56\56\x21\x21\74\57\163\164\162\x6f\x6e\147\76\xd\xa\x20\x20\40\x20\x20\x20\x20\x20\x20\40\x20\40\x3c\x2f\144\151\x76\76\15\xa\40\x20\40\x20\40\40\x20\x20\40\40\x20\40\x3c\x70\x20\x73\164\x79\154\145\75\x22\x66\x6f\x6e\164\x2d\x73\151\172\145\x3a\61\64\160\x78\73\x20\155\x61\162\147\151\156\x2d\154\145\146\164\72\x20\x38\45\x3b\x20\x6d\x61\x72\147\151\x6e\55\162\151\x67\x68\164\72\x20\x38\x25\42\x3e\x3c\163\164\x72\x6f\156\x67\x3e\127\x61\162\156\151\156\x67\40\74\57\x73\x74\x72\x6f\156\147\76\x3a\x20\x49\x66\40\x79\157\x75\x20\x72\x65\x6d\x6f\166\145\x20\171\157\x75\x72\40\x61\x63\x63\x6f\165\156\164\x2c\x20\171\x6f\165\x20\x77\151\x6c\x6c\x20\150\x61\166\145\40\x74\157\40\x65\x6e\x74\145\x72\40\154\x69\143\145\156\143\145\x20\x4b\x65\171\40\101\147\x61\x69\x6e\x20\141\146\x74\145\162\40\x6c\157\x67\151\156\57\x73\151\147\x6e\40\x69\156\40\167\x69\x74\150\40\x74\x68\145\x20\x6e\145\167\x20\x61\x63\143\x6f\x75\156\164\x2e\x3c\x2f\160\76\xd\xa\x20\x20\40\40\40\40\40\40\40\x20\x20\x20\40\x20\x20\x20\x3c\142\162\57\76\xd\xa\x20\40\40\40\40\40\40\40\x20\40\40\x20\x20\x20\x20\40\74\146\x6f\x72\155\40\x6e\x61\155\145\x3d\42\146\x22\x20\x6d\145\164\x68\x6f\144\75\x22\x70\157\x73\x74\x22\x20\x61\143\x74\151\157\156\x3d\x22\42\40\151\x64\x3d\42\x6d\157\137\162\145\155\x6f\x76\145\x5f\x61\x63\x63\x6f\165\156\164\42\x3e\xd\xa\40\40\x20\x20\40\x20\40\40\40\40\40\x20\40\x20\x20\40\x20\40\40\x20\74\144\x69\166\76\xd\xa\x20\x20\x20\40\40\x20\x20\x20\x20\40\x20\x20\x20\40\x20\40\40\x20\x20\40\40\40\40\x20\x20\40\x20\40\x3c\151\x6e\x70\x75\164\40\164\x79\160\x65\75\42\x68\151\x64\144\x65\x6e\x22\x20\156\x61\155\145\75\x22\x6f\160\x22\40\x76\x61\154\165\x65\75";
+    echo $mA;
+    echo "\x3e\xd\xa\x20\x20\40\40\x20\x20\40\40\x20\40\40\40\x20\40\x20\40\40\40\40\x20\40\40\40\x20\x20\40\x20\x20\74\151\x6e\160\x75\x74\x20\x74\x79\x70\x65\x3d\x22\150\x69\x64\144\145\x6e\42\x20\156\x61\x6d\x65\75\42\x66\x6f\x72\155\x5f\x62\165\x69\x6c\144\137\x69\144\42\40\166\141\154\165\145\75\40";
+    echo $jB;
+    echo "\x3e\15\12\x20\40\40\40\x20\40\40\x20\40\x20\x20\x20\40\x20\x20\40\x20\x20\40\40\x20\x20\40\40\40\40\x20\x20\74\x69\156\x70\165\x74\x20\164\x79\x70\x65\x3d\42\x68\151\144\144\145\156\42\x20\156\141\x6d\x65\75\42\x66\157\162\x6d\x5f\164\157\x6b\145\x6e\x22\x20\166\141\x6c\x75\145\75";
+    echo $Rz;
+    echo "\x3e\xd\12\40\40\40\x20\40\40\x20\40\40\40\40\x20\x20\40\40\x20\40\40\40\40\x20\40\40\x20\40\40\x20\x20\74\151\156\x70\x75\164\40\x74\x79\160\145\75\x22\x68\151\144\144\145\156\x22\40\x6e\x61\x6d\x65\75\x22\146\x6f\162\x6d\x5f\x69\144\x22\40\x76\x61\x6c\165\145\75\x20";
+    echo $nV;
+    echo "\76\xd\xa\40\40\x20\40\40\x20\40\x20\40\x20\40\40\x20\x20\x20\x20\x20\x20\40\x20\x20\40\x20\40\x20\x20\x20\x20\74\x69\x6e\x70\165\164\40\x74\x79\160\x65\75\x22\150\151\144\144\x65\156\42\x20\156\141\x6d\145\x3d\x22\x76\x61\154\x75\x65\x5f\x63\150\x65\143\153\x22\x20\166\141\154\165\145\75\40\47\x54\x72\x75\x65\47\76\15\12\x20\40\x20\40\x20\x20\40\40\40\x20\40\x20\x20\x20\x20\40\40\x20\40\40\74\57\144\x69\166\x3e\xd\12\x20\x20\x20\40\40\40\x20\x20\x20\40\40\x20\40\40\40\40\40\x20\x20\x20\74\144\151\166\40\40\163\164\x79\x6c\145\75\x22\x6d\x61\162\147\x69\x6e\x3a\40\x61\x75\x74\x6f\73\40\x74\x65\x78\x74\x2d\141\154\x69\147\156\x3a\40\x63\145\x6e\x74\145\162\73\x22\40\40\40\143\x6c\x61\163\x73\75\42\x6d\x6f\62\146\137\x6d\157\144\x61\x6c\55\x66\x6f\157\164\x65\162\42\76\15\12\40\40\x20\x20\x20\40\40\40\x20\40\x20\x20\40\40\x20\x20\40\40\x20\x20\40\x20\x20\40\74\151\156\160\165\x74\x20\164\x79\160\x65\x3d\42\163\165\x62\155\151\164\x22\40\x73\164\171\x6c\145\x3d\42\x20\x70\141\144\x64\x69\156\x67\72\61\45\x3b\40\x77\x69\x64\164\x68\72\61\x30\60\160\170\73\40\x62\x61\x63\x6b\x67\x72\157\165\156\x64\72\x20\43\x30\60\x39\x31\x43\x44\x20\156\157\x6e\x65\x20\x72\145\160\145\x61\164\x20\x73\x63\162\157\154\154\x20\60\45\40\x30\x25\x3b\x20\x63\165\162\163\157\162\72\40\160\157\x69\156\164\145\162\73\40\146\157\x6e\164\x2d\163\151\172\145\72\x31\65\160\x78\73\40\x62\x6f\162\144\145\x72\55\x77\151\144\x74\x68\72\x20\x31\160\170\x3b\40\142\157\162\144\x65\x72\x2d\163\x74\171\154\145\72\40\163\157\x6c\x69\144\x3b\40\x62\x6f\162\144\145\x72\55\162\141\144\151\x75\x73\x3a\x20\x33\160\x78\x3b\x20\167\150\x69\x74\145\55\163\x70\141\143\x65\x3a\x20\156\157\167\162\x61\160\x3b\x20\142\157\170\x2d\x73\151\172\151\156\x67\72\x20\142\x6f\162\x64\x65\x72\x2d\142\157\170\x3b\x62\157\x72\144\145\x72\55\x63\157\x6c\157\x72\72\x20\x23\x30\60\67\63\x41\101\x3b\40\142\157\170\x2d\163\150\141\x64\157\167\x3a\40\60\x70\x78\40\x31\x70\170\40\x30\x70\x78\40\x72\x67\142\141\x28\x31\x32\x30\54\40\x32\60\60\x2c\x20\62\x33\60\x2c\40\x30\x2e\66\x29\40\151\x6e\163\145\164\73\x20\143\x6f\x6c\x6f\x72\72\x20\x23\106\x46\x46\x3b\42\x20\156\x61\155\x65\x3d\x22\x6d\x69\156\x69\157\162\141\x6e\x67\x65\137\x63\157\x6e\146\151\x72\x6d\137\x73\165\x62\x6d\x69\x74\42\40\143\x6c\141\163\x73\75\x22\x62\x75\164\164\157\156\40\142\165\x74\x74\157\x6e\55\144\141\x6e\147\x65\x72\x20\142\x75\164\164\x6f\156\x2d\154\141\162\147\x65\x22\x20\166\141\x6c\x75\145\x3d\x22\103\157\156\146\x69\x72\155\x22\x2f\x3e\15\12\40\40\40\40\x20\x20\x20\40\x20\40\x20\40\40\x20\x20\40\x20\x20\x20\x20\74\57\x64\x69\x76\x3e\15\12\40\40\40\40\x20\x20\x20\40\x20\40\x20\40\40\x20\x20\x20\x3c\x2f\146\157\162\155\76\xd\12\40\40\x20\x20\40\40\40\x20\x3c\57\144\x69\166\x3e\xd\12\x20\x20\40\40\x20\x20\x20\x20\74\x2f\x62\157\x64\171\76\15\12\x20\40\40\40\40\x20\40\40\x3c\x2f\x68\x74\x6d\154\76\15\xa\40\40\x20\x20\40\40\40\x20";
+    exit;
+    goto Zf;
+    ZW:
+    if (!(variable_get("\155\151\x6e\151\x6f\x72\141\156\x67\145\137\163\x61\x6d\x6c\x5f\154\151\143\x65\156\x73\145\x5f\153\x65\171", NULL) != NULL)) {
+        goto pG;
     }
+    $vy = variable_get("\x6d\x69\x6e\151\157\162\141\156\x67\145\x5f\163\141\x6d\154\x5f\x63\165\x73\x74\157\155\x65\x72\x5f\x61\x64\155\x69\156\137\145\x6d\x61\151\x6c", NULL);
+    $GC = variable_get("\155\x69\156\x69\x6f\162\141\x6e\x67\x65\137\x73\141\155\154\x5f\143\x75\163\x74\157\x6d\x65\x72\137\x61\x64\x6d\x69\156\x5f\x70\x68\157\x6e\145", NULL);
+    $rZ = new MiniorangeSAMLCustomer($vy, $GC, NULL, NULL);
+    $bz = json_decode($rZ->updateStatus());
+    if (!($bz->status == "\123\125\103\x43\x45\x53\x53")) {
+        goto Rz;
+    }
+    variable_del("\x6d\x69\156\x69\x6f\x72\141\156\x67\x65\x5f\x73\x61\x6d\x6c\137\154\151\143\x65\156\x73\145\137\x6b\x65\171");
+    variable_del("\155\151\x6e\151\157\162\141\x6e\x67\x65\137\163\x61\x6d\154\137\x63\x75\x73\164\x6f\155\145\x72\x5f\x61\x64\155\x69\156\x5f\x65\155\x61\x69\154");
+    variable_del("\x6d\151\156\151\157\162\x61\156\x67\145\137\163\x61\155\x6c\137\143\165\x73\x74\157\155\145\162\137\141\144\x6d\151\156\137\160\x68\157\x6e\145");
+    variable_del("\x6d\x69\156\x69\x6f\162\x61\156\147\145\137\x73\141\x6d\x6c\x5f\143\165\163\x74\x6f\155\145\x72\137\x61\160\151\x5f\153\145\x79");
+    variable_del("\x6d\x69\x6e\x69\x6f\162\x61\156\147\145\137\163\x61\x6d\x6c\x5f\143\x75\163\x74\x6f\155\x65\x72\137\141\144\155\151\156\137\x74\157\153\x65\156");
+    variable_del("\155\x69\156\151\157\162\x61\x6e\x67\145\137\x73\x61\155\154\x5f\x63\x75\163\164\x6f\x6d\145\x72\137\x73\145\x74\x75\x70\x5f\x70\141\x73\163\167\x6f\162\x64\x5b\160\141\x73\163\61\135");
+    variable_del("\155\x69\x6e\151\x6f\x72\141\x6e\147\x65\x5f\x73\x61\x6d\x6c\x5f\x63\165\x73\164\x6f\x6d\x65\162\137\163\x65\x74\x75\160\x5f\x70\x61\x73\163\x77\x6f\x72\144\133\160\141\x73\x73\62\x5d");
+    variable_set("\x6d\x69\156\151\157\x72\x61\156\x67\145\x5f\x73\141\155\x6c\x5f\x73\x74\141\x74\165\163", "\103\125\x53\124\x4f\x4d\x45\x52\x5f\123\105\124\x55\x50");
+    drupal_set_message(t("\x59\157\x75\x72\x20\101\143\143\157\x75\x6e\x74\x20\x48\x61\163\x20\x42\x65\145\156\40\122\x65\x6d\x6f\166\x65\144\x20\123\165\x63\143\145\x73\x73\x66\x75\154\154\171\x21"), "\x73\x74\141\x74\165\x73");
+    $_POST["\166\x61\154\165\145\137\143\150\145\x63\x6b"] = "\106\x61\x6c\x73\145";
+    Rz:
+    pG:
+    Zf:
 }

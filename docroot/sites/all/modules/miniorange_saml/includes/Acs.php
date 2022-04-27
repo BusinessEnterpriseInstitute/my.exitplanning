@@ -1,288 +1,298 @@
 <?php
-/**
- * @package    miniOrange
- * @author	   miniOrange Security Software Pvt. Ltd.
- * @license    GNU/GPLv3
- * @copyright  Copyright 2015 miniOrange. All Rights Reserved.
- *
- *
- * This file is part of miniOrange SAML plugin.
- */
-
-/**
- * The MiniOrangeAcs class.
- */
-class MiniOrangeAcs {
-
-  /**
-   * The function processSamlResponse.
-   */
-  public function processSamlResponse($post, $base_url, $spEntityId, $username_attribute, $custom_attributes, $custom_roles) {
-      if (array_key_exists('SAMLResponse', $post)) {
-  		    $saml_response = $post['SAMLResponse'];
-      }
-      else {
-          throw new Exception('Missing SAMLRequest or SAMLResponse parameter.');
-      }
-
-	    $saml_response = base64_decode($saml_response);
-
-      $document = new DOMDocument();
-      $document->loadXML($saml_response);
-      $saml_response_xml = $document->firstChild;
-      $SamlResponse = new SAML2_Response($saml_response_xml);
-      $issuer = current($SamlResponse->getAssertions())->getIssuer();
-
-      $sql = db_query("SELECT * FROM {miniorange_saml_idp_list} WHERE mo_idp_issuer = '$issuer'");
-      $data = $sql->fetchAssoc();
-
-      if(empty($data)){
-
-          throw new Exception('Identity Provider not configured. If you have configured the IDP then please make sure you are using correct Issuer Value');
-      }
 
 
-      $_SESSION['IDP_ISSUER'] = $issuer;
-      $base_site_url = Utilities::miniorange_get_baseURL();
-      $acs_url = $base_site_url . '/?q=samlassertion';
-      $cert_fingerprint = $data['mo_idp_cert'];
-      $issuer = $data['mo_idp_issuer'];
-
-      if(array_key_exists('RelayState', $post)) {
-          $RelayState = $post['RelayState'];
-      }
-      else {
-          $RelayState = '';
-      }
-
-      if ($RelayState == "showSamlResponse") {
-          Utilities::Print_SAML_Request($saml_response,"displaySamlResponse");
-      }
-
-      $doc = $document->documentElement;
-      $xpath = new DOMXpath($document);
-      $xpath->registerNamespace('samlp', 'urn:oasis:names:tc:SAML:2.0:protocol');
-      $xpath->registerNamespace('saml', 'urn:oasis:names:tc:SAML:2.0:assertion');
-      $status = $xpath->query('/samlp:Response/samlp:Status/samlp:StatusCode', $doc);
-      $statusString = $status->item(0)->getAttribute('Value');
-      $statusChildString = '';
-      if($status->item(0)->firstChild !== null){
-          $statusChildString = $status->item(0)->firstChild->getAttribute('Value');
-      }
-
-      $status = explode(":",$statusString)[7];
-
-      if($status!="Success"){
-          if(!empty($statusChildString)){
-              $status = explode(":", $statusChildString)[7];
-          }
-          $this->show_error_message($status, $RelayState);
-      }
-
-      if(!is_null($cert_fingerprint)){
-          $cert_fingerprint_value_1 = XMLSecurityKey::getRawThumbprint($cert_fingerprint);
-          $cert_fingerprint_value_2 = preg_replace('/\s+/', '', $cert_fingerprint_value_1);
-          $cert_fingerprint = iconv("UTF-8", "CP1252//IGNORE", $cert_fingerprint_value_2);
-      }
-
-      $saml_response = new SAML2_Response($saml_response_xml);
-      //echo "<pre>";print_r($saml_response);exit;
-      $response_signature_data = $saml_response->getSignatureData();
-
-      if (!empty($response_signature_data)) {
-          $valid_signature = Utilities::processResponse($acs_url, $cert_fingerprint, $response_signature_data, $saml_response, $RelayState);
-          if (!$valid_signature){
-              echo 'Invalid Signature in SAML Response';
-              exit();
-          }
-      }
-      $assertion_signature_data = current($saml_response->getAssertions())->getSignatureData();
-    //echo "<pre>";print_r($assertion_signature_data);exit;
-      if (!empty($assertion_signature_data)) {
-          $valid_signature = Utilities::processResponse($acs_url, $cert_fingerprint, $assertion_signature_data, $saml_response, $RelayState);
-          if (!$valid_signature) {
-              echo 'Invalid Signature in SAML Assertion';
-              exit();
-          }
-      }
-
-      $acs_url = substr($acs_url, 0, strpos($acs_url, "?"));
-      Utilities::validateIssuerAndAudience($saml_response, $spEntityId, $issuer, $base_url, $RelayState);
-      $attrs = current($saml_response->getAssertions())->getAttributes();
-      variable_set('miniorange_saml_attrs_list', $attrs);
-
-      if ($username_attribute != 'NameID') {
-          if (array_key_exists($username_attribute, $attrs)) {
-              $username = $attrs[$username_attribute][0];
-          }
-          else {
-              // Get NameID value if username attribute doesnt exist in response.
-              $username = current(current($saml_response->getAssertions())->getNameId());
-          }
-      }
-      else {
-          // Get Name ID value.
-          $username = current(current($saml_response->getAssertions())->getNameId());
-      }
-
-      // Get Email.
-      $email_attribute = variable_get('miniorange_saml_email_attribute', 'NameID');
-      if ($email_attribute == 'NameID' ) {
-          $email_value = current(current($saml_response->getAssertions())->getNameId());
-      }
-      else {
-          $email_value = $attrs[$email_attribute][0];
-      }
-
-      variable_set('miniorange_saml_email_id_value', $email_value);
-      // Get RelayState if any.
-	    $relay_state = '';
-      if(array_key_exists('RelayState', $post)) {
-          if($post['RelayState'] == 'testValidate') {
-              $this->showTestResults($username, $attrs);
-          } else {
-		          $relay_state = $post['RelayState'];
-          }
-      }
-
-	    $sessionIndex = current($saml_response->getAssertions())->getSessionIndex();
-	    $nameId = current(current($saml_response->getAssertions())->getNameId());
-	    /*Custom Attributes*/
-	    $custom_attribute_values = array();
-	    foreach($custom_attributes as $key=>$value){
-		      if(array_key_exists($value, $attrs)){
-			        $attr_value = $attrs[$value][0];
-			        $custom_attribute_values[$key] = $attr_value;
-		      }
-	    }
-
-	    /*Custom Roles*/
-	    $role_attribute = variable_get('miniorange_saml_idp_attr1_name', '');
-	    /* handled comma separated roles eg.(manager, admin, author) */
-      if(isset($role_attribute) && !empty($role_attribute) && isset($attrs[$role_attribute])) {
-          $de_attribute =  $attrs[$role_attribute];
-          $de_attribute[0] = preg_replace('/\s+/', '', $de_attribute[0]);
-          $pos = strpos($de_attribute[0], ',');
-          if(sizeof($attrs[$role_attribute]) == 1 && $pos !== false){
-              $description_attribute = (explode(',', $de_attribute[0]));
-              $attrs[$role_attribute] = $description_attribute;
-          }
-	        for($i=0 ; $i < sizeof($attrs[$role_attribute]) ; $i++) {
-			        $myrole[$i] = $attrs[$role_attribute][$i];
-	        }
-
-          $custom_role_values = array();
-          if(!variable_get('miniorange_saml_disable_role_update')) {
-            for($i=0; $i < sizeof($myrole) ; $i++) {
-                foreach($custom_roles as $key=>$value) {
-                    if(!empty($key) && !is_null($key) && !strcasecmp($myrole[$i], $key)) {
-                        $role_value = array_search($value, user_roles());
-                        $custom_role_values[$role_value] = $value;
-                    } 
-                }
+class MiniOrangeAcs
+{
+    public function processSamlResponse($post, $base_url, $DU, $Kz, $u_, $S0)
+    {
+        if (array_key_exists("\x53\101\x4d\114\122\145\163\160\157\x6e\163\145", $post)) {
+            goto xR;
+        }
+        throw new Exception("\x4d\x69\x73\x73\x69\x6e\x67\x20\123\x41\x4d\114\122\145\x71\165\x65\163\x74\40\x6f\162\40\x53\101\115\114\122\145\x73\x70\x6f\x6e\163\145\x20\160\141\x72\141\x6d\145\164\x65\x72\56");
+        goto Pp;
+        xR:
+        $zp = $post["\x53\x41\x4d\x4c\x52\145\163\x70\x6f\156\x73\x65"];
+        Pp:
+        $zp = base64_decode($zp);
+        $Uz = new DOMDocument();
+        $Uz->loadXML($zp);
+        $fY = $Uz->firstChild;
+        $zp = new SAML2_Response($fY);
+        $xx = current($zp->getAssertions())->getIssuer();
+        $xE = db_query("\x53\x45\114\105\103\124\x20\52\40\106\x52\117\x4d\40\x7b\x6d\151\156\x69\157\x72\x61\156\147\145\137\x73\141\155\x6c\x5f\151\x64\x70\x5f\154\x69\x73\x74\175\x20\127\x48\x45\x52\x45\x20\x6d\157\x5f\x69\144\x70\137\151\163\x73\x75\145\x72\x20\75\40\x27{$xx}\x27");
+        $TG = $xE->fetchAssoc();
+        if (!empty($TG)) {
+            goto aK;
+        }
+        throw new Exception("\111\x64\145\156\164\151\164\171\x20\x50\x72\x6f\166\151\x64\145\x72\x20\x6e\157\x74\40\x63\x6f\x6e\x66\x69\x67\165\x72\x65\144\x2e\x20\111\146\40\171\x6f\x75\40\x68\x61\x76\145\40\143\x6f\x6e\x66\151\x67\x75\162\145\x64\x20\164\x68\x65\x20\x49\x44\x50\40\x74\150\x65\x6e\40\x70\154\x65\141\x73\145\40\x6d\x61\x6b\145\x20\x73\165\x72\x65\x20\171\157\165\40\141\162\145\40\165\163\x69\156\147\40\x63\x6f\x72\x72\x65\143\x74\40\x49\163\163\x75\145\162\x20\126\x61\x6c\165\x65");
+        aK:
+        $_SESSION["\x49\x44\120\x5f\x49\x53\x53\x55\x45\x52"] = $xx;
+        $pK = Utilities::miniorange_get_baseURL();
+        $d7 = $pK . "\57\77\161\75\x73\x61\x6d\154\x61\x73\x73\145\x72\164\151\157\156";
+        $tM = $TG["\x6d\x6f\137\x69\144\x70\137\143\x65\x72\x74"];
+        $xx = $TG["\155\x6f\137\151\144\160\137\x69\163\x73\165\145\x72"];
+        if (array_key_exists("\x52\x65\x6c\x61\171\123\x74\x61\164\x65", $post)) {
+            goto ca;
+        }
+        $NI = '';
+        goto f6;
+        ca:
+        $NI = $post["\122\x65\x6c\141\171\123\164\141\x74\145"];
+        f6:
+        if (!($NI == "\x73\150\157\167\123\141\155\154\x52\x65\x73\160\x6f\156\163\145")) {
+            goto m9;
+        }
+        Utilities::Print_SAML_Request($zp, "\144\x69\x73\x70\x6c\141\171\123\141\x6d\x6c\122\x65\163\x70\x6f\x6e\x73\145");
+        m9:
+        $JC = $Uz->documentElement;
+        $gS = new DOMXpath($Uz);
+        $gS->registerNamespace("\163\141\155\x6c\x70", "\x75\162\x6e\72\x6f\x61\163\x69\x73\x3a\x6e\x61\155\145\163\72\x74\x63\x3a\x53\101\115\x4c\x3a\62\56\60\x3a\160\x72\157\164\x6f\143\x6f\x6c");
+        $gS->registerNamespace("\x73\141\x6d\x6c", "\165\162\x6e\x3a\x6f\x61\x73\x69\163\72\x6e\x61\x6d\x65\163\x3a\x74\143\72\x53\101\x4d\114\72\x32\56\x30\x3a\x61\x73\163\x65\x72\x74\151\x6f\156");
+        $Rw = $gS->query("\x2f\163\x61\155\x6c\160\72\122\145\163\x70\x6f\156\163\x65\x2f\163\141\x6d\x6c\160\x3a\x53\x74\141\x74\165\x73\57\163\x61\x6d\154\160\x3a\123\x74\141\x74\x75\163\x43\157\x64\x65", $JC);
+        $p3 = $Rw->item(0)->getAttribute("\x56\141\154\165\145");
+        $iu = '';
+        if (!($Rw->item(0)->firstChild !== null)) {
+            goto ra;
+        }
+        $iu = $Rw->item(0)->firstChild->getAttribute("\x56\141\x6c\x75\145");
+        ra:
+        $Rw = explode("\72", $p3)[7];
+        if (!($Rw != "\123\x75\143\143\x65\163\x73")) {
+            goto Us;
+        }
+        if (empty($iu)) {
+            goto em;
+        }
+        $Rw = explode("\x3a", $iu)[7];
+        em:
+        $this->show_error_message($Rw, $NI);
+        Us:
+        if (is_null($tM)) {
+            goto C6;
+        }
+        $xR = XMLSecurityKey::getRawThumbprint($tM);
+        $Fo = preg_replace("\57\x5c\163\x2b\57", '', $xR);
+        $tM = iconv("\x55\x54\106\55\70", "\103\x50\61\62\65\x32\57\x2f\111\x47\x4e\117\x52\105", $Fo);
+        C6:
+        $YV = $zp->getSignatureData();
+        $gh = current($zp->getAssertions())->getSignatureData();
+        if (!(is_null($YV) && is_null($gh))) {
+            goto Pz;
+        }
+        echo "\116\145\x69\x74\x68\x65\x72\x20\x72\145\x73\x70\x6f\156\163\145\40\156\x6f\162\40\141\163\x73\x65\162\x74\151\157\x6e\x20\x69\163\x20\163\151\x67\x6e\x65\144";
+        exit;
+        Pz:
+        if (is_null($YV)) {
+            goto q2;
+        }
+        $Rk = Utilities::processResponse($d7, $tM, $YV, $zp, $NI);
+        if ($Rk) {
+            goto M6;
+        }
+        echo "\x49\156\x76\x61\x6c\151\144\x20\x53\151\147\156\x61\164\165\x72\145\40\151\156\x20\123\x41\115\114\x20\x52\145\x73\160\157\156\163\x65";
+        exit;
+        M6:
+        q2:
+        if (is_null($gh)) {
+            goto dh;
+        }
+        $s5 = Utilities::processResponse($d7, $tM, $gh, $zp, $NI);
+        if ($s5) {
+            goto K2;
+        }
+        echo "\x49\156\x76\x61\x6c\151\144\40\x53\151\147\156\141\x74\165\162\x65\40\151\156\40\x53\101\115\x4c\40\101\163\163\x65\162\164\x69\x6f\x6e";
+        exit;
+        K2:
+        dh:
+        $d7 = substr($d7, 0, strpos($d7, "\x3f"));
+        Utilities::validateIssuerAndAudience($zp, $DU, $xx, $base_url, $NI);
+        $Y2 = current($zp->getAssertions())->getAttributes();
+        variable_set("\155\x69\156\x69\x6f\x72\141\156\x67\145\x5f\163\141\155\x6c\x5f\141\x74\x74\x72\x73\137\154\151\x73\x74", $Y2);
+        if ($Kz != "\x4e\x61\x6d\x65\111\104") {
+            goto jU;
+        }
+        $vy = current(current($zp->getAssertions())->getNameId());
+        goto Hw;
+        jU:
+        if (array_key_exists($Kz, $Y2)) {
+            goto nB;
+        }
+        $vy = current(current($zp->getAssertions())->getNameId());
+        goto ps;
+        nB:
+        $vy = $Y2[$Kz][0];
+        ps:
+        Hw:
+        $fa = variable_get("\x6d\151\156\151\x6f\x72\141\156\147\145\137\x73\141\x6d\154\137\145\155\x61\x69\x6c\x5f\141\164\x74\x72\151\x62\165\x74\145", "\x4e\x61\x6d\x65\x49\104");
+        if ($fa == "\116\141\x6d\145\111\104") {
+            goto Gd;
+        }
+        $sR = $Y2[$fa][0];
+        goto zk;
+        Gd:
+        $sR = current(current($zp->getAssertions())->getNameId());
+        zk:
+        variable_set("\155\151\x6e\x69\x6f\162\x61\156\147\x65\137\x73\141\x6d\154\x5f\x65\155\x61\x69\154\137\x69\x64\x5f\166\x61\154\165\145", $sR);
+        $c4 = '';
+        if (!array_key_exists("\x52\x65\154\141\171\123\164\141\x74\x65", $post)) {
+            goto HC;
+        }
+        if ($post["\122\145\154\x61\x79\x53\x74\141\x74\145"] == "\x74\145\x73\x74\x56\141\x6c\151\144\141\x74\145") {
+            goto xJ;
+        }
+        $c4 = $post["\122\x65\154\141\171\x53\x74\141\x74\x65"];
+        goto MI;
+        xJ:
+        $this->showTestResults($vy, $Y2);
+        MI:
+        HC:
+        $bq = current($zp->getAssertions())->getSessionIndex();
+        $jE = current(current($zp->getAssertions())->getNameId());
+        $xO = array();
+        foreach ($u_ as $aC => $uo) {
+            if (!array_key_exists($uo, $Y2)) {
+                goto cF;
             }
-          }
-      }
-      $response = array();
-      $response['email'] = isset($email_value)? $email_value : '';
-      $response['username'] = isset($username)? $username : '';
-	    $response['NameID'] = isset($nameId)? $nameId : '';
-	    $response['sessionIndex'] = isset($sessionIndex)? $sessionIndex : '';
-	    $response['customFieldAttributes'] = isset($custom_attribute_values)? $custom_attribute_values : '';
-	    $response['customFieldRoles'] = isset($custom_role_values)? $custom_role_values : '';
-
-	    if(!empty($relay_state)) {
-		      $response['relay_state'] = $relay_state;
-	    }
-      return $response;
-  }
-
-  function show_error_message($statusCode, $relayState){
-		if($relayState=='testValidate'){
-
-			echo '<div style="font-family:Calibri;padding:0 3%;">';
-			echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-			<div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong> Invalid SAML Response Status.</p>
-			<p><strong>Causes</strong>: Identity Provider has sent \''.$statusCode.'\' status code in SAML Response. </p>
-							<p><strong>Reason</strong>: '.$this->get_status_message($statusCode).'</p><br>
-			</div>
-
-			<div style="margin:3%;display:block;text-align:center;">
-			<div style="margin:3%;display:block;text-align:center;"><input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();"></div>';
-							exit;
-		  }
-		  else{
-				if($statusCode == 'RequestDenied' ){
-					echo 'You are not allowed to login into the site. Please contact your Administrator.';
-					exit;
-				}else{
-					echo 'We could not sign you in. Please contact your Administrator.';
-					exit;
-				}
-		  }
-	}
-
-	function get_status_message($statusCode){
-		switch($statusCode){
-			case 'RequestDenied':
-				return 'You are not allowed to login into the site. Please contact your Administrator.';
-				break;
-			case 'Requester':
-				return 'The request could not be performed due to an error on the part of the requester.';
-				break;
-			case 'Responder':
-				return 'The request could not be performed due to an error on the part of the SAML responder or SAML authority.';
-				break;
-			case 'VersionMismatch':
-				return 'The SAML responder could not process the request because the version of the request message was incorrect.';
-				break;
-			default:
-				return 'Unknown';
-		}
-	}
-
-  public function showTestResults($username, $attrs) {
-      global $base_url;
-      $module_path = drupal_get_path('module', 'miniorange_saml');
-
-      echo '<div style="font-family:Calibri;padding:0 3%;">';
-      if (!empty($username)) {
-          echo '<div style="color: #3c763d;background-color: #dff0d8; padding:2%;margin-bottom:20px;text-align:center; border:1px solid #AEDB9A; font-size:18pt;">TEST SUCCESSFUL</div>
-          <div style="display:block;text-align:center;margin-bottom:4%;"><img style="width:15%;"src="'. $module_path . '/includes/images/green_check.png"></div>';
-      }
-      else {
-          echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;">TEST FAILED</div>
-          <div style="color: #a94442;font-size:14pt; margin-bottom:20px;">WARNING: Some Attributes Did Not Match.</div>
-          <div style="display:block;text-align:center;margin-bottom:4%;"><img style="width:15%;"src="'. $module_path . 'includes/images/wrong.png"></div>';
-      }
-
-      echo '<span style="font-size:14pt;"><b>Hello</b>, '.$username.'</span><br/><p style="font-weight:bold;font-size:14pt;margin-left:1%;">ATTRIBUTES RECEIVED:</p>
-          <table style="border-collapse:collapse;border-spacing:0; display:table;width:100%; font-size:14pt;background-color:#EDEDED;">
-          <tr style="text-align:center;"><td style="font-weight:bold;border:2px solid #949090;padding:2%;">ATTRIBUTE NAME</td><td style="font-weight:bold;padding:2%;border:2px solid #949090; word-wrap:break-word;">ATTRIBUTE VALUE</td></tr>';
-
-      if (!empty($attrs)) {
-          echo "<tr><td style='font-weight:bold;border:2px solid #949090;padding:2%;'>NameID</td><td style='padding:2%;border:2px solid #949090; word-wrap:break-word;'>" . $username . "</td></tr>";
-          foreach ($attrs as $key => $value) {
-              echo "<tr><td style='font-weight:bold;border:2px solid #949090;padding:2%;'>" . $key . "</td><td style='padding:2%;border:2px solid #949090; word-wrap:break-word;'>" . implode("<br/>",$value) . "</td></tr>";
-          }
-      }
-      else {
-          echo "<tr><td style='font-weight:bold;border:2px solid #949090;padding:2%;'>NameID</td><td style='padding:2%;border:2px solid #949090; word-wrap:break-word;'>" . $username . "</td></tr>";
-      }
-      echo '</table></div>';
-      echo '<div style="margin:3%;display:block;text-align:center;">
-                 <input style="padding:1%;width:37%;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;
-                border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;
-                box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Configure Attribute/Role Mapping" onClick="close_and_redirect();">              
-                 <input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;
-                    border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;
-                    box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();">            
-            </div>
-            <script>               
-                 function close_and_redirect(){
-                    window.opener.redirect_to_attribute_mapping();
-                    self.close();
-                 }                
-            </script>';     exit;
-  }
+            $lf = $Y2[$uo][0];
+            $xO[$aC] = $lf;
+            cF:
+            EL:
+        }
+        tZ:
+        $CP = variable_get("\155\x69\156\x69\157\x72\x61\x6e\x67\145\137\x73\x61\x6d\154\x5f\x69\144\160\137\141\164\164\x72\x31\137\156\x61\155\x65", '');
+        if (!(isset($CP) && !empty($CP) && isset($Y2[$CP]))) {
+            goto xl;
+        }
+        $a2 = $Y2[$CP];
+        $a2[0] = preg_replace("\57\x5c\163\53\57", '', $a2[0]);
+        $CD = strpos($a2[0], "\54");
+        if (!(sizeof($Y2[$CP]) == 1 && $CD !== false)) {
+            goto GU;
+        }
+        $wC = explode("\x2c", $a2[0]);
+        $Y2[$CP] = $wC;
+        GU:
+        $MS = 0;
+        Kj:
+        if (!($MS < sizeof($Y2[$CP]))) {
+            goto R1;
+        }
+        $G9[$MS] = $Y2[$CP][$MS];
+        lh:
+        $MS++;
+        goto Kj;
+        R1:
+        $h3 = array();
+        if (variable_get("\155\151\156\151\x6f\x72\x61\156\147\145\137\x73\x61\x6d\154\137\x64\x69\163\141\142\154\x65\137\x72\157\x6c\x65\137\x75\160\x64\141\x74\x65")) {
+            goto yI;
+        }
+        $MS = 0;
+        Pw:
+        if (!($MS < sizeof($G9))) {
+            goto da;
+        }
+        foreach ($S0 as $aC => $uo) {
+            if (!(!empty($aC) && !is_null($aC) && !strcasecmp($G9[$MS], $aC))) {
+                goto h8;
+            }
+            $Uk = array_search($uo, user_roles());
+            $h3[$Uk] = $uo;
+            h8:
+            op:
+        }
+        w4:
+        kL:
+        $MS++;
+        goto Pw;
+        da:
+        yI:
+        xl:
+        $bz = array();
+        $bz["\145\155\141\x69\154"] = isset($sR) ? $sR : '';
+        $bz["\165\163\x65\x72\x6e\x61\155\x65"] = isset($vy) ? $vy : '';
+        $bz["\x4e\141\155\x65\x49\104"] = isset($jE) ? $jE : '';
+        $bz["\x73\145\x73\163\151\x6f\x6e\111\x6e\144\x65\170"] = isset($bq) ? $bq : '';
+        $bz["\x63\x75\x73\x74\x6f\155\106\x69\145\x6c\144\x41\164\164\162\151\x62\x75\164\145\163"] = isset($xO) ? $xO : '';
+        $bz["\x63\x75\x73\x74\x6f\x6d\x46\x69\x65\x6c\144\122\157\154\145\163"] = isset($h3) ? $h3 : '';
+        if (empty($c4)) {
+            goto DP;
+        }
+        $bz["\x72\145\x6c\x61\171\137\163\164\x61\x74\x65"] = $c4;
+        DP:
+        return $bz;
+    }
+    function show_error_message($P9, $Fb)
+    {
+        if ($Fb == "\x74\145\x73\164\x56\141\x6c\x69\144\x61\x74\x65") {
+            goto UU;
+        }
+        if ($P9 == "\122\145\x71\165\x65\163\164\x44\145\x6e\x69\x65\x64") {
+            goto hL;
+        }
+        echo "\127\145\40\x63\x6f\x75\154\144\x20\x6e\x6f\164\40\x73\x69\147\156\x20\171\157\165\40\x69\156\56\40\x50\154\x65\141\x73\x65\40\x63\x6f\156\164\x61\143\x74\40\171\x6f\x75\162\40\101\x64\x6d\151\x6e\x69\163\164\x72\x61\x74\x6f\162\x2e";
+        exit;
+        goto lr;
+        hL:
+        echo "\131\157\x75\40\141\162\x65\40\x6e\x6f\x74\x20\141\154\x6c\157\167\x65\144\x20\x74\157\x20\x6c\157\x67\x69\x6e\40\151\156\x74\x6f\x20\164\150\145\40\163\151\164\145\56\40\x50\154\145\141\x73\x65\40\x63\157\156\164\141\143\x74\40\171\157\x75\162\40\x41\144\155\151\x6e\x69\x73\x74\162\141\x74\157\162\x2e";
+        exit;
+        lr:
+        goto Mn;
+        UU:
+        echo "\74\144\151\x76\40\163\x74\171\x6c\145\75\x22\146\157\x6e\164\55\x66\x61\x6d\151\154\x79\72\103\141\x6c\151\x62\x72\x69\x3b\160\141\144\144\x69\156\x67\72\x30\40\x33\45\73\42\76";
+        echo "\x3c\144\x69\x76\40\x73\x74\171\x6c\145\75\x22\143\157\154\x6f\162\x3a\40\43\141\x39\64\64\x34\x32\73\x62\141\x63\x6b\x67\x72\157\x75\156\x64\x2d\x63\157\x6c\x6f\162\x3a\x20\x23\x66\x32\144\x65\x64\145\73\x70\141\144\x64\x69\156\147\72\40\x31\65\160\170\73\155\x61\x72\x67\x69\x6e\55\x62\x6f\x74\164\x6f\x6d\x3a\40\62\60\x70\170\x3b\x74\x65\x78\164\x2d\x61\154\151\x67\156\x3a\143\145\x6e\x74\145\162\73\142\x6f\162\x64\x65\162\x3a\x31\x70\x78\x20\163\157\154\151\x64\40\43\105\66\x42\x33\102\x32\x3b\x66\157\156\164\55\163\x69\172\x65\x3a\x31\x38\160\x74\73\x22\x3e\x20\105\x52\122\x4f\122\x3c\x2f\144\x69\x76\76\15\12\11\x9\x9\74\x64\151\x76\40\x73\164\x79\154\x65\75\42\143\x6f\x6c\157\x72\x3a\x20\x23\x61\71\64\x34\x34\62\73\146\x6f\156\x74\x2d\x73\151\x7a\x65\72\61\64\160\164\73\40\155\x61\162\147\x69\x6e\55\142\157\x74\164\x6f\x6d\72\x32\60\x70\x78\x3b\x22\76\74\160\76\74\x73\x74\162\157\x6e\147\76\105\x72\162\x6f\162\x3a\40\74\57\x73\x74\162\x6f\156\147\x3e\x20\111\x6e\x76\x61\154\151\x64\40\123\101\x4d\x4c\40\x52\x65\163\160\x6f\156\x73\x65\40\123\164\x61\164\x75\x73\56\74\57\160\76\15\xa\11\x9\11\74\160\x3e\x3c\x73\164\x72\x6f\156\x67\x3e\103\141\x75\x73\x65\163\x3c\57\x73\x74\x72\x6f\x6e\147\76\x3a\40\x49\144\x65\156\x74\x69\164\x79\40\120\162\157\166\x69\x64\145\x72\x20\150\141\x73\40\x73\145\x6e\164\40\x27" . $P9 . "\x27\40\x73\164\x61\164\x75\163\40\x63\157\x64\145\40\x69\x6e\40\x53\101\x4d\114\x20\122\x65\x73\160\157\156\x73\145\56\x20\x3c\57\x70\76\xd\12\x9\x9\x9\11\11\11\11\x3c\160\x3e\x3c\x73\164\162\157\x6e\x67\x3e\122\x65\x61\x73\157\156\74\x2f\x73\164\x72\157\x6e\147\x3e\x3a\x20" . $this->get_status_message($P9) . "\74\x2f\x70\76\74\x62\x72\76\15\xa\x9\x9\x9\x3c\x2f\x64\151\x76\x3e\15\xa\xd\12\x9\11\11\x3c\x64\x69\x76\40\x73\164\x79\154\x65\x3d\x22\155\141\162\147\151\156\x3a\63\45\x3b\144\151\x73\x70\154\x61\171\x3a\142\x6c\x6f\x63\153\73\164\145\x78\164\x2d\141\x6c\x69\x67\x6e\x3a\143\145\156\164\x65\x72\x3b\42\76\xd\xa\x9\x9\11\x3c\144\x69\166\40\163\x74\x79\x6c\145\75\42\x6d\141\x72\147\151\x6e\x3a\63\45\x3b\x64\x69\x73\x70\x6c\x61\x79\x3a\142\154\x6f\143\153\x3b\x74\145\x78\x74\55\141\x6c\x69\x67\x6e\72\143\x65\x6e\164\145\162\73\42\x3e\x3c\151\156\160\165\164\x20\x73\x74\171\x6c\x65\75\42\x70\141\144\144\x69\156\x67\72\61\x25\x3b\167\x69\x64\164\x68\72\61\x30\60\x70\170\73\142\x61\x63\153\x67\162\157\165\x6e\x64\72\40\43\x30\60\71\x31\x43\x44\x20\156\157\156\x65\x20\x72\x65\160\145\x61\x74\x20\163\x63\162\x6f\154\x6c\x20\x30\45\x20\x30\x25\73\143\x75\162\x73\157\162\72\40\x70\157\151\x6e\164\145\162\x3b\146\x6f\156\164\x2d\x73\151\x7a\145\72\61\x35\160\170\x3b\142\x6f\x72\x64\x65\x72\x2d\167\x69\x64\164\150\72\40\x31\x70\170\73\142\157\162\144\x65\x72\x2d\163\164\x79\x6c\145\x3a\x20\x73\x6f\x6c\151\x64\x3b\142\x6f\162\144\145\x72\55\162\x61\144\151\165\x73\72\40\63\160\170\x3b\167\x68\151\164\x65\x2d\163\160\x61\x63\x65\72\x20\156\157\167\162\x61\x70\73\x62\x6f\x78\55\163\x69\x7a\x69\156\x67\72\x20\142\157\162\144\x65\x72\x2d\x62\157\x78\73\x62\157\x72\144\x65\162\55\143\157\x6c\157\162\72\x20\43\60\x30\67\x33\x41\x41\73\142\x6f\170\x2d\x73\150\x61\144\157\x77\72\x20\x30\160\x78\40\61\x70\170\x20\60\160\170\40\x72\147\x62\x61\x28\61\62\x30\x2c\x20\62\x30\x30\54\x20\x32\x33\x30\x2c\x20\60\x2e\x36\51\40\x69\x6e\163\145\164\73\x63\157\154\x6f\162\72\x20\x23\x46\106\x46\x3b\42\x74\171\x70\145\75\42\x62\165\x74\x74\x6f\x6e\42\40\x76\x61\154\165\x65\x3d\42\104\x6f\x6e\x65\42\x20\x6f\156\x43\154\x69\143\153\x3d\42\163\145\x6c\x66\56\x63\x6c\x6f\x73\x65\50\51\x3b\42\x3e\x3c\57\144\151\166\76";
+        exit;
+        Mn:
+    }
+    function get_status_message($P9)
+    {
+        switch ($P9) {
+            case "\x52\x65\161\x75\145\x73\x74\x44\x65\156\x69\x65\144":
+                return "\131\x6f\x75\x20\x61\162\x65\40\x6e\157\x74\x20\x61\x6c\x6c\x6f\x77\145\144\40\x74\x6f\40\154\157\x67\151\156\40\x69\156\x74\x6f\40\x74\x68\145\x20\x73\x69\x74\145\x2e\x20\120\x6c\x65\x61\x73\145\x20\x63\157\x6e\164\141\x63\164\x20\x79\x6f\x75\162\x20\x41\144\x6d\151\x6e\151\x73\164\x72\141\164\157\162\56";
+                goto ja;
+            case "\x52\145\161\165\145\163\164\145\162":
+                return "\124\150\145\x20\x72\145\x71\x75\x65\x73\164\40\143\x6f\165\x6c\x64\x20\156\157\164\x20\x62\x65\40\x70\x65\162\146\157\x72\155\145\144\x20\x64\x75\x65\40\x74\x6f\40\141\x6e\40\x65\x72\x72\157\x72\x20\x6f\156\40\x74\x68\145\40\160\141\x72\x74\x20\x6f\x66\40\x74\150\x65\40\162\145\161\165\x65\163\x74\145\162\56";
+                goto ja;
+            case "\x52\145\x73\x70\157\x6e\x64\145\162":
+                return "\124\150\x65\40\x72\145\x71\x75\145\x73\x74\40\x63\x6f\x75\x6c\144\x20\x6e\x6f\x74\40\x62\145\x20\160\145\x72\x66\x6f\x72\155\x65\144\x20\144\165\145\x20\164\157\x20\141\156\x20\x65\162\x72\157\162\x20\x6f\x6e\40\164\x68\x65\x20\160\x61\x72\164\x20\157\x66\x20\x74\x68\145\x20\123\101\x4d\114\40\162\x65\x73\x70\x6f\x6e\144\x65\162\40\157\162\x20\x53\101\x4d\x4c\x20\141\165\164\150\x6f\x72\x69\x74\x79\56";
+                goto ja;
+            case "\x56\x65\162\x73\151\157\x6e\115\151\x73\155\x61\164\x63\x68":
+                return "\124\x68\145\x20\123\101\115\114\40\162\145\163\160\157\156\x64\145\162\x20\143\157\x75\x6c\144\40\x6e\157\164\x20\160\x72\x6f\143\x65\x73\163\40\164\150\145\40\x72\x65\161\165\145\x73\164\x20\142\145\x63\141\x75\x73\145\40\x74\150\x65\x20\x76\145\x72\x73\x69\x6f\156\x20\157\146\40\164\x68\145\40\162\x65\161\x75\145\x73\164\x20\155\x65\163\163\x61\x67\145\40\167\141\x73\40\x69\x6e\x63\x6f\162\x72\x65\143\164\56";
+                goto ja;
+            default:
+                return "\125\156\x6b\x6e\157\167\156";
+        }
+        XX:
+        ja:
+    }
+    public function showTestResults($vy, $Y2)
+    {
+        global $base_url;
+        $xb = drupal_get_path("\x6d\x6f\x64\165\x6c\145", "\x6d\x69\156\x69\157\162\141\156\147\x65\x5f\x73\141\x6d\154");
+        echo "\74\x64\x69\x76\40\163\164\171\154\x65\x3d\x22\146\157\x6e\x74\x2d\x66\141\155\x69\154\171\72\x43\141\154\151\142\x72\151\x3b\x70\141\144\x64\151\156\x67\72\x30\x20\63\x25\x3b\42\76";
+        if (!empty($vy)) {
+            goto cK;
+        }
+        echo "\x3c\x64\x69\166\40\x73\x74\171\154\145\x3d\x22\143\x6f\154\x6f\x72\x3a\40\x23\x61\71\x34\64\64\62\x3b\142\x61\143\153\x67\162\157\x75\156\144\55\x63\157\x6c\157\x72\72\40\43\146\x32\x64\x65\x64\145\73\x70\x61\144\144\x69\156\x67\72\x20\x31\x35\160\x78\73\155\x61\162\147\151\x6e\x2d\x62\157\x74\x74\x6f\155\72\40\x32\x30\160\170\x3b\x74\x65\x78\164\55\x61\x6c\151\x67\x6e\72\x63\x65\156\164\145\162\73\x62\157\x72\144\145\x72\x3a\x31\x70\170\x20\x73\x6f\x6c\x69\x64\x20\x23\x45\66\102\63\x42\62\73\146\x6f\x6e\x74\55\163\x69\x7a\x65\72\x31\70\x70\164\x3b\42\76\124\105\123\x54\40\x46\x41\x49\x4c\x45\x44\74\57\144\x69\166\76\15\12\40\x20\x20\40\x20\40\x20\40\x20\40\74\x64\x69\166\40\163\164\171\x6c\145\75\x22\x63\x6f\154\157\x72\72\x20\x23\141\x39\64\64\64\62\x3b\x66\157\156\164\x2d\x73\x69\172\145\72\61\x34\x70\164\73\x20\155\141\x72\x67\151\x6e\x2d\x62\x6f\x74\x74\157\155\72\x32\x30\160\170\x3b\x22\76\x57\x41\122\116\111\116\x47\x3a\x20\x53\157\155\145\40\x41\164\164\162\x69\142\x75\x74\x65\163\40\104\x69\x64\x20\116\157\x74\x20\115\141\164\x63\x68\x2e\x3c\x2f\144\x69\166\x3e\15\xa\x20\x20\40\x20\40\40\40\40\40\40\x3c\x64\x69\166\x20\x73\x74\x79\x6c\145\x3d\42\x64\151\x73\x70\x6c\x61\171\72\x62\x6c\157\x63\153\x3b\x74\x65\x78\164\x2d\x61\154\151\147\x6e\x3a\143\x65\x6e\x74\145\x72\x3b\155\x61\x72\x67\x69\x6e\55\x62\x6f\164\x74\x6f\x6d\72\x34\45\73\x22\x3e\x3c\x69\155\x67\x20\163\164\x79\x6c\x65\x3d\42\167\151\144\164\x68\72\x31\x35\45\73\42\x73\x72\x63\75\x22" . $xb . "\x69\x6e\143\x6c\165\144\145\x73\57\x69\155\x61\x67\145\x73\x2f\167\x72\157\x6e\x67\x2e\x70\156\x67\x22\x3e\x3c\x2f\144\151\x76\76";
+        goto Y9;
+        cK:
+        echo "\x3c\x64\x69\166\40\163\x74\171\154\145\75\x22\x63\157\154\x6f\162\72\x20\x23\63\143\67\x36\63\144\73\x62\x61\x63\153\147\162\157\165\156\144\x2d\x63\x6f\154\157\x72\x3a\x20\x23\144\146\146\60\x64\x38\73\40\x70\x61\x64\x64\151\x6e\x67\x3a\x32\45\x3b\x6d\141\162\x67\151\156\55\142\x6f\x74\x74\x6f\155\x3a\x32\60\x70\170\73\164\145\x78\164\x2d\141\x6c\151\147\x6e\72\x63\x65\156\164\x65\162\73\x20\142\157\x72\x64\x65\162\72\61\160\x78\40\x73\x6f\x6c\x69\x64\x20\43\101\105\104\102\x39\101\73\x20\x66\x6f\156\164\55\x73\x69\x7a\145\x3a\61\70\x70\164\73\x22\76\124\105\x53\124\40\123\x55\103\x43\x45\123\123\x46\125\114\x3c\x2f\144\x69\x76\76\15\12\x20\40\40\x20\x20\x20\40\x20\40\40\x3c\x64\x69\166\x20\x73\164\x79\x6c\x65\75\x22\144\x69\163\160\x6c\141\x79\72\142\x6c\x6f\x63\x6b\73\164\x65\170\x74\55\x61\x6c\x69\147\156\x3a\x63\145\x6e\x74\145\x72\73\x6d\141\162\147\151\x6e\x2d\142\x6f\x74\164\x6f\x6d\x3a\x34\45\73\42\x3e\x3c\151\x6d\147\40\163\164\x79\x6c\x65\x3d\x22\x77\x69\x64\164\150\x3a\x31\x35\x25\73\42\x73\x72\x63\x3d\42" . $xb . "\x2f\151\156\x63\154\165\144\x65\x73\57\151\155\x61\147\x65\x73\x2f\x67\162\x65\145\156\x5f\x63\x68\x65\x63\x6b\56\160\156\147\42\76\74\57\x64\151\x76\76";
+        Y9:
+        echo "\x3c\x73\160\141\x6e\40\163\164\171\154\x65\75\42\146\x6f\x6e\x74\55\x73\x69\172\x65\72\x31\x34\x70\x74\73\42\76\74\142\76\110\145\x6c\154\157\x3c\57\x62\x3e\54\40" . $vy . "\x3c\x2f\163\160\141\156\x3e\x3c\142\x72\57\x3e\74\160\40\x73\x74\x79\154\x65\75\x22\x66\157\156\164\55\167\145\x69\x67\150\164\72\142\x6f\154\144\73\x66\157\x6e\x74\55\x73\x69\x7a\145\72\61\64\x70\x74\73\155\141\162\147\x69\x6e\55\154\145\x66\x74\x3a\61\45\73\42\x3e\x41\x54\x54\x52\x49\x42\125\x54\105\x53\40\x52\105\x43\105\111\126\x45\104\x3a\74\57\160\x3e\xd\xa\x20\x20\x20\x20\x20\40\40\40\40\40\74\x74\x61\x62\x6c\145\40\x73\164\x79\154\x65\x3d\42\142\x6f\162\x64\145\x72\x2d\143\157\154\154\x61\x70\163\145\x3a\x63\157\154\154\x61\x70\163\x65\x3b\142\157\x72\x64\145\162\55\163\160\141\143\x69\156\147\x3a\x30\x3b\40\x64\x69\163\160\x6c\x61\171\x3a\x74\x61\142\x6c\x65\x3b\x77\x69\144\164\x68\72\61\60\60\45\x3b\40\x66\157\x6e\x74\x2d\163\x69\x7a\x65\72\61\64\x70\164\73\x62\141\x63\153\x67\162\x6f\165\156\x64\x2d\x63\x6f\154\x6f\162\72\x23\x45\x44\x45\x44\105\104\x3b\42\x3e\15\xa\x20\40\40\40\40\40\40\x20\x20\x20\74\x74\x72\40\163\164\171\x6c\145\x3d\x22\164\145\170\x74\55\141\x6c\151\x67\156\x3a\143\x65\x6e\164\145\x72\73\42\x3e\x3c\x74\144\40\163\x74\171\154\145\x3d\42\x66\157\156\164\x2d\167\145\151\x67\x68\x74\x3a\x62\x6f\154\x64\73\x62\157\x72\144\x65\162\x3a\62\x70\170\x20\163\x6f\154\151\144\40\x23\71\x34\x39\x30\71\60\73\x70\141\144\144\x69\x6e\x67\x3a\x32\x25\x3b\x22\76\x41\124\x54\x52\x49\x42\x55\124\105\x20\116\x41\115\x45\74\57\164\144\x3e\x3c\x74\x64\x20\x73\x74\x79\x6c\145\75\42\x66\x6f\x6e\164\x2d\167\145\151\x67\x68\x74\x3a\142\157\154\144\x3b\160\x61\144\144\151\156\x67\72\62\45\x3b\x62\x6f\162\144\x65\x72\x3a\x32\160\x78\x20\x73\x6f\154\x69\144\40\x23\x39\64\x39\60\x39\60\73\40\x77\x6f\162\144\x2d\167\162\141\160\72\142\x72\145\x61\153\55\x77\x6f\162\x64\x3b\x22\x3e\101\124\x54\x52\111\102\125\124\105\x20\x56\x41\x4c\125\x45\x3c\x2f\x74\144\x3e\74\57\x74\x72\76";
+        if (!empty($Y2)) {
+            goto fB;
+        }
+        echo "\74\164\162\x3e\74\164\x64\x20\x73\164\171\154\145\75\47\x66\157\156\x74\x2d\167\145\x69\147\150\x74\x3a\142\x6f\154\144\x3b\142\157\162\x64\145\x72\x3a\62\x70\170\x20\163\157\154\x69\144\40\43\x39\64\71\60\71\60\73\160\x61\144\x64\x69\156\x67\72\62\x25\x3b\47\x3e\116\141\155\x65\x49\x44\74\57\x74\x64\76\74\x74\144\x20\x73\x74\x79\154\x65\x3d\x27\x70\x61\144\144\151\156\147\72\x32\45\73\x62\157\162\x64\x65\162\72\x32\x70\170\40\163\x6f\x6c\151\x64\40\x23\71\64\x39\60\71\x30\x3b\x20\x77\x6f\x72\x64\x2d\167\162\x61\160\x3a\x62\162\145\x61\153\55\167\x6f\162\144\x3b\x27\76" . $vy . "\74\57\x74\x64\76\x3c\x2f\x74\162\76";
+        goto MQ;
+        fB:
+        echo "\x3c\164\x72\x3e\x3c\x74\x64\x20\163\164\x79\154\x65\75\x27\146\x6f\156\164\55\167\x65\151\x67\150\x74\x3a\x62\157\x6c\x64\73\x62\157\162\x64\145\x72\x3a\x32\x70\x78\x20\163\x6f\154\151\x64\x20\x23\71\64\71\x30\x39\x30\x3b\160\141\x64\144\151\x6e\x67\x3a\x32\x25\x3b\47\76\116\x61\x6d\145\111\x44\74\x2f\164\144\76\74\164\144\x20\x73\x74\171\154\x65\75\x27\x70\x61\144\144\x69\156\x67\x3a\x32\x25\73\x62\157\x72\144\145\162\x3a\62\x70\x78\40\x73\157\154\151\x64\40\43\71\x34\x39\60\71\60\x3b\x20\x77\x6f\162\144\55\167\x72\141\x70\x3a\142\162\145\x61\153\55\167\x6f\x72\x64\x3b\x27\x3e" . $vy . "\x3c\57\164\144\x3e\x3c\57\164\x72\76";
+        foreach ($Y2 as $aC => $uo) {
+            echo "\x3c\164\x72\76\x3c\x74\x64\x20\163\x74\171\154\145\x3d\x27\x66\x6f\x6e\164\x2d\167\x65\151\147\x68\164\x3a\142\x6f\x6c\x64\x3b\142\x6f\162\x64\145\x72\x3a\62\160\170\40\163\157\154\151\x64\x20\x23\71\x34\71\x30\71\x30\73\x70\141\144\x64\151\156\x67\x3a\x32\x25\73\47\76" . $aC . "\74\57\x74\x64\x3e\x3c\x74\x64\x20\x73\164\x79\x6c\x65\x3d\x27\160\x61\x64\x64\x69\156\147\72\62\45\73\x62\x6f\162\x64\145\162\x3a\62\160\x78\x20\163\157\154\151\x64\x20\x23\x39\x34\x39\x30\x39\x30\73\x20\167\x6f\x72\x64\55\x77\162\x61\160\72\142\162\145\141\x6b\x2d\x77\x6f\x72\144\x3b\x27\x3e" . implode("\74\x62\162\57\x3e", $uo) . "\74\57\164\x64\76\74\57\164\x72\76";
+            SP:
+        }
+        tB:
+        MQ:
+        echo "\x3c\57\x74\x61\142\154\x65\x3e\74\57\x64\151\x76\x3e";
+        echo "\x3c\144\x69\x76\40\163\x74\x79\154\145\x3d\42\155\141\162\147\151\156\72\63\x25\x3b\x64\x69\163\x70\154\141\x79\72\x62\x6c\157\143\153\x3b\164\145\170\x74\55\141\x6c\x69\x67\156\x3a\x63\145\x6e\164\x65\x72\73\42\x3e\xd\xa\x20\x20\x20\x20\40\x20\40\x20\40\x20\x20\x20\40\40\x20\x20\40\x3c\151\156\x70\x75\164\x20\163\x74\x79\154\x65\75\42\160\141\144\x64\x69\x6e\x67\72\61\45\x3b\167\x69\144\x74\150\72\63\67\x25\x3b\x62\141\x63\153\147\162\x6f\165\x6e\144\72\x20\x23\x30\60\71\x31\103\x44\40\156\157\x6e\145\x20\162\145\x70\x65\141\164\40\x73\143\x72\x6f\x6c\x6c\40\x30\x25\40\60\x25\73\143\x75\x72\163\157\162\72\x20\x70\157\151\156\x74\x65\x72\x3b\x66\157\156\164\x2d\x73\x69\172\x65\x3a\61\x35\160\x78\73\xd\12\40\40\x20\x20\40\x20\40\x20\x20\40\x20\40\40\x20\40\40\142\x6f\x72\144\x65\162\x2d\x77\151\x64\x74\x68\x3a\x20\61\160\x78\x3b\x62\x6f\x72\144\145\x72\55\163\x74\x79\x6c\145\x3a\x20\x73\x6f\x6c\x69\x64\73\142\157\162\144\x65\162\55\162\141\144\151\x75\x73\72\40\63\x70\170\x3b\x77\x68\151\x74\145\55\163\x70\x61\143\145\72\x20\x6e\157\x77\x72\x61\160\73\142\157\170\55\x73\151\172\151\156\x67\72\40\x62\x6f\x72\144\x65\x72\x2d\x62\x6f\x78\x3b\x62\157\162\144\x65\162\x2d\x63\157\154\x6f\162\x3a\x20\43\60\x30\x37\63\101\101\x3b\xd\xa\x20\x20\x20\x20\x20\40\x20\40\x20\x20\x20\x20\40\40\40\40\142\x6f\170\x2d\x73\x68\141\x64\157\x77\72\x20\60\x70\170\40\61\160\x78\40\60\160\170\x20\x72\147\142\x61\50\61\62\60\54\40\x32\x30\x30\54\x20\62\63\60\54\40\x30\x2e\66\51\x20\x69\x6e\x73\145\x74\73\x63\157\x6c\157\x72\x3a\x20\x23\x46\106\106\x3b\42\164\171\x70\145\x3d\x22\x62\165\164\x74\x6f\156\x22\40\x76\x61\x6c\x75\x65\x3d\x22\103\x6f\x6e\x66\151\x67\165\x72\145\x20\x41\x74\164\x72\x69\142\x75\x74\145\57\x52\x6f\x6c\x65\x20\x4d\141\x70\160\151\156\x67\42\40\157\x6e\x43\x6c\151\x63\x6b\75\42\143\x6c\157\x73\x65\x5f\x61\156\x64\137\162\x65\144\151\x72\x65\143\x74\50\51\73\x22\x3e\xd\xa\40\x20\40\x20\40\40\40\40\40\40\x20\x20\40\40\40\40\x20\x3c\x69\156\160\x75\164\40\x73\164\x79\x6c\x65\75\x22\160\x61\x64\144\151\156\147\x3a\61\45\x3b\x77\x69\144\x74\150\72\x31\60\x30\160\170\x3b\142\141\x63\x6b\x67\x72\x6f\x75\x6e\x64\72\40\43\x30\x30\71\x31\103\x44\40\x6e\x6f\156\145\40\162\x65\x70\145\141\x74\40\163\143\162\157\154\x6c\40\x30\45\40\60\45\x3b\143\165\x72\163\x6f\162\72\x20\160\157\x69\x6e\x74\145\x72\x3b\x66\x6f\x6e\164\55\163\x69\172\x65\x3a\x31\x35\x70\170\73\xd\xa\40\40\x20\40\40\40\40\40\x20\x20\x20\40\40\40\40\x20\x20\40\x20\40\142\157\162\x64\x65\162\x2d\x77\x69\144\x74\150\x3a\40\x31\160\170\x3b\142\x6f\x72\144\x65\162\x2d\163\x74\171\x6c\145\x3a\40\x73\x6f\154\151\144\x3b\x62\x6f\162\144\145\162\x2d\x72\x61\x64\151\x75\x73\x3a\40\63\160\170\73\167\x68\x69\164\x65\x2d\163\x70\141\143\x65\x3a\40\x6e\x6f\x77\x72\141\160\73\x62\x6f\170\55\x73\151\x7a\151\156\x67\x3a\40\x62\x6f\x72\x64\145\162\55\x62\157\x78\x3b\x62\157\162\x64\145\x72\55\143\x6f\154\157\x72\72\40\x23\x30\60\x37\63\x41\101\73\xd\xa\40\x20\40\40\40\x20\x20\x20\40\x20\40\40\x20\40\40\40\40\x20\x20\x20\142\x6f\x78\x2d\x73\150\141\144\x6f\x77\72\40\60\x70\x78\x20\x31\160\x78\40\x30\160\x78\40\x72\147\142\x61\50\61\62\60\54\x20\62\x30\60\54\40\62\63\x30\54\40\x30\56\66\51\40\151\x6e\163\145\x74\73\143\x6f\154\x6f\x72\x3a\x20\x23\106\106\x46\73\42\164\171\160\145\x3d\42\x62\x75\164\x74\157\x6e\x22\40\166\x61\154\165\x65\x3d\x22\104\157\x6e\145\42\x20\157\x6e\x43\154\151\143\x6b\x3d\42\x73\145\x6c\146\56\143\154\x6f\x73\145\x28\51\x3b\x22\x3e\15\xa\40\40\x20\40\x20\40\40\x20\x20\x20\x20\40\x3c\57\144\x69\166\76\15\xa\x20\40\x20\40\40\x20\x20\x20\40\40\x20\x20\74\x73\143\162\151\160\164\x3e\15\xa\x20\x20\x20\x20\40\x20\x20\40\40\40\x20\40\40\40\40\40\x20\146\165\156\x63\164\151\x6f\156\x20\x63\154\157\163\x65\137\x61\x6e\144\137\x72\145\144\x69\162\x65\x63\164\50\x29\x7b\15\12\x20\x20\40\40\40\40\x20\40\40\x20\x20\x20\40\x20\40\40\40\x20\x20\x20\167\151\156\144\x6f\x77\x2e\157\160\145\156\145\x72\x2e\x72\145\144\x69\x72\x65\143\164\137\x74\x6f\x5f\141\164\x74\x72\x69\x62\x75\x74\x65\137\x6d\141\x70\160\151\x6e\147\x28\x29\73\15\12\40\x20\40\x20\x20\x20\x20\40\40\x20\40\40\40\x20\40\40\x20\40\x20\x20\x73\145\154\146\x2e\x63\154\x6f\x73\x65\50\51\73\xd\xa\x20\x20\40\x20\40\x20\x20\40\40\x20\40\40\x20\40\40\x20\x20\x7d\xd\12\40\40\x20\40\40\40\40\x20\40\x20\40\x20\74\57\163\x63\162\x69\x70\164\x3e";
+        exit;
+    }
 }

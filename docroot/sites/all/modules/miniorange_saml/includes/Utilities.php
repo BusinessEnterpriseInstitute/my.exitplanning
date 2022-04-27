@@ -1,1458 +1,1261 @@
 <?php
-/**
- * This file is part of miniOrange SAML plugin.
- *
- * miniOrange SAML plugin is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * miniOrange SAML plugin is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with miniOrange SAML plugin.  If not, see <http://www.gnu.org/licenses/>.
- */
 
-class Utilities {
 
+class Utilities
+{
     public static function show_idp_list()
     {
-        $sql = db_query("SELECT mo_idp_name FROM miniorange_saml_idp_list");
-        $data = $sql->fetchAll();
-
-        $array = json_decode(json_encode($data), True);
-        $cnt = count($array);
-        $idps = array();
-        for($i = 0; $i < $cnt; $i++){
-            $idps[$i] = $array[$i]['mo_idp_name'];
+        $xE = db_query("\x53\105\x4c\105\103\124\x20\155\157\x5f\x69\x64\x70\137\156\141\x6d\145\40\x46\122\117\115\40\x6d\151\156\x69\x6f\x72\141\x6e\147\145\137\163\x61\155\154\137\x69\144\160\x5f\154\151\x73\164");
+        $TG = $xE->fetchAll();
+        $qo = json_decode(json_encode($TG), True);
+        $h4 = count($qo);
+        $jF = array();
+        $MS = 0;
+        cX:
+        if (!($MS < $h4)) {
+            goto IX;
         }
-        return $idps;
+        $jF[$MS] = $qo[$MS]["\155\157\137\x69\144\x70\137\x6e\141\x6d\x65"];
+        B3:
+        $MS++;
+        goto cX;
+        IX:
+        return $jF;
     }
-
     public static function show_attr_list_from_idp(&$form, $form_state)
     {
-        $idp_attrs =  variable_get('miniorange_saml_attrs_list');
-        $email_attribute = variable_get('miniorange_saml_email_attribute', 'NameID');
-
-        $username_attribute = variable_get('miniorange_saml_email_id_value');
-
-        if(empty($username_attribute)){
-            Utilities::AddsupportTab($form, $form_state);
-            return;
+        $mJ = variable_get("\x6d\x69\156\x69\x6f\162\x61\x6e\147\x65\137\x73\x61\x6d\154\x5f\x61\x74\x74\x72\163\x5f\154\x69\x73\x74");
+        $fa = variable_get("\x6d\x69\156\151\x6f\x72\141\156\147\145\137\x73\141\155\x6c\x5f\x65\155\141\151\x6c\137\x61\164\x74\162\x69\142\165\164\x65", "\116\141\155\x65\x49\x44");
+        $Kz = variable_get("\155\151\x6e\x69\x6f\162\141\x6e\x67\x65\x5f\x73\141\x6d\154\x5f\145\155\x61\x69\154\137\151\x64\137\x76\x61\x6c\165\145");
+        if (!empty($Kz)) {
+            goto zt;
         }
-
-        $form['miniorange_idp_guide_link'] = array(
-            '#markup' => '<div class="mo_saml_table_layout mo_saml_table_layout_support_1">',
-        );
-
-        $form['miniorange_saml_attr_header'] = array(
-            '#markup' => '<div style="font-size: 1.3em;font-weight: 600;font-family: sans-serif;">Attributes received from the Identity Provider:</div><br>'
-        );
-
-        $form['mo_saml_attrs_list_idp'] = array(
-            '#markup' => '<div class="table-responsive mo_guide_text-center" style="font-family: sans-serif;font-size: 12px;">          
-                <table class="mo_guide_table mo_guide_table-striped mo_guide_table-bordered" style="border: 1px solid #ddd;max-width: 100%;border-collapse: collapse;">
-                    <thead>
-                        <tr>
-                            <th class="mo_guide_text-center mo_td_values">ATTRIBUTE NAME</th>
-                            <th class="mo_guide_text-center mo_td_values">ATTRIBUTE VALUE</th>                         
-                        </tr>
-                    </thead>',
-        );
-
-        $someattrs = '';
-
-        if(isset($idp_attrs) && !empty($idp_attrs)){
-            foreach($idp_attrs as $attr_name => $attr_values)
-            {
-                $someattrs .= '<tr><td>'.$attr_name.'</td><td>'.$attr_values[0].'</td></tr>';
-            }
+        Utilities::AddsupportTab($form, $form_state);
+        return;
+        zt:
+        $form["\x6d\151\156\x69\157\162\141\156\x67\x65\137\x69\144\x70\137\147\165\x69\144\145\x5f\x6c\151\x6e\x6b"] = array("\x23\155\x61\162\x6b\x75\x70" => "\x3c\144\x69\166\x20\x63\x6c\x61\163\163\75\x22\155\x6f\x5f\x73\141\x6d\x6c\137\x74\141\x62\154\x65\x5f\154\141\171\157\165\x74\x20\x6d\x6f\137\x73\141\x6d\154\137\164\141\142\x6c\145\137\x6c\x61\x79\157\165\x74\137\x73\x75\160\x70\x6f\162\164\x5f\61\x22\x3e");
+        $form["\155\151\156\151\157\x72\x61\156\147\x65\137\163\x61\x6d\x6c\x5f\x61\164\164\x72\x5f\x68\x65\x61\x64\x65\162"] = array("\x23\x6d\141\162\153\165\x70" => "\x3c\144\151\x76\x20\163\164\171\154\145\75\x22\x66\x6f\x6e\164\55\163\x69\172\145\x3a\x20\x31\56\63\145\x6d\x3b\146\157\156\x74\x2d\x77\145\x69\x67\150\x74\72\40\66\60\60\73\146\x6f\156\x74\55\x66\141\x6d\x69\x6c\171\72\40\x73\x61\156\163\55\163\x65\162\x69\x66\x3b\x22\76\101\x74\164\162\x69\x62\x75\x74\x65\163\x20\162\145\143\x65\x69\x76\145\144\x20\146\x72\x6f\x6d\x20\x74\150\x65\x20\111\x64\x65\x6e\x74\x69\164\171\x20\x50\162\x6f\x76\x69\x64\145\x72\x3a\x3c\57\144\x69\166\76\x3c\x62\162\76");
+        $form["\155\x6f\137\x73\x61\x6d\x6c\x5f\x61\x74\164\162\x73\x5f\154\151\x73\x74\x5f\151\x64\x70"] = array("\43\x6d\x61\162\153\x75\160" => "\74\x64\x69\166\x20\143\x6c\141\163\163\x3d\x22\x74\141\142\154\145\55\162\145\163\160\x6f\156\x73\151\x76\x65\40\155\157\x5f\147\x75\151\144\145\137\164\145\170\x74\55\x63\x65\156\x74\145\x72\42\x20\163\x74\171\x6c\145\x3d\42\x66\x6f\x6e\x74\55\146\141\155\x69\154\171\72\x20\x73\141\x6e\x73\55\163\145\x72\151\x66\73\x66\157\x6e\x74\55\x73\x69\x7a\x65\x3a\40\61\62\x70\170\x3b\x22\76\40\40\x20\x20\40\x20\40\40\x20\x20\xd\xa\40\40\x20\40\x20\40\x20\40\x20\40\x20\40\x20\40\40\x20\x3c\x74\141\x62\154\x65\x20\143\154\x61\163\163\x3d\x22\x6d\x6f\137\147\x75\x69\x64\x65\137\x74\141\142\x6c\145\x20\x6d\x6f\x5f\x67\165\x69\144\x65\x5f\x74\141\x62\x6c\x65\55\163\x74\162\x69\x70\x65\x64\x20\x6d\157\137\147\x75\151\x64\145\137\164\x61\142\154\145\55\x62\157\x72\144\145\162\145\x64\x22\x20\163\164\171\x6c\145\x3d\42\142\x6f\x72\144\x65\162\72\x20\61\x70\x78\x20\x73\x6f\154\151\144\40\43\144\144\144\x3b\155\x61\170\55\167\x69\144\164\150\x3a\40\x31\x30\60\x25\x3b\142\157\162\144\145\162\55\143\157\x6c\x6c\x61\160\163\145\x3a\x20\x63\157\x6c\154\141\160\x73\x65\x3b\42\x3e\15\12\x20\x20\40\x20\x20\x20\x20\40\40\x20\x20\40\x20\x20\40\40\40\40\40\x20\x3c\164\x68\x65\x61\144\76\xd\xa\x20\40\x20\x20\x20\x20\x20\x20\40\x20\x20\x20\x20\x20\x20\40\x20\x20\x20\x20\x20\x20\x20\40\74\164\162\76\xd\xa\x20\40\40\40\40\40\x20\40\x20\40\x20\x20\x20\40\40\40\40\x20\40\40\x20\40\x20\x20\x20\40\x20\40\74\164\150\40\x63\154\x61\x73\163\75\42\155\x6f\137\x67\165\x69\144\145\x5f\x74\x65\170\164\x2d\143\145\156\164\145\x72\x20\x6d\x6f\x5f\x74\144\x5f\x76\x61\x6c\x75\145\x73\42\76\101\124\x54\x52\111\x42\125\124\105\40\116\x41\x4d\105\x3c\x2f\164\150\x3e\15\12\x20\x20\40\x20\40\x20\40\40\40\x20\x20\x20\x20\x20\x20\40\x20\x20\40\x20\40\x20\x20\40\x20\40\40\40\74\x74\x68\40\143\154\x61\163\x73\75\42\x6d\157\x5f\147\165\151\x64\x65\137\x74\x65\x78\x74\55\143\x65\x6e\x74\x65\162\x20\x6d\x6f\x5f\164\x64\137\166\141\154\x75\x65\163\x22\x3e\101\x54\x54\x52\111\x42\x55\124\x45\40\126\101\114\125\105\x3c\x2f\164\x68\x3e\40\x20\x20\40\40\40\x20\40\40\40\40\40\x20\x20\x20\40\x20\40\x20\40\40\x20\40\40\40\15\xa\40\40\x20\x20\x20\40\40\40\40\x20\x20\x20\40\x20\x20\x20\40\x20\40\40\x20\40\x20\x20\x3c\57\x74\162\76\15\12\40\40\x20\40\x20\40\x20\x20\x20\40\x20\40\40\x20\x20\40\40\x20\x20\40\x3c\x2f\x74\150\x65\141\144\76");
+        $ta = '';
+        if (!(isset($mJ) && !empty($mJ))) {
+            goto Hx;
         }
-
-        $form['miniorange_saml_guide_table_list'] = array(
-            '#markup' => '<tbody style="font-weight:bold;font-size: 12px;color:gray;"><tr><td>'.$email_attribute.'</td><td>'.$username_attribute.'</td></tr>'.$someattrs.'</tbody></table>',
-        );
-
-        $form['miniorange_saml_clear_attr_list'] = array(
-            '#type' => 'submit',
-            '#value' => t('Clear Attribute List'),
-            '#submit' => array('clear_attr_list'),
-            '#attributes' => array('style' => 'border-radius:4px;background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;
-                box-shadow: 0 2px 0 #006799;border-color: #337ab7 #337ab7 #337ab7;'),
-        );
-
-        $form['miniorange_saml_guide_clear_list_note'] = array(
-            '#markup' => '<div style="font-size: 13px;"><b>NOTE : </b>Please clear this list after configuring the module to hide your confidential attributes.<br>
-                            Click on <b>Test configuration</b> in <b> Service Provider</b> tab to populate the list again.</div>',
-        );
-
-        $form['miniorange_saml_guide_table_end'] = array(
-            '#markup' => '</div>',
-        );
+        foreach ($mJ as $dY => $yW) {
+            $ta .= "\x3c\x74\162\x3e\74\164\144\x3e" . $dY . "\x3c\57\164\x64\x3e\74\x74\x64\76" . $yW[0] . "\x3c\x2f\164\x64\76\74\x2f\164\162\76";
+            D0:
+        }
+        ec:
+        Hx:
+        $form["\155\x69\x6e\151\157\162\141\156\147\145\137\163\141\155\x6c\x5f\147\x75\151\144\x65\137\x74\141\142\154\145\137\x6c\151\x73\x74"] = array("\x23\x6d\141\162\x6b\x75\x70" => "\x3c\x74\142\157\144\x79\40\x73\x74\x79\154\145\x3d\42\146\x6f\x6e\x74\x2d\167\x65\x69\147\150\x74\72\142\157\x6c\x64\x3b\x66\157\156\164\x2d\x73\151\172\145\72\x20\61\62\x70\170\73\x63\x6f\x6c\157\x72\x3a\147\x72\x61\171\73\42\x3e\74\x74\x72\76\x3c\164\144\x3e" . $fa . "\74\x2f\x74\144\76\x3c\x74\x64\x3e" . $Kz . "\74\57\164\x64\x3e\x3c\57\x74\162\76" . $ta . "\74\x2f\x74\142\157\144\171\76\74\57\x74\141\x62\x6c\x65\x3e");
+        $form["\x6d\151\156\151\157\162\141\156\x67\145\x5f\163\x61\155\x6c\x5f\x63\154\145\x61\x72\x5f\141\x74\x74\162\137\154\x69\163\x74"] = array("\x23\164\171\x70\x65" => "\x73\x75\142\155\151\164", "\43\x76\141\154\x75\145" => t("\103\154\x65\x61\x72\40\101\x74\164\x72\x69\x62\165\x74\145\x20\114\151\163\164"), "\43\x73\x75\142\x6d\151\x74" => array("\x63\154\x65\141\162\x5f\141\x74\x74\162\137\154\x69\x73\x74"), "\43\141\164\164\162\151\142\x75\x74\145\x73" => array("\163\x74\171\154\x65" => "\142\x6f\162\144\x65\x72\55\x72\x61\144\x69\165\x73\72\64\160\x78\73\142\x61\143\153\x67\162\x6f\x75\156\144\x3a\40\43\63\63\67\x61\142\67\x3b\143\x6f\x6c\x6f\x72\72\40\x23\x66\x66\x66\x66\146\x66\73\x74\145\170\x74\x2d\163\x68\141\x64\x6f\167\72\40\x30\x20\55\x31\x70\x78\40\61\160\x78\40\x23\x33\x33\x37\141\x62\x37\54\40\61\x70\170\40\x30\x20\x31\x70\170\40\x23\63\x33\x37\x61\142\x37\x2c\x20\x30\x20\x31\160\170\x20\x31\160\x78\40\43\63\x33\67\141\x62\x37\x2c\x20\x2d\61\160\x78\x20\x30\x20\61\x70\x78\40\43\63\x33\x37\141\142\x37\x3b\xd\12\x20\x20\40\40\40\x20\40\40\x20\40\40\x20\x20\40\40\40\x62\157\x78\x2d\x73\x68\141\x64\157\167\72\40\x30\x20\62\160\x78\x20\60\x20\43\x30\x30\x36\67\x39\x39\x3b\142\x6f\162\x64\145\162\x2d\x63\x6f\x6c\157\162\72\x20\43\63\x33\x37\141\x62\x37\40\x23\x33\63\67\x61\142\67\40\43\63\63\67\141\x62\x37\x3b"));
+        $form["\155\x69\x6e\151\x6f\x72\x61\x6e\147\145\137\163\141\x6d\154\137\147\165\151\x64\145\x5f\x63\x6c\x65\x61\162\x5f\154\x69\x73\164\x5f\156\x6f\x74\x65"] = array("\43\x6d\141\x72\x6b\165\160" => "\74\x64\151\166\40\163\164\171\154\145\75\x22\x66\x6f\156\164\x2d\163\x69\172\145\72\x20\61\x33\x70\x78\73\42\x3e\74\x62\x3e\x4e\117\124\105\x20\72\x20\74\x2f\142\76\120\x6c\x65\x61\163\145\x20\x63\x6c\x65\x61\162\40\164\x68\151\x73\x20\154\151\163\164\40\141\146\x74\x65\162\x20\143\157\x6e\x66\151\x67\165\x72\151\156\147\x20\164\150\145\40\x6d\x6f\x64\x75\154\145\x20\x74\x6f\40\x68\151\x64\x65\x20\171\x6f\165\x72\40\143\x6f\x6e\x66\x69\x64\145\156\x74\x69\141\x6c\40\x61\164\x74\x72\151\142\x75\164\145\x73\x2e\x3c\x62\162\76\xd\12\x20\40\x20\40\x20\x20\x20\x20\40\40\x20\x20\40\40\40\x20\40\40\x20\40\x20\x20\x20\40\40\40\40\x20\103\x6c\x69\143\x6b\x20\157\x6e\x20\74\x62\x3e\x54\145\163\164\40\x63\x6f\x6e\146\x69\x67\x75\x72\x61\x74\151\157\156\x3c\x2f\x62\x3e\x20\151\156\40\74\142\x3e\x20\123\x65\162\x76\151\143\x65\x20\120\x72\x6f\166\151\x64\x65\162\74\x2f\142\76\x20\x74\x61\142\x20\x74\157\40\160\x6f\160\165\154\x61\164\145\40\164\150\x65\x20\154\x69\x73\164\x20\x61\147\141\151\156\x2e\74\x2f\x64\x69\x76\76");
+        $form["\x6d\151\x6e\151\x6f\162\141\x6e\x67\145\137\163\x61\155\154\x5f\x67\165\151\144\145\137\x74\141\x62\154\x65\x5f\x65\156\144"] = array("\43\155\x61\x72\x6b\165\x70" => "\x3c\x2f\x64\x69\166\76");
     }
-
-    public static function generateCertificate($dn,$digest_algo,$private_key_bits,$valid_days)
+    public static function generateCertificate($B1, $xo, $qM, $ee)
     {
-        $opensslConfigPath = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'openssl.cnf';
-
-        $config = array(
-            "config" => $opensslConfigPath,
-            "digest_alg" => "$digest_algo",
-            "private_key_bits" => $private_key_bits,
-            "private_key_type" => OPENSSL_KEYTYPE_RSA,
-        );
-
-        $private_key = openssl_pkey_new($config);
-        $csr = openssl_csr_new($dn, $private_key, $config);
-        $csr_signed = openssl_csr_sign($csr, null, $private_key, $valid_days, $config, time());
-        openssl_x509_export($csr_signed, $public_key_out);
-        openssl_pkey_export($private_key, $private_key_out,null,$config);
-        openssl_csr_export($csr, $csrout);
-
-        while (($e = openssl_error_string()) !== false) {
-            error_log($e);
+        $eC = dirname(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "\x72\x65\x73\x6f\165\x72\x63\x65\x73" . DIRECTORY_SEPARATOR . "\157\x70\145\x6e\163\163\154\x2e\x63\x6e\x66";
+        $po = array("\143\157\x6e\146\x69\x67" => $eC, "\144\x69\x67\145\163\x74\x5f\x61\x6c\x67" => "{$xo}", "\x70\162\151\x76\x61\164\x65\137\153\x65\x79\x5f\x62\x69\164\x73" => $qM, "\x70\162\x69\x76\x61\164\x65\x5f\153\x65\171\137\x74\x79\160\x65" => OPENSSL_KEYTYPE_RSA);
+        $Yg = openssl_pkey_new($po);
+        $i_ = openssl_csr_new($B1, $Yg, $po);
+        $MK = openssl_csr_sign($i_, null, $Yg, $ee, $po, time());
+        openssl_x509_export($MK, $qg);
+        openssl_pkey_export($Yg, $HT, null, $po);
+        openssl_csr_export($i_, $PX);
+        RY:
+        if (!(($jf = openssl_error_string()) !== false)) {
+            goto Wc;
         }
-
-        $certificates = array(
-            'public_key' => $public_key_out,
-            'private_key' => $private_key_out,
-        );
-
-        $pblc_filename = drupal_get_path('module', 'miniorange_saml') . '/resources/Custom_Public_Certificate.crt';
-        file_put_contents ($pblc_filename ,$certificates['public_key']);
-
-        $prvt_filename = drupal_get_path('module', 'miniorange_saml') . '/resources/Custom_Private_Certificate.key';
-        file_put_contents ($prvt_filename ,$certificates['private_key']);
-
-        variable_set('miniorange_saml_publ_certificate', $certificates['public_key']);
-        variable_set('miniorange_saml_private_certificate', $certificates['private_key']);
+        error_log($jf);
+        goto RY;
+        Wc:
+        $pF = array("\x70\165\142\154\x69\x63\x5f\x6b\145\x79" => $qg, "\x70\x72\151\x76\141\x74\x65\137\153\x65\171" => $HT);
+        $nW = drupal_get_path("\x6d\157\x64\165\154\x65", "\x6d\x69\156\x69\x6f\162\x61\x6e\147\x65\x5f\163\141\155\x6c") . "\57\x72\145\x73\157\x75\x72\x63\x65\163\57\103\165\163\164\x6f\x6d\x5f\120\165\142\154\151\143\x5f\x43\145\162\164\x69\146\x69\x63\x61\164\145\56\143\x72\x74";
+        file_put_contents($nW, $pF["\160\x75\x62\x6c\x69\x63\137\x6b\x65\x79"]);
+        $zC = drupal_get_path("\155\x6f\x64\x75\x6c\x65", "\x6d\x69\156\151\x6f\162\141\x6e\147\x65\137\163\141\155\x6c") . "\x2f\162\145\163\x6f\x75\x72\x63\x65\x73\57\x43\x75\x73\164\157\155\137\x50\x72\x69\x76\x61\164\x65\137\103\145\x72\164\151\x66\151\x63\x61\x74\x65\x2e\x6b\x65\x79";
+        file_put_contents($zC, $pF["\160\x72\x69\166\141\x74\145\x5f\153\x65\x79"]);
+        variable_set("\155\x69\x6e\x69\157\x72\141\156\x67\145\x5f\163\141\155\154\137\160\x75\x62\154\137\x63\145\x72\164\x69\x66\x69\143\141\164\x65", $pF["\160\165\142\154\151\x63\x5f\x6b\145\171"]);
+        variable_set("\155\151\x6e\151\157\162\x61\156\147\x65\x5f\x73\141\155\x6c\137\x70\x72\x69\166\x61\164\x65\137\143\145\162\x74\x69\x66\151\x63\x61\x74\x65", $pF["\x70\x72\x69\x76\x61\x74\x65\137\153\145\x79"]);
     }
-
-    public static function isCustomerRegistered(&$form, $form_state){
-
+    public static function isCustomerRegistered(&$form, $form_state)
+    {
         global $base_url;
-        $register_url = $base_url . '/admin/config/people/miniorange_saml/customer_setup/';
-        if (variable_get('miniorange_saml_customer_admin_email', NULL) == NULL
-            || variable_get('miniorange_saml_customer_id', NULL) == NULL
-            || variable_get('miniorange_saml_customer_admin_token', NULL) == NULL
-            || variable_get('miniorange_saml_customer_api_key', NULL) == NULL)
-        {
-            $form['markup_reg_msg'] = array(
-                '#markup' => '<div class="mo_saml_register_message">You need to <a href="'.$register_url.'" >Register/Login</a> with miniOrange before using this module.</center></div>',
-            );
-            return TRUE;
+        $W1 = $base_url . "\57\x61\x64\155\x69\x6e\57\x63\x6f\x6e\146\x69\147\57\x70\x65\x6f\160\154\145\57\x6d\x69\156\x69\157\162\141\x6e\x67\x65\137\x73\x61\x6d\x6c\x2f\x63\165\163\164\x6f\155\x65\x72\x5f\163\x65\164\x75\160\x2f";
+        if (variable_get("\155\151\x6e\x69\x6f\x72\x61\156\147\145\137\163\x61\155\x6c\137\143\165\x73\x74\x6f\x6d\x65\162\x5f\x61\144\155\x69\156\x5f\145\155\x61\151\x6c", NULL) == NULL || variable_get("\155\151\x6e\x69\x6f\x72\141\156\147\145\x5f\x73\141\155\x6c\x5f\143\165\x73\x74\157\x6d\x65\162\x5f\151\144", NULL) == NULL || variable_get("\155\x69\156\x69\157\x72\141\156\x67\145\x5f\163\x61\x6d\x6c\137\x63\165\x73\164\x6f\x6d\x65\x72\137\x61\144\155\151\156\137\x74\x6f\153\145\x6e", NULL) == NULL || variable_get("\155\151\x6e\x69\157\x72\x61\x6e\147\x65\x5f\163\x61\155\x6c\x5f\143\x75\x73\164\x6f\x6d\145\x72\137\141\160\x69\137\x6b\x65\x79", NULL) == NULL) {
+            goto t5;
         }
-        else if(variable_get('miniorange_saml_license_key') == NULL &&
-                variable_get('miniorange_saml_customer_admin_email') != NULL)
-        {
-            $form['markup_msg'] = array(
-                '#markup' => '<div class="mo_saml_register_message"><p>You need to <a href="'.$register_url.'" >Verify</a> your license key before using this module.</a></p></div>'
-            );
-            return TRUE;
+        if (variable_get("\x6d\151\x6e\x69\x6f\x72\141\156\x67\145\x5f\163\x61\x6d\x6c\137\154\151\143\145\x6e\x73\x65\137\153\145\171") == NULL && variable_get("\x6d\x69\x6e\151\x6f\162\x61\156\x67\x65\137\163\141\x6d\x6c\x5f\x63\165\x73\164\x6f\x6d\145\x72\137\x61\x64\155\x69\x6e\x5f\x65\x6d\x61\151\x6c") != NULL) {
+            goto b4;
         }
-        else
-          return False;
-
+        return False;
+        goto sq;
+        b4:
+        $form["\155\141\x72\153\x75\160\137\x6d\x73\147"] = array("\43\x6d\141\162\x6b\x75\x70" => "\x3c\x64\x69\x76\40\x63\x6c\x61\x73\163\x3d\42\155\x6f\137\163\x61\155\x6c\137\162\145\147\x69\163\164\145\162\x5f\x6d\x65\x73\163\x61\x67\145\42\x3e\74\160\x3e\131\157\x75\x20\x6e\145\x65\x64\x20\x74\157\x20\74\x61\40\x68\162\145\x66\x3d\42" . $W1 . "\42\40\x3e\x56\x65\162\x69\146\171\74\57\x61\76\x20\171\x6f\x75\x72\x20\154\151\143\145\156\x73\x65\40\x6b\x65\x79\40\x62\x65\146\x6f\x72\145\40\165\163\151\156\147\40\164\x68\151\163\x20\155\157\144\165\154\x65\x2e\x3c\x2f\141\x3e\74\x2f\x70\76\x3c\57\144\151\x76\76");
+        return TRUE;
+        sq:
+        goto HE;
+        t5:
+        $form["\x6d\x61\x72\x6b\x75\x70\x5f\x72\145\x67\137\x6d\163\x67"] = array("\x23\x6d\x61\162\153\165\160" => "\x3c\x64\x69\x76\40\143\x6c\141\x73\x73\x3d\x22\155\x6f\137\x73\x61\155\x6c\x5f\x72\x65\x67\151\x73\x74\145\x72\137\x6d\145\163\x73\x61\x67\x65\42\76\131\x6f\x75\x20\156\x65\145\x64\x20\x74\x6f\40\74\x61\x20\x68\162\x65\x66\75\42" . $W1 . "\x22\40\76\x52\x65\x67\151\x73\x74\145\x72\x2f\x4c\x6f\147\x69\x6e\74\57\x61\76\x20\167\x69\x74\x68\40\x6d\x69\156\151\x4f\162\141\156\147\x65\x20\x62\145\x66\157\x72\145\x20\x75\163\151\156\147\40\x74\x68\x69\163\x20\x6d\157\144\x75\x6c\x65\x2e\74\57\x63\x65\x6e\x74\x65\x72\x3e\x3c\x2f\144\x69\166\x3e");
+        return TRUE;
+        HE:
     }
-
     public static function AddsupportTab(&$form, $form_state)
     {
-        $RegisteredEmailandPhone = Utilities::getEmailandPhone();
-        $form['markup_idp_attr_header_top_support'] = array(
-            '#markup' => '<div class="mo_saml_table_layout_support_1">',
-        );
-
-        $form['markup_support_1'] = array(
-            '#markup' => '<h3><b>Support:</b></h3><div>Need any help? Just send us a query so we can help you.<br /></div>',
-        );
-
-        $form['miniorange_saml_email_address_support'] = array(
-            '#type' => 'textfield',
-            '#attributes' => array('style' => 'width:100%','placeholder' => 'Enter your Email'),
-            '#default_value' => $RegisteredEmailandPhone['email'],
-        );
-
-        $form['miniorange_saml_phone_number_support'] = array(
-            '#type' => 'textfield',
-            '#attributes' => array('style' => 'width:100%','placeholder' => 'Enter your phone number with country code eg.(+1)'),
-            '#default_value' => $RegisteredEmailandPhone['phone'],
-        );
-
-        $form['miniorange_saml_support_query_support'] = array(
-            '#type' => 'textarea',
-            '#cols' => '10',
-            '#rows' => '5',
-            '#attributes' => array('style' => 'width:100%','placeholder' => 'Write your query here.'),
-            '#resizable' => False,
-        );
-
-        $form['miniorange_saml_support_submit_click'] = array(
-            '#type' => 'submit',
-            '#value' => t('Submit Query'),
-            '#submit' => array('miniorange_saml_idp_send_query'),
-            '#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;display:block;margin-left:auto;margin-right:auto;'),
-        );
-
-        $form['miniorange_saml_support_note'] = array(
-            '#markup' => '<div>If you want custom features in the module, just drop an email to <a href="mailto:info@xecurify.com">info@xecurify.com</a></div></div>'
-        );
+        $AR = Utilities::getEmailandPhone();
+        $form["\x6d\x61\x72\153\x75\160\x5f\151\x64\x70\x5f\x61\164\164\162\137\x68\145\141\x64\145\162\137\164\x6f\160\137\163\165\160\160\157\x72\x74"] = array("\x23\155\141\162\x6b\x75\x70" => "\74\x64\x69\x76\40\x63\x6c\141\x73\163\75\42\x6d\x6f\137\163\141\x6d\154\x5f\164\141\x62\154\145\137\154\x61\171\157\x75\164\x5f\163\165\160\x70\x6f\162\x74\137\61\42\x3e");
+        $form["\155\x61\x72\153\x75\160\x5f\x73\165\160\160\157\162\164\137\61"] = array("\x23\x6d\141\x72\153\x75\160" => "\74\x68\x33\76\74\142\76\123\x75\160\x70\x6f\162\164\x3a\74\57\142\x3e\x3c\x2f\x68\63\x3e\74\x64\151\166\x3e\x4e\x65\x65\144\40\x61\156\171\40\150\145\x6c\x70\x3f\x20\112\x75\163\x74\x20\x73\145\156\x64\x20\165\163\x20\x61\40\161\165\x65\x72\x79\x20\163\157\40\x77\145\x20\x63\141\x6e\x20\x68\x65\x6c\160\x20\171\157\x75\56\x3c\142\162\40\57\76\x3c\57\144\x69\x76\x3e");
+        $form["\155\x69\x6e\151\157\x72\141\156\x67\x65\x5f\x73\141\x6d\154\137\145\155\141\x69\154\137\x61\x64\144\162\145\163\163\137\x73\165\x70\x70\157\162\x74"] = array("\x23\164\171\160\145" => "\x74\145\x78\164\146\151\x65\x6c\144", "\43\x61\x74\x74\x72\151\142\x75\x74\145\163" => array("\x73\x74\x79\x6c\x65" => "\167\151\x64\164\150\x3a\x31\60\60\45", "\x70\x6c\141\x63\145\x68\x6f\154\x64\145\162" => "\x45\x6e\x74\x65\162\x20\x79\x6f\165\162\x20\x45\155\x61\x69\x6c"), "\43\144\145\146\x61\x75\x6c\x74\x5f\x76\141\154\x75\145" => $AR["\145\155\141\151\x6c"]);
+        $form["\155\151\156\151\x6f\x72\141\x6e\x67\x65\x5f\163\141\x6d\x6c\x5f\160\x68\x6f\x6e\x65\137\x6e\165\155\142\x65\x72\137\163\x75\x70\x70\157\x72\x74"] = array("\43\164\x79\x70\x65" => "\164\145\x78\x74\x66\x69\x65\154\144", "\43\x61\164\x74\162\151\x62\165\x74\x65\x73" => array("\x73\x74\171\154\x65" => "\167\x69\144\x74\150\x3a\61\60\x30\x25", "\x70\154\x61\x63\145\x68\157\x6c\x64\x65\162" => "\105\156\164\x65\x72\x20\x79\x6f\x75\162\40\x70\x68\x6f\x6e\145\40\x6e\x75\155\142\145\x72\40\167\x69\x74\x68\40\143\157\165\x6e\164\162\x79\x20\x63\157\144\x65\40\145\147\56\x28\x2b\61\x29"), "\43\x64\x65\146\141\x75\x6c\164\137\x76\141\x6c\165\145" => $AR["\160\x68\x6f\156\145"]);
+        $form["\x6d\x69\156\151\157\x72\141\156\147\145\137\163\x61\x6d\154\137\163\165\160\160\157\x72\x74\x5f\x71\165\x65\162\x79\137\x73\x75\160\x70\x6f\162\x74"] = array("\43\x74\x79\x70\145" => "\164\145\170\x74\x61\162\145\141", "\43\143\x6f\154\x73" => "\x31\x30", "\x23\x72\x6f\x77\x73" => "\x35", "\x23\x61\x74\164\162\151\142\x75\x74\x65\163" => array("\x73\x74\171\x6c\x65" => "\167\151\144\164\x68\x3a\61\60\x30\x25", "\160\x6c\x61\143\145\x68\x6f\154\x64\x65\162" => "\127\x72\151\x74\x65\40\171\x6f\x75\x72\x20\161\165\145\x72\x79\40\150\x65\x72\x65\x2e"), "\x23\162\145\163\151\x7a\x61\142\154\145" => False);
+        $form["\155\x69\x6e\x69\x6f\x72\x61\156\147\145\137\163\141\155\154\137\163\x75\160\x70\157\162\164\x5f\x73\x75\x62\x6d\x69\x74\137\x63\x6c\151\143\153"] = array("\x23\164\171\160\x65" => "\x73\x75\142\155\x69\x74", "\x23\x76\141\154\165\145" => t("\123\x75\x62\155\151\x74\x20\121\x75\145\x72\171"), "\x23\163\x75\x62\x6d\x69\164" => array("\x6d\x69\156\x69\157\162\141\156\147\x65\137\163\x61\155\x6c\x5f\151\144\160\x5f\163\x65\x6e\x64\137\x71\x75\145\162\x79"), "\43\x61\x74\164\x72\x69\x62\165\164\x65\x73" => array("\163\164\x79\154\145" => "\142\x61\x63\x6b\147\x72\157\165\156\144\72\40\43\x33\x33\x37\x61\142\67\x3b\x63\157\x6c\x6f\x72\72\40\x23\x66\x66\x66\x66\x66\x66\x3b\x74\x65\x78\x74\55\x73\150\141\144\157\167\x3a\40\x30\x20\55\x31\x70\170\40\61\x70\170\40\x23\63\x33\x37\141\142\67\54\x20\61\x70\170\40\60\x20\61\x70\x78\40\43\x33\63\67\x61\x62\67\x2c\40\60\40\x31\x70\170\40\61\x70\x78\x20\43\63\63\67\x61\142\67\54\40\55\61\x70\x78\x20\60\40\61\x70\x78\x20\43\x33\63\x37\x61\142\x37\73\x62\157\x78\55\163\150\x61\144\157\x77\72\x20\x30\40\61\x70\170\40\60\x20\x23\63\x33\67\x61\x62\x37\73\x62\x6f\x72\x64\145\162\x2d\x63\x6f\154\157\162\72\x20\43\x33\63\67\x61\142\67\40\x23\x33\x33\x37\x61\142\67\40\x23\63\x33\67\x61\142\67\x3b\144\x69\163\160\154\x61\x79\x3a\142\154\157\143\x6b\x3b\x6d\x61\x72\147\151\156\x2d\x6c\145\146\164\x3a\x61\165\x74\x6f\x3b\x6d\141\162\x67\x69\156\55\x72\151\x67\x68\x74\x3a\x61\x75\x74\x6f\73"));
+        $form["\155\x69\x6e\x69\x6f\x72\141\x6e\147\145\x5f\x73\x61\x6d\x6c\137\163\x75\x70\x70\x6f\162\164\137\156\157\x74\145"] = array("\43\155\x61\162\153\x75\x70" => "\x3c\144\x69\166\x3e\x49\x66\x20\171\157\165\40\x77\x61\156\164\x20\143\x75\163\x74\157\x6d\x20\146\x65\141\x74\x75\162\x65\x73\40\151\x6e\x20\x74\x68\x65\40\x6d\x6f\x64\165\x6c\145\54\x20\152\x75\163\164\40\144\x72\x6f\160\x20\x61\156\40\145\155\x61\151\x6c\x20\164\x6f\x20\x3c\141\40\150\162\145\x66\75\42\x6d\x61\151\x6c\164\x6f\72\151\156\146\x6f\100\170\145\143\165\162\x69\146\x79\x2e\143\x6f\155\x22\76\151\156\146\157\x40\x78\145\x63\x75\162\x69\x66\171\x2e\143\157\155\74\x2f\x61\x3e\x3c\x2f\x64\x69\x76\76\74\x2f\x64\x69\x76\x3e");
     }
-
-    public static function send_query($email, $phone, $query)
+    public static function send_query($k6, $GC, $rD)
     {
-        if(empty($email)||empty($query)){
-            drupal_set_message(t('The <b><u>Email</u></b> and <b><u>Query</u></b> fields are required.'), 'error');
-            return;
-        } elseif(!valid_email_address($email)) {
-            drupal_set_message(t('The email address <b><i>' . $email . '</i></b> is not valid.'), 'error');
-            return;
+        if (empty($k6) || empty($rD)) {
+            goto uK;
         }
-        $support = new MiniOrangeSamlSupport($email, $phone, $query);
-        $support_response = $support->sendSupportQuery();
-        if($support_response) {
-            drupal_set_message(t('Support query successfully sent.'));
+        if (!valid_email_address($k6)) {
+            goto iG;
         }
-        else {
-            drupal_set_message(t('Error sending support query.'), 'error');
+        goto ib;
+        uK:
+        drupal_set_message(t("\124\150\145\40\x3c\x62\x3e\x3c\165\x3e\105\155\x61\x69\x6c\x3c\57\165\76\74\x2f\142\76\x20\x61\x6e\144\40\74\142\76\x3c\165\x3e\121\x75\x65\162\x79\74\x2f\x75\x3e\74\57\142\x3e\x20\146\x69\x65\154\144\163\x20\141\x72\145\x20\x72\145\x71\165\151\x72\x65\x64\x2e"), "\145\x72\162\157\x72");
+        return;
+        goto ib;
+        iG:
+        drupal_set_message(t("\124\150\145\40\145\x6d\141\151\154\x20\x61\x64\144\x72\x65\x73\163\40\74\x62\76\74\x69\x3e" . $k6 . "\74\x2f\151\76\74\57\142\76\x20\x69\x73\x20\x6e\157\164\x20\x76\x61\154\x69\144\x2e"), "\145\162\162\x6f\162");
+        return;
+        ib:
+        $xu = new MiniOrangeSamlSupport($k6, $GC, $rD);
+        $eS = $xu->sendSupportQuery();
+        if ($eS) {
+            goto Lj;
         }
+        drupal_set_message(t("\x45\162\x72\157\162\40\163\x65\156\144\x69\x6e\x67\40\163\x75\x70\x70\157\162\164\40\x71\165\x65\162\x79\56"), "\x65\x72\162\x6f\162");
+        goto R0;
+        Lj:
+        drupal_set_message(t("\x53\x75\x70\x70\157\162\164\x20\x71\x75\x65\162\x79\40\163\x75\143\x63\145\163\163\146\x75\x6c\154\171\40\163\x65\156\164\x2e"));
+        R0:
     }
-
-    public static function getEmailandPhone() {
-        $Registered_email = variable_get('miniorange_saml_customer_admin_email', '');
-        $Registered_phone = variable_get('miniorange_saml_customer_admin_phone', '');
-        $array = array(
-            'email' => isset($Registered_email) ? $Registered_email : '',
-            'phone' => isset($Registered_phone) ? $Registered_phone : '',
-        );
-        return $array;
+    public static function getEmailandPhone()
+    {
+        $ky = variable_get("\x6d\151\156\x69\157\x72\x61\x6e\147\145\137\x73\141\x6d\x6c\137\x63\x75\163\164\x6f\155\x65\x72\137\141\144\x6d\x69\156\x5f\x65\155\x61\x69\154", '');
+        $VO = variable_get("\x6d\151\156\x69\x6f\162\141\156\147\145\137\163\x61\x6d\x6c\x5f\x63\165\163\x74\x6f\155\145\x72\x5f\141\144\x6d\151\x6e\x5f\x70\x68\157\156\145", '');
+        $qo = array("\145\x6d\141\151\x6c" => isset($ky) ? $ky : '', "\x70\150\x6f\x6e\x65" => isset($VO) ? $VO : '');
+        return $qo;
     }
-
-    public static function miniorange_get_baseURL(){
+    public static function miniorange_get_baseURL()
+    {
         global $base_url;
-        $url = variable_get('miniorange_saml_base_url','');
-        $b_url = isset($url) && !empty($url)? $url:$base_url;
-        return $b_url;
+        $P4 = variable_get("\x6d\151\x6e\151\x6f\162\x61\x6e\147\145\x5f\x73\x61\155\154\137\142\141\x73\x65\137\165\x72\154", '');
+        $vQ = isset($P4) && !empty($P4) ? $P4 : $base_url;
+        return $vQ;
     }
-
-	public static function set_idp_parameters($idpid){
-		  if($idpid != "new"){
-			    $sql = db_query("SELECT * FROM {miniorange_saml_idp_list} WHERE id = $idpid");
-          $data = $sql->fetchAssoc();
-          variable_set('miniorange_saml_idp_id', $idpid);
-          variable_set('miniorange_saml_idp_name', $data['mo_idp_name']);
-          variable_set('miniorange_saml_idp_issuer', $data['mo_idp_issuer']);
-          variable_set('miniorange_saml_idp_login_url', $data['mo_idp_sso_url']);
-          variable_set('miniorange_saml_idp_x509_certificate', $data['mo_idp_cert']);
-          variable_set('miniorange_nameid_format', $data['mo_idp_nameid_format']);
-          variable_set('miniorange_saml_request_signed', $data['mo_idp_request_signed']);
-          variable_set('miniorange_saml_http_binding', $data['mo_idp_http_binding_sso']);
-          variable_set('miniorange_saml_http_binding_slo', $data['mo_idp_http_binding_slo']);
-          variable_set('miniorange_saml_idp_logout_url', $data['mo_idp_slo_url']);
-          variable_set('miniorange_saml_fetch_metadata_time_intervals', $data['miniorange_saml_fetch_metadata_time_intervals']);
-          variable_set('miniorange_saml_meta_data_url', $data['miniorange_saml_meta_data_url']);
-		  }else{
-          variable_set('miniorange_saml_idp_id','');
-          variable_set('miniorange_saml_idp_name','');
-          variable_set('miniorange_saml_idp_issuer','');
-          variable_set('miniorange_saml_idp_login_url','');
-          variable_set('miniorange_saml_idp_x509_certificate','');
-          variable_set('miniorange_nameid_format','');
-          variable_set('miniorange_saml_request_signed','');
-          variable_set('miniorange_saml_http_binding','');
-          variable_set('miniorange_saml_http_binding_slo','');
-          variable_set('miniorange_saml_idp_logout_url','');
-		}
-	}
-
-	public static function delete_sp_parameters($idpid){
-      $dbdelete = db_delete('miniorange_saml_idp_list')
-      ->condition('id', $idpid)
-      ->execute();
-
-      variable_set('miniorange_saml_idp_id','');
-      variable_set('miniorange_saml_idp_name','');
-      variable_set('miniorange_saml_idp_issuer','');
-      variable_set('miniorange_saml_idp_login_url','');
-      variable_set('miniorange_saml_idp_x509_certificate','');
-      variable_set('miniorange_nameid_format','');
-      variable_set('miniorange_saml_request_signed','');
-      variable_set('miniorange_saml_http_binding','');
-      variable_set('miniorange_saml_http_binding_slo','');
-      variable_set('miniorange_saml_idp_logout_url','');
-	}
-
-	public static function faq(&$form, &$form_state){
-
-      $form['miniorange_idp_guide_linkw'] = array(
-            '#markup' => '<div class="mo_saml_table_layout_support_1" style="margin-top: 5px;">',
-      );
-
-      $form['miniorange_faq'] = array(
-          '#markup' => '<b></b><a class="btn btn-primary-faq btn-large btn_faq_buttons" style="float: left;padding: 3px 6px !important;color: #48a0dc;border: 2px solid #48a0dc;width:30%;" href="https://faq.miniorange.com/kb/drupal/saml-drupal/" target="_blank">'
-            . 'FAQs</a>',
-      );
-
-      $form['miniorange_forum'] = array(
-          '#markup' => '<b></b><a class="btn btn-primary-faq btn-large btn_faq_buttons" style="float: right;padding: 3px 6px !important;color: #48a0dc;border: 2px solid #48a0dc;width:55%;" href="https://forum.miniorange.com/" target="_blank">'
-            . 'Ask questions on forum</a>',
-      );
-
-      $form['markup_test_div']=array('#markup'=>'</div>');
-  }
-
-  public static function isCurlInstalled() {
-      if (in_array('curl', get_loaded_extensions())) {
-          return 1;
-      }
-      else {
-          return 0;
-      }
-  }
-
-	public static function generateID() {
-	  	return '_' . self::stringToHex(self::generateRandomBytes(21));
-	}
-
-	public static function stringToHex($bytes) {
-		  $ret = '';
-		  for($i = 0; $i < strlen($bytes); $i++) {
-			    $ret .= sprintf('%02x', ord($bytes[$i]));
-		  }
-		  return $ret;
-	}
-
-	public static function generateRandomBytes($length, $fallback = TRUE) {
-	  	return openssl_random_pseudo_bytes($length);
-	}
-
-	public static function insertSignature(XMLSecurityKey $key, array $certificates, DOMElement $root = NULL, DOMNode $insertBefore = NULL) {
-        $objXMLSecDSig = new XMLSecurityDSig();
-        $objXMLSecDSig->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
-
-        switch ($key->type) {
+    public static function set_idp_parameters($Fv)
+    {
+        if ($Fv != "\x6e\145\167") {
+            goto U3;
+        }
+        variable_set("\x6d\x69\156\151\x6f\x72\141\156\147\x65\137\x73\x61\155\154\137\x69\x64\x70\137\151\x64", '');
+        variable_set("\155\x69\x6e\151\157\x72\141\x6e\147\x65\137\163\141\155\154\x5f\151\x64\x70\x5f\x6e\x61\155\145", '');
+        variable_set("\x6d\x69\156\151\x6f\x72\141\x6e\x67\x65\137\x73\141\x6d\154\137\x69\144\160\x5f\151\163\163\x75\145\x72", '');
+        variable_set("\x6d\151\156\x69\157\x72\x61\x6e\x67\145\x5f\163\141\x6d\x6c\x5f\151\144\x70\137\x6c\157\x67\x69\156\x5f\165\x72\154", '');
+        variable_set("\155\x69\x6e\x69\x6f\x72\141\x6e\x67\x65\x5f\163\x61\155\154\137\x69\144\160\x5f\x78\x35\60\71\x5f\143\x65\x72\164\x69\146\x69\143\141\164\145", '');
+        variable_set("\155\151\x6e\151\x6f\x72\x61\156\x67\x65\x5f\156\141\x6d\x65\151\144\137\x66\x6f\x72\x6d\141\164", '');
+        variable_set("\155\x69\x6e\151\157\162\141\156\147\145\x5f\163\141\155\x6c\137\x72\145\x71\165\145\163\x74\x5f\x73\151\147\x6e\145\144", '');
+        variable_set("\x6d\x69\x6e\x69\157\x72\x61\x6e\147\145\x5f\163\x61\x6d\x6c\137\x68\164\164\x70\x5f\x62\151\156\144\x69\156\147", '');
+        variable_set("\x6d\151\x6e\x69\157\162\x61\156\147\145\137\x73\141\x6d\154\x5f\150\x74\x74\x70\137\142\x69\x6e\x64\x69\156\x67\x5f\163\x6c\x6f", '');
+        variable_set("\155\151\x6e\x69\157\162\x61\x6e\x67\x65\137\163\x61\x6d\x6c\137\x69\144\x70\x5f\154\x6f\147\x6f\x75\164\x5f\x75\x72\x6c", '');
+        goto ie;
+        U3:
+        $xE = db_query("\x53\x45\x4c\x45\x43\124\x20\52\x20\x46\x52\117\x4d\x20\x7b\155\151\156\151\157\162\141\156\x67\145\137\x73\141\x6d\154\137\151\144\160\x5f\154\x69\163\164\x7d\x20\127\110\105\122\x45\x20\x69\144\x20\x3d\x20{$Fv}");
+        $TG = $xE->fetchAssoc();
+        variable_set("\155\x69\x6e\x69\157\x72\141\x6e\x67\145\x5f\163\x61\x6d\x6c\x5f\x69\144\x70\x5f\151\x64", $Fv);
+        variable_set("\155\151\156\151\157\162\x61\156\x67\x65\x5f\163\141\155\x6c\x5f\151\144\x70\x5f\x6e\141\155\x65", $TG["\x6d\157\x5f\x69\144\x70\137\x6e\x61\x6d\x65"]);
+        variable_set("\155\x69\x6e\151\x6f\x72\x61\156\147\x65\x5f\x73\141\155\x6c\x5f\151\144\x70\137\151\163\x73\x75\145\x72", $TG["\x6d\157\137\151\144\160\x5f\151\163\x73\165\145\x72"]);
+        variable_set("\155\151\156\x69\x6f\162\141\156\147\x65\137\x73\x61\x6d\154\137\x69\x64\x70\x5f\x6c\157\147\151\x6e\x5f\x75\162\x6c", $TG["\x6d\157\x5f\151\144\160\137\x73\x73\157\x5f\x75\162\154"]);
+        variable_set("\x6d\x69\x6e\x69\157\162\x61\x6e\x67\145\x5f\163\x61\155\154\x5f\151\x64\x70\x5f\170\65\60\x39\137\x63\145\x72\164\x69\x66\x69\143\x61\x74\x65", $TG["\x6d\x6f\137\151\x64\160\137\x63\x65\162\164"]);
+        variable_set("\x6d\151\156\x69\x6f\162\x61\x6e\x67\145\x5f\x6e\141\x6d\145\x69\144\x5f\x66\x6f\162\x6d\x61\164", $TG["\155\157\137\x69\x64\x70\x5f\156\141\x6d\x65\151\144\137\x66\x6f\162\x6d\141\164"]);
+        variable_set("\x6d\x69\156\x69\157\162\141\156\147\145\137\163\141\x6d\154\137\x72\x65\x71\165\x65\x73\x74\x5f\163\151\x67\156\x65\x64", $TG["\155\157\x5f\151\144\160\137\162\x65\161\165\145\163\x74\137\x73\x69\x67\x6e\145\144"]);
+        variable_set("\155\x69\156\151\157\162\141\x6e\147\145\137\x73\x61\x6d\154\x5f\x68\164\164\160\137\142\x69\x6e\x64\151\x6e\x67", $TG["\x6d\x6f\x5f\151\144\160\x5f\150\x74\164\160\137\x62\151\x6e\144\151\156\x67\x5f\163\163\157"]);
+        variable_set("\x6d\151\x6e\x69\157\x72\x61\156\147\145\137\x73\x61\155\154\137\150\x74\x74\x70\x5f\142\151\x6e\x64\151\x6e\147\137\x73\154\x6f", $TG["\x6d\x6f\x5f\x69\144\160\x5f\150\x74\x74\x70\137\142\151\156\x64\x69\156\147\137\x73\154\x6f"]);
+        variable_set("\x6d\x69\x6e\x69\157\162\141\x6e\x67\x65\x5f\x73\x61\155\x6c\137\x69\x64\x70\x5f\154\x6f\147\157\x75\x74\137\x75\x72\154", $TG["\155\x6f\x5f\x69\144\160\137\163\x6c\157\137\165\162\154"]);
+        variable_set("\x6d\x69\x6e\151\157\x72\x61\156\x67\x65\137\163\x61\155\x6c\137\x66\145\x74\143\150\x5f\x6d\145\164\x61\x64\141\x74\x61\x5f\164\x69\x6d\145\137\151\156\x74\x65\x72\x76\141\x6c\x73", $TG["\155\151\156\x69\x6f\162\141\156\147\145\137\x73\141\x6d\x6c\x5f\146\145\164\143\x68\x5f\155\x65\164\x61\x64\141\x74\x61\137\x74\151\x6d\x65\137\x69\156\164\145\162\x76\x61\x6c\163"]);
+        variable_set("\155\x69\156\x69\x6f\162\x61\x6e\x67\145\137\x73\x61\x6d\154\x5f\x6d\145\x74\x61\x5f\x64\x61\164\x61\137\165\162\154", $TG["\x6d\151\156\x69\157\x72\141\x6e\147\x65\137\x73\x61\x6d\154\137\x6d\145\x74\x61\x5f\x64\141\164\x61\x5f\x75\x72\154"]);
+        ie:
+    }
+    public static function delete_sp_parameters($Fv)
+    {
+        $bD = db_delete("\x6d\x69\x6e\x69\x6f\x72\x61\156\x67\145\x5f\163\141\x6d\x6c\x5f\151\x64\160\x5f\154\x69\x73\164")->condition("\x69\144", $Fv)->execute();
+        variable_set("\155\151\x6e\151\x6f\x72\141\x6e\x67\x65\x5f\x73\141\x6d\x6c\x5f\151\144\160\137\151\x64", '');
+        variable_set("\x6d\151\x6e\151\157\162\141\156\x67\x65\137\x73\141\x6d\x6c\137\151\144\x70\137\156\x61\x6d\x65", '');
+        variable_set("\x6d\x69\x6e\x69\x6f\x72\141\156\x67\x65\137\163\141\x6d\154\x5f\151\144\x70\x5f\151\163\x73\165\x65\162", '');
+        variable_set("\x6d\x69\156\x69\x6f\x72\141\x6e\x67\145\137\163\x61\x6d\x6c\x5f\151\144\x70\x5f\154\x6f\147\151\156\x5f\x75\x72\154", '');
+        variable_set("\155\151\x6e\151\x6f\x72\x61\x6e\147\145\x5f\x73\141\x6d\154\137\x69\144\160\137\170\65\60\71\x5f\143\x65\x72\x74\x69\x66\x69\x63\x61\164\145", '');
+        variable_set("\155\x69\156\151\x6f\x72\x61\x6e\x67\145\137\x6e\x61\155\x65\151\144\x5f\146\157\x72\x6d\141\x74", '');
+        variable_set("\155\151\156\151\157\x72\x61\156\x67\145\137\x73\x61\155\x6c\137\x72\x65\161\x75\x65\163\164\137\x73\x69\x67\x6e\x65\x64", '');
+        variable_set("\x6d\151\x6e\151\157\x72\141\156\x67\145\x5f\163\141\155\x6c\137\x68\x74\164\x70\137\x62\x69\x6e\x64\x69\x6e\147", '');
+        variable_set("\155\151\x6e\151\157\x72\141\x6e\147\145\x5f\x73\x61\x6d\x6c\137\x68\x74\164\160\x5f\142\x69\156\144\x69\156\147\x5f\x73\x6c\157", '');
+        variable_set("\x6d\x69\x6e\151\x6f\162\141\x6e\147\x65\x5f\x73\141\155\154\x5f\x69\x64\160\137\154\x6f\x67\x6f\x75\164\137\165\162\154", '');
+    }
+    public static function faq(&$form, &$form_state)
+    {
+        $form["\x6d\x69\156\151\157\x72\141\156\147\145\x5f\x69\x64\160\x5f\x67\165\151\x64\145\x5f\x6c\151\156\153\x77"] = array("\43\x6d\141\x72\x6b\165\x70" => "\74\x64\151\166\40\143\154\x61\x73\163\x3d\x22\155\x6f\137\x73\141\155\x6c\x5f\x74\x61\142\154\145\137\x6c\141\171\x6f\165\x74\x5f\x73\165\x70\160\x6f\x72\x74\x5f\61\42\40\x73\164\171\154\145\x3d\x22\x6d\141\x72\147\151\156\x2d\164\x6f\x70\x3a\x20\x35\x70\170\x3b\42\76");
+        $form["\x6d\151\x6e\151\x6f\x72\141\156\x67\x65\137\146\x61\x71"] = array("\43\x6d\141\x72\153\x75\x70" => "\74\x62\x3e\x3c\x2f\142\76\x3c\x61\x20\143\x6c\141\x73\163\75\x22\x62\164\x6e\40\x62\x74\156\x2d\160\162\x69\155\x61\162\x79\x2d\146\x61\161\40\x62\164\156\55\x6c\141\162\x67\145\x20\142\164\156\x5f\x66\x61\161\x5f\142\165\164\x74\157\156\163\42\40\x73\x74\x79\x6c\145\x3d\42\x66\154\x6f\x61\164\x3a\40\x6c\x65\146\x74\73\x70\x61\x64\x64\x69\156\147\72\40\63\160\170\x20\66\160\170\40\41\x69\155\x70\x6f\x72\x74\x61\x6e\164\x3b\143\x6f\x6c\157\x72\72\40\x23\x34\70\x61\x30\x64\x63\x3b\142\157\x72\x64\145\x72\x3a\x20\62\x70\x78\x20\x73\x6f\154\151\144\x20\x23\64\70\x61\60\144\143\73\167\151\144\164\x68\72\63\x30\45\x3b\42\40\150\162\145\x66\x3d\42\x68\x74\164\160\163\x3a\57\x2f\146\141\161\x2e\155\x69\x6e\x69\x6f\x72\x61\x6e\147\145\56\x63\157\x6d\x2f\153\x62\x2f\x64\x72\x75\x70\141\x6c\57\163\x61\x6d\x6c\55\144\x72\x75\160\x61\x6c\57\x22\40\164\141\x72\x67\x65\x74\x3d\42\137\142\154\141\x6e\153\42\x3e" . "\x46\x41\121\x73\74\57\x61\x3e");
+        $form["\x6d\151\x6e\151\157\x72\x61\156\x67\145\137\x66\x6f\162\x75\155"] = array("\x23\155\141\162\x6b\x75\x70" => "\74\x62\76\74\57\142\76\74\x61\40\x63\x6c\x61\163\x73\x3d\x22\142\x74\156\40\x62\x74\156\55\x70\x72\151\155\141\x72\x79\x2d\146\141\x71\x20\x62\x74\156\55\154\141\162\x67\x65\40\142\164\156\x5f\146\x61\161\137\142\x75\x74\x74\157\156\x73\42\40\x73\164\x79\x6c\x65\75\42\146\x6c\x6f\x61\164\72\40\162\x69\x67\x68\164\73\160\x61\144\144\151\156\147\x3a\x20\63\x70\170\40\66\160\x78\x20\41\151\x6d\160\x6f\x72\x74\141\x6e\x74\x3b\x63\x6f\x6c\x6f\162\x3a\40\x23\64\70\141\x30\144\143\73\x62\157\x72\x64\145\x72\x3a\40\x32\160\x78\x20\x73\x6f\x6c\151\144\40\x23\x34\70\x61\x30\144\x63\x3b\x77\151\144\164\x68\x3a\65\65\45\73\42\40\x68\x72\x65\146\75\x22\150\x74\164\x70\x73\x3a\57\57\146\157\162\165\155\x2e\x6d\151\x6e\x69\157\x72\141\x6e\147\x65\56\x63\x6f\155\57\x22\x20\164\x61\162\x67\x65\164\x3d\42\x5f\142\154\141\156\153\42\76" . "\101\163\153\40\161\165\x65\163\164\x69\157\x6e\163\40\x6f\x6e\x20\x66\x6f\x72\165\x6d\x3c\57\141\76");
+        $form["\155\141\162\153\165\160\137\164\x65\163\x74\137\x64\151\x76"] = array("\43\155\141\162\x6b\165\160" => "\74\x2f\x64\151\x76\76");
+    }
+    public static function isCurlInstalled()
+    {
+        if (in_array("\143\165\162\x6c", get_loaded_extensions())) {
+            goto WK;
+        }
+        return 0;
+        goto ZL;
+        WK:
+        return 1;
+        ZL:
+    }
+    public static function generateID()
+    {
+        return "\137" . self::stringToHex(self::generateRandomBytes(21));
+    }
+    public static function stringToHex($l1)
+    {
+        $uQ = '';
+        $MS = 0;
+        zy:
+        if (!($MS < strlen($l1))) {
+            goto hF;
+        }
+        $uQ .= sprintf("\45\60\62\170", ord($l1[$MS]));
+        Ub:
+        $MS++;
+        goto zy;
+        hF:
+        return $uQ;
+    }
+    public static function generateRandomBytes($c8, $a_ = TRUE)
+    {
+        return openssl_random_pseudo_bytes($c8);
+    }
+    public static function insertSignature(XMLSecurityKey $aC, array $pF, DOMElement $uw = NULL, DOMNode $VW = NULL)
+    {
+        $jn = new XMLSecurityDSig();
+        $jn->setCanonicalMethod(XMLSecurityDSig::EXC_C14N);
+        switch ($aC->type) {
             case XMLSecurityKey::RSA_SHA256:
-                $type = XMLSecurityDSig::SHA256;
-                break;
+                $KA = XMLSecurityDSig::SHA256;
+                goto ll;
             case XMLSecurityKey::RSA_SHA384:
-                $type = XMLSecurityDSig::SHA384;
-                break;
+                $KA = XMLSecurityDSig::SHA384;
+                goto ll;
             case XMLSecurityKey::RSA_SHA512:
-                $type = XMLSecurityDSig::SHA512;
-                break;
+                $KA = XMLSecurityDSig::SHA512;
+                goto ll;
             default:
-                $type = XMLSecurityDSig::SHA1;
+                $KA = XMLSecurityDSig::SHA1;
         }
-
-        $objXMLSecDSig->addReferenceList(
-            array($root),
-            $type,
-            array('http://www.w3.org/2000/09/xmldsig#enveloped-signature', XMLSecurityDSig::EXC_C14N),
-            array('id_name' => 'ID', 'overwrite' => FALSE)
-        );
-
-        $objXMLSecDSig->sign($key);
-
-        foreach ($certificates as $certificate) {
-            $objXMLSecDSig->add509Cert($certificate, TRUE);
+        b3:
+        ll:
+        $jn->addReferenceList(array($uw), $KA, array("\x68\x74\164\x70\x3a\57\57\167\x77\x77\56\167\x33\56\x6f\162\147\57\x32\x30\60\x30\x2f\x30\x39\x2f\x78\x6d\x6c\x64\163\x69\147\43\x65\156\x76\145\154\157\160\145\x64\55\x73\x69\x67\156\x61\x74\x75\162\145", XMLSecurityDSig::EXC_C14N), array("\x69\x64\x5f\156\141\155\x65" => "\111\104", "\x6f\166\x65\x72\x77\162\x69\164\145" => FALSE));
+        $jn->sign($aC);
+        foreach ($pF as $AD) {
+            $jn->add509Cert($AD, TRUE);
+            cN:
         }
-
-        $objXMLSecDSig->insertSignature($root, $insertBefore);
-  }
-
-	public static function signXML($xml, $publicCertPath, $privateKeyPath, $insertBeforeTagName = "", $sign_algo) {
-
-		  if (libraries_get_path('xmlseclibs')) {
-	  	  		$xmlseclibs_file = libraries_get_path('xmlseclibs') . '/xmlseclibs.php';
-		  }
-		  else {
-			  	// Trying alternate library path.
-		  		$xmlseclibs_file = libraries_get_path('xmlseclibs-master') . '/xmlseclibs.php';
-		  }
-
-		  libraries_load('xmlseclibs');
-
-		  if (!class_exists('XMLSecurityKey') && !@include($xmlseclibs_file)) {
-		      echo "<div>
-				    <p><font class='alert' background-color='crimson' color='red'>Error: xmlseclibs not loaded properly</font></p>
-				    <p>You can download xmlseclibs from <a href='https://github.com/robrichards/xmlseclibs/tree/1.4' target='_blank'>here</a>.
-				    <br>Extract the archive and place it under <b>sites/all/libraries/</b> in your Drupal directory.</p>
-				    <div>";
-				  exit();
-		  }
-
-		  $param =array( 'type' => 'private');
-		  if($sign_algo == 'RSA_SHA256'){
-  		    $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $param);
-		  }
-		  elseif($sign_algo == 'RSA_SHA384'){
-  		    $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $param);
-		  }
-		  elseif ($sign_algo == 'RSA_SHA512'){
-		      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $param);
-		  }
-		  elseif($sign_algo == 'RSA_SHA1'){
-		      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $param);
-		  }
-
-		  //$key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $param);
-      $key->loadKey($privateKeyPath, TRUE);
-		  $publicCertificate = file_get_contents( $publicCertPath );
-		  $document = new DOMDocument();
-
-  		$document->loadXML($xml);
-	  	$element = $document->firstChild;
-		  if( !empty($insertBeforeTagName) ) {
-			    $domNode = $document->getElementsByTagName( $insertBeforeTagName )->item(0);
-			    self::insertSignature($key, array ( $publicCertificate ), $element, $domNode);
-		  } else {
-			    self::insertSignature($key, array ( $publicCertificate ), $element);
-		  }
-		  $requestXML = $element->ownerDocument->saveXML($element);
-		  $base64EncodedXML = base64_encode($requestXML);
-		  return $base64EncodedXML;
-	}
-
-	public static function postSAMLRequest($url, $samlRequestXML, $relayState) {
-
-	  	echo "<html><head>
-                 <script src='https://code.jquery.com/jquery-1.11.3.min.js'></script>
-                 <script type=\"text/javascript\">$(function(){document.forms['saml-request-form'].submit();});</script></head>
-                 <body>Please wait...<form action=\"" . $url . "\" method=\"post\" id=\"saml-request-form\">
-                   <input type=\"hidden\" name=\"SAMLRequest\" value=\"" . $samlRequestXML . "\" />
-                    <input type=\"hidden\" name=\"RelayState\" value=\"" . htmlentities($relayState) . "\" /></form>
-                    </body>
-              </html>";
-  		exit;
-	}
-
-	public static function createAuthnRequest($acsUrl, $issuer, $destination, $nameid_format, $force_authn = 'false', $sso_binding_type) {
-	  	$requestXmlStr = '<?xml version="1.0" encoding="UTF-8"?>' .
-						'<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns="urn:oasis:names:tc:SAML:2.0:assertion" ID="' . self::generateID() .
-						'" Version="2.0" IssueInstant="' . self::generateTimestamp() . '"';
-		  if( $force_authn == 'true') {
-			    $requestXmlStr .= ' ForceAuthn="true"';
-		  }
-		  $requestXmlStr .= ' ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" AssertionConsumerServiceURL="' . $acsUrl .
-						'" Destination="' . $destination . '"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">' . $issuer . '</saml:Issuer><samlp:NameIDPolicy AllowCreate="true" Format="'.$nameid_format.'"
-                        /></samlp:AuthnRequest>';
-
-		  if(empty($sso_binding_type) || $sso_binding_type == 'HTTP-Redirect') {
-		      $deflatedStr = gzdeflate($requestXmlStr);
-		      $base64EncodedStr = base64_encode($deflatedStr);
-		      $urlEncoded = urlencode($base64EncodedStr);
-		      $requestXmlStr = $urlEncoded;
-		  }
-		  return $requestXmlStr;
-	}
-
-	public static function createSAMLRequest($acsUrl, $issuer, $destination, $nameid_format, $force_authn = 'false') {
-      $requestXmlStr = '<?xml version="1.0" encoding="UTF-8"?>' .
-            '<samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="' . self::generateID() .
-            '" Version="2.0" IssueInstant="' . self::generateTimestamp() . '"';
-      if( $force_authn == 'true') {
-          $requestXmlStr .= ' ForceAuthn="true"';
-      }
-      $requestXmlStr .= ' ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" AssertionConsumerServiceURL="' . $acsUrl .
-            '" Destination="' . $destination . '"><saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">' . $issuer . '</saml:Issuer><samlp:NameIDPolicy AllowCreate="true" Format="'.$nameid_format.'"
-                        /></samlp:AuthnRequest>';
-
-      return $requestXmlStr;
-  }
-
-  public static function mo_saml_logout() {
-      if(isset($_SESSION['IDP_ISSUER'])){
-          $issuer = $_SESSION['IDP_ISSUER'];
-      }
-
-      $sql = db_query("SELECT * FROM {miniorange_saml_idp_list} WHERE mo_idp_issuer = '$issuer'");
-      $data = $sql->fetchAssoc();
-      $logout_url = $data['mo_idp_slo_url'];
-      $logout_binding_type = $data['mo_idp_http_binding_slo'];
-      $sign_algo = $data['security_signature_algorithm'];
-      libraries_load('xmlseclibs');
-      if( !empty($logout_url) )
-      {
-          if( ! session_id() || session_id() == '' || !isset($_SESSION) ) {
-              session_start();
-          }
-          if(isset($_SESSION['mo_saml_logout_request'])) {
-              //Utilities::createLogoutResponseAndRedirect($logout_url, $logout_binding_type);
-              //exit();
-          } elseif (isset($_SESSION['mo_saml']['logged_in_with_idp'])) {
-              global $base_url;
-              unset($_SESSION['mo_saml']);
-              $sessionIndex = $_SESSION['sessionIndex'];
-              $nameId = $_SESSION['NameID'];
-
-              $logout_url_test = variable_get('miniorange_saml_enable_logout');
-              if($logout_url_test == 1 || $logout_url_test == true) {
-                  session_destroy();
-              }
-              if(!isset($_SESSION['logout']) && !empty($_SESSION['logout'])) {
-                  $sp_base_url = $_SESSION['logout'];
-              }
-              else{
-                  $sp_base_url = $base_url;
-              }
-              $sp_entity_id = $base_url; //variable_get('miniorange_saml_sp_issuer', '');
-              $request_signed = $data['mo_idp_request_signed'];
-              $destination = $logout_url;
-              $sendRelayState = $sp_base_url;
-              $samlRequest = Utilities::createLogoutRequest($nameId, $sessionIndex, $sp_entity_id, $destination, $logout_binding_type);
-              $module_path = drupal_get_path('module', 'miniorange_saml');
-
-              if(empty($logout_binding_type) || $logout_binding_type == 'HTTP-Redirect')
-              {
-                  $redirect = $logout_url;
-                  if (strpos($logout_url,'?') !== false)
-                  {
-                      $redirect .= '&';
-                  } else {
-                      $redirect .= '?';
-                  }
-                  if(!$request_signed){
-                      $redirect .= 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState);
-                      header('Location: '.$redirect);
-                      exit();
-                  }
-
-                  if($sign_algo == 'RSA_SHA256'){
-                      $samlRequest = 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState) . '&SigAlg='. urlencode(XMLSecurityKey::RSA_SHA256);
-                  }
-                  elseif($sign_algo == 'RSA_SHA384'){
-                      $samlRequest = 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState) . '&SigAlg='. urlencode(XMLSecurityKey::RSA_SHA384);
-                  }
-                  elseif ($sign_algo == 'RSA_SHA512'){
-                      $samlRequest = 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState) . '&SigAlg='. urlencode(XMLSecurityKey::RSA_SHA512);
-                  }
-                  elseif($sign_algo == 'RSA_SHA1'){
-                      $samlRequest = 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState) . '&SigAlg='. urlencode(XMLSecurityKey::RSA_SHA1);
-                  }
-
-                  //$samlRequest = 'SAMLRequest=' . $samlRequest . '&RelayState=' . urlencode($sendRelayState) . '&SigAlg='. urlencode(XMLSecurityKey::RSA_SHA256);
-
-                  $param =array( 'type' => 'private');
-
-                  if($sign_algo == 'RSA_SHA256'){
-                      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $param);
-                  }
-                  elseif($sign_algo == 'RSA_SHA384'){
-                      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $param);
-                  }
-                  elseif ($sign_algo == 'RSA_SHA512'){
-                      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $param);
-                  }
-                  elseif($sign_algo == 'RSA_SHA1'){
-                      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $param);
-                  }
-                  //$key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $param);
-
-                  $private_cert = "";
-                  $private_cert = variable_get( 'miniorange_saml_private_certificate' );
-                  if( $private_cert != "")
-                  {
-                      $certFilePath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'Custom_Private_Certificate.key';
-                  }
-                  else {
-                      $certFilePath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'sp-key.key';
-                  }
-                  $key->loadKey($certFilePath,TRUE);
-
-
-                  $objXmlSecDSig = new XMLSecurityDSig();
-                  $signature = $key->signData($samlRequest);
-                  $signature = base64_encode($signature);
-                  $redirect .= $samlRequest . '&Signature=' . urlencode($signature);
-
-                  header('Location: '.$redirect);
-                  exit();
-              }
-              else {
-                  if(!$request_signed){
-                      $base64EncodedXML = base64_encode($samlRequest);
-                      Utilities::postSAMLRequest($logout_url, $base64EncodedXML, $sendRelayState);
-                      exit();
-                  }
-                  $privateKeyPath = "";
-                  $publicCertPath = "";
-                  $custom_cert = "";
-                  $custom_cert = variable_get( 'miniorange_saml_publ_certificate' );
-                  $private_cert = "";
-                  $private_cert = variable_get( 'miniorange_saml_private_certificate' );
-                  if( $private_cert != "")
-                  {
-                      $privateKeyPath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'Custom_Private_Certificate.key';
-                  }
-                  else {
-                      $privateKeyPath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'sp-key.key';
-                  }
-                  if( $custom_cert != "")
-                  {
-                      $publicCertPath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'Custom_Public_Certificate.crt';
-                  }
-                  else {
-                      $publicCertPath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'sp-certificate.crt';
-                  }
-                  $base64EncodedXML = Utilities::signXML( $samlRequest, $publicCertPath, $privateKeyPath, 'NameID', $sign_algo );
-                  Utilities::postSAMLRequest($logout_url, $base64EncodedXML, $sendRelayState);
-              }
-          }
-      }
-  }
-
-	public static function createLogoutRequest($nameId, $sessionIndex = '', $issuer, $destination, $slo_binding_type = 'HttpRedirect'){
-	  	$requestXmlStr='<?xml version="1.0" encoding="UTF-8"?>' .
-						'<samlp:LogoutRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ForceAuthn="true" ID="'. self::generateID() .
-						'" IssueInstant="' . self::generateTimestamp() .
-						'" Version="2.0" Destination="'. $destination . '">
-						<saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">' . $issuer . '</saml:Issuer>
-						<saml:NameID xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">'. $nameId . '</saml:NameID>';
-		  if(!empty($sessionIndex)) {
-			    $requestXmlStr .= '<samlp:SessionIndex>' . $sessionIndex . '</samlp:SessionIndex>';
-		  }
-		  $requestXmlStr .= '</samlp:LogoutRequest>';
-
-		  if(empty($slo_binding_type) || $slo_binding_type == 'HttpRedirect') {
-			    $deflatedStr = gzdeflate($requestXmlStr);
-			    $base64EncodedStr = base64_encode($deflatedStr);
-			    $urlEncoded = urlencode($base64EncodedStr);
-			    $requestXmlStr = $urlEncoded;
-		  }
-		  return $requestXmlStr;
-	}
-
-	/*public static function createLogoutResponseAndRedirect( $logout_url, $logout_binding_type ) {
-		global $base_url;
-		$sp_base_url = $base_url;
-		$logout_request = $_SESSION['mo_saml_logout_request'];
-		$relay_state = $_SESSION['mo_saml_logout_relay_state'];
-		unset($_SESSION['mo_saml_logout_request']);
-		unset($_SESSION['mo_saml_logout_relay_state']);
-		$document = new DOMDocument();
-		$document->loadXML($logout_request);
-		$logout_request = $document->firstChild;
-		if( $logout_request->localName == 'LogoutRequest' ) {
-			$logoutRequest = new SAML2SPLogoutRequest( $logout_request );
-			$sp_entity_id = get_option('mo_saml_sp_entity_id');
-			if(empty($sp_entity_id)) {
-				$sp_entity_id = $sp_base_url.'/wp-content/plugins/miniorange-saml-20-single-sign-on/';
-			}
-			//$sp_entity_id = $sp_base_url.'/wp-content/plugins/miniorange-saml-20-single-sign-on/';
-			$destination = $logout_url;
-			$logoutResponse = SAMLSPUtilities::createLogoutResponse($logoutRequest->getId(), $sp_entity_id, $destination, $logout_binding_type);
-
-			if(empty($logout_binding_type) || $logout_binding_type == 'HttpRedirect') {
-				$redirect = $logout_url;
-				if (strpos($logout_url,'?') !== false) {
-					$redirect .= '&';
-				} else {
-					$redirect .= '?';
-				}
-				$redirect .= 'SAMLResponse=' . $logoutResponse . '&RelayState=' . urlencode($relay_state);
-				//echo $redirect.'<br/>';
-				header('Location: '.$redirect);
-				exit();
-			} else {
-				$privateKeyPath = plugin_dir_path(__FILE__) . 'resources' . DIRECTORY_SEPARATOR . 'sp-key.key';
-				$publicCertPath = plugin_dir_path(__FILE__) . 'resources' . DIRECTORY_SEPARATOR . 'sp-certificate.crt';
-
-				$base64EncodedXML = SAMLSPUtilities::signXML( $logoutResponse, $publicCertPath, $privateKeyPath, 'Status' );
-
-				SAMLSPUtilities::postSAMLResponse($logout_url, $base64EncodedXML, $relay_state);
-			}
-		}
-	}*/
-
-	public static function upload_metadata($file, $msg = false, $idp_name, $MetaDataAfterSpecificTime = false, $url = false, $idpid = null) {
-	    global $base_url;
-	    require_once drupal_get_path('module', 'miniorange_saml') . DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR . 'MetadataReader.php';
-
-	    $document = new DOMDocument();
-	    $document->loadXML($file);
-	    restore_error_handler();
-	    $first_child = $document->firstChild;
-	    $nameid_format = 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress';
-
-	    if(!empty($first_child)) {
-	        $metadata = new IDPMetadataReader($document);
-	        $identity_providers = $metadata->getIdentityProviders();
-
-	        if(empty($identity_providers)) {
-	            drupal_set_message(t('Please provide a valid metadata file.'),error);
-	            return;
-	        }
-
-	        foreach($identity_providers as $key => $idp) {
-	            $saml_login_url = $idp->getLoginURL('HTTP-Redirect');
-	            $logout_url = $idp->getLogoutURL('HTTP-Redirect');
-
-	            if(empty($saml_login_url)) {
-	                $saml_login_url = $idp->getLoginURL('HTTP-POST');
-	            }
-
-	            if(empty($logout_url)) {
-	                $logout_url = $idp->getLogoutURL('HTTP-POST');
-	            }
-
-	            $saml_issuer = $idp->getEntityID();
-	            $saml_x509_certificate = $idp->getSigningCertificate()[0];
-	            $sp_issuer = $base_url;
-	            $request_signed = FALSE;
-	            $http_binding = 'HTTP-Redirect';
-	            $http_binding_slo = 'HTTP-POST';
-          }
-
-
-              $sql = db_query("SELECT * FROM {miniorange_saml_idp_list}");
-              $data = $sql->fetchAll();
-              $idpid = -1;
-
-              if($MetaDataAfterSpecificTime == true || $MetaDataAfterSpecificTime == 1)
-                   $url = $url;
-              else
-                   $url = '';
-
-              $sign_algo = 'RSA_SHA256';
-
-              foreach ($data as $idpdata) {
-                  if (($idpdata->mo_idp_issuer == $saml_issuer) || ($idpdata->mo_idp_sso_url == $saml_login_url))
-                  $idpid = $idpdata->id;
-              }
-
-              if ($idpid == -1) {
-                  Utilities::Database_insert($idp_name, $saml_issuer, $saml_login_url, $saml_x509_certificate, $nameid_format, $request_signed, $http_binding,
-                    $http_binding_slo, $logout_url, $MetaDataAfterSpecificTime, $url,$sign_algo);
-              } else {
-                  Utilities::Database_update($idp_name, $saml_issuer, $saml_login_url, $saml_x509_certificate, $nameid_format, $request_signed, $http_binding,
-                    $http_binding_slo, $logout_url, $MetaDataAfterSpecificTime, $url, $idpid,$sign_algo);
-              }
+        uB:
+        $jn->insertSignature($uw, $VW);
+    }
+    public static function signXML($Tr, $LM, $QS, $eq = '', $f7)
+    {
+        if (libraries_get_path("\x78\x6d\x6c\163\145\143\x6c\x69\x62\163")) {
+            goto rV;
         }
-
-	        if($msg == true) {
-	            drupal_set_message(t('Identity Provider Configuration successfully saved.'));
-              return;
-	        }
-	        else {
-	            drupal_set_message(t('Please provide a valid metadata file.'),error);
-	            return;
-          }
-	}
-
-	public static function Database_insert($idp_name,$saml_issuer,$saml_login_url,$saml_x509_certificate,$nameid_format,$request_signed,$http_binding,$http_binding_slo, $logout_url,$MetaDataAfterSpecificTime,$url,$sign_algo){
-	  $fields = array('mo_idp_name' => $idp_name, 'mo_idp_issuer' => $saml_issuer, 'mo_idp_sso_url' => $saml_login_url, 'mo_idp_cert' => $saml_x509_certificate,
-      'mo_idp_nameid_format' => $nameid_format, 'mo_idp_request_signed' => $request_signed, 'mo_idp_http_binding_sso' => $http_binding,
-      'mo_idp_http_binding_slo' => $http_binding_slo, 'mo_idp_slo_url' => $logout_url, 'miniorange_saml_fetch_metadata_time_intervals' => $MetaDataAfterSpecificTime, 'miniorange_saml_meta_data_url' => $url,
-      'security_signature_algorithm' => $sign_algo);
-	  db_insert('miniorange_saml_idp_list')
-          ->fields($fields)
-        ->execute();
-	}
-
-	public static function Database_update($idp_name,$saml_issuer,$saml_login_url,$saml_x509_certificate,$nameid_format,$request_signed,$http_binding,$http_binding_slo, $logout_url,$MetaDataAfterSpecificTime,$url, $idpid,$sign_algo){
-	  db_update('miniorange_saml_idp_list')
-        ->fields(array('mo_idp_name' => $idp_name, 'mo_idp_issuer' => $saml_issuer, 'mo_idp_sso_url' => $saml_login_url, 'mo_idp_cert' => $saml_x509_certificate,
-          'mo_idp_nameid_format' => $nameid_format, 'mo_idp_request_signed' => $request_signed, 'mo_idp_http_binding_sso' => $http_binding,
-          'mo_idp_http_binding_slo' => $http_binding_slo, 'mo_idp_slo_url' => $logout_url, 'miniorange_saml_fetch_metadata_time_intervals' => $MetaDataAfterSpecificTime, 'miniorange_saml_meta_data_url' => $url,
-          'security_signature_algorithm' => $sign_algo))
-          ->condition('id', $idpid, '=')
-          ->execute();
-	}
-
-	public static function generateTimestamp($instant = NULL) {
-	    if($instant === NULL) {
-	        $instant = time();
-	    }
-	    return gmdate('Y-m-d\TH:i:s\Z', $instant);
-	}
-
-	public static function xpQuery(DOMNode $node, $query)
-  {
-      static $xpCache = NULL;
-
-      if ($node instanceof DOMDocument) {
-          $doc = $node;
-      } else {
-          $doc = $node->ownerDocument;
-      }
-
-      if ($xpCache === NULL || !$xpCache->document->isSameNode($doc)) {
-          $xpCache = new DOMXPath($doc);
-          $xpCache->registerNamespace('soap-env', 'http://schemas.xmlsoap.org/soap/envelope/');
-          $xpCache->registerNamespace('saml_protocol', 'urn:oasis:names:tc:SAML:2.0:protocol');
-          $xpCache->registerNamespace('saml_assertion', 'urn:oasis:names:tc:SAML:2.0:assertion');
-          $xpCache->registerNamespace('saml_metadata', 'urn:oasis:names:tc:SAML:2.0:metadata');
-          $xpCache->registerNamespace('ds', 'http://www.w3.org/2000/09/xmldsig#');
-          $xpCache->registerNamespace('xenc', 'http://www.w3.org/2001/04/xmlenc#');
-      }
-
-      $results = $xpCache->query($query, $node);
-      $ret = array();
-      for ($i = 0; $i < $results->length; $i++) {
-          $ret[$i] = $results->item($i);
-      }
-
-      return $ret;
-  }
-
-  public static function parseNameId(DOMElement $xml)
-  {
-      $ret = array('Value' => trim($xml->textContent));
-
-      foreach (array('NameQualifier', 'SPNameQualifier', 'Format') as $attr) {
-          if ($xml->hasAttribute($attr)) {
-              $ret[$attr] = $xml->getAttribute($attr);
-          }
-      }
-      return $ret;
-  }
-
-	public static function xsDateTimeToTimestamp($time)
-  {
-      $matches = array();
-
-      // We use a very strict regex to parse the timestamp.
-      $regex = '/^(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d)T(\\d\\d):(\\d\\d):(\\d\\d)(?:\\.\\d+)?Z$/D';
-      if (preg_match($regex, $time, $matches) == 0) {
-          echo sprintf("nvalid SAML2 timestamp passed to xsDateTimeToTimestamp: ".$time);
-          exit;
-      }
-
-      // Extract the different components of the time from the  matches in the regex.
-      // intval will ignore leading zeroes in the string.
-      $year   = intval($matches[1]);
-      $month  = intval($matches[2]);
-      $day    = intval($matches[3]);
-      $hour   = intval($matches[4]);
-      $minute = intval($matches[5]);
-      $second = intval($matches[6]);
-
-      // We use gmmktime because the timestamp will always be given
-      //in UTC.
-      $ts = gmmktime($hour, $minute, $second, $month, $day, $year);
-
-      return $ts;
-  }
-
-	public static function extractStrings(DOMElement $parent, $namespaceURI, $localName)
-  {
-      $ret = array();
-      for ($node = $parent->firstChild; $node !== NULL; $node = $node->nextSibling) {
-          if ($node->namespaceURI !== $namespaceURI || $node->localName !== $localName) {
-              continue;
-          }
-          $ret[] = trim($node->textContent);
-      }
-
-      return $ret;
-  }
-
-	public static function validateElement(DOMElement $root)
-  {
-    	//$data = $root->ownerDocument->saveXML($root);
-        /* Create an XML security object. */
-        $objXMLSecDSig = new XMLSecurityDSig();
-
-        /* Both SAML messages and SAML assertions use the 'ID' attribute. */
-        $objXMLSecDSig->idKeys[] = 'ID';
-
-        /* Locate the XMLDSig Signature element to be used. */
-        $signatureElement = self::xpQuery($root, './ds:Signature');
-
-        if (count($signatureElement) === 0) {
-            /* We don't have a signature element to validate. */
-            return FALSE;
-        } elseif (count($signatureElement) > 1) {
-          	echo sprintf("XMLSec: more than one signature element in root.");
-        	  exit;
-        }/*  elseif ((in_array('Response', $signatureElement) && $ocurrence['Response'] > 1) ||
-            (in_array('Assertion', $signatureElement) && $ocurrence['Assertion'] > 1) ||
-            !in_array('Response', $signatureElement) && !in_array('Assertion', $signatureElement)
-        ) {
-            return false;
-        } */
-
-        $signatureElement = $signatureElement[0];
-        $objXMLSecDSig->sigNode = $signatureElement;
-
-        /* Canonicalize the XMLDSig SignedInfo element in the message. */
-        $objXMLSecDSig->canonicalizeSignedInfo();
-
-       /* Validate referenced xml nodes. */
-        if (!$objXMLSecDSig->validateReference()) {
-        	  echo sprintf("XMLsec: digest validation failed");
-        	  exit;
+        $dm = libraries_get_path("\170\155\x6c\163\145\143\x6c\x69\x62\163\x2d\155\141\163\164\145\x72") . "\x2f\170\155\154\163\145\x63\x6c\151\142\x73\56\160\x68\160";
+        goto kg;
+        rV:
+        $dm = libraries_get_path("\170\155\154\x73\x65\143\154\151\x62\x73") . "\x2f\170\x6d\154\163\145\x63\154\x69\142\x73\56\x70\x68\x70";
+        kg:
+        libraries_load("\x78\155\x6c\163\145\x63\154\151\x62\163");
+        if (!(!class_exists("\130\115\x4c\x53\145\143\x75\x72\151\164\x79\x4b\145\171") && !@(include $dm))) {
+            goto zA;
         }
-
-		    /* Check that $root is one of the signed nodes. */
-        $rootSigned = FALSE;
-        /** @var DOMNode $signedNode */
-        foreach ($objXMLSecDSig->getValidatedNodes() as $signedNode) {
-            if ($signedNode->isSameNode($root)) {
-                $rootSigned = TRUE;
-                break;
-            } elseif ($root->parentNode instanceof DOMDocument && $signedNode->isSameNode($root->ownerDocument)) {
-                /* $root is the root element of a signed document. */
-                $rootSigned = TRUE;
-                break;
-            }
-        }
-
-		    if (!$rootSigned) {
-			      echo sprintf("XMLSec: The root element is not signed.");
-			      exit;
-        }
-
-        /* Now we extract all available X509 certificates in the signature element. */
-        $certificates = array();
-        foreach (self::xpQuery($signatureElement, './ds:KeyInfo/ds:X509Data/ds:X509Certificate') as $certNode) {
-            $certData = trim($certNode->textContent);
-            $certData = str_replace(array("\r", "\n", "\t", ' '), '', $certData);
-            $certificates[] = $certData;
-        }
-
-        $ret = array(
-              'Signature' => $objXMLSecDSig,
-              'Certificates' => $certificates,
-          );
-
-        return $ret;
-  }
-
-	public static function validateSignature(array $info, XMLSecurityKey $key)
-  {
-      /** @var XMLSecurityDSig $objXMLSecDSig */
-      $objXMLSecDSig = $info['Signature'];
-
-      $sigMethod = self::xpQuery($objXMLSecDSig->sigNode, './ds:SignedInfo/ds:SignatureMethod');
-      if (empty($sigMethod)) {
-          echo sprintf('Missing SignatureMethod element');
-          exit();
-      }
-      $sigMethod = $sigMethod[0];
-      if (!$sigMethod->hasAttribute('Algorithm')) {
-          echo sprintf('Missing Algorithm-attribute on SignatureMethod element.');
-          exit;
-      }
-      $algo = $sigMethod->getAttribute('Algorithm');
-
-      if ($key->type === XMLSecurityKey::RSA_SHA1 && $algo !== $key->type) {
-          $key = self::castKey($key, $algo);
-      }
-
-      /* Check the signature. */
-      if (! $objXMLSecDSig->verify($key)) {
-          echo sprintf('Unable to validate Sgnature');
-        	exit;
-      }
-  }
-
-  public static function castKey(XMLSecurityKey $key, $algorithm, $type = 'public')
-  {
-    	// do nothing if algorithm is already the type of the key
-    	if ($key->type === $algorithm) {
-      		return $key;
-    	}
-    	$keyInfo = openssl_pkey_get_details($key->key);
-    	if ($keyInfo === FALSE) {
-      		echo sprintf('Unable to get key details from XMLSecurityKey.');
-    	  	exit;
-    	}
-    	if (!isset($keyInfo['key'])) {
-    	  	echo sprintf('Missing key in public key details.');
-    		  exit;
-    	}
-    	$newKey = new XMLSecurityKey($algorithm, array('type'=>$type));
-    	$newKey->loadKey($keyInfo['key']);
-
-    	return $newKey;
-  }
-
-	public static function processResponse($currentURL, $certFingerprint, $signatureData, SAML2_Response $response, $relayState) {
-	  	/* Validate Response-element destination. */
-		  $msgDestination = $response->getDestination();
-		  if ($msgDestination !== NULL && $msgDestination !== $currentURL) {
-			    echo sprintf('Destination in response doesn\'t match the current URL. Destination is "' .
-				  $msgDestination . '", current URL is "' . $currentURL . '".');
-			    exit;
-		  }
-
-		  $responseSigned = self::checkSign($certFingerprint, $signatureData, $relayState);
-		  /* Returning boolean $responseSigned */
-		  return $responseSigned;
-	}
-
-	public static function checkSign($certFingerprint, $signatureData, $relayState) {
-      $certificates = $signatureData['Certificates'];
-
-      if (count($certificates) === 0) {
-			    return FALSE;
-		  }
-
-		  $pemCert = self::findCertificate($certFingerprint, $certificates, $relayState);
-      $lastException = NULL;
-      $key = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array('type'=>'public'));
-      $key->loadKey($pemCert);
-
-      try {
-          /* Make sure that we have a valid signature */
-          self::validateSignature($signatureData, $key);
-          return TRUE;
-      } catch (Exception $e) {
-			    $lastException = $e;
-      }
-
-		  /* We were unable to validate the signature with any of our keys. */
-		  if ($lastException !== NULL) {
-			    throw $lastException;
-		  } else {
-			    return FALSE;
-		  }
-	}
-
-	private static function findCertificate(string $certFingerprints, array $certificates, $relayState) {
-	    $ResCert = $certificates[0];
-	    $ResCert = chunk_split($ResCert, 80);
-
-	    /*$candidates = array();                         //Shree
-       foreach ($certificates as $cert) {
-           $fp = strtolower(sha1(base64_decode($cert)));
-           if (!in_array($fp, $certFingerprints, TRUE)) {
-               $candidates[] = $fp;
-               continue;
-           }
-	                // We have found a matching fingerprint.
-            $pem = "-----BEGIN CERTIFICATE-----\n" .
-                chunk_split($cert, 64) .
-                "-----END CERTIFICATE-----\n";
-           return $pem;
-       }*/
-
-	    foreach ($certificates as $cert) {
-	        $fp = strtolower(sha1(base64_decode($cert)));
-	        if (strcmp($fp, $certFingerprints) == 0) {
-	            /* We have found a matching fingerprint. */
-              $pem = "-----BEGIN CERTIFICATE-----\n" . chunk_split($cert, 64) . "-----END CERTIFICATE-----\n";
-              return $pem;
-	        }
-	    }
-
-	    if($relayState=='testValidate') {
-	        echo '<div style="font-family:Calibri;padding:0 3%;">';
-	        echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-           <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>Unable to find a certificate matching the configured fingerprint.</p>
-           <p><strong>Possible Cause: </strong>Content of \'X.509 Certificate\' field in Service Provider Settings is incorrect</p>
-			      <p><b>Expected value: </b>' . $ResCert . '</p>';
-            echo str_repeat('&nbsp;', 15);
-            echo'</div>
-                <div style="margin:3%;display:block;text-align:center;">
-                <form action="index.php">
-                <div style="margin:3%;display:block;text-align:center;"><input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();"></div>';
-            exit;
-	    }
-	    else{
-	        echo ' <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>We could not sign you in. Please contact your Administrator.</p></div>';
-	        exit;
-	    }
-	}
-
-	public static function validateIssuerAndAudience($samlResponse, $spEntityId, $issuerToValidateAgainst, $base_url, $relayState) {
-	  	$issuer = current($samlResponse->getAssertions())->getIssuer();
-		  $audience = current(current($samlResponse->getAssertions())->getValidAudiences());
-		  if(strcmp($issuerToValidateAgainst, $issuer) === 0) {
-			    if(strcmp($audience, $base_url) === 0) {
-				      return TRUE;
-			    }
-			    else {
-			        echo sprintf('Invalid audience');
-				      exit;
-		    	}
-		  }
-		  else {
-			    if($relayState=='testValidate'){
-			        ob_end_clean();
-			        echo '<div style="font-family:Calibri;padding:0 3%;">';
-			        echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-               <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>Issuer cannot be verified.</p>
-               <p>Please contact your administrator and report the following error:</p>
-               <p><strong>Possible Cause: </strong>The value in \'IdP Entity ID or Issuer\' field in Service Provider Settings is incorrect</p>
-               <p><strong>Expected Entity ID: </strong>'.$issuer.'<p>
-               <p><strong>Entity ID Found: </strong>'.$issuerToValidateAgainst.'</p>
-               </div>
-               <div style="margin:3%;display:block;text-align:center;">
-               <div style="margin:3%;display:block;text-align:center;"><input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();"></div>';
-			        exit;
-			    }
-			    else {
-			        echo ' <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>We could not sign you in. Please contact your Administrator.</p></div>
-                 <div style="margin:3%;display:block;text-align:center;">';
-			          exit;
-			    }
-		  }
-	}
-
-	/*
-     * Decrypt an encrypted element.
-     *
-     * This is an internal helper function.
-     *
-     * @param  DOMElement     $encryptedData The encrypted data.
-     * @param  XMLSecurityKey $inputKey      The decryption key.
-     * @param  array          &$blacklist    Blacklisted decryption algorithms.
-     * @return DOMElement     The decrypted element.
-     * @throws Exception
-     */
-	private static function doDecryptElement(DOMElement $encryptedData, XMLSecurityKey $inputKey, array &$blacklist)
-  {
-      $enc = new XMLSecEnc();
-      $enc->setNode($encryptedData);
-      $enc->type = $encryptedData->getAttribute("Type");
-      $symmetricKey = $enc->locateKey($encryptedData);
-
-      if (!$symmetricKey) {
-          echo sprintf('Could not locate key algorithm in encrypted data.');
-          exit;
-      }
-
-      $symmetricKeyInfo = $enc->locateKeyInfo($symmetricKey);
-
-      if (!$symmetricKeyInfo) {
-          echo sprintf('Could not locate <dsig:KeyInfo> for the encrypted key.');
-          exit;
-      }
-      $inputKeyAlgo = $inputKey->getAlgorith();
-
-      if ($symmetricKeyInfo->isEncrypted) {
-          $symKeyInfoAlgo = $symmetricKeyInfo->getAlgorith();
-
-          if (in_array($symKeyInfoAlgo, $blacklist, TRUE)) {
-              echo sprintf('Algorithm disabled: ' . var_export($symKeyInfoAlgo, TRUE));
-              exit;
-          }
-          if ($symKeyInfoAlgo === XMLSecurityKey::RSA_OAEP_MGF1P && $inputKeyAlgo === XMLSecurityKey::RSA_1_5) {
-            /*
-                * The RSA key formats are equal, so loading an RSA_1_5 key
-                * into an RSA_OAEP_MGF1P key can be done without problems.
-                * We therefore pretend that the input key is an
-                * RSA_OAEP_MGF1P key.
-                */
-              $inputKeyAlgo = XMLSecurityKey::RSA_OAEP_MGF1P;
-          }
-
-          /* Make sure that the input key format is the same as the one used to encrypt the key. */
-          if ($inputKeyAlgo !== $symKeyInfoAlgo) {
-              echo sprintf( 'Algorithm mismatch between input key and key used to encrypt ' .
-                ' the symmetric key for the message. Key was: ' .
-                var_export($inputKeyAlgo, TRUE) . '; message was: ' .
-                var_export($symKeyInfoAlgo, TRUE));
-              exit;
-          }
-
-          /** @var XMLSecEnc $encKey */
-          $encKey = $symmetricKeyInfo->encryptedCtx;
-          $symmetricKeyInfo->key = $inputKey->key;
-          $keySize = $symmetricKey->getSymmetricKeySize();
-
-          if ($keySize === NULL) {
-              /* To protect against "key oracle" attacks, we need to be able to create a
-               * symmetric key, and for that we need to know the key size.
-               */
-              echo sprintf('Unknown key size for encryption algorithm: ' . var_export($symmetricKey->type, TRUE));
-              exit;
-          }
-          try {
-              $key = $encKey->decryptKey($symmetricKeyInfo);
-              if (strlen($key) != $keySize) {
-                  echo sprintf('Unexpected key size (' . strlen($key) * 8 . 'bits) for encryption algorithm: ' . var_export($symmetricKey->type, TRUE));
-                  exit;
-              }
-          } catch (Exception $e) {
-              /* We failed to decrypt this key. Log it, and substitute a "random" key. */
-              /* Create a replacement key, so that it looks like we fail in the same way as if the key was correctly padded. */
-              /* We base the symmetric key on the encrypted key and private key, so that we always behave the
-               * same way for a given input key.
-               */
-              $encryptedKey = $encKey->getCipherValue();
-              $pkey = openssl_pkey_get_details($symmetricKeyInfo->key);
-              $pkey = sha1(serialize($pkey), TRUE);
-              $key = sha1($encryptedKey . $pkey, TRUE);
-              /* Make sure that the key has the correct length. */
-              if (strlen($key) > $keySize) {
-                  $key = substr($key, 0, $keySize);
-              } elseif (strlen($key) < $keySize) {
-                  $key = str_pad($key, $keySize);
-              }
-          }
-          $symmetricKey->loadkey($key);
-      } else {
-          $symKeyAlgo = $symmetricKey->getAlgorith();
-          /* Make sure that the input key has the correct format. */
-          if ($inputKeyAlgo !== $symKeyAlgo) {
-              echo sprintf( 'Algorithm mismatch between input key and key in message. ' .
-                  'Key was: ' . var_export($inputKeyAlgo, TRUE) . '; message was: ' .
-                  var_export($symKeyAlgo, TRUE));
-              exit;
-          }
-          $symmetricKey = $inputKey;
-      }
-      $algorithm = $symmetricKey->getAlgorith();
-      if (in_array($algorithm, $blacklist, TRUE)) {
-          echo sprintf('Algorithm disabled: ' . var_export($algorithm, TRUE));
-          exit;
-      }
-      /** @var string $decrypted */
-      $decrypted = $enc->decryptNode($symmetricKey, FALSE);
-      /*
-       * This is a workaround for the case where only a subset of the XML
-       * tree was serialized for encryption. In that case, we may miss the
-       * namespaces needed to parse the XML.         */
-        $xml = '<root xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" '. 'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">' . $decrypted . '</root>';
-        $newDoc = new DOMDocument();
-        if (!@$newDoc->loadXML($xml)) {
-        	  //echo sprintf('Failed to parse decrypted XML. Maybe the wrong sharedkey was used?');
-        	  throw new Exception('Failed to parse decrypted XML. Maybe the wrong sharedkey was used?');
-        }
-        $decryptedElement = $newDoc->firstChild->firstChild;
-        if ($decryptedElement === NULL) {
-            echo sprintf('Missing encrypted element.');
-        	  throw new Exception('Missing encrypted element.');
-        }
-
-        if (!($decryptedElement instanceof DOMElement)) {
-            echo sprintf('Decrypted element was not actually a DOMElement.');
-        }
-        //echo "decelsjdl==>";print_r($decryptedElement);exit;
-        return $decryptedElement;
-  }
-  /**
-   * Decrypt an encrypted element.
-   *
-   * @param  DOMElement     $encryptedData The encrypted data.
-   * @param  XMLSecurityKey $inputKey      The decryption key.
-   * @param  array          $blacklist     Blacklisted decryption algorithms.
-   * @return DOMElement     The decrypted element.
-   * @throws Exception
-   */
-  public static function decryptElement(DOMElement $encryptedData, XMLSecurityKey $inputKey, array $blacklist = array(), XMLSecurityKey $alternateKey = NULL)
-  {
-      try {
-          return self::doDecryptElement($encryptedData, $inputKey, $blacklist);
-      } catch (Exception $e) {
-          //Try with alternate key
-        	try {
-        	  	return self::doDecryptElement($encryptedData, $alternateKey, $blacklist);
-        	} catch(Exception $t) {
-              $module_path = drupal_get_path('module', 'miniorange_saml');
-              $publicCertPath = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $module_path . DIRECTORY_SEPARATOR . 'resources' . DIRECTORY_SEPARATOR . 'sp-certificate.crt';
-              $CustomPublicCert =  variable_get('miniorange_saml_publ_certificate', '');
-
-              if(!empty($CustomPublicCert)){
-                  $ResCert =  variable_get('miniorange_saml_publ_certificate', '');
-                  $message = '<strong>Possible Cause: </strong>If you have uploaded custom certificate then please update this new custom public certificate in your IDP side.';
-              }
-              else{
-                  $ResCert = file_get_contents($publicCertPath);
-                  $message = '<strong>Possible Cause: </strong>If you have removed custom certificate then please update this default public certificate in your IDP side.';
-              }
-
-              echo '<div style="font-family:Calibri;padding:0 3%;">';
-              echo '<div style="color: #a94442;background-color: #f2dede;padding: 15px;margin-bottom: 20px;text-align:center;border:1px solid #E6B3B2;font-size:18pt;"> ERROR</div>
-                    <div style="color: #a94442;font-size:14pt; margin-bottom:20px;"><p><strong>Error: </strong>Unable to find a certificate matching the configured fingerprint.</p>
-                        <p>'.$message.'</p>
-			                  <p><b>Expected value: </b>' . $ResCert . '</p>';
-                        echo str_repeat('&nbsp;', 15);
-                        echo'</div>
-                        <div style="margin:3%;display:block;text-align:center;">
-                        <form action="index.php">
-                            <div style="margin:3%;display:block;text-align:center;"><input style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Done" onClick="self.close();"></div>';
-                      exit;
-        	}
-        	/*
-        	 * Something went wrong during decryption, but for security
-        	 * reasons we cannot tell the user what failed.
-        	 */
-        	//print_r($e->getMessage());
-        	//echo sprintf('Failed to decrypt XML element.');
-        	exit;
-      }
-  }
-
-	public static function get_mapped_groups($saml_params, $saml_groups)
-	{
-			$groups = array();
-
-	  	if (!empty($saml_groups)) {
-		    	$saml_mapped_groups = array();
-			    $i=1;
-			    while ($i < 10) {
-			        $saml_mapped_groups_value = $saml_params->get('group'.$i.'_map');
-			        $saml_mapped_groups[$i] = explode(';', $saml_mapped_groups_value);
-			        $i++;
-			    }
-		  }
-
-	  	foreach ($saml_groups as $saml_group) {
-	  	    if (!empty($saml_group)) {
-				      $i = 0;
-				      $found = false;
-				      while ($i < 9 && !$found) {
-				          if (!empty($saml_mapped_groups[$i]) && in_array($saml_group, $saml_mapped_groups[$i])) {
-				              $groups[] = $saml_params->get('group'.$i);
-						          $found = true;
-					        }
-					        $i++;
-				      }
-	  	    }
-		  }
-	  	return array_unique($groups);
-	}
-
-	public static function getEncryptionAlgorithm($method){
-	  	switch($method){
-		  	case 'http://www.w3.org/2001/04/xmlenc#tripledes-cbc':
-			  	return XMLSecurityKey::TRIPLEDES_CBC;
-				  break;
-
-			  case 'http://www.w3.org/2001/04/xmlenc#aes128-cbc':
-				  return XMLSecurityKey::AES128_CBC;
-
-			  case 'http://www.w3.org/2001/04/xmlenc#aes192-cbc':
-				  return XMLSecurityKey::AES192_CBC;
-				  break;
-
-			  case 'http://www.w3.org/2001/04/xmlenc#aes256-cbc':
-				  return XMLSecurityKey::AES256_CBC;
-				  break;
-
-			  case 'http://www.w3.org/2001/04/xmlenc#rsa-1_5':
-				  return XMLSecurityKey::RSA_1_5;
-				  break;
-
-			  case 'http://www.w3.org/2001/04/xmlenc#rsa-oaep-mgf1p':
-				  return XMLSecurityKey::RSA_OAEP_MGF1P;
-				  break;
-
-			  case 'http://www.w3.org/2000/09/xmldsig#dsa-sha1':
-				  return XMLSecurityKey::DSA_SHA1;
-				  break;
-
-			  case 'http://www.w3.org/2000/09/xmldsig#rsa-sha1':
-  				return XMLSecurityKey::RSA_SHA1;
-  				break;
-
-  			case 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256':
-  				return XMLSecurityKey::RSA_SHA256;
-  				break;
-
-	  		case 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha384':
-		  		return XMLSecurityKey::RSA_SHA384;
-			  	break;
-
-			  case 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha512':
-			    return XMLSecurityKey::RSA_SHA512;
-			    break;
-
-			  default:
-			    echo sprintf('Invalid Encryption Method: '.$method);
-			    exit;
-			    break;
-		  }
-	}
-
-	public static function sanitize_certificate( $certificate ) {
-	  	$certificate = preg_replace("/[\r\n]+/", "", $certificate);
-		  $certificate = str_replace( "-", "", $certificate );
-		  $certificate = str_replace( "BEGIN CERTIFICATE", "", $certificate );
-		  $certificate = str_replace( "END CERTIFICATE", "", $certificate );
-		  $certificate = str_replace( " ", "", $certificate );
-		  $certificate = chunk_split($certificate, 64, "\r\n");
-		  $certificate = "-----BEGIN CERTIFICATE-----\r\n" . $certificate . "-----END CERTIFICATE-----";
-		  return $certificate;
-	}
-
-	public static function sanitize_private_key( $private_key ) {
-      $private_key = preg_replace("/[\r\n]+/", "", $private_key);
-      $private_key = str_replace( "-", "", $private_key );
-      $private_key = str_replace( "BEGIN PRIVATE KEY", "", $private_key );
-      $private_key = str_replace( "END PRIVATE KEY", "", $private_key );
-      $private_key = str_replace( " ", "", $private_key );
-      $private_key = chunk_split($private_key, 64, "\r\n");
-      $private_key = "-----BEGIN PRIVATE KEY-----\r\n" . $private_key . "-----END PRIVATE KEY-----";
-      return $private_key;
-  }
-
-	public static function desanitize_certificate( $certificate ) {
-	  	$certificate = preg_replace("/[\r\n]+/", "", $certificate);
-		  $certificate = str_replace( "-----BEGIN CERTIFICATE-----", "", $certificate );
-		  $certificate = str_replace( "-----END CERTIFICATE-----", "", $certificate );
-		  $certificate = str_replace( " ", "", $certificate );
-		  return $certificate;
-	}
-
-	public static function Print_SAML_Request($samlRequestResponceXML,$type){
-      header("Content-Type: text/html");
-      $doc = new DOMDocument();
-      $doc->preserveWhiteSpace = false;
-      $doc->formatOutput = true;
-      $doc->loadXML($samlRequestResponceXML);
-
-      if($type=='displaySAMLRequest')
-          $show_value='SAML Request';
-      else
-          $show_value='SAML Response';
-
-      $out = $doc->saveXML();
-      $out1 = htmlentities($out);
-      $out1 = rtrim($out1);
-      $xml   = simplexml_load_string( $out );
-      $url = drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css';
-      echo '<link rel=\'stylesheet\' id=\'mo_saml_admin_settings_style-css\'  href=\''.$url.'\' type=\'text/css\' media=\'all\' />
-            <div class="mo-display-logs" ><p type="text"   id="SAML_type">'.$show_value.'</p></div>		
-            <div type="text" id="SAML_display" class="mo-display-block"><pre class=\'brush: xml;\'>'.$out1.'</pre></div><br>
-            <div style="margin:3%;display:block;text-align:center;">
-                <div style="margin:3%;display:block;text-align:center;" ></div>
-                <button id="copy" onclick="copyDivToClipboard()"  style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;" >Copy</button>&nbsp;
-                <input id="dwn-btn" style="padding:1%;width:100px;background: #0091CD none repeat scroll 0% 0%;cursor: pointer;font-size:15px;border-width: 1px;border-style: solid;border-radius: 3px;white-space: nowrap;box-sizing: border-box;border-color: #0073AA;box-shadow: 0px 1px 0px rgba(120, 200, 230, 0.6) inset;color: #FFF;"type="button" value="Download"
-                ">
-            </div>
-			      </div>';
-      ob_end_flush();?>
-      <script>
-          function copyDivToClipboard() {
-              var aux = document.createElement("input");
-              aux.setAttribute("value", document.getElementById("SAML_display").textContent);
-              document.body.appendChild(aux);
-              aux.select();
-              document.execCommand("copy");
-              document.body.removeChild(aux);
-              document.getElementById('copy').textContent = "Copied";
-              document.getElementById('copy').style.background = "grey";
-              window.getSelection().selectAllChildren( document.getElementById( "SAML_display" ) );
-          }
-
-          function download(filename, text) {
-              var element = document.createElement('a');
-              element.setAttribute('href', 'data:Application/octet-stream;charset=utf-8,' + encodeURIComponent(text));
-              element.setAttribute('download', filename);
-              element.style.display = 'none';
-              document.body.appendChild(element);
-              element.click();
-              document.body.removeChild(element);
-          }
-
-          document.getElementById("dwn-btn").addEventListener("click", function () {
-              var filename = document.getElementById("SAML_type").textContent+".xml";
-              var node = document.getElementById("SAML_display");
-              htmlContent = node.innerHTML;
-              text = node.textContent;
-              console.log(text);
-              download(filename, text);
-          }, false);
-        </script>
-        <?php
+        echo "\x3c\144\151\x76\76\15\12\11\x9\11\11\40\x20\x20\40\x3c\x70\76\74\146\x6f\156\x74\x20\x63\x6c\x61\x73\x73\x3d\x27\x61\x6c\x65\162\164\x27\40\x62\141\143\153\x67\x72\x6f\165\156\144\x2d\x63\x6f\154\157\x72\x3d\x27\x63\162\151\x6d\163\157\x6e\47\x20\143\157\x6c\157\x72\x3d\x27\x72\x65\x64\x27\x3e\105\162\x72\157\162\x3a\40\x78\x6d\x6c\163\x65\143\154\x69\142\x73\x20\156\157\x74\x20\x6c\157\x61\144\x65\x64\40\x70\162\157\x70\x65\162\154\x79\74\x2f\146\157\x6e\164\76\74\57\160\76\xd\12\11\x9\x9\x9\40\x20\40\40\x3c\x70\x3e\x59\x6f\165\40\143\141\156\40\144\157\x77\x6e\x6c\x6f\141\144\x20\x78\x6d\x6c\x73\x65\143\154\x69\x62\x73\x20\x66\x72\157\x6d\40\74\x61\x20\x68\162\145\146\x3d\47\150\x74\x74\160\x73\72\57\57\147\x69\164\150\165\x62\x2e\x63\x6f\x6d\x2f\162\x6f\142\162\x69\143\150\x61\x72\144\163\x2f\170\x6d\x6c\x73\x65\143\154\x69\142\x73\x2f\x74\162\x65\x65\x2f\x31\56\64\x27\x20\x74\141\162\x67\x65\164\x3d\x27\x5f\x62\x6c\x61\x6e\153\x27\76\x68\x65\x72\x65\x3c\57\x61\x3e\x2e\15\xa\11\11\11\11\40\x20\x20\x20\x3c\142\162\76\x45\x78\164\162\x61\x63\164\x20\x74\150\145\x20\141\162\143\x68\151\166\x65\40\141\156\144\40\x70\154\x61\143\x65\x20\151\164\x20\x75\156\x64\145\x72\40\74\142\76\x73\x69\164\x65\x73\x2f\x61\x6c\x6c\x2f\x6c\x69\142\x72\141\162\151\x65\163\57\74\57\x62\76\x20\x69\156\40\x79\157\165\x72\40\x44\162\165\x70\141\154\40\x64\x69\x72\x65\x63\x74\x6f\x72\x79\x2e\74\x2f\160\x3e\xd\12\11\11\x9\11\40\x20\40\x20\74\x64\151\166\x3e";
         exit;
-  }
+        zA:
+        $Aj = array("\x74\171\x70\145" => "\x70\162\151\x76\x61\x74\x65");
+        if ($f7 == "\x52\123\101\137\123\x48\101\62\65\66") {
+            goto Nb;
+        }
+        if ($f7 == "\122\123\101\x5f\x53\x48\101\63\x38\x34") {
+            goto I5;
+        }
+        if ($f7 == "\x52\x53\101\x5f\x53\x48\x41\65\x31\x32") {
+            goto ER;
+        }
+        if ($f7 == "\x52\123\101\x5f\x53\110\x41\x31") {
+            goto Yo;
+        }
+        goto X4;
+        Nb:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $Aj);
+        goto X4;
+        I5:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $Aj);
+        goto X4;
+        ER:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $Aj);
+        goto X4;
+        Yo:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $Aj);
+        X4:
+        $aC->loadKey($QS, TRUE);
+        $Rh = file_get_contents($LM);
+        $Uz = new DOMDocument();
+        $Uz->loadXML($Tr);
+        $TI = $Uz->firstChild;
+        if (!empty($eq)) {
+            goto vu;
+        }
+        self::insertSignature($aC, array($Rh), $TI);
+        goto tS;
+        vu:
+        $QX = $Uz->getElementsByTagName($eq)->item(0);
+        self::insertSignature($aC, array($Rh), $TI, $QX);
+        tS:
+        $wZ = $TI->ownerDocument->saveXML($TI);
+        $DK = base64_encode($wZ);
+        return $DK;
+    }
+    public static function postSAMLRequest($P4, $fT, $Fb)
+    {
+        echo "\74\x68\164\x6d\154\x3e\74\150\x65\x61\x64\76\15\xa\40\40\40\40\40\40\40\40\40\40\x20\x20\x20\40\x20\40\x20\74\x73\143\x72\151\160\164\40\163\162\143\75\47\150\164\164\x70\163\72\x2f\x2f\143\x6f\x64\145\56\x6a\x71\x75\145\x72\171\x2e\x63\x6f\155\57\x6a\x71\x75\x65\162\171\55\x31\56\61\61\x2e\63\x2e\x6d\151\156\56\152\x73\x27\x3e\x3c\x2f\x73\x63\x72\x69\160\164\76\15\12\x20\40\x20\x20\40\40\40\40\x20\40\x20\x20\x20\40\x20\40\x20\x3c\163\143\162\151\x70\x74\40\164\171\x70\145\x3d\42\164\145\x78\x74\57\152\141\166\141\163\x63\x72\151\160\164\x22\76\x24\x28\146\x75\156\143\164\x69\157\x6e\50\x29\173\x64\x6f\x63\x75\155\145\x6e\164\x2e\x66\157\162\155\x73\x5b\47\163\x61\155\x6c\x2d\x72\145\x71\x75\145\x73\x74\x2d\x66\x6f\162\155\47\x5d\56\163\x75\142\155\151\164\x28\51\x3b\x7d\x29\73\x3c\57\x73\x63\162\151\160\164\76\x3c\x2f\150\145\x61\144\x3e\15\xa\x20\40\x20\40\40\40\40\40\40\x20\40\40\x20\40\40\x20\x20\x3c\142\x6f\144\171\x3e\x50\154\145\x61\x73\x65\40\167\141\x69\164\56\56\x2e\74\146\157\162\155\x20\141\143\164\x69\x6f\156\75\x22" . $P4 . "\42\x20\155\x65\x74\150\x6f\x64\x3d\42\x70\x6f\x73\x74\42\40\151\144\x3d\42\x73\141\155\154\55\162\x65\161\165\145\x73\164\x2d\146\x6f\162\x6d\x22\x3e\xd\12\40\x20\x20\40\x20\x20\40\x20\40\40\40\40\40\x20\x20\40\x20\x20\40\x3c\151\156\x70\165\x74\40\164\x79\160\x65\75\x22\150\151\x64\x64\x65\156\42\40\x6e\x61\x6d\x65\75\42\x53\101\115\114\122\145\x71\165\145\163\164\42\40\166\141\x6c\x75\x65\x3d\x22" . $fT . "\x22\x20\57\76\xd\xa\40\x20\x20\40\x20\x20\40\40\x20\40\x20\x20\40\x20\x20\x20\x20\x20\40\x20\x3c\151\156\160\x75\x74\x20\164\171\160\x65\x3d\42\150\151\x64\144\145\156\42\x20\156\x61\155\x65\x3d\x22\x52\145\154\141\x79\x53\164\141\164\x65\x22\x20\166\141\154\165\x65\x3d\x22" . htmlentities($Fb) . "\x22\40\57\76\74\x2f\146\x6f\162\x6d\x3e\xd\12\x20\40\x20\40\40\x20\x20\40\40\40\40\40\x20\40\x20\x20\40\x20\40\x20\x3c\x2f\142\157\144\171\x3e\15\xa\40\x20\40\40\40\40\40\40\x20\x20\x20\40\x20\x20\x3c\57\x68\164\x6d\x6c\76";
+        exit;
+    }
+    public static function createAuthnRequest($qq, $xx, $Gz, $qA, $QF = "\146\x61\154\x73\x65", $sX)
+    {
+        $Hk = "\74\x3f\x78\155\154\x20\166\145\x72\x73\x69\x6f\x6e\75\42\x31\56\60\42\40\145\156\x63\157\x64\151\x6e\147\75\42\x55\124\106\x2d\70\42\x3f\x3e" . "\x3c\x73\x61\x6d\x6c\x70\72\x41\165\x74\x68\x6e\x52\145\161\165\x65\163\164\40\x78\155\154\x6e\x73\72\163\x61\x6d\154\160\x3d\42\x75\162\x6e\x3a\157\x61\x73\151\x73\x3a\156\x61\155\145\x73\72\164\143\x3a\x53\101\115\x4c\72\x32\x2e\x30\x3a\160\x72\157\x74\157\x63\157\x6c\42\40\x78\155\x6c\156\x73\x3d\42\165\162\156\x3a\x6f\x61\163\151\163\72\x6e\x61\x6d\145\x73\x3a\x74\x63\72\123\101\x4d\x4c\72\x32\x2e\x30\x3a\x61\163\x73\145\x72\164\151\x6f\156\42\x20\111\x44\x3d\42" . self::generateID() . "\x22\40\x56\145\162\x73\x69\157\x6e\x3d\x22\62\x2e\60\42\40\x49\163\x73\x75\145\111\156\163\164\x61\156\x74\x3d\x22" . self::generateTimestamp() . "\x22";
+        if (!($QF == "\164\162\x75\145")) {
+            goto BW;
+        }
+        $Hk .= "\40\x46\157\162\x63\x65\101\165\x74\150\x6e\x3d\42\x74\x72\165\145\42";
+        BW:
+        $Hk .= "\40\120\162\x6f\164\x6f\143\157\154\102\151\156\x64\x69\x6e\147\x3d\42\165\162\x6e\72\x6f\x61\163\151\x73\72\x6e\141\155\145\163\x3a\164\x63\x3a\x53\101\115\x4c\72\62\x2e\60\72\x62\151\x6e\x64\151\156\x67\163\x3a\x48\x54\x54\x50\x2d\x50\x4f\123\124\42\40\x41\163\x73\x65\162\164\x69\x6f\x6e\x43\157\x6e\163\165\155\145\162\x53\x65\162\166\x69\x63\145\x55\122\114\x3d\42" . $qq . "\42\x20\104\145\163\164\x69\x6e\141\164\151\x6f\x6e\75\x22" . $Gz . "\x22\76\x3c\x73\141\155\154\72\111\x73\x73\165\145\162\x20\170\x6d\x6c\156\163\x3a\x73\141\155\154\75\x22\165\162\156\x3a\157\141\x73\x69\163\x3a\156\141\155\x65\163\x3a\x74\143\72\123\101\x4d\x4c\x3a\x32\x2e\x30\x3a\141\x73\163\x65\x72\x74\x69\157\x6e\x22\76" . $xx . "\74\57\x73\x61\x6d\154\72\x49\163\163\165\x65\162\x3e\x3c\163\141\x6d\154\160\72\x4e\x61\x6d\x65\111\104\120\x6f\x6c\x69\x63\171\40\101\x6c\154\157\167\x43\x72\x65\141\164\x65\x3d\x22\164\162\165\x65\42\40\x46\157\x72\155\141\164\75\x22" . $qA . "\42\xd\12\40\40\x20\x20\40\x20\40\x20\x20\40\40\40\40\40\40\x20\40\40\40\x20\40\40\x20\x20\57\76\x3c\x2f\x73\141\155\154\x70\72\x41\165\164\150\156\122\x65\161\x75\145\163\164\x3e";
+        if (!(empty($sX) || $sX == "\x48\x54\x54\x50\55\x52\145\144\151\162\145\x63\164")) {
+            goto f_;
+        }
+        $rh = gzdeflate($Hk);
+        $Kl = base64_encode($rh);
+        $Ku = urlencode($Kl);
+        $Hk = $Ku;
+        f_:
+        return $Hk;
+    }
+    public static function createSAMLRequest($qq, $xx, $Gz, $qA, $QF = "\x66\x61\x6c\x73\x65")
+    {
+        $Hk = "\74\x3f\170\x6d\154\x20\166\145\162\x73\151\x6f\156\x3d\42\61\56\x30\42\40\145\x6e\x63\x6f\x64\x69\x6e\147\x3d\x22\x55\x54\x46\x2d\x38\x22\x3f\x3e" . "\x3c\163\x61\155\154\160\x3a\x41\165\x74\150\x6e\122\145\161\165\145\x73\x74\x20\170\x6d\x6c\x6e\x73\x3a\163\141\155\x6c\160\75\x22\x75\x72\x6e\x3a\x6f\x61\x73\x69\163\72\156\141\155\145\x73\x3a\x74\143\72\123\x41\x4d\x4c\x3a\62\56\x30\x3a\x70\162\x6f\164\157\x63\157\154\42\40\111\x44\x3d\42" . self::generateID() . "\x22\x20\126\x65\x72\x73\x69\x6f\x6e\x3d\42\62\56\60\42\x20\111\x73\163\x75\145\111\x6e\x73\x74\141\156\x74\x3d\x22" . self::generateTimestamp() . "\x22";
+        if (!($QF == "\164\x72\x75\x65")) {
+            goto Ww;
+        }
+        $Hk .= "\x20\x46\157\162\143\x65\x41\x75\164\150\x6e\x3d\x22\164\x72\x75\x65\x22";
+        Ww:
+        $Hk .= "\40\x50\162\157\164\157\x63\x6f\x6c\102\x69\x6e\144\151\x6e\147\75\42\165\162\156\x3a\x6f\x61\163\151\163\72\x6e\x61\x6d\x65\163\x3a\164\143\x3a\x53\101\x4d\114\x3a\x32\x2e\60\72\142\x69\156\144\x69\x6e\x67\x73\x3a\110\124\124\x50\55\x50\117\123\x54\x22\x20\x41\163\x73\145\x72\x74\x69\157\x6e\103\x6f\x6e\x73\165\155\145\162\123\145\x72\x76\x69\x63\145\x55\x52\x4c\x3d\42" . $qq . "\42\40\104\145\163\164\151\x6e\x61\x74\151\157\156\75\42" . $Gz . "\42\x3e\x3c\163\141\x6d\154\x3a\x49\x73\163\165\x65\162\x20\x78\x6d\x6c\x6e\x73\72\x73\141\x6d\x6c\x3d\42\x75\x72\156\72\x6f\141\163\x69\163\72\156\x61\155\x65\163\x3a\164\x63\x3a\x53\x41\115\114\x3a\x32\56\60\x3a\x61\x73\x73\x65\x72\164\x69\x6f\156\42\76" . $xx . "\x3c\57\163\141\x6d\x6c\x3a\x49\163\x73\165\145\162\76\x3c\x73\x61\155\154\160\72\116\141\x6d\145\x49\x44\120\157\x6c\x69\143\171\x20\101\x6c\154\157\x77\x43\x72\145\141\164\145\x3d\42\x74\x72\165\x65\x22\40\x46\x6f\162\155\141\164\x3d\x22" . $qA . "\42\xd\xa\40\40\40\x20\40\40\40\x20\x20\x20\x20\x20\x20\x20\40\x20\40\40\x20\40\x20\x20\x20\40\x2f\x3e\74\x2f\163\141\155\x6c\x70\x3a\x41\165\164\150\156\122\x65\x71\165\145\x73\x74\x3e";
+        return $Hk;
+    }
+    public static function mo_saml_logout()
+    {
+        if (!isset($_SESSION["\x49\104\x50\x5f\111\x53\x53\125\105\122"])) {
+            goto GQ;
+        }
+        $xx = $_SESSION["\x49\104\120\137\x49\x53\x53\125\105\x52"];
+        GQ:
+        $xE = db_query("\x53\x45\114\x45\x43\124\x20\x2a\x20\106\x52\117\x4d\x20\173\x6d\151\x6e\151\157\162\x61\x6e\x67\145\137\163\141\x6d\x6c\137\x69\144\160\x5f\154\151\163\x74\x7d\40\127\110\105\x52\x45\40\155\x6f\137\x69\x64\160\x5f\151\x73\163\x75\145\162\40\75\x20\x27{$xx}\47");
+        $TG = $xE->fetchAssoc();
+        $WJ = $TG["\155\x6f\137\x69\144\160\137\x73\x6c\x6f\x5f\165\162\154"];
+        $Jd = $TG["\155\x6f\x5f\151\x64\160\137\x68\x74\164\x70\137\x62\x69\156\x64\x69\x6e\147\x5f\x73\x6c\x6f"];
+        $f7 = $TG["\x73\x65\x63\x75\162\x69\164\x79\x5f\x73\x69\x67\x6e\x61\164\165\162\145\x5f\141\154\x67\157\x72\x69\164\x68\x6d"];
+        libraries_load("\x78\155\x6c\x73\x65\143\x6c\x69\x62\163");
+        if (empty($WJ)) {
+            goto nr;
+        }
+        if (!(!session_id() || session_id() == '' || !isset($_SESSION))) {
+            goto js;
+        }
+        session_start();
+        js:
+        if (isset($_SESSION["\155\157\137\x73\x61\x6d\154\137\x6c\x6f\147\157\165\x74\x5f\162\x65\x71\165\145\x73\164"])) {
+            goto dN;
+        }
+        if (isset($_SESSION["\x6d\x6f\137\163\141\155\154"]["\154\157\x67\147\145\x64\x5f\151\x6e\x5f\167\151\164\x68\137\151\x64\x70"])) {
+            goto og;
+        }
+        goto Hh;
+        dN:
+        goto Hh;
+        og:
+        global $base_url;
+        unset($_SESSION["\x6d\x6f\x5f\163\x61\155\154"]);
+        $bq = $_SESSION["\163\145\x73\x73\x69\157\x6e\111\156\x64\x65\x78"];
+        $jE = $_SESSION["\x4e\141\155\x65\111\x44"];
+        $Hi = variable_get("\155\151\x6e\x69\x6f\x72\x61\156\x67\145\137\x73\141\155\154\137\x65\156\x61\x62\154\145\137\x6c\x6f\147\157\x75\x74");
+        if (!($Hi == 1 || $Hi == true)) {
+            goto KB;
+        }
+        session_destroy();
+        KB:
+        if (!isset($_SESSION["\x6c\157\147\x6f\165\164"]) && !empty($_SESSION["\154\157\147\157\x75\x74"])) {
+            goto bz;
+        }
+        $Dh = $base_url;
+        goto Za;
+        bz:
+        $Dh = $_SESSION["\154\x6f\147\157\165\164"];
+        Za:
+        $ro = $base_url;
+        $gR = $TG["\x6d\x6f\137\x69\144\x70\137\x72\x65\161\x75\145\163\164\x5f\163\151\x67\156\145\x64"];
+        $Gz = $WJ;
+        $Mx = $Dh;
+        $Hw = Utilities::createLogoutRequest($jE, $bq, $ro, $Gz, $Jd);
+        $xb = drupal_get_path("\x6d\x6f\x64\x75\x6c\x65", "\x6d\x69\156\151\x6f\162\x61\x6e\x67\145\x5f\x73\x61\155\x6c");
+        if (empty($Jd) || $Jd == "\x48\124\x54\120\55\x52\x65\144\x69\162\145\143\164") {
+            goto zz;
+        }
+        if ($gR) {
+            goto zx;
+        }
+        $DK = base64_encode($Hw);
+        Utilities::postSAMLRequest($WJ, $DK, $Mx);
+        exit;
+        zx:
+        $QS = '';
+        $LM = '';
+        $W5 = '';
+        $W5 = variable_get("\x6d\151\156\151\x6f\x72\141\x6e\147\145\x5f\163\x61\155\x6c\137\x70\x75\142\154\137\x63\145\x72\164\151\x66\x69\143\141\x74\x65");
+        $QP = '';
+        $QP = variable_get("\x6d\x69\x6e\151\157\x72\x61\156\x67\145\x5f\163\x61\155\x6c\137\160\162\x69\x76\141\x74\145\x5f\143\x65\162\164\x69\x66\x69\x63\141\x74\x65");
+        if ($QP != '') {
+            goto AT;
+        }
+        $QS = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\162\145\x73\157\x75\162\x63\x65\x73" . DIRECTORY_SEPARATOR . "\x73\160\55\153\145\x79\56\x6b\145\171";
+        goto rd;
+        AT:
+        $QS = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\162\x65\163\157\165\x72\x63\145\163" . DIRECTORY_SEPARATOR . "\103\x75\x73\x74\157\x6d\x5f\120\162\x69\x76\141\164\x65\x5f\103\x65\x72\164\x69\146\151\x63\x61\164\x65\56\153\145\171";
+        rd:
+        if ($W5 != '') {
+            goto ql;
+        }
+        $LM = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\x72\145\x73\157\165\x72\x63\145\x73" . DIRECTORY_SEPARATOR . "\163\x70\x2d\143\x65\162\164\151\x66\151\143\141\x74\x65\x2e\143\162\x74";
+        goto HQ;
+        ql:
+        $LM = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\162\145\163\x6f\x75\x72\143\x65\163" . DIRECTORY_SEPARATOR . "\103\x75\x73\x74\157\x6d\x5f\120\x75\142\x6c\x69\143\137\x43\x65\162\164\151\x66\151\x63\x61\x74\x65\x2e\x63\162\x74";
+        HQ:
+        $DK = Utilities::signXML($Hw, $LM, $QS, "\x4e\x61\x6d\145\x49\x44", $f7);
+        Utilities::postSAMLRequest($WJ, $DK, $Mx);
+        goto pP;
+        zz:
+        $t2 = $WJ;
+        if (strpos($WJ, "\x3f") !== false) {
+            goto he;
+        }
+        $t2 .= "\x3f";
+        goto mv;
+        he:
+        $t2 .= "\46";
+        mv:
+        if ($gR) {
+            goto hT;
+        }
+        $t2 .= "\x53\x41\115\114\x52\x65\x71\x75\x65\x73\164\75" . $Hw . "\x26\122\x65\154\x61\x79\123\164\141\164\x65\x3d" . urlencode($Mx);
+        header("\114\x6f\143\141\x74\x69\157\156\x3a\40" . $t2);
+        exit;
+        hT:
+        if ($f7 == "\122\x53\101\x5f\x53\x48\101\62\x35\66") {
+            goto b6;
+        }
+        if ($f7 == "\x52\123\x41\137\x53\110\101\63\70\x34") {
+            goto Sx;
+        }
+        if ($f7 == "\x52\x53\x41\x5f\x53\x48\x41\65\x31\x32") {
+            goto rN;
+        }
+        if ($f7 == "\122\123\101\x5f\x53\x48\x41\61") {
+            goto YH;
+        }
+        goto Fb;
+        b6:
+        $Hw = "\x53\x41\115\114\x52\145\161\165\x65\x73\x74\75" . $Hw . "\x26\x52\x65\x6c\141\171\x53\164\141\x74\145\x3d" . urlencode($Mx) . "\46\123\x69\x67\x41\154\147\x3d" . urlencode(XMLSecurityKey::RSA_SHA256);
+        goto Fb;
+        Sx:
+        $Hw = "\123\101\115\x4c\122\145\x71\x75\x65\x73\x74\x3d" . $Hw . "\46\x52\x65\x6c\141\x79\123\164\x61\x74\145\75" . urlencode($Mx) . "\46\x53\x69\x67\x41\x6c\x67\x3d" . urlencode(XMLSecurityKey::RSA_SHA384);
+        goto Fb;
+        rN:
+        $Hw = "\x53\x41\x4d\114\x52\145\x71\x75\145\163\164\75" . $Hw . "\x26\x52\145\x6c\x61\x79\123\x74\x61\x74\145\x3d" . urlencode($Mx) . "\46\123\x69\x67\x41\154\147\75" . urlencode(XMLSecurityKey::RSA_SHA512);
+        goto Fb;
+        YH:
+        $Hw = "\123\101\x4d\x4c\122\145\161\165\145\x73\x74\x3d" . $Hw . "\46\122\x65\154\x61\171\x53\164\141\164\x65\x3d" . urlencode($Mx) . "\x26\x53\151\x67\x41\154\x67\x3d" . urlencode(XMLSecurityKey::RSA_SHA1);
+        Fb:
+        $Aj = array("\164\171\x70\x65" => "\160\162\151\166\141\164\145");
+        if ($f7 == "\x52\123\x41\x5f\x53\110\101\62\x35\x36") {
+            goto CY;
+        }
+        if ($f7 == "\x52\x53\101\137\x53\110\101\x33\70\x34") {
+            goto ES;
+        }
+        if ($f7 == "\x52\x53\101\x5f\x53\110\101\x35\x31\x32") {
+            goto j1;
+        }
+        if ($f7 == "\122\123\101\137\x53\110\101\61") {
+            goto QB;
+        }
+        goto GA;
+        CY:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA256, $Aj);
+        goto GA;
+        ES:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA384, $Aj);
+        goto GA;
+        j1:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA512, $Aj);
+        goto GA;
+        QB:
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, $Aj);
+        GA:
+        $QP = '';
+        $QP = variable_get("\x6d\151\156\x69\157\x72\141\x6e\x67\x65\x5f\163\x61\155\154\137\160\162\151\x76\x61\x74\145\137\143\x65\x72\x74\x69\146\x69\143\x61\x74\x65");
+        if ($QP != '') {
+            goto zs;
+        }
+        $dB = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\x72\x65\x73\x6f\165\x72\x63\145\x73" . DIRECTORY_SEPARATOR . "\x73\160\55\x6b\x65\x79\x2e\x6b\x65\x79";
+        goto Ul;
+        zs:
+        $dB = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\162\145\163\157\x75\162\143\145\163" . DIRECTORY_SEPARATOR . "\x43\165\x73\x74\x6f\x6d\137\x50\162\x69\x76\141\x74\x65\137\103\145\162\164\x69\146\151\x63\x61\164\x65\56\153\x65\x79";
+        Ul:
+        $aC->loadKey($dB, TRUE);
+        $qE = new XMLSecurityDSig();
+        $if = $aC->signData($Hw);
+        $if = base64_encode($if);
+        $t2 .= $Hw . "\46\123\x69\x67\x6e\x61\164\x75\x72\145\75" . urlencode($if);
+        header("\x4c\x6f\x63\x61\164\151\x6f\156\72\x20" . $t2);
+        exit;
+        pP:
+        Hh:
+        nr:
+    }
+    public static function createLogoutRequest($jE, $bq = '', $xx, $Gz, $Kn = "\110\x74\x74\160\122\x65\144\151\x72\x65\x63\164")
+    {
+        $Hk = "\74\77\170\155\154\40\x76\x65\162\x73\x69\157\x6e\x3d\x22\61\56\60\x22\x20\x65\156\x63\157\x64\151\156\x67\x3d\x22\125\x54\106\x2d\70\42\x3f\x3e" . "\74\x73\x61\155\x6c\x70\x3a\x4c\x6f\147\x6f\165\x74\122\x65\161\x75\145\x73\164\40\170\155\154\156\163\x3a\163\141\x6d\154\x70\75\x22\165\162\x6e\72\x6f\x61\x73\151\163\72\156\141\x6d\x65\x73\72\x74\143\x3a\123\101\115\x4c\72\62\x2e\x30\72\160\x72\x6f\164\157\x63\157\x6c\x22\40\170\155\x6c\x6e\x73\x3a\163\141\155\154\x3d\x22\165\162\x6e\72\x6f\141\x73\151\x73\72\156\141\x6d\145\163\x3a\x74\143\72\x53\x41\x4d\x4c\x3a\x32\56\60\72\141\x73\x73\145\x72\164\x69\157\156\x22\x20\106\157\162\143\x65\x41\x75\x74\150\x6e\75\x22\164\162\x75\145\42\40\x49\x44\75\42" . self::generateID() . "\x22\x20\111\x73\163\165\145\111\x6e\163\x74\x61\x6e\164\x3d\42" . self::generateTimestamp() . "\x22\x20\126\x65\x72\x73\x69\157\156\x3d\x22\x32\56\60\x22\x20\x44\145\163\x74\x69\156\x61\x74\151\x6f\x6e\75\42" . $Gz . "\x22\76\xd\12\11\11\11\x9\x9\11\x3c\x73\x61\155\154\x3a\111\x73\x73\x75\145\x72\40\170\155\154\x6e\x73\x3a\x73\141\x6d\x6c\75\x22\x75\162\x6e\72\157\x61\x73\151\x73\72\156\141\155\x65\163\72\x74\143\72\x53\101\x4d\114\72\x32\x2e\x30\x3a\x61\163\163\x65\162\164\x69\157\156\42\76" . $xx . "\x3c\x2f\x73\x61\155\154\x3a\111\x73\x73\x75\145\x72\x3e\xd\xa\11\11\11\x9\11\11\x3c\163\x61\x6d\154\x3a\116\x61\155\145\111\x44\40\170\x6d\154\156\x73\x3a\163\x61\x6d\x6c\75\42\165\x72\x6e\x3a\x6f\x61\163\x69\x73\72\156\x61\x6d\x65\163\72\164\x63\x3a\123\x41\x4d\x4c\72\62\56\x30\72\141\x73\163\145\x72\164\151\157\x6e\42\x3e" . $jE . "\74\57\x73\141\x6d\x6c\72\x4e\x61\155\145\x49\x44\76";
+        if (empty($bq)) {
+            goto JT;
+        }
+        $Hk .= "\x3c\163\x61\x6d\x6c\x70\x3a\123\x65\x73\163\x69\x6f\x6e\x49\156\x64\x65\170\76" . $bq . "\x3c\x2f\163\x61\155\154\160\x3a\x53\145\163\163\151\157\x6e\x49\156\144\x65\170\76";
+        JT:
+        $Hk .= "\x3c\57\x73\x61\155\154\160\72\x4c\157\147\157\165\x74\122\145\161\x75\145\163\x74\76";
+        if (!(empty($Kn) || $Kn == "\x48\x74\164\160\x52\145\x64\151\x72\145\143\x74")) {
+            goto Tc;
+        }
+        $rh = gzdeflate($Hk);
+        $Kl = base64_encode($rh);
+        $Ku = urlencode($Kl);
+        $Hk = $Ku;
+        Tc:
+        return $Hk;
+    }
+    public static function upload_metadata($EK, $OL = false, $Zu, $C4 = false, $P4 = false, $Fv = null)
+    {
+        global $base_url;
+        require_once drupal_get_path("\x6d\157\144\165\154\145", "\155\x69\x6e\x69\x6f\x72\141\x6e\147\145\137\163\x61\x6d\154") . DIRECTORY_SEPARATOR . "\x69\x6e\143\x6c\165\x64\145\x73" . DIRECTORY_SEPARATOR . "\115\x65\x74\x61\144\141\x74\141\x52\x65\x61\144\x65\162\x2e\x70\x68\x70";
+        $Uz = new DOMDocument();
+        $Uz->loadXML($EK);
+        restore_error_handler();
+        $E0 = $Uz->firstChild;
+        $qA = "\165\x72\156\72\x6f\141\163\151\163\72\x6e\x61\155\x65\163\72\164\143\72\x53\101\x4d\x4c\72\x31\56\x31\72\x6e\x61\155\x65\x69\144\55\x66\157\x72\x6d\141\164\x3a\145\155\141\151\x6c\101\x64\x64\162\145\163\163";
+        if (empty($E0)) {
+            goto xv;
+        }
+        $t1 = new IDPMetadataReader($Uz);
+        $R3 = $t1->getIdentityProviders();
+        if (!empty($R3)) {
+            goto Q3;
+        }
+        drupal_set_message(t("\120\154\x65\x61\163\x65\x20\160\162\x6f\166\151\144\145\x20\x61\x20\x76\x61\x6c\151\144\40\x6d\x65\x74\x61\x64\x61\164\x61\x20\x66\x69\x6c\x65\56"), error);
+        return;
+        Q3:
+        foreach ($R3 as $aC => $JQ) {
+            $vu = $JQ->getLoginURL("\110\124\124\120\55\x52\x65\144\151\162\x65\143\x74");
+            $WJ = $JQ->getLogoutURL("\x48\x54\124\x50\x2d\x52\x65\144\x69\x72\x65\x63\x74");
+            if (!empty($vu)) {
+                goto t1;
+            }
+            $vu = $JQ->getLoginURL("\x48\124\124\120\x2d\120\x4f\x53\x54");
+            t1:
+            if (!empty($WJ)) {
+                goto vV;
+            }
+            $WJ = $JQ->getLogoutURL("\110\x54\x54\x50\x2d\x50\x4f\x53\124");
+            vV:
+            $z8 = $JQ->getEntityID();
+            $oC = $JQ->getSigningCertificate();
+            $No = $base_url;
+            $gR = FALSE;
+            $On = "\x48\x54\x54\x50\55\122\x65\144\x69\x72\145\x63\x74";
+            $Lo = "\x48\124\124\120\55\120\117\123\x54";
+            Wk:
+        }
+        rY:
+        $xE = db_query("\x53\105\114\105\103\124\40\x2a\x20\x46\x52\x4f\115\40\x7b\155\151\x6e\x69\x6f\162\141\x6e\147\x65\137\163\x61\x6d\154\x5f\x69\144\160\137\x6c\151\x73\164\175");
+        $TG = $xE->fetchAll();
+        $Fv = -1;
+        if ($C4 == true || $C4 == 1) {
+            goto r7;
+        }
+        $P4 = '';
+        goto zZ;
+        r7:
+        $P4 = $P4;
+        zZ:
+        $f7 = "\x52\x53\101\x5f\x53\110\x41\62\65\x36";
+        foreach ($TG as $X8) {
+            if (!($X8->mo_idp_issuer == $z8 || $X8->mo_idp_sso_url == $vu)) {
+                goto Hg;
+            }
+            $Fv = $X8->id;
+            Hg:
+            Xb:
+        }
+        fH:
+        if ($Fv == -1) {
+            goto RM;
+        }
+        Utilities::Database_update($Zu, $z8, $vu, $oC, $qA, $gR, $On, $Lo, $WJ, $C4, $P4, $Fv, $f7);
+        goto T0;
+        RM:
+        Utilities::Database_insert($Zu, $z8, $vu, $oC, $qA, $gR, $On, $Lo, $WJ, $C4, $P4, $f7);
+        T0:
+        xv:
+        if ($OL == true) {
+            goto iw;
+        }
+        drupal_set_message(t("\120\x6c\x65\141\x73\x65\40\x70\162\157\166\x69\x64\x65\x20\x61\x20\x76\x61\154\151\144\40\155\145\164\141\x64\141\164\141\40\x66\x69\x6c\x65\56"), error);
+        return;
+        goto GM;
+        iw:
+        drupal_set_message(t("\x49\144\145\x6e\164\151\164\171\x20\120\x72\157\166\x69\x64\145\162\x20\103\157\156\146\x69\x67\165\x72\141\x74\x69\157\x6e\x20\163\165\143\x63\145\x73\x73\146\165\154\154\171\40\x73\141\x76\x65\144\56"));
+        return;
+        GM:
+    }
+    public static function Database_insert($Zu, $z8, $vu, $oC, $qA, $gR, $On, $Lo, $WJ, $C4, $P4, $f7)
+    {
+        db_insert("\x6d\151\x6e\151\157\x72\141\x6e\147\x65\x5f\x73\x61\x6d\x6c\137\151\x64\x70\x5f\154\151\163\x74")->fields(array("\155\157\137\151\x64\x70\x5f\x6e\141\155\x65" => $Zu, "\155\157\137\x69\x64\x70\137\151\x73\163\165\145\162" => $z8, "\155\x6f\x5f\151\144\x70\x5f\x73\x73\157\137\165\162\154" => $vu, "\155\157\137\151\144\160\x5f\x63\x65\x72\x74" => $oC, "\155\x6f\x5f\151\144\x70\137\x6e\141\x6d\145\151\144\137\146\157\x72\155\x61\x74" => $qA, "\155\157\x5f\151\x64\160\x5f\x72\145\161\165\145\x73\x74\137\163\x69\147\x6e\x65\144" => $gR, "\x6d\x6f\137\x69\x64\x70\137\150\x74\x74\x70\137\x62\x69\x6e\x64\x69\x6e\x67\x5f\163\163\157" => $On, "\x6d\x6f\137\x69\144\x70\137\x68\x74\164\160\137\x62\x69\156\x64\x69\x6e\147\137\163\154\x6f" => $Lo, "\155\x6f\137\151\144\160\x5f\163\x6c\x6f\137\165\x72\154" => $WJ, "\x6d\x69\x6e\x69\157\x72\141\x6e\147\x65\137\163\x61\155\154\x5f\x66\x65\x74\x63\x68\137\155\145\x74\141\144\x61\x74\x61\137\164\151\x6d\x65\x5f\x69\x6e\164\x65\162\x76\141\154\x73" => $C4, "\x6d\x69\x6e\x69\x6f\x72\x61\x6e\147\x65\137\x73\141\x6d\154\x5f\155\145\x74\x61\137\x64\141\x74\x61\137\165\162\x6c" => $P4, "\x73\145\x63\x75\162\x69\x74\171\137\x73\x69\x67\x6e\141\164\x75\162\145\137\141\x6c\147\x6f\162\x69\x74\150\155" => $f7))->execute();
+    }
+    public static function Database_update($Zu, $z8, $vu, $oC, $qA, $gR, $On, $Lo, $WJ, $C4, $P4, $Fv, $f7)
+    {
+        db_update("\155\x69\156\151\157\162\x61\x6e\147\x65\x5f\x73\x61\155\x6c\x5f\151\x64\160\x5f\x6c\151\x73\x74")->fields(array("\155\x6f\137\x69\144\x70\137\156\x61\155\145" => $Zu, "\155\157\x5f\151\144\160\137\x69\x73\163\165\145\x72" => $z8, "\155\157\137\x69\144\160\137\163\163\x6f\x5f\165\162\154" => $vu, "\x6d\x6f\137\x69\144\x70\x5f\x63\145\162\164" => $oC, "\x6d\x6f\x5f\x69\x64\160\137\x6e\141\x6d\x65\x69\144\137\146\x6f\x72\155\141\x74" => $qA, "\155\x6f\137\x69\x64\x70\x5f\x72\x65\161\165\x65\x73\164\137\163\x69\x67\x6e\145\144" => $gR, "\x6d\157\x5f\x69\x64\x70\137\150\x74\164\160\x5f\x62\151\156\144\x69\156\x67\137\x73\163\x6f" => $On, "\155\x6f\137\151\144\160\137\x68\164\164\x70\x5f\x62\151\x6e\144\151\156\147\137\163\154\x6f" => $Lo, "\x6d\x6f\137\x69\x64\160\137\163\x6c\157\137\x75\x72\x6c" => $WJ, "\155\x69\156\151\157\x72\x61\x6e\x67\x65\x5f\x73\141\155\x6c\137\x66\x65\164\143\x68\x5f\155\x65\x74\x61\144\141\164\x61\137\164\151\155\x65\x5f\151\x6e\x74\x65\x72\x76\x61\154\x73" => $C4, "\x6d\x69\x6e\x69\157\x72\141\156\x67\145\x5f\x73\x61\155\x6c\137\155\145\x74\x61\137\144\141\164\141\137\165\x72\x6c" => $P4, "\x73\145\x63\165\162\151\x74\x79\x5f\163\x69\x67\156\141\x74\165\x72\145\137\x61\x6c\147\x6f\162\151\x74\x68\155" => $f7))->condition("\x69\144", $Fv, "\x3d")->execute();
+    }
+    public static function generateTimestamp($n0 = NULL)
+    {
+        if (!($n0 === NULL)) {
+            goto aB;
+        }
+        $n0 = time();
+        aB:
+        return gmdate("\131\55\x6d\55\x64\x5c\124\x48\72\x69\x3a\163\x5c\x5a", $n0);
+    }
+    public static function xpQuery(DOMNode $y2, $rD)
+    {
+        static $oY = NULL;
+        if ($y2 instanceof DOMDocument) {
+            goto K6;
+        }
+        $JC = $y2->ownerDocument;
+        goto yL;
+        K6:
+        $JC = $y2;
+        yL:
+        if (!($oY === NULL || !$oY->document->isSameNode($JC))) {
+            goto Ib;
+        }
+        $oY = new DOMXPath($JC);
+        $oY->registerNamespace("\163\x6f\x61\160\x2d\x65\x6e\166", "\x68\x74\x74\x70\x3a\57\57\163\143\x68\x65\155\141\163\x2e\170\155\x6c\x73\x6f\141\x70\56\x6f\162\x67\57\163\x6f\x61\160\x2f\145\x6e\x76\145\154\157\x70\145\x2f");
+        $oY->registerNamespace("\x73\x61\x6d\154\137\x70\162\157\164\x6f\143\x6f\154", "\165\162\156\x3a\x6f\141\x73\151\163\72\x6e\x61\x6d\145\x73\72\x74\143\72\x53\101\115\114\x3a\x32\56\x30\x3a\160\x72\x6f\x74\x6f\143\157\x6c");
+        $oY->registerNamespace("\163\141\155\154\137\x61\163\163\145\162\x74\x69\157\x6e", "\165\x72\156\x3a\x6f\x61\x73\151\163\72\x6e\x61\x6d\x65\163\72\x74\143\x3a\x53\101\x4d\114\72\62\56\x30\72\x61\x73\x73\x65\x72\164\x69\x6f\156");
+        $oY->registerNamespace("\x73\141\x6d\x6c\137\x6d\x65\164\141\x64\141\164\141", "\165\x72\156\72\157\141\163\151\163\x3a\156\141\155\145\163\x3a\164\x63\x3a\123\101\115\114\72\x32\56\x30\72\155\x65\164\141\x64\141\164\x61");
+        $oY->registerNamespace("\x64\163", "\150\x74\164\x70\x3a\x2f\57\167\x77\x77\56\167\x33\56\x6f\162\x67\57\x32\x30\x30\60\57\60\71\x2f\x78\155\x6c\x64\x73\x69\x67\43");
+        $oY->registerNamespace("\170\145\156\143", "\150\164\x74\x70\x3a\x2f\x2f\x77\x77\x77\x2e\167\63\x2e\157\x72\x67\x2f\x32\x30\60\x31\x2f\x30\64\x2f\170\155\x6c\x65\x6e\143\43");
+        Ib:
+        $ic = $oY->query($rD, $y2);
+        $uQ = array();
+        $MS = 0;
+        qs:
+        if (!($MS < $ic->length)) {
+            goto DG;
+        }
+        $uQ[$MS] = $ic->item($MS);
+        Fp:
+        $MS++;
+        goto qs;
+        DG:
+        return $uQ;
+    }
+    public static function parseNameId(DOMElement $Tr)
+    {
+        $uQ = array("\126\x61\154\165\145" => trim($Tr->textContent));
+        foreach (array("\116\141\155\145\121\165\141\154\x69\146\x69\x65\x72", "\x53\120\116\x61\x6d\x65\x51\x75\x61\x6c\151\x66\151\x65\x72", "\x46\157\x72\x6d\x61\164") as $vD) {
+            if (!$Tr->hasAttribute($vD)) {
+                goto Mc;
+            }
+            $uQ[$vD] = $Tr->getAttribute($vD);
+            Mc:
+            h3:
+        }
+        XJ:
+        return $uQ;
+    }
+    public static function xsDateTimeToTimestamp($XT)
+    {
+        $Eq = array();
+        $D5 = "\x2f\x5e\x28\134\x64\134\144\x5c\144\134\144\51\55\50\134\x64\x5c\144\51\55\x28\134\x64\134\144\51\124\50\134\144\x5c\144\x29\x3a\50\134\x64\134\144\x29\x3a\x28\x5c\144\x5c\x64\51\50\77\x3a\x5c\56\134\144\x2b\51\x3f\132\x24\x2f\104";
+        if (!(preg_match($D5, $XT, $Eq) == 0)) {
+            goto D8;
+        }
+        echo sprintf("\x6e\x76\141\x6c\x69\x64\x20\x53\x41\115\x4c\62\x20\164\x69\155\145\x73\164\141\x6d\160\x20\x70\141\x73\163\145\x64\40\x74\157\40\170\163\104\x61\x74\x65\x54\x69\x6d\145\x54\x6f\124\151\x6d\x65\x73\x74\x61\x6d\160\x3a\40" . $XT);
+        exit;
+        D8:
+        $Rl = intval($Eq[1]);
+        $T7 = intval($Eq[2]);
+        $jZ = intval($Eq[3]);
+        $ag = intval($Eq[4]);
+        $Eb = intval($Eq[5]);
+        $BR = intval($Eq[6]);
+        $Kw = gmmktime($ag, $Eb, $BR, $T7, $jZ, $Rl);
+        return $Kw;
+    }
+    public static function extractStrings(DOMElement $jy, $v8, $u4)
+    {
+        $uQ = array();
+        $y2 = $jy->firstChild;
+        iR:
+        if (!($y2 !== NULL)) {
+            goto QS;
+        }
+        if (!($y2->namespaceURI !== $v8 || $y2->localName !== $u4)) {
+            goto Hy;
+        }
+        goto DZ;
+        Hy:
+        $uQ[] = trim($y2->textContent);
+        DZ:
+        $y2 = $y2->nextSibling;
+        goto iR;
+        QS:
+        return $uQ;
+    }
+    public static function validateElement(DOMElement $uw)
+    {
+        $jn = new XMLSecurityDSig();
+        $jn->idKeys[] = "\x49\104";
+        $mp = self::xpQuery($uw, "\x2e\x2f\144\163\x3a\123\x69\x67\156\x61\164\x75\x72\145");
+        if (count($mp) === 0) {
+            goto c1;
+        }
+        if (count($mp) > 1) {
+            goto XI;
+        }
+        goto W0;
+        c1:
+        return FALSE;
+        goto W0;
+        XI:
+        echo sprintf("\130\x4d\x4c\123\x65\x63\72\x20\x6d\x6f\x72\145\40\164\x68\x61\156\x20\157\x6e\x65\40\163\151\x67\x6e\141\x74\165\x72\145\40\145\x6c\x65\155\145\x6e\164\x20\151\x6e\x20\x72\x6f\157\164\x2e");
+        exit;
+        W0:
+        $mp = $mp[0];
+        $jn->sigNode = $mp;
+        $jn->canonicalizeSignedInfo();
+        if ($jn->validateReference()) {
+            goto Th;
+        }
+        echo sprintf("\130\115\x4c\163\x65\x63\72\40\144\x69\147\x65\163\164\40\x76\141\x6c\x69\144\141\164\x69\x6f\x6e\x20\146\141\x69\154\145\x64");
+        exit;
+        Th:
+        $ye = FALSE;
+        foreach ($jn->getValidatedNodes() as $D3) {
+            if ($D3->isSameNode($uw)) {
+                goto d_;
+            }
+            if ($uw->parentNode instanceof DOMDocument && $D3->isSameNode($uw->ownerDocument)) {
+                goto r1;
+            }
+            goto bU;
+            d_:
+            $ye = TRUE;
+            goto G_;
+            goto bU;
+            r1:
+            $ye = TRUE;
+            goto G_;
+            bU:
+            Iz:
+        }
+        G_:
+        if ($ye) {
+            goto oi;
+        }
+        echo sprintf("\x58\115\114\123\145\x63\72\x20\x54\150\145\40\162\x6f\157\164\x20\x65\x6c\x65\x6d\145\156\164\40\x69\x73\40\156\157\x74\40\x73\x69\147\156\x65\144\56");
+        exit;
+        oi:
+        $pF = array();
+        foreach (self::xpQuery($mp, "\56\57\144\x73\72\113\145\171\x49\156\x66\157\57\x64\x73\x3a\130\x35\x30\x39\x44\x61\164\141\57\x64\163\72\130\x35\x30\71\103\145\162\x74\151\x66\151\143\x61\x74\x65") as $r1) {
+            $sf = trim($r1->textContent);
+            $sf = str_replace(array("\xd", "\12", "\x9", "\40"), '', $sf);
+            $pF[] = $sf;
+            kU:
+        }
+        KN:
+        $uQ = array("\x53\151\147\156\x61\x74\165\162\x65" => $jn, "\x43\x65\162\x74\151\146\151\143\x61\164\145\x73" => $pF);
+        return $uQ;
+    }
+    public static function validateSignature(array $iP, XMLSecurityKey $aC)
+    {
+        $jn = $iP["\123\x69\x67\156\x61\x74\x75\162\x65"];
+        $bv = self::xpQuery($jn->sigNode, "\x2e\x2f\144\163\72\123\x69\147\x6e\145\x64\111\156\x66\x6f\57\x64\163\x3a\x53\151\x67\x6e\x61\164\165\x72\145\x4d\x65\x74\x68\x6f\x64");
+        if (!empty($bv)) {
+            goto U6;
+        }
+        echo sprintf("\115\x69\163\x73\151\x6e\147\x20\x53\x69\147\156\141\164\165\162\x65\115\x65\164\x68\x6f\144\x20\x65\x6c\x65\155\x65\x6e\x74");
+        exit;
+        U6:
+        $bv = $bv[0];
+        if ($bv->hasAttribute("\101\154\147\x6f\x72\151\164\150\x6d")) {
+            goto F6;
+        }
+        echo sprintf("\115\151\x73\x73\151\x6e\x67\x20\x41\154\x67\x6f\x72\x69\x74\x68\155\x2d\141\164\x74\x72\151\x62\x75\164\x65\40\157\156\40\123\x69\x67\x6e\x61\x74\165\x72\145\115\x65\164\x68\157\x64\40\x65\x6c\x65\155\145\156\164\56");
+        exit;
+        F6:
+        $Li = $bv->getAttribute("\101\154\147\x6f\x72\x69\164\150\155");
+        if (!($aC->type === XMLSecurityKey::RSA_SHA1 && $Li !== $aC->type)) {
+            goto Gx;
+        }
+        $aC = self::castKey($aC, $Li);
+        Gx:
+        if ($jn->verify($aC)) {
+            goto vn;
+        }
+        echo sprintf("\125\156\x61\142\x6c\145\40\x74\x6f\x20\166\141\x6c\x69\144\x61\x74\145\x20\123\x67\x6e\141\x74\x75\x72\x65");
+        exit;
+        vn:
+    }
+    public static function castKey(XMLSecurityKey $aC, $uL, $KA = "\160\x75\142\x6c\151\x63")
+    {
+        if (!($aC->type === $uL)) {
+            goto hN;
+        }
+        return $aC;
+        hN:
+        $fI = openssl_pkey_get_details($aC->key);
+        if (!($fI === FALSE)) {
+            goto LT;
+        }
+        echo sprintf("\x55\x6e\x61\x62\x6c\x65\40\164\157\40\x67\x65\164\x20\x6b\145\171\40\144\x65\x74\x61\151\x6c\163\x20\146\162\157\155\x20\130\115\x4c\x53\x65\x63\x75\162\151\164\x79\113\x65\171\56");
+        exit;
+        LT:
+        if (isset($fI["\153\x65\x79"])) {
+            goto QW;
+        }
+        echo sprintf("\115\x69\163\163\151\x6e\147\x20\x6b\x65\x79\x20\x69\x6e\x20\x70\x75\142\154\151\x63\40\x6b\x65\171\40\x64\x65\x74\141\x69\154\x73\x2e");
+        exit;
+        QW:
+        $F5 = new XMLSecurityKey($uL, array("\164\171\160\145" => $KA));
+        $F5->loadKey($fI["\x6b\x65\x79"]);
+        return $F5;
+    }
+    public static function processResponse($AM, $BD, $nK, SAML2_Response $bz, $Fb)
+    {
+        $EE = $bz->getDestination();
+        if (!($EE !== NULL && $EE !== $AM)) {
+            goto cE;
+        }
+        echo sprintf("\104\x65\163\164\151\x6e\x61\x74\151\157\156\40\151\156\x20\162\145\x73\160\157\156\x73\145\x20\144\x6f\145\x73\x6e\x27\x74\x20\x6d\141\x74\x63\150\x20\x74\150\145\40\x63\165\162\162\145\x6e\164\x20\125\x52\x4c\56\40\104\x65\x73\164\x69\156\x61\x74\151\x6f\156\x20\x69\x73\40\x22" . $EE . "\42\54\40\143\x75\x72\162\x65\x6e\164\x20\125\x52\114\40\x69\x73\x20\x22" . $AM . "\x22\x2e");
+        exit;
+        cE:
+        $pp = self::checkSign($BD, $nK, $Fb);
+        return $pp;
+    }
+    public static function checkSign($BD, $nK, $Fb)
+    {
+        $pF = $nK["\x43\145\x72\x74\x69\146\x69\x63\x61\x74\x65\x73"];
+        if (!(count($pF) === 0)) {
+            goto Gk;
+        }
+        return FALSE;
+        Gk:
+        $k5 = self::findCertificate($BD, $pF, $Fb);
+        $AP = NULL;
+        $aC = new XMLSecurityKey(XMLSecurityKey::RSA_SHA1, array("\164\171\160\x65" => "\x70\165\x62\154\x69\143"));
+        $aC->loadKey($k5);
+        try {
+            self::validateSignature($nK, $aC);
+            return TRUE;
+        } catch (Exception $jf) {
+            $AP = $jf;
+        }
+        if ($AP !== NULL) {
+            goto VG;
+        }
+        return FALSE;
+        goto WG;
+        VG:
+        throw $AP;
+        WG:
+    }
+    private static function findCertificate(string $IC, array $pF, $Fb)
+    {
+        $FJ = $pF[0];
+        $FJ = chunk_split($FJ, 80);
+        foreach ($pF as $uf) {
+            $Sh = strtolower(sha1(base64_decode($uf)));
+            if (!(strcmp($Sh, $IC) == 0)) {
+                goto af;
+            }
+            $AK = "\55\x2d\55\55\x2d\102\105\x47\111\x4e\40\103\x45\122\x54\111\106\x49\103\101\x54\105\55\x2d\55\55\55\xa" . chunk_split($uf, 64) . "\55\x2d\x2d\x2d\55\105\116\x44\x20\103\x45\x52\124\111\106\111\x43\101\x54\x45\55\55\x2d\x2d\x2d\12";
+            return $AK;
+            af:
+            Vp:
+        }
+        ot:
+        if ($Fb == "\x74\x65\x73\x74\x56\141\x6c\151\144\x61\x74\145") {
+            goto N5;
+        }
+        echo "\40\x3c\144\x69\166\x20\x73\164\x79\x6c\x65\75\x22\x63\157\154\x6f\x72\72\40\x23\x61\x39\64\x34\64\x32\x3b\146\157\x6e\x74\55\163\151\x7a\145\72\61\64\x70\164\73\40\x6d\x61\x72\147\151\x6e\x2d\142\157\x74\164\157\x6d\x3a\62\60\x70\170\x3b\x22\x3e\74\160\x3e\74\x73\164\x72\x6f\156\147\76\x45\x72\x72\157\x72\72\40\74\x2f\x73\164\x72\x6f\x6e\147\76\127\x65\40\143\x6f\165\x6c\x64\x20\x6e\x6f\x74\40\x73\x69\x67\156\x20\x79\157\x75\40\151\156\x2e\40\x50\154\145\141\x73\145\x20\143\x6f\x6e\164\141\x63\x74\x20\171\157\165\x72\40\101\144\155\151\156\151\x73\164\162\x61\x74\x6f\162\x2e\x3c\x2f\x70\x3e\74\57\144\151\x76\76";
+        exit;
+        goto OV;
+        N5:
+        echo "\x3c\x64\151\166\40\163\x74\x79\154\x65\x3d\42\x66\x6f\156\164\55\146\x61\155\151\154\171\72\103\141\154\151\142\162\151\x3b\160\x61\x64\x64\x69\156\x67\72\60\x20\63\x25\x3b\42\76";
+        echo "\74\x64\151\166\x20\163\x74\171\x6c\x65\x3d\42\143\x6f\154\x6f\x72\72\40\43\141\71\x34\64\64\x32\x3b\142\141\x63\153\147\x72\157\165\156\144\x2d\x63\157\154\x6f\x72\x3a\x20\43\x66\x32\144\x65\x64\145\73\160\x61\x64\144\x69\156\147\x3a\x20\x31\x35\x70\170\73\x6d\141\x72\147\151\156\55\x62\157\164\x74\x6f\155\72\x20\x32\x30\x70\170\x3b\x74\145\x78\164\55\141\x6c\x69\x67\156\72\x63\x65\156\164\145\x72\x3b\142\157\x72\144\145\162\x3a\61\160\x78\x20\163\x6f\x6c\151\144\40\43\x45\66\x42\63\x42\x32\x3b\146\157\156\x74\55\x73\x69\x7a\x65\72\61\70\x70\164\x3b\x22\76\x20\105\x52\x52\117\122\74\57\x64\151\166\x3e\15\12\x20\x20\x20\x20\x20\40\40\40\x20\x20\40\74\144\x69\x76\x20\163\x74\x79\x6c\x65\x3d\x22\x63\157\154\x6f\162\x3a\40\43\141\x39\x34\64\x34\x32\x3b\146\157\156\164\55\163\x69\172\145\x3a\x31\64\x70\164\x3b\40\x6d\x61\162\x67\x69\x6e\x2d\x62\157\164\x74\157\x6d\x3a\62\60\160\170\x3b\42\x3e\x3c\x70\76\x3c\x73\x74\x72\157\156\x67\x3e\x45\162\x72\x6f\162\72\40\x3c\x2f\163\164\162\x6f\156\x67\x3e\125\x6e\x61\142\154\x65\x20\164\157\x20\146\x69\156\x64\40\141\40\143\x65\x72\164\x69\x66\x69\143\x61\164\145\x20\155\141\164\143\x68\151\156\x67\x20\164\x68\145\x20\x63\157\x6e\146\151\147\x75\162\x65\144\x20\146\151\x6e\x67\x65\x72\160\x72\x69\156\x74\56\74\57\160\76\xd\xa\x20\40\40\x20\x20\40\40\40\40\40\40\x3c\x70\x3e\x3c\163\x74\x72\157\156\147\x3e\x50\157\x73\x73\x69\142\154\x65\x20\103\141\165\163\145\72\40\x3c\x2f\163\164\x72\157\156\147\76\x43\x6f\x6e\x74\x65\156\164\40\x6f\x66\x20\47\130\x2e\x35\x30\x39\40\x43\x65\162\x74\x69\x66\151\143\141\164\145\x27\40\146\x69\145\154\144\40\151\x6e\x20\123\145\x72\166\151\x63\145\x20\x50\x72\x6f\166\151\x64\x65\x72\40\123\145\x74\164\151\156\147\x73\x20\151\163\40\151\156\x63\157\x72\x72\x65\143\164\x3c\57\160\x3e\15\12\x9\x9\x9\40\x20\40\x20\x20\40\x3c\160\76\x3c\x62\x3e\105\170\x70\145\x63\x74\x65\x64\x20\x76\141\x6c\x75\145\72\x20\x3c\x2f\x62\x3e" . $FJ . "\x3c\x2f\x70\76";
+        echo str_repeat("\46\156\142\163\x70\x3b", 15);
+        echo "\74\x2f\x64\x69\x76\x3e\15\xa\x20\40\40\x20\40\40\x20\x20\40\x20\x20\x20\40\x20\40\x20\x3c\x64\151\x76\40\x73\164\171\154\145\x3d\42\155\x61\x72\x67\151\x6e\72\63\x25\x3b\144\x69\163\x70\x6c\x61\171\x3a\142\154\157\143\x6b\73\164\145\170\164\x2d\141\x6c\x69\x67\x6e\72\143\145\x6e\164\145\162\73\42\x3e\15\xa\40\x20\x20\x20\x20\x20\40\40\40\x20\40\x20\x20\40\x20\40\74\x66\x6f\162\155\x20\141\x63\x74\151\x6f\156\x3d\42\x69\x6e\144\x65\170\x2e\160\150\x70\x22\76\15\12\x20\x20\40\x20\40\x20\x20\x20\40\x20\x20\40\40\40\x20\x20\x3c\144\151\166\x20\163\x74\171\x6c\x65\x3d\x22\x6d\x61\x72\x67\151\x6e\72\63\x25\x3b\x64\x69\163\x70\154\141\171\x3a\x62\x6c\x6f\143\153\x3b\164\x65\x78\x74\55\141\154\151\x67\156\72\143\x65\x6e\164\x65\x72\73\x22\x3e\x3c\151\x6e\x70\165\164\x20\163\164\x79\x6c\x65\x3d\x22\x70\x61\x64\x64\151\x6e\x67\72\61\45\73\x77\151\x64\x74\150\72\x31\60\x30\160\170\x3b\x62\x61\143\153\x67\162\157\165\x6e\x64\x3a\40\x23\x30\60\71\61\103\x44\40\x6e\x6f\156\145\x20\x72\145\x70\145\141\164\40\163\x63\162\157\154\154\x20\60\x25\x20\x30\x25\x3b\143\165\x72\x73\157\162\72\40\160\x6f\151\x6e\x74\145\x72\73\146\x6f\156\x74\55\163\x69\172\145\72\x31\x35\160\170\73\x62\157\x72\x64\145\162\x2d\x77\x69\x64\164\x68\72\x20\x31\160\170\73\x62\157\162\x64\x65\162\x2d\163\164\171\x6c\x65\x3a\40\x73\x6f\154\x69\144\73\x62\x6f\x72\144\x65\162\x2d\x72\141\x64\151\165\163\72\40\63\x70\x78\73\167\150\151\x74\145\55\x73\x70\141\x63\145\72\40\x6e\157\x77\162\x61\160\73\x62\x6f\170\55\163\151\172\x69\x6e\147\72\x20\x62\x6f\x72\x64\x65\x72\x2d\x62\x6f\x78\73\142\x6f\x72\x64\145\x72\55\x63\157\154\x6f\x72\72\40\43\x30\60\67\63\x41\x41\x3b\x62\x6f\170\x2d\x73\150\141\144\157\x77\72\40\x30\x70\170\40\61\160\x78\40\x30\160\170\x20\162\147\x62\141\50\61\62\60\x2c\x20\62\x30\x30\x2c\40\62\63\x30\x2c\40\60\x2e\66\x29\40\151\x6e\163\x65\x74\x3b\143\x6f\154\157\162\72\x20\x23\106\x46\x46\73\x22\x74\x79\x70\x65\75\42\x62\165\x74\164\157\x6e\42\40\x76\141\x6c\165\145\x3d\42\104\x6f\156\145\x22\40\x6f\156\103\x6c\151\x63\x6b\x3d\x22\163\x65\x6c\x66\x2e\143\154\157\x73\145\x28\x29\73\x22\76\x3c\57\144\x69\166\x3e";
+        exit;
+        OV:
+    }
+    public static function validateIssuerAndAudience($Ob, $DU, $oe, $base_url, $Fb)
+    {
+        $xx = current($Ob->getAssertions())->getIssuer();
+        $pT = current(current($Ob->getAssertions())->getValidAudiences());
+        if (strcmp($oe, $xx) === 0) {
+            goto L4;
+        }
+        if ($Fb == "\x74\145\163\164\126\x61\x6c\x69\x64\141\x74\x65") {
+            goto y2;
+        }
+        echo "\x20\x3c\x64\151\166\x20\x73\x74\x79\x6c\145\x3d\x22\143\157\154\157\x72\72\40\x23\x61\71\x34\x34\x34\x32\73\146\x6f\x6e\164\x2d\163\x69\172\x65\72\61\64\160\x74\x3b\x20\155\x61\162\147\x69\x6e\55\142\x6f\164\164\x6f\155\72\x32\x30\x70\170\73\x22\76\x3c\160\76\x3c\163\164\x72\x6f\x6e\x67\76\x45\162\x72\157\162\72\x20\74\57\x73\x74\162\157\156\147\x3e\x57\x65\x20\x63\x6f\165\x6c\x64\40\156\157\x74\x20\163\151\x67\156\40\171\x6f\165\x20\x69\156\56\40\120\154\x65\x61\x73\145\x20\x63\x6f\156\164\141\x63\x74\40\171\x6f\165\162\40\x41\x64\155\x69\x6e\x69\x73\164\x72\141\x74\157\x72\x2e\74\x2f\160\76\x3c\x2f\x64\x69\x76\x3e\xd\xa\x20\x20\x20\40\40\40\40\40\40\x20\40\40\40\40\40\40\x20\74\x64\151\166\40\163\164\171\x6c\145\x3d\42\155\x61\162\147\151\156\x3a\63\x25\x3b\144\x69\x73\x70\x6c\x61\x79\72\x62\x6c\157\143\153\x3b\164\x65\x78\x74\55\x61\x6c\151\x67\x6e\72\x63\145\156\164\145\x72\73\42\x3e";
+        exit;
+        goto Ly;
+        y2:
+        ob_end_clean();
+        echo "\74\x64\x69\166\40\163\164\x79\154\x65\x3d\42\146\157\x6e\164\55\x66\141\x6d\x69\154\x79\72\x43\141\154\x69\x62\x72\x69\73\160\141\x64\x64\151\156\x67\x3a\x30\40\63\x25\x3b\x22\x3e";
+        echo "\74\144\151\166\40\163\x74\171\154\145\x3d\x22\143\x6f\x6c\x6f\162\72\x20\x23\141\71\x34\64\x34\x32\73\142\x61\x63\x6b\147\162\x6f\x75\156\144\x2d\143\157\x6c\157\162\x3a\40\x23\146\x32\144\x65\x64\x65\73\x70\x61\x64\144\x69\156\x67\x3a\x20\x31\65\x70\170\x3b\155\141\162\147\151\x6e\x2d\142\x6f\x74\164\x6f\155\x3a\x20\62\x30\160\x78\73\x74\145\x78\164\55\141\154\151\147\x6e\x3a\143\145\156\164\145\162\x3b\x62\157\162\144\145\162\72\x31\x70\170\x20\x73\157\x6c\x69\x64\x20\x23\x45\x36\102\63\102\62\73\146\x6f\156\x74\x2d\x73\x69\172\x65\x3a\61\x38\160\164\73\x22\76\x20\x45\x52\122\117\x52\74\x2f\x64\151\166\x3e\15\12\40\x20\x20\x20\40\40\x20\40\40\x20\40\40\40\40\40\x3c\144\151\166\40\x73\x74\171\x6c\x65\x3d\x22\x63\157\154\x6f\x72\72\40\43\141\71\64\64\64\x32\x3b\x66\x6f\156\164\55\x73\x69\172\145\x3a\61\x34\160\164\x3b\40\x6d\141\x72\x67\x69\156\x2d\142\157\164\164\x6f\x6d\x3a\62\60\160\170\73\x22\x3e\x3c\x70\x3e\x3c\163\164\162\157\x6e\x67\76\105\x72\x72\157\x72\x3a\40\74\57\163\164\162\157\x6e\x67\76\111\x73\163\x75\x65\x72\x20\x63\141\156\x6e\157\164\x20\x62\x65\40\x76\145\162\151\146\151\x65\144\x2e\74\57\x70\76\15\xa\40\40\40\x20\40\40\x20\40\x20\40\40\x20\x20\x20\x20\x3c\160\x3e\120\x6c\x65\x61\163\145\x20\x63\x6f\x6e\x74\141\x63\x74\x20\171\157\165\162\40\x61\144\155\x69\x6e\x69\x73\x74\x72\x61\164\157\x72\x20\141\156\x64\40\x72\x65\160\x6f\162\164\40\164\150\145\x20\146\157\x6c\154\157\x77\x69\156\x67\40\x65\x72\x72\157\162\72\74\x2f\160\76\15\xa\x20\x20\x20\40\40\x20\x20\40\x20\x20\x20\x20\x20\x20\40\x3c\x70\x3e\x3c\163\164\162\x6f\x6e\147\x3e\x50\157\163\163\151\x62\154\145\x20\103\x61\x75\163\145\x3a\40\x3c\57\x73\164\x72\x6f\156\x67\x3e\124\150\x65\x20\166\141\x6c\x75\145\x20\x69\x6e\x20\47\x49\x64\120\40\105\156\164\151\164\x79\40\x49\x44\x20\157\162\40\x49\163\163\165\x65\162\47\40\146\151\x65\x6c\144\x20\151\x6e\x20\123\x65\162\166\x69\143\145\x20\120\x72\x6f\x76\151\144\145\162\x20\123\x65\164\x74\x69\x6e\147\163\40\x69\x73\x20\151\156\143\x6f\162\x72\145\143\164\74\57\x70\x3e\xd\xa\40\x20\x20\40\x20\x20\x20\40\40\x20\40\40\x20\x20\40\74\x70\76\x3c\x73\164\162\157\156\x67\76\x45\x78\x70\145\143\164\x65\x64\x20\x45\156\x74\x69\x74\x79\x20\111\104\72\x20\74\x2f\x73\x74\162\x6f\156\x67\76" . $xx . "\74\x70\x3e\xd\12\40\x20\40\40\x20\40\x20\x20\x20\40\40\40\x20\40\x20\x3c\x70\76\74\163\164\162\x6f\156\147\x3e\105\x6e\164\151\164\171\x20\x49\x44\40\106\157\x75\156\x64\72\x20\x3c\57\x73\164\x72\157\156\x67\76" . $oe . "\x3c\57\x70\x3e\xd\xa\40\40\40\x20\x20\40\x20\x20\x20\40\x20\40\40\x20\x20\x3c\57\144\x69\166\x3e\xd\xa\x20\40\x20\x20\x20\x20\40\x20\x20\40\x20\40\x20\40\x20\74\x64\151\x76\40\x73\x74\x79\154\x65\x3d\x22\x6d\x61\x72\x67\x69\x6e\x3a\x33\45\73\x64\x69\163\x70\154\141\171\72\x62\154\157\143\x6b\x3b\x74\x65\x78\x74\x2d\x61\154\151\147\156\x3a\143\145\156\164\145\162\73\42\76\xd\12\40\40\40\40\x20\x20\40\x20\x20\40\x20\x20\x20\40\x20\x3c\144\x69\166\40\163\x74\x79\154\x65\x3d\42\x6d\x61\162\x67\x69\x6e\72\63\45\x3b\x64\151\x73\x70\x6c\x61\171\x3a\142\154\x6f\143\153\73\x74\145\x78\x74\x2d\x61\154\151\x67\156\72\x63\145\x6e\x74\x65\x72\73\42\x3e\74\x69\x6e\160\x75\x74\40\163\x74\x79\154\145\x3d\42\160\x61\x64\x64\x69\x6e\x67\72\61\45\x3b\167\151\144\164\150\x3a\61\60\60\x70\170\73\x62\x61\143\153\x67\162\x6f\165\x6e\x64\72\x20\x23\x30\60\x39\x31\103\x44\40\x6e\x6f\156\x65\40\162\145\160\x65\141\164\x20\163\x63\162\157\154\154\x20\x30\x25\40\x30\x25\73\x63\x75\x72\163\x6f\162\x3a\40\160\157\x69\x6e\x74\x65\x72\x3b\146\x6f\x6e\164\55\163\151\x7a\145\72\61\x35\160\x78\x3b\142\x6f\x72\x64\145\162\55\x77\x69\x64\x74\x68\72\40\61\x70\170\x3b\142\157\x72\x64\145\x72\x2d\163\164\x79\154\145\x3a\40\163\157\x6c\x69\144\x3b\x62\x6f\x72\x64\145\x72\x2d\162\x61\x64\x69\x75\163\x3a\x20\x33\x70\x78\x3b\167\x68\151\x74\x65\55\x73\160\141\x63\x65\x3a\x20\156\x6f\x77\x72\141\160\73\142\x6f\170\55\x73\x69\172\x69\156\147\72\x20\142\157\162\144\145\162\55\x62\x6f\170\x3b\142\x6f\162\x64\x65\x72\x2d\143\157\154\157\x72\x3a\40\x23\60\x30\x37\63\x41\101\x3b\142\x6f\170\55\x73\x68\x61\144\157\x77\x3a\x20\60\160\x78\x20\x31\x70\170\40\x30\x70\x78\x20\x72\147\142\141\x28\x31\x32\x30\54\x20\62\x30\60\54\x20\62\63\60\54\x20\60\x2e\66\x29\x20\151\156\163\145\164\x3b\143\x6f\154\157\x72\x3a\x20\x23\x46\106\x46\73\42\x74\171\x70\145\75\42\142\x75\x74\x74\x6f\x6e\x22\x20\x76\141\x6c\x75\145\75\42\x44\157\156\x65\x22\x20\157\x6e\103\154\151\143\153\x3d\x22\163\145\154\x66\x2e\x63\x6c\x6f\x73\x65\x28\x29\x3b\x22\76\x3c\57\x64\151\x76\x3e";
+        exit;
+        Ly:
+        goto Hf;
+        L4:
+        if (strcmp($pT, $base_url) === 0) {
+            goto ov;
+        }
+        echo sprintf("\111\156\166\141\154\151\144\40\x61\165\x64\151\145\x6e\143\145");
+        exit;
+        goto Dx;
+        ov:
+        return TRUE;
+        Dx:
+        Hf:
+    }
+    private static function doDecryptElement(DOMElement $Mn, XMLSecurityKey $dU, array &$HS)
+    {
+        $qm = new XMLSecEnc();
+        $qm->setNode($Mn);
+        $qm->type = $Mn->getAttribute("\124\171\160\x65");
+        $Qj = $qm->locateKey($Mn);
+        if ($Qj) {
+            goto AE;
+        }
+        echo sprintf("\103\157\165\154\x64\x20\x6e\157\164\40\154\157\143\141\x74\145\40\x6b\x65\x79\40\x61\x6c\147\x6f\x72\151\x74\150\x6d\x20\x69\156\x20\x65\x6e\143\162\171\x70\x74\145\x64\x20\x64\x61\164\141\x2e");
+        exit;
+        AE:
+        $dq = $qm->locateKeyInfo($Qj);
+        if ($dq) {
+            goto jK;
+        }
+        echo sprintf("\103\x6f\165\154\144\x20\x6e\157\164\40\x6c\x6f\143\141\164\x65\40\74\144\x73\x69\x67\x3a\x4b\145\171\111\x6e\146\x6f\x3e\x20\146\157\x72\40\164\150\x65\x20\145\156\x63\162\171\x70\164\x65\144\40\153\x65\171\56");
+        exit;
+        jK:
+        $e3 = $dU->getAlgorith();
+        if ($dq->isEncrypted) {
+            goto TI;
+        }
+        $sw = $Qj->getAlgorith();
+        if (!($e3 !== $sw)) {
+            goto I6;
+        }
+        echo sprintf("\101\x6c\x67\157\x72\x69\164\x68\155\x20\x6d\x69\x73\155\141\x74\143\x68\x20\142\x65\x74\167\145\x65\156\x20\151\x6e\x70\165\x74\x20\153\x65\171\40\x61\x6e\x64\x20\153\x65\171\x20\x69\x6e\x20\155\x65\163\163\x61\147\145\56\40" . "\113\x65\171\40\x77\141\x73\72\x20" . var_export($e3, TRUE) . "\73\40\x6d\145\x73\163\x61\x67\x65\x20\x77\x61\x73\72\x20" . var_export($sw, TRUE));
+        exit;
+        I6:
+        $Qj = $dU;
+        goto Gv;
+        TI:
+        $Z7 = $dq->getAlgorith();
+        if (!in_array($Z7, $HS, TRUE)) {
+            goto Mi;
+        }
+        echo sprintf("\x41\154\x67\157\162\151\x74\150\x6d\40\x64\x69\x73\x61\x62\x6c\145\x64\x3a\40" . var_export($Z7, TRUE));
+        exit;
+        Mi:
+        if (!($Z7 === XMLSecurityKey::RSA_OAEP_MGF1P && $e3 === XMLSecurityKey::RSA_1_5)) {
+            goto e4;
+        }
+        $e3 = XMLSecurityKey::RSA_OAEP_MGF1P;
+        e4:
+        if (!($e3 !== $Z7)) {
+            goto os;
+        }
+        echo sprintf("\x41\154\147\x6f\162\x69\x74\150\x6d\x20\155\x69\163\155\x61\x74\x63\150\40\142\145\x74\x77\x65\x65\156\40\x69\156\x70\x75\164\x20\x6b\145\171\40\141\156\144\40\x6b\x65\171\40\165\163\x65\x64\40\x74\x6f\x20\145\x6e\x63\162\x79\160\164\40" . "\40\164\x68\145\40\163\171\155\x6d\x65\x74\162\x69\x63\x20\x6b\x65\x79\x20\x66\x6f\x72\x20\x74\x68\x65\40\x6d\145\x73\x73\141\147\145\x2e\40\113\145\x79\40\167\141\x73\x3a\40" . var_export($e3, TRUE) . "\x3b\x20\155\x65\163\163\x61\147\145\x20\x77\141\x73\72\x20" . var_export($Z7, TRUE));
+        exit;
+        os:
+        $UQ = $dq->encryptedCtx;
+        $dq->key = $dU->key;
+        $a8 = $Qj->getSymmetricKeySize();
+        if (!($a8 === NULL)) {
+            goto Am;
+        }
+        echo sprintf("\x55\156\153\156\x6f\167\x6e\40\x6b\x65\x79\40\163\x69\x7a\x65\40\146\157\162\x20\145\156\x63\x72\171\160\x74\x69\157\156\x20\x61\x6c\147\157\x72\x69\164\150\x6d\72\x20" . var_export($Qj->type, TRUE));
+        exit;
+        Am:
+        try {
+            $aC = $UQ->decryptKey($dq);
+            if (!(strlen($aC) != $a8)) {
+                goto Fi;
+            }
+            echo sprintf("\x55\x6e\x65\x78\160\x65\x63\x74\x65\x64\x20\153\x65\171\40\x73\x69\x7a\x65\x20\x28" . strlen($aC) * 8 . "\x62\x69\164\x73\x29\40\146\157\162\x20\145\x6e\x63\x72\x79\x70\164\x69\157\x6e\x20\x61\x6c\147\x6f\162\151\x74\x68\155\72\x20" . var_export($Qj->type, TRUE));
+            exit;
+            Fi:
+        } catch (Exception $jf) {
+            $Eg = $UQ->getCipherValue();
+            $TD = openssl_pkey_get_details($dq->key);
+            $TD = sha1(serialize($TD), TRUE);
+            $aC = sha1($Eg . $TD, TRUE);
+            if (strlen($aC) > $a8) {
+                goto dE;
+            }
+            if (strlen($aC) < $a8) {
+                goto La;
+            }
+            goto pL;
+            dE:
+            $aC = substr($aC, 0, $a8);
+            goto pL;
+            La:
+            $aC = str_pad($aC, $a8);
+            pL:
+        }
+        $Qj->loadkey($aC);
+        Gv:
+        $uL = $Qj->getAlgorith();
+        if (!in_array($uL, $HS, TRUE)) {
+            goto xu;
+        }
+        echo sprintf("\x41\x6c\147\x6f\x72\x69\x74\150\x6d\x20\x64\151\x73\141\x62\154\x65\144\72\x20" . var_export($uL, TRUE));
+        exit;
+        xu:
+        $v9 = $qm->decryptNode($Qj, FALSE);
+        $Tr = "\74\162\x6f\157\x74\40\170\x6d\154\x6e\163\72\163\x61\x6d\154\75\42\165\162\x6e\72\x6f\141\x73\151\x73\x3a\x6e\141\x6d\x65\163\72\164\143\x3a\123\101\115\114\72\x32\x2e\x30\x3a\x61\x73\163\145\x72\x74\151\x6f\156\42\x20" . "\170\x6d\154\156\x73\72\170\x73\x69\x3d\x22\x68\164\x74\160\72\57\57\x77\x77\x77\56\167\x33\x2e\x6f\x72\147\57\x32\60\60\61\57\130\x4d\114\x53\x63\x68\x65\x6d\141\55\151\x6e\x73\x74\141\x6e\x63\145\42\x3e" . $v9 . "\74\57\x72\157\157\164\x3e";
+        $VY = new DOMDocument();
+        if (@$VY->loadXML($Tr)) {
+            goto rJ;
+        }
+        throw new Exception("\x46\141\151\x6c\x65\x64\40\x74\157\x20\160\x61\x72\163\x65\40\144\145\x63\162\171\x70\x74\145\x64\40\x58\x4d\114\x2e\x20\x4d\x61\171\142\x65\40\x74\150\x65\40\167\162\157\156\x67\x20\163\150\141\162\x65\x64\153\x65\x79\x20\167\141\x73\40\x75\163\145\x64\x3f");
+        rJ:
+        $L6 = $VY->firstChild->firstChild;
+        if (!($L6 === NULL)) {
+            goto BQ;
+        }
+        echo sprintf("\115\x69\x73\x73\151\x6e\147\40\145\156\x63\x72\x79\x70\x74\145\x64\x20\145\154\145\155\145\x6e\164\56");
+        throw new Exception("\115\151\163\x73\x69\156\x67\x20\145\x6e\x63\162\x79\160\x74\x65\x64\x20\145\154\145\155\145\156\164\x2e");
+        BQ:
+        if ($L6 instanceof DOMElement) {
+            goto nL;
+        }
+        echo sprintf("\x44\145\x63\162\x79\160\x74\x65\144\x20\x65\154\x65\x6d\145\156\164\40\x77\141\163\x20\x6e\157\164\x20\141\x63\164\165\141\154\x6c\x79\40\141\x20\x44\x4f\x4d\105\154\x65\x6d\x65\x6e\164\56");
+        nL:
+        return $L6;
+    }
+    public static function decryptElement(DOMElement $Mn, XMLSecurityKey $dU, array $HS = array(), XMLSecurityKey $wH = NULL)
+    {
+        try {
+            return self::doDecryptElement($Mn, $dU, $HS);
+        } catch (Exception $jf) {
+            try {
+                return self::doDecryptElement($Mn, $wH, $HS);
+            } catch (Exception $D2) {
+                $xb = drupal_get_path("\155\x6f\x64\165\154\x65", "\155\x69\156\151\157\x72\x61\x6e\147\145\137\x73\141\155\154");
+                $LM = DRUPAL_ROOT . DIRECTORY_SEPARATOR . $xb . DIRECTORY_SEPARATOR . "\x72\145\x73\x6f\x75\x72\x63\145\x73" . DIRECTORY_SEPARATOR . "\x73\x70\55\143\145\162\164\x69\x66\151\x63\x61\164\145\56\143\x72\164";
+                $BX = variable_get("\155\x69\x6e\151\x6f\162\x61\x6e\x67\x65\x5f\x73\x61\155\x6c\x5f\160\x75\142\154\137\143\x65\162\164\151\x66\151\143\141\x74\x65", '');
+                if (!empty($BX)) {
+                    goto V0;
+                }
+                $FJ = file_get_contents($LM);
+                $aV = "\74\x73\x74\162\x6f\156\147\x3e\120\x6f\x73\x73\x69\x62\154\x65\x20\103\x61\165\163\145\x3a\x20\74\57\163\x74\162\x6f\156\x67\76\111\146\40\x79\x6f\165\40\x68\x61\x76\145\40\x72\x65\155\157\x76\x65\x64\x20\143\x75\x73\x74\157\155\40\x63\145\162\164\151\146\151\143\141\164\145\x20\x74\x68\145\156\40\x70\x6c\145\141\x73\145\40\165\160\x64\141\164\x65\40\x74\x68\151\163\40\x64\145\x66\x61\165\x6c\x74\x20\x70\x75\142\x6c\x69\143\40\x63\x65\x72\x74\151\146\151\143\x61\x74\x65\x20\151\156\x20\171\x6f\165\162\x20\111\104\x50\40\163\x69\144\x65\56";
+                goto Dl;
+                V0:
+                $FJ = variable_get("\155\x69\x6e\x69\157\x72\x61\x6e\x67\x65\x5f\x73\141\x6d\154\x5f\160\165\x62\x6c\x5f\x63\x65\162\164\x69\x66\x69\143\141\164\x65", '');
+                $aV = "\x3c\x73\164\162\157\156\x67\x3e\120\x6f\x73\163\151\142\154\145\40\x43\141\x75\163\x65\x3a\x20\74\57\x73\164\x72\157\156\147\x3e\x49\x66\x20\171\x6f\165\40\150\x61\166\x65\40\x75\160\x6c\x6f\x61\144\145\x64\40\143\165\x73\x74\157\x6d\40\143\x65\162\x74\151\x66\151\143\141\164\145\40\164\x68\145\156\x20\160\154\x65\141\x73\145\40\165\x70\144\141\164\145\40\164\150\151\x73\x20\156\x65\167\40\x63\x75\x73\164\x6f\155\x20\x70\x75\142\x6c\151\x63\40\143\145\x72\164\151\x66\151\143\141\x74\145\40\x69\x6e\x20\171\157\x75\162\x20\111\x44\120\x20\x73\151\144\145\56";
+                Dl:
+                echo "\x3c\x64\x69\166\x20\163\164\171\x6c\145\x3d\x22\146\157\156\164\x2d\146\141\155\151\x6c\x79\x3a\103\x61\x6c\151\142\x72\x69\73\x70\141\144\x64\x69\x6e\x67\72\x30\x20\x33\45\x3b\x22\x3e";
+                echo "\x3c\144\151\x76\x20\x73\x74\x79\154\145\75\42\143\x6f\x6c\157\x72\x3a\40\x23\x61\71\x34\x34\x34\x32\73\142\141\x63\153\147\x72\157\165\156\x64\55\x63\157\x6c\157\x72\x3a\40\43\x66\62\x64\145\144\145\73\x70\x61\144\x64\x69\x6e\x67\x3a\x20\61\65\160\x78\73\x6d\141\162\x67\151\156\55\x62\x6f\164\x74\x6f\x6d\x3a\40\62\60\160\x78\73\x74\x65\x78\164\x2d\x61\154\x69\x67\x6e\72\x63\x65\x6e\x74\145\x72\73\x62\x6f\x72\x64\145\x72\72\x31\160\170\x20\163\157\x6c\151\x64\40\x23\x45\x36\x42\63\x42\x32\73\146\x6f\x6e\x74\x2d\x73\151\172\145\72\x31\x38\160\x74\x3b\x22\x3e\40\105\x52\x52\x4f\x52\x3c\x2f\144\151\166\76\xd\12\x20\x20\x20\x20\x20\40\40\40\40\40\40\40\x20\40\x20\40\x20\40\40\x20\74\144\151\166\x20\163\x74\x79\154\145\x3d\x22\143\x6f\x6c\157\162\72\x20\43\141\71\x34\x34\x34\x32\73\146\x6f\x6e\164\x2d\x73\x69\172\x65\x3a\61\64\160\x74\x3b\x20\x6d\x61\162\147\151\x6e\55\x62\x6f\164\x74\157\155\x3a\x32\60\x70\170\73\42\x3e\x3c\x70\x3e\74\x73\164\162\157\x6e\147\x3e\x45\162\x72\157\162\x3a\x20\x3c\57\163\x74\x72\x6f\156\x67\76\125\156\141\x62\154\145\x20\x74\x6f\40\146\x69\x6e\144\x20\x61\x20\x63\145\162\164\x69\146\x69\x63\141\x74\x65\40\x6d\141\x74\x63\150\151\x6e\x67\x20\x74\150\145\x20\143\157\x6e\146\151\x67\165\x72\x65\144\40\x66\x69\156\147\145\162\x70\x72\x69\x6e\164\56\x3c\x2f\160\76\xd\12\x20\x20\40\40\x20\40\40\x20\40\x20\x20\x20\40\x20\40\40\40\40\40\x20\x20\x20\x20\x20\x3c\x70\76" . $aV . "\74\x2f\x70\76\xd\xa\x9\11\11\40\x20\40\40\40\x20\x20\x20\40\x20\x20\x20\x20\x20\x20\40\40\x20\x3c\160\x3e\x3c\x62\76\x45\170\x70\145\x63\x74\145\x64\40\x76\141\154\x75\145\72\x20\74\57\142\x3e" . $FJ . "\74\x2f\160\x3e";
+                echo str_repeat("\46\x6e\142\x73\x70\x3b", 15);
+                echo "\74\x2f\x64\151\166\76\xd\12\40\40\x20\40\x20\40\x20\40\40\x20\x20\x20\40\x20\x20\40\x20\40\40\x20\x20\x20\40\x20\74\144\x69\x76\40\x73\164\x79\x6c\x65\x3d\x22\x6d\x61\x72\x67\151\x6e\x3a\63\45\73\x64\151\x73\x70\154\141\171\x3a\142\x6c\157\143\153\x3b\164\145\170\164\x2d\x61\x6c\151\147\x6e\72\143\145\x6e\164\x65\x72\x3b\42\x3e\xd\12\40\x20\40\x20\40\40\40\x20\40\40\40\x20\40\40\x20\x20\40\40\40\x20\40\40\40\x20\x3c\146\x6f\162\x6d\40\x61\143\164\x69\x6f\156\75\x22\151\x6e\144\x65\x78\x2e\x70\x68\160\x22\x3e\xd\xa\40\x20\x20\40\x20\40\40\x20\x20\40\x20\40\40\x20\40\x20\x20\40\x20\40\40\x20\40\40\40\x20\40\x20\74\x64\151\166\40\x73\x74\171\154\x65\75\42\155\x61\x72\147\151\x6e\72\x33\45\73\144\151\163\160\154\141\x79\72\x62\x6c\x6f\x63\x6b\x3b\x74\145\x78\164\55\x61\x6c\151\x67\156\x3a\x63\x65\156\164\x65\x72\x3b\42\x3e\x3c\151\156\x70\x75\x74\40\163\x74\171\x6c\x65\x3d\x22\x70\141\x64\144\151\x6e\147\72\x31\45\x3b\x77\x69\x64\x74\150\72\61\60\60\160\170\x3b\142\141\143\x6b\147\162\157\x75\156\x64\72\x20\x23\x30\60\x39\61\103\x44\40\x6e\157\x6e\x65\40\x72\x65\160\x65\x61\164\x20\x73\x63\162\157\x6c\x6c\x20\x30\45\x20\x30\x25\73\143\165\x72\x73\157\162\x3a\x20\x70\x6f\151\x6e\x74\x65\x72\73\146\x6f\x6e\x74\x2d\x73\x69\x7a\145\x3a\61\65\160\170\73\x62\x6f\x72\x64\x65\x72\x2d\x77\151\144\164\150\x3a\x20\x31\160\x78\x3b\142\x6f\x72\144\145\162\x2d\163\164\171\x6c\x65\72\x20\163\157\154\x69\x64\73\x62\x6f\162\144\145\x72\x2d\162\141\144\x69\165\163\72\x20\63\x70\170\x3b\x77\x68\x69\164\145\x2d\163\160\x61\x63\145\72\40\156\157\167\162\141\160\x3b\142\x6f\170\x2d\x73\x69\172\151\156\147\x3a\x20\142\157\x72\x64\145\162\x2d\142\x6f\x78\x3b\x62\x6f\162\x64\x65\162\x2d\143\157\x6c\157\162\x3a\40\43\x30\60\x37\63\x41\x41\x3b\142\x6f\x78\x2d\163\150\x61\144\157\167\x3a\40\x30\x70\170\x20\61\x70\170\40\x30\x70\170\40\162\147\142\x61\x28\61\62\x30\x2c\40\62\x30\60\54\40\x32\x33\x30\x2c\40\x30\56\66\51\40\x69\156\163\x65\x74\73\143\x6f\154\157\162\x3a\40\x23\106\106\106\x3b\42\164\171\160\145\75\x22\x62\x75\164\x74\x6f\x6e\42\x20\166\141\x6c\165\x65\75\42\x44\x6f\156\x65\42\40\157\x6e\103\154\x69\x63\153\x3d\42\x73\145\x6c\x66\56\x63\154\157\x73\x65\x28\x29\73\x22\76\74\57\144\151\x76\76";
+                exit;
+            }
+            exit;
+        }
+    }
+    public static function get_mapped_groups($Sk, $zj)
+    {
+        $Zb = array();
+        if (empty($zj)) {
+            goto M0;
+        }
+        $gp = array();
+        $MS = 1;
+        yY:
+        if (!($MS < 10)) {
+            goto A3;
+        }
+        $Fg = $Sk->get("\x67\162\157\165\160" . $MS . "\137\155\x61\160");
+        $gp[$MS] = explode("\x3b", $Fg);
+        $MS++;
+        goto yY;
+        A3:
+        M0:
+        foreach ($zj as $hB) {
+            if (empty($hB)) {
+                goto p3;
+            }
+            $MS = 0;
+            $hN = false;
+            iV:
+            if (!($MS < 9 && !$hN)) {
+                goto jo;
+            }
+            if (!(!empty($gp[$MS]) && in_array($hB, $gp[$MS]))) {
+                goto OO;
+            }
+            $Zb[] = $Sk->get("\x67\162\x6f\x75\x70" . $MS);
+            $hN = true;
+            OO:
+            $MS++;
+            goto iV;
+            jo:
+            p3:
+            Go:
+        }
+        Xw:
+        return array_unique($Zb);
+    }
+    public static function getEncryptionAlgorithm($Ub)
+    {
+        switch ($Ub) {
+            case "\x68\164\x74\160\72\57\57\x77\167\167\56\167\63\56\157\162\147\57\62\x30\60\61\x2f\60\x34\x2f\170\155\x6c\145\156\x63\43\164\162\x69\x70\154\145\144\145\x73\55\143\x62\x63":
+                return XMLSecurityKey::TRIPLEDES_CBC;
+                goto JN;
+            case "\x68\x74\x74\160\72\57\57\x77\167\x77\x2e\167\x33\x2e\157\162\x67\57\62\x30\60\61\57\60\64\x2f\x78\155\x6c\145\x6e\x63\43\x61\145\163\61\x32\x38\x2d\x63\142\x63":
+                return XMLSecurityKey::AES128_CBC;
+            case "\150\x74\x74\x70\72\57\57\x77\x77\167\56\167\63\56\157\x72\x67\57\62\x30\x30\x31\57\x30\x34\x2f\x78\x6d\x6c\x65\x6e\x63\x23\x61\145\x73\x31\x39\62\55\x63\142\143":
+                return XMLSecurityKey::AES192_CBC;
+                goto JN;
+            case "\x68\x74\x74\x70\72\x2f\x2f\x77\x77\167\56\x77\63\x2e\157\162\147\x2f\x32\x30\x30\x31\x2f\x30\x34\x2f\x78\x6d\154\x65\x6e\143\43\141\145\x73\62\x35\x36\55\x63\x62\143":
+                return XMLSecurityKey::AES256_CBC;
+                goto JN;
+            case "\x68\164\164\x70\72\57\57\167\167\167\x2e\167\x33\56\157\162\147\57\x32\x30\x30\x31\57\60\64\57\170\x6d\154\x65\156\143\43\162\163\x61\55\x31\x5f\x35":
+                return XMLSecurityKey::RSA_1_5;
+                goto JN;
+            case "\x68\164\164\x70\x3a\x2f\x2f\167\167\x77\x2e\x77\x33\x2e\157\162\147\57\x32\x30\60\61\57\x30\64\x2f\170\x6d\x6c\145\x6e\143\x23\x72\163\x61\x2d\157\141\145\160\55\155\x67\x66\x31\x70":
+                return XMLSecurityKey::RSA_OAEP_MGF1P;
+                goto JN;
+            case "\150\164\x74\x70\72\x2f\57\167\x77\167\x2e\x77\63\x2e\x6f\162\147\57\x32\60\60\60\57\x30\x39\x2f\x78\155\x6c\144\163\151\x67\43\144\x73\141\x2d\x73\x68\141\61":
+                return XMLSecurityKey::DSA_SHA1;
+                goto JN;
+            case "\150\x74\164\160\x3a\57\57\x77\x77\167\56\x77\63\x2e\x6f\162\x67\x2f\62\x30\60\x30\57\x30\71\57\170\155\154\144\163\151\x67\x23\x72\163\x61\55\x73\150\x61\x31":
+                return XMLSecurityKey::RSA_SHA1;
+                goto JN;
+            case "\150\164\164\x70\72\57\57\x77\167\167\x2e\167\x33\56\157\162\147\57\x32\60\60\x31\57\x30\64\x2f\x78\155\154\x64\163\151\147\55\x6d\157\162\x65\x23\x72\x73\x61\55\163\x68\x61\x32\x35\x36":
+                return XMLSecurityKey::RSA_SHA256;
+                goto JN;
+            case "\x68\x74\164\160\x3a\x2f\x2f\167\167\x77\x2e\167\x33\56\157\x72\147\57\x32\x30\60\x31\x2f\60\64\57\x78\x6d\154\144\x73\151\147\x2d\x6d\x6f\162\145\43\162\163\x61\55\x73\150\x61\63\x38\64":
+                return XMLSecurityKey::RSA_SHA384;
+                goto JN;
+            case "\x68\164\x74\x70\x3a\57\x2f\x77\x77\x77\x2e\x77\63\56\x6f\162\147\57\62\60\60\x31\x2f\x30\64\x2f\x78\x6d\154\x64\x73\x69\x67\55\x6d\x6f\162\x65\x23\162\163\141\55\x73\150\x61\x35\x31\62":
+                return XMLSecurityKey::RSA_SHA512;
+                goto JN;
+            default:
+                echo sprintf("\111\156\166\x61\x6c\151\x64\40\105\x6e\x63\162\171\x70\x74\151\x6f\156\x20\115\145\164\150\x6f\x64\72\x20" . $Ub);
+                exit;
+                goto JN;
+        }
+        Ra:
+        JN:
+    }
+    public static function sanitize_certificate($AD)
+    {
+        $AD = preg_replace("\x2f\133\xd\12\135\53\57", '', $AD);
+        $AD = str_replace("\x2d", '', $AD);
+        $AD = str_replace("\102\x45\107\x49\116\x20\x43\105\x52\x54\x49\x46\111\x43\x41\124\105", '', $AD);
+        $AD = str_replace("\x45\116\x44\x20\x43\x45\x52\x54\x49\106\x49\103\101\124\105", '', $AD);
+        $AD = str_replace("\x20", '', $AD);
+        $AD = chunk_split($AD, 64, "\15\xa");
+        $AD = "\x2d\x2d\55\55\55\102\105\107\111\x4e\x20\103\x45\122\124\x49\106\111\103\x41\x54\105\x2d\55\x2d\55\55\15\12" . $AD . "\55\55\55\55\x2d\x45\116\104\x20\103\105\x52\x54\x49\x46\x49\103\x41\124\105\55\55\x2d\55\55";
+        return $AD;
+    }
+    public static function sanitize_private_key($Yg)
+    {
+        $Yg = preg_replace("\57\133\xd\12\x5d\x2b\57", '', $Yg);
+        $Yg = str_replace("\55", '', $Yg);
+        $Yg = str_replace("\x42\105\x47\111\116\x20\120\x52\111\x56\101\124\105\x20\113\x45\131", '', $Yg);
+        $Yg = str_replace("\105\x4e\x44\40\120\x52\x49\126\101\x54\105\x20\x4b\105\131", '', $Yg);
+        $Yg = str_replace("\40", '', $Yg);
+        $Yg = chunk_split($Yg, 64, "\xd\12");
+        $Yg = "\55\x2d\55\55\55\102\x45\107\x49\x4e\x20\x50\x52\111\x56\101\x54\x45\40\113\105\x59\55\55\x2d\55\x2d\15\12" . $Yg . "\x2d\x2d\55\55\55\x45\x4e\104\40\x50\122\111\x56\101\124\105\x20\x4b\x45\x59\55\55\x2d\x2d\55";
+        return $Yg;
+    }
+    public static function desanitize_certificate($AD)
+    {
+        $AD = preg_replace("\57\x5b\xd\xa\135\53\57", '', $AD);
+        $AD = str_replace("\55\x2d\55\x2d\x2d\102\105\107\111\116\40\x43\105\122\x54\111\106\111\103\101\x54\105\x2d\55\x2d\x2d\x2d", '', $AD);
+        $AD = str_replace("\x2d\55\x2d\x2d\55\x45\116\104\x20\103\105\122\x54\111\106\x49\x43\x41\x54\x45\55\x2d\x2d\55\55", '', $AD);
+        $AD = str_replace("\x20", '', $AD);
+        return $AD;
+    }
+    public static function Print_SAML_Request($oR, $KA)
+    {
+        header("\103\x6f\x6e\164\x65\156\x74\x2d\x54\x79\160\x65\x3a\40\164\x65\x78\x74\57\x68\x74\x6d\154");
+        $JC = new DOMDocument();
+        $JC->preserveWhiteSpace = false;
+        $JC->formatOutput = true;
+        $JC->loadXML($oR);
+        if ($KA == "\x64\151\163\160\x6c\x61\171\x53\101\x4d\114\122\145\161\165\145\x73\164") {
+            goto R5;
+        }
+        $Tc = "\123\101\x4d\x4c\x20\x52\x65\163\160\x6f\x6e\163\145";
+        goto cx;
+        R5:
+        $Tc = "\123\101\115\114\x20\x52\145\x71\165\x65\x73\x74";
+        cx:
+        $V2 = $JC->saveXML();
+        $hK = htmlentities($V2);
+        $hK = rtrim($hK);
+        $Tr = simplexml_load_string($V2);
+        $P4 = drupal_get_path("\155\x6f\144\x75\154\145", "\x6d\151\x6e\151\157\162\141\x6e\x67\x65\x5f\x73\141\155\x6c") . "\x2f\143\x73\163\57\163\x74\x79\x6c\145\137\163\x65\x74\x74\x69\156\147\163\56\x63\163\163";
+        echo "\x3c\154\151\156\x6b\x20\162\x65\x6c\x3d\x27\163\164\x79\x6c\x65\x73\x68\145\145\x74\x27\40\x69\x64\x3d\47\155\157\x5f\163\x61\x6d\x6c\x5f\x61\144\155\x69\156\137\163\145\x74\164\151\156\147\163\137\163\x74\171\154\x65\x2d\143\x73\163\47\40\x20\x68\162\145\146\75\47" . $P4 . "\47\x20\164\x79\160\145\75\47\x74\145\x78\x74\x2f\143\x73\163\47\40\x6d\x65\144\151\x61\x3d\x27\x61\154\154\x27\x20\57\76\xd\12\x20\x20\x20\40\x20\x20\x20\x20\40\40\x20\x20\74\144\151\166\40\143\154\141\163\163\75\x22\x6d\x6f\55\144\x69\x73\160\154\141\x79\55\154\x6f\x67\x73\x22\40\76\x3c\x70\40\164\171\160\x65\75\42\164\145\x78\164\42\x20\x20\40\x69\x64\75\x22\x53\x41\115\114\137\164\x79\x70\x65\42\76" . $Tc . "\x3c\x2f\160\x3e\x3c\x2f\144\151\166\x3e\x9\11\xd\xa\40\40\x20\x20\x20\40\40\40\40\x20\40\40\x3c\144\x69\166\40\x74\171\160\145\75\x22\x74\x65\x78\x74\x22\x20\151\x64\75\42\x53\x41\115\x4c\137\144\x69\x73\x70\154\141\x79\x22\40\143\154\141\163\x73\x3d\x22\x6d\x6f\55\144\x69\163\x70\154\x61\171\55\142\154\x6f\x63\x6b\42\76\x3c\x70\x72\145\x20\143\154\x61\x73\163\x3d\47\x62\x72\165\163\x68\x3a\x20\x78\155\154\x3b\47\76" . $hK . "\74\57\x70\162\145\76\74\57\144\x69\x76\x3e\x3c\x62\162\76\15\xa\x20\40\x20\x20\40\x20\40\x20\40\x20\40\x20\x3c\x64\151\x76\40\x73\164\171\x6c\145\x3d\42\155\x61\162\147\x69\156\72\63\45\73\144\x69\x73\160\x6c\x61\171\x3a\x62\154\x6f\143\153\x3b\164\x65\x78\x74\x2d\141\x6c\x69\x67\x6e\x3a\x63\x65\156\x74\x65\162\73\x22\x3e\15\xa\x20\x20\40\40\40\40\40\x20\x20\40\40\x20\40\x20\x20\40\74\144\x69\166\40\163\164\x79\x6c\x65\75\x22\155\x61\x72\x67\x69\x6e\x3a\x33\x25\73\x64\x69\x73\x70\x6c\x61\x79\72\142\154\x6f\x63\x6b\x3b\x74\145\x78\x74\55\141\x6c\151\147\156\72\143\x65\x6e\164\x65\x72\x3b\42\x20\76\x3c\x2f\144\x69\x76\x3e\15\xa\x20\x20\40\40\x20\40\40\40\40\40\40\x20\x20\x20\40\40\74\x62\165\x74\164\157\156\x20\x69\x64\x3d\x22\x63\157\160\171\x22\40\157\156\143\x6c\x69\143\x6b\x3d\42\143\x6f\160\x79\x44\151\166\x54\x6f\103\x6c\151\x70\x62\x6f\141\162\x64\x28\x29\42\x20\x20\163\x74\171\x6c\x65\x3d\42\160\141\144\144\x69\x6e\147\x3a\61\x25\x3b\x77\151\x64\164\x68\72\61\x30\x30\x70\170\73\142\141\143\153\147\162\x6f\165\x6e\x64\72\40\43\x30\x30\71\61\x43\x44\40\x6e\157\156\145\40\x72\145\x70\x65\x61\164\40\x73\143\x72\x6f\154\154\40\x30\45\x20\60\45\x3b\x63\x75\162\x73\157\x72\x3a\x20\160\157\151\x6e\x74\x65\162\73\146\x6f\x6e\x74\x2d\x73\x69\x7a\145\x3a\61\65\x70\x78\x3b\142\x6f\162\x64\145\162\x2d\167\x69\144\x74\150\x3a\40\x31\x70\x78\73\142\x6f\x72\x64\145\162\55\163\164\x79\154\x65\72\40\163\157\154\151\x64\73\x62\157\162\x64\145\162\x2d\x72\x61\144\x69\x75\163\x3a\40\x33\x70\170\73\x77\150\151\164\x65\55\163\x70\141\143\x65\x3a\40\x6e\x6f\x77\162\x61\x70\x3b\142\157\170\x2d\x73\x69\x7a\x69\156\x67\72\40\x62\157\x72\x64\145\162\55\142\157\x78\73\142\157\x72\x64\x65\162\x2d\x63\x6f\154\157\162\72\x20\x23\x30\x30\x37\x33\x41\101\x3b\x62\x6f\x78\x2d\163\150\141\144\x6f\x77\x3a\x20\x30\x70\170\40\x31\x70\x78\x20\60\160\170\x20\162\147\142\x61\50\x31\x32\x30\x2c\x20\62\x30\60\54\x20\62\x33\x30\x2c\40\x30\x2e\66\x29\40\x69\x6e\x73\145\164\x3b\x63\x6f\x6c\x6f\162\72\x20\x23\106\x46\106\73\42\40\76\103\x6f\160\171\74\57\142\x75\164\x74\157\x6e\76\46\x6e\x62\163\160\x3b\15\xa\40\40\40\x20\x20\x20\x20\x20\40\x20\40\40\x20\40\x20\40\x3c\x69\156\160\165\x74\40\x69\144\x3d\42\x64\x77\x6e\x2d\x62\164\x6e\x22\40\x73\x74\x79\154\x65\75\42\x70\x61\x64\144\x69\156\147\x3a\x31\x25\73\x77\x69\x64\164\150\x3a\x31\x30\x30\x70\170\73\142\141\143\153\147\x72\157\165\156\144\x3a\40\x23\60\60\x39\x31\x43\104\40\156\x6f\156\x65\40\x72\145\160\x65\x61\x74\x20\x73\143\162\157\x6c\154\40\60\45\40\x30\45\x3b\x63\165\x72\163\157\x72\x3a\x20\160\157\x69\156\x74\x65\162\73\x66\x6f\x6e\x74\55\163\x69\x7a\x65\x3a\61\x35\x70\170\73\x62\157\162\x64\145\x72\x2d\167\151\144\x74\x68\x3a\x20\61\160\x78\x3b\x62\157\162\x64\145\162\x2d\x73\x74\x79\154\x65\x3a\40\x73\x6f\154\x69\x64\73\142\x6f\x72\x64\x65\x72\55\162\x61\x64\x69\165\x73\x3a\x20\63\160\x78\73\167\150\x69\164\x65\x2d\163\160\x61\143\x65\72\40\156\x6f\167\x72\141\x70\73\142\x6f\x78\55\x73\151\172\x69\x6e\147\72\40\x62\157\x72\144\x65\x72\x2d\x62\x6f\170\73\142\x6f\x72\x64\145\x72\55\x63\x6f\x6c\x6f\162\x3a\40\43\60\x30\67\63\101\101\73\142\157\170\x2d\x73\x68\x61\x64\x6f\167\x3a\40\60\160\170\x20\61\160\x78\40\60\160\170\x20\x72\147\142\x61\x28\61\62\x30\x2c\x20\62\x30\x30\54\x20\62\63\60\x2c\x20\x30\56\x36\x29\x20\x69\156\x73\145\x74\x3b\143\157\x6c\157\x72\72\40\x23\106\x46\106\73\42\x74\x79\x70\x65\x3d\x22\142\165\x74\x74\x6f\x6e\42\x20\x76\141\154\165\x65\75\x22\104\157\x77\x6e\x6c\157\x61\144\x22\xd\xa\40\40\x20\x20\40\x20\x20\x20\x20\40\40\40\40\40\x20\x20\x22\x3e\15\12\40\40\40\x20\40\x20\40\40\40\40\40\40\74\x2f\144\x69\x76\x3e\xd\xa\11\x9\x9\40\40\x20\x20\40\40\74\x2f\144\151\166\x3e";
+        ob_end_flush();
+        echo "\x20\x20\x20\x20\x20\40\x3c\x73\x63\162\x69\x70\164\x3e\15\12\x20\40\40\40\x20\x20\x20\x20\x20\40\x66\x75\156\x63\164\x69\157\156\x20\143\x6f\160\x79\104\151\x76\124\x6f\x43\x6c\151\x70\x62\157\x61\162\144\50\51\x20\173\xd\12\x20\x20\x20\x20\x20\40\40\40\x20\x20\x20\40\x20\40\x76\141\162\x20\141\165\170\x20\75\x20\x64\x6f\x63\x75\x6d\145\x6e\x74\x2e\x63\162\x65\x61\x74\145\x45\x6c\x65\155\x65\x6e\164\50\x22\151\x6e\160\165\x74\42\51\73\xd\12\x20\x20\x20\40\40\40\40\40\x20\40\40\x20\40\40\141\x75\170\x2e\163\x65\x74\x41\164\x74\x72\151\142\x75\x74\145\50\42\166\141\154\165\x65\x22\x2c\40\144\157\143\165\155\145\x6e\x74\x2e\x67\x65\x74\x45\x6c\145\155\145\x6e\164\102\171\111\144\50\42\x53\x41\x4d\114\x5f\144\151\x73\160\x6c\x61\171\42\x29\56\164\x65\x78\x74\103\157\156\x74\145\156\x74\x29\x3b\xd\12\x20\x20\x20\x20\40\40\40\40\x20\x20\40\x20\x20\40\144\x6f\x63\x75\x6d\145\x6e\x74\56\x62\157\144\x79\x2e\x61\x70\x70\x65\x6e\144\103\150\151\x6c\144\x28\141\x75\170\51\x3b\15\xa\40\x20\x20\40\x20\x20\40\40\40\x20\x20\x20\x20\40\x61\x75\x78\x2e\163\145\154\145\143\164\50\51\x3b\15\12\x20\40\40\x20\40\x20\x20\40\40\40\40\x20\x20\x20\x64\157\143\165\155\x65\x6e\164\56\x65\170\x65\x63\x43\157\x6d\155\141\x6e\x64\50\x22\x63\x6f\160\x79\x22\x29\x3b\15\xa\40\x20\x20\x20\40\x20\x20\40\40\x20\x20\x20\x20\40\144\x6f\143\165\155\x65\156\164\x2e\x62\x6f\x64\x79\56\162\145\155\x6f\x76\x65\103\150\x69\x6c\x64\x28\141\x75\170\51\x3b\xd\xa\40\x20\x20\40\40\40\x20\x20\x20\40\40\x20\40\40\144\x6f\x63\165\155\145\x6e\164\56\147\x65\x74\105\154\x65\155\x65\x6e\x74\x42\x79\x49\144\50\x27\143\157\x70\171\x27\x29\x2e\164\x65\x78\164\103\157\156\x74\x65\x6e\x74\x20\75\40\x22\x43\x6f\x70\151\x65\x64\42\x3b\xd\xa\x20\40\x20\x20\40\x20\x20\40\x20\x20\x20\40\40\40\144\x6f\143\165\155\x65\156\x74\x2e\x67\145\164\x45\154\x65\155\145\x6e\x74\102\171\111\144\50\47\143\x6f\x70\x79\47\51\x2e\x73\x74\x79\x6c\145\56\x62\141\143\x6b\147\162\157\x75\x6e\x64\x20\75\40\x22\147\162\145\x79\42\x3b\15\xa\x20\40\x20\x20\x20\40\x20\x20\40\x20\40\40\40\40\x77\151\156\144\x6f\167\x2e\x67\x65\164\x53\145\x6c\145\x63\164\151\157\x6e\50\x29\x2e\x73\x65\154\x65\143\x74\101\x6c\154\103\150\151\154\144\x72\145\x6e\50\x20\144\x6f\x63\165\x6d\x65\156\x74\56\147\x65\164\105\154\x65\155\x65\x6e\164\102\171\111\144\50\40\42\123\101\115\x4c\x5f\144\x69\163\x70\154\x61\171\42\40\x29\x20\x29\73\15\12\x20\x20\40\40\40\x20\x20\x20\40\40\x7d\15\xa\xd\xa\40\40\40\40\40\x20\40\40\40\40\146\x75\156\x63\x74\x69\157\156\x20\144\x6f\x77\156\x6c\157\x61\144\50\146\x69\x6c\145\156\141\x6d\x65\54\x20\164\145\x78\164\x29\x20\173\xd\xa\x20\40\x20\x20\x20\40\40\x20\x20\40\40\x20\x20\40\x76\x61\162\x20\145\154\x65\x6d\145\156\x74\40\x3d\40\144\157\143\165\x6d\x65\156\x74\x2e\143\162\x65\141\164\x65\105\154\x65\x6d\x65\156\x74\50\x27\141\47\51\x3b\15\xa\x20\40\x20\x20\40\40\x20\x20\40\x20\40\x20\40\x20\x65\154\x65\155\x65\156\x74\56\163\145\164\x41\x74\x74\162\151\x62\165\x74\x65\x28\x27\150\x72\x65\x66\x27\54\40\x27\x64\x61\x74\x61\x3a\x41\160\160\154\x69\x63\x61\x74\x69\x6f\156\x2f\157\143\x74\x65\164\x2d\163\x74\x72\x65\141\x6d\73\x63\150\x61\162\163\x65\164\75\x75\164\146\x2d\70\54\47\x20\x2b\x20\x65\156\x63\157\x64\x65\125\x52\x49\x43\x6f\x6d\x70\x6f\156\145\x6e\164\x28\x74\x65\x78\x74\51\51\73\xd\12\x20\40\x20\x20\x20\x20\x20\x20\x20\x20\x20\x20\40\40\x65\x6c\145\x6d\x65\156\164\x2e\163\145\164\101\164\x74\x72\151\142\x75\164\x65\x28\47\x64\x6f\167\x6e\154\x6f\x61\x64\47\x2c\x20\146\x69\154\145\x6e\141\155\x65\51\73\xd\xa\40\x20\40\40\x20\40\40\40\40\40\x20\x20\x20\x20\145\x6c\x65\x6d\x65\x6e\164\56\x73\164\x79\154\145\x2e\144\151\163\x70\154\x61\x79\40\x3d\40\x27\x6e\x6f\x6e\145\x27\73\15\12\40\40\x20\x20\40\40\40\x20\40\x20\x20\40\40\40\x64\157\143\165\x6d\145\x6e\164\56\142\x6f\x64\x79\x2e\x61\x70\160\145\156\x64\x43\x68\151\x6c\144\x28\145\x6c\145\x6d\x65\x6e\x74\51\x3b\15\12\40\x20\x20\x20\40\x20\x20\x20\40\40\40\x20\40\40\145\x6c\145\155\x65\156\164\56\143\x6c\x69\x63\x6b\x28\x29\73\15\12\40\x20\x20\x20\40\x20\x20\x20\x20\x20\x20\40\x20\x20\144\x6f\143\x75\x6d\x65\156\164\56\x62\x6f\x64\x79\x2e\x72\x65\x6d\157\166\145\103\x68\x69\154\144\50\145\154\x65\x6d\x65\156\164\51\x3b\xd\xa\40\40\x20\x20\40\x20\40\40\40\x20\x7d\xd\xa\15\12\40\40\x20\40\x20\40\40\40\40\x20\144\157\143\x75\155\145\x6e\x74\56\x67\145\164\x45\154\x65\155\145\x6e\164\x42\x79\x49\x64\50\x22\144\167\x6e\55\x62\164\156\x22\51\x2e\141\x64\144\105\x76\x65\x6e\164\x4c\x69\x73\164\145\156\145\x72\50\x22\x63\x6c\x69\x63\153\x22\x2c\x20\x66\x75\156\143\164\x69\x6f\x6e\x20\50\51\40\x7b\15\12\x20\x20\x20\x20\x20\40\40\40\40\40\x20\x20\x20\x20\x76\141\162\40\x66\151\x6c\145\156\x61\x6d\x65\40\x3d\x20\x64\157\x63\x75\x6d\145\156\164\56\147\x65\164\105\154\145\x6d\145\156\x74\x42\171\x49\x64\x28\42\123\101\115\114\x5f\164\171\160\x65\x22\x29\56\164\x65\x78\x74\103\x6f\156\164\145\156\x74\x2b\42\56\170\x6d\154\x22\x3b\15\xa\x20\40\x20\x20\40\x20\40\x20\40\40\x20\x20\40\40\x76\x61\x72\40\156\x6f\144\x65\x20\75\40\144\x6f\x63\165\155\145\156\164\56\147\145\164\105\x6c\x65\x6d\x65\x6e\164\102\171\111\144\50\42\123\101\115\114\x5f\x64\151\x73\160\154\x61\171\x22\x29\73\15\xa\40\40\40\40\x20\40\40\40\x20\40\x20\x20\x20\40\x68\x74\155\x6c\x43\157\x6e\x74\x65\156\x74\x20\75\x20\x6e\157\144\x65\56\151\x6e\x6e\145\162\110\x54\115\x4c\73\15\xa\40\40\x20\x20\x20\40\x20\x20\x20\40\x20\x20\x20\40\164\145\x78\164\40\75\40\x6e\x6f\x64\x65\56\x74\145\170\x74\x43\157\x6e\164\145\156\x74\x3b\xd\12\40\40\x20\x20\x20\x20\40\40\x20\x20\40\40\x20\x20\x63\x6f\x6e\x73\x6f\x6c\145\56\154\157\x67\x28\164\x65\170\164\x29\x3b\xd\12\x20\x20\x20\x20\x20\40\40\x20\x20\40\x20\40\x20\x20\x64\157\x77\156\154\x6f\141\x64\50\x66\x69\154\145\x6e\141\x6d\145\x2c\40\x74\145\170\x74\x29\x3b\xd\12\40\40\x20\40\40\40\x20\x20\40\x20\x7d\54\40\146\141\154\163\145\x29\x3b\15\xa\x20\x20\40\40\40\40\40\x20\74\57\163\x63\162\151\x70\x74\x3e\15\xa\x20\40\40\40\40\x20\40\40";
+        exit;
+    }
 }
-?>

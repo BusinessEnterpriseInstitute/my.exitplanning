@@ -1,347 +1,371 @@
-
 <?php
-/**
- * @file
- * Contains support form for miniOrange SAML Login Module.
- */
-include "includes\miniorange_saml_enum.php";
-define( "Tab_Class_Names", serialize( array(
-   // "Identity_Provider" => 'mo_options_enum_identity_provider',
-    "Service_Providers"  => 'mo_options_enum_service_provider',
-    "Mapping" => 'mo_options_enum_mapping',
-    "Sign_In_Settings" => 'mo_options_enum_sign_in_settings',
-    "Custom_Certificate" => 'mo_options_enum_custom_certificate',
-    //"Proxy_Setup"       => 'mo_options_enum_proxy_setup'
-) ) );
 
-/**
- * Showing Support form info.
- */
+
+echo "\15\12";
+include "\x69\156\143\x6c\x75\x64\145\x73\134\x6d\x69\x6e\x69\x6f\162\x61\x6e\x67\145\137\163\x61\x6d\154\137\145\x6e\165\x6d\x2e\160\150\160";
+define("\x54\141\x62\x5f\x43\x6c\141\163\163\137\x4e\141\155\145\x73", serialize(array("\x53\x65\x72\166\151\143\145\137\120\162\x6f\x76\151\x64\x65\162\163" => "\155\x6f\137\x6f\160\164\151\x6f\156\163\x5f\145\156\x75\x6d\137\x73\145\x72\166\151\143\x65\137\x70\x72\x6f\x76\x69\x64\x65\x72", "\x4d\141\x70\160\151\x6e\x67" => "\155\x6f\x5f\x6f\x70\164\151\x6f\x6e\x73\x5f\x65\156\165\x6d\137\x6d\x61\160\x70\x69\156\147", "\123\151\x67\156\137\111\x6e\x5f\123\145\164\x74\151\156\x67\163" => "\155\157\137\x6f\x70\164\151\157\x6e\163\137\145\x6e\x75\155\x5f\163\151\147\156\x5f\151\x6e\137\x73\x65\164\x74\151\x6e\x67\163", "\103\x75\163\164\157\155\x5f\x43\x65\x72\164\151\146\151\x63\x61\x74\x65" => "\155\x6f\137\x6f\x70\164\x69\157\156\x73\137\x65\156\x75\155\x5f\143\x75\163\164\157\x6d\x5f\143\145\162\164\x69\x66\151\x63\x61\164\x65")));
 function miniorange_saml_export_config($form, &$form_state)
 {
     global $base_url;
-    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/bootstrap.min.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-    drupal_add_css( drupal_get_path('module', 'miniorange_saml'). '/css/style_settings.css' , array('group' => CSS_DEFAULT, 'every_page' => TRUE));
-
-    $disabled = Utilities::isCustomerRegistered($form, $form_state);
-
-    $form['header_top_style_2'] = array(
-	     '#markup' => '<div class="mo_saml_table_layout_1">
-	                   <div class="mo_saml_table_layout mo_saml_container">'
-	);
-
-
-    $form['markup_top'] = array(
-        '#markup' => '<h3>Export Configuration</h3>' .'<hr/>',
-    );
-
-    
-    // if(variable_get('miniorange_saml_license_key', NULL) == NULL &&
-    //     variable_get('miniorange_saml_customer_admin_email', NULL) != NULL)
-    // {
-    //     return $form;
-    // }
-
-    $form['markup_top_head'] = array(
-        '#markup' => '<p>This tab will help you to transfer your module configurations when you change your Drupal instance.</p>'
-            . '<p>Download module configuration file by clicking on the button given below and send us this file along with your support query. </p>'
-    );
-
-    $b_url = Utilities::miniorange_get_baseURL();
-
-    if(Utilities::show_idp_list()) {
-        $form['miniorange_saml_idp_export'] = array(
-            '#type' => 'submit',
-            '#value' => t('Download Configuration'),
-            '#prefix' => '<td>',
-            '#suffix' => '</td>',
-            '#submit' => array('miniorange_export'),
-            '#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
-        );
+    drupal_add_css(drupal_get_path("\155\157\144\165\154\x65", "\x6d\x69\x6e\151\157\162\x61\x6e\x67\145\137\163\x61\x6d\x6c") . "\x2f\143\163\163\x2f\x62\157\x6f\x74\163\x74\162\141\160\56\155\x69\156\56\x63\163\x73", array("\x67\162\157\x75\160" => CSS_DEFAULT, "\145\166\145\x72\x79\137\160\x61\x67\x65" => TRUE));
+    drupal_add_css(drupal_get_path("\155\157\x64\165\154\145", "\x6d\x69\156\x69\157\x72\x61\156\147\145\x5f\x73\x61\x6d\x6c") . "\57\x63\163\163\57\163\x74\171\x6c\145\137\x73\145\164\x74\151\156\147\163\x2e\x63\163\163", array("\x67\x72\157\165\x70" => CSS_DEFAULT, "\x65\x76\x65\162\x79\x5f\160\x61\x67\145" => TRUE));
+    $rE = Utilities::isCustomerRegistered($form, $form_state);
+    $form["\x68\x65\x61\144\x65\162\x5f\x74\157\160\x5f\x73\164\171\154\x65\137\x32"] = array("\x23\155\141\x72\153\165\x70" => "\74\x64\151\166\40\143\x6c\x61\x73\x73\x3d\42\x6d\x6f\137\163\x61\155\154\137\164\141\142\x6c\x65\137\154\x61\171\x6f\x75\x74\x5f\61\42\x3e\xd\xa\x9\40\x20\40\40\x20\x20\40\40\40\40\x20\40\x20\x20\40\x20\40\x20\x20\x3c\144\x69\x76\40\x63\154\141\163\x73\75\x22\x6d\157\137\x73\x61\x6d\154\137\164\x61\142\x6c\x65\x5f\154\141\x79\x6f\x75\164\40\x6d\x6f\x5f\163\141\x6d\154\137\x63\157\156\164\x61\151\156\145\162\x22\76");
+    $form["\x6d\x61\x72\153\165\160\137\164\x6f\160"] = array("\43\x6d\141\x72\153\x75\x70" => "\74\x68\x33\x3e\x45\x78\x70\157\x72\x74\40\x43\x6f\156\146\x69\147\165\x72\141\x74\151\157\156\74\57\x68\x33\x3e" . "\74\150\162\x2f\76");
+    $form["\x6d\x61\x72\153\x75\160\x5f\164\x6f\x70\x5f\x68\145\x61\144"] = array("\x23\x6d\141\162\x6b\165\x70" => "\x3c\160\x3e\124\150\151\163\40\x74\141\x62\40\167\x69\x6c\154\x20\150\x65\154\160\40\x79\x6f\x75\x20\164\x6f\x20\164\162\x61\x6e\163\146\x65\162\40\171\x6f\x75\162\40\x6d\x6f\144\x75\x6c\145\x20\x63\x6f\156\146\x69\x67\x75\x72\141\x74\x69\157\156\x73\40\167\150\145\x6e\40\x79\157\x75\40\143\x68\141\156\x67\x65\40\x79\x6f\x75\x72\40\x44\x72\165\x70\141\154\40\151\x6e\163\x74\x61\156\x63\x65\56\x3c\x2f\x70\76" . "\74\160\76\104\157\x77\x6e\x6c\x6f\x61\144\x20\x6d\x6f\144\x75\154\145\40\143\157\x6e\146\x69\x67\x75\x72\141\164\151\157\x6e\x20\x66\151\154\x65\x20\x62\x79\40\x63\154\151\x63\153\151\x6e\x67\x20\157\156\40\164\150\x65\x20\142\165\164\164\157\x6e\x20\x67\151\x76\x65\156\40\142\x65\154\x6f\x77\x20\x61\x6e\x64\40\x73\145\x6e\144\40\165\x73\x20\164\x68\x69\x73\x20\x66\x69\x6c\145\40\x61\154\157\x6e\x67\x20\x77\x69\164\x68\40\x79\x6f\x75\162\x20\x73\x75\160\160\x6f\162\164\x20\161\x75\145\162\171\56\x20\74\x2f\160\76");
+    $vQ = Utilities::miniorange_get_baseURL();
+    if (Utilities::show_idp_list()) {
+        goto Qu;
     }
-    else{
-        $form['miniorange_saml_idp_export'] = array(
-            '#markup' => '<div style="display:block; margin-top:10px; color:red; background-color:rgba(251, 232, 0, 0.15); font-size: medium;padding:5px;border:solid 1px rgba(255, 0, 9, 0.36);">
-	                            Please <a href="' . $b_url . '/admin/config/people/miniorange_saml/sp_setup">configure the module</a> first to export the configurations.
-                          </div>',
-        );
-	}
-
-    $form['markup_import'] = array(
-        '#markup' => '<br/><br/>'.'<h3>Import Configuration</h3>' .'<hr/>'
-            . '<p>This tab will help you to<span style="font-weight: bold"> Import your module configurations</span> when you change your Drupal instance.</p>'
-            . '<p>choose <b>"json"</b> Extened module configuration file and upload by clicking on the button given below. </p>'
-    );
-
-    $form['import_Config_file'] = array(
-        '#type' => 'file',
-    );
-
-    $form['miniorange_saml_idp_import'] = array(
-        '#type' => 'submit',
-        '#value' => t('Upload'),
-        '#submit' => array('miniorange_import_Config'),
-        '#disabled' => $disabled,
-        '#attributes' => array('style' => 'background: #337ab7;color: #ffffff;text-shadow: 0 -1px 1px #337ab7, 1px 0 1px #337ab7, 0 1px 1px #337ab7, -1px 0 1px #337ab7;box-shadow: 0 1px 0 #337ab7;border-color: #337ab7 #337ab7 #337ab7;'),
-    );
-
-    $form['miniorange_saml_support_div_end'] = array(
-        '#markup' => '</div>',
-    );
-
-    Utilities::AddsupportTab( $form, $form_state);
-
+    $form["\x6d\x69\156\151\x6f\x72\x61\156\x67\x65\x5f\163\141\155\x6c\x5f\x69\144\160\x5f\145\170\160\x6f\x72\164"] = array("\x23\155\x61\162\153\165\x70" => "\x3c\144\x69\166\x20\x73\164\171\x6c\145\75\42\x64\x69\x73\160\x6c\x61\x79\72\x62\x6c\157\x63\x6b\73\x20\x6d\141\x72\x67\151\x6e\55\x74\157\160\x3a\x31\x30\x70\x78\73\x20\143\x6f\154\157\x72\72\162\145\x64\73\40\142\141\143\x6b\x67\162\x6f\165\156\144\55\x63\157\154\157\162\72\162\147\x62\x61\50\x32\65\x31\54\40\62\x33\x32\54\40\x30\54\40\x30\56\61\x35\51\73\x20\146\x6f\156\164\x2d\x73\151\172\145\72\x20\x6d\145\x64\x69\x75\x6d\73\x70\x61\x64\x64\x69\156\x67\x3a\65\x70\170\x3b\142\157\x72\144\x65\162\x3a\x73\157\x6c\x69\144\x20\61\x70\170\x20\x72\147\x62\x61\x28\62\65\x35\x2c\40\60\x2c\40\x39\54\40\60\x2e\x33\66\x29\73\x22\x3e\xd\12\11\40\x20\40\x20\40\40\x20\x20\x20\40\x20\x20\x20\x20\x20\x20\x20\40\x20\x20\40\x20\x20\40\x20\40\40\x20\x50\154\x65\x61\x73\x65\40\x3c\x61\x20\x68\162\145\146\75\x22" . $vQ . "\x2f\141\144\155\151\x6e\x2f\x63\x6f\x6e\146\x69\147\x2f\x70\x65\x6f\x70\154\145\57\x6d\151\156\x69\x6f\x72\x61\x6e\x67\145\137\x73\x61\x6d\154\x2f\163\160\x5f\x73\145\x74\165\x70\42\76\143\x6f\x6e\x66\151\x67\165\162\x65\40\x74\x68\x65\40\155\x6f\144\165\154\145\74\57\x61\x3e\40\x66\151\162\163\164\40\164\x6f\40\145\x78\x70\157\162\x74\x20\164\x68\145\40\143\157\x6e\146\151\147\165\x72\x61\x74\151\x6f\156\x73\56\xd\12\40\40\x20\x20\40\x20\40\40\40\40\x20\x20\x20\x20\x20\x20\40\40\x20\x20\40\40\40\x20\40\x20\x3c\57\144\151\166\76");
+    goto Tp;
+    Qu:
+    $form["\x6d\151\x6e\x69\x6f\x72\x61\156\147\x65\137\163\x61\155\x6c\137\x69\x64\x70\137\145\x78\x70\157\x72\x74"] = array("\x23\164\x79\160\x65" => "\163\x75\142\x6d\x69\164", "\43\166\141\x6c\165\145" => t("\x44\157\x77\x6e\154\x6f\141\x64\40\103\x6f\156\146\151\147\x75\162\x61\x74\151\157\x6e"), "\x23\x70\162\x65\x66\x69\x78" => "\74\x74\x64\x3e", "\43\163\165\x66\x66\x69\170" => "\x3c\x2f\x74\144\x3e", "\x23\x73\x75\x62\x6d\x69\x74" => array("\155\151\x6e\151\157\x72\141\156\147\x65\x5f\145\x78\160\x6f\x72\164"), "\x23\141\164\x74\162\151\x62\x75\x74\x65\x73" => array("\x73\164\x79\x6c\145" => "\142\141\x63\x6b\147\x72\x6f\165\156\x64\72\40\43\63\63\x37\x61\142\67\x3b\x63\x6f\x6c\157\x72\x3a\40\x23\146\146\146\146\146\x66\73\x74\145\x78\164\55\x73\150\141\x64\x6f\167\x3a\40\x30\x20\55\x31\160\170\40\61\x70\170\40\x23\63\x33\x37\141\142\67\54\40\x31\x70\x78\x20\60\40\x31\160\170\40\43\x33\x33\x37\141\142\x37\54\x20\60\x20\x31\x70\170\40\61\160\170\40\x23\x33\63\67\x61\142\x37\54\x20\x2d\61\160\170\x20\x30\40\x31\160\x78\x20\43\x33\x33\x37\x61\x62\x37\73\x62\157\x78\x2d\x73\x68\141\x64\157\167\72\40\60\x20\61\160\x78\40\60\x20\x23\63\x33\67\x61\x62\x37\x3b\x62\x6f\x72\x64\x65\x72\55\x63\x6f\154\157\162\x3a\40\x23\63\63\67\x61\142\x37\x20\43\63\x33\67\141\x62\67\x20\43\63\x33\67\x61\x62\x37\x3b"));
+    Tp:
+    $form["\155\x61\162\x6b\x75\160\x5f\x69\155\160\157\x72\x74"] = array("\x23\x6d\x61\x72\153\165\160" => "\74\x62\162\57\x3e\x3c\x62\x72\57\x3e" . "\74\150\x33\x3e\111\155\160\157\x72\164\40\103\157\156\146\x69\147\165\162\141\x74\x69\157\156\74\57\150\x33\x3e" . "\74\150\162\x2f\76" . "\74\x70\x3e\x54\x68\151\x73\x20\164\x61\x62\x20\167\151\x6c\x6c\40\150\145\x6c\160\40\x79\157\165\40\164\x6f\x3c\163\160\141\156\x20\x73\x74\171\x6c\x65\x3d\42\146\x6f\x6e\164\55\167\145\151\x67\150\x74\72\x20\142\157\154\x64\x22\x3e\x20\x49\155\x70\x6f\162\x74\40\171\x6f\x75\162\40\x6d\157\144\x75\154\x65\x20\x63\157\156\146\151\x67\x75\162\141\164\151\157\x6e\x73\x3c\x2f\163\x70\x61\156\x3e\40\167\150\145\x6e\x20\x79\x6f\165\40\x63\150\141\156\x67\x65\x20\x79\x6f\x75\162\x20\104\162\x75\160\x61\x6c\40\x69\156\163\x74\141\156\143\x65\x2e\x3c\x2f\160\76" . "\x3c\x70\x3e\x63\150\157\157\163\145\x20\x3c\142\x3e\42\x6a\163\x6f\156\42\x3c\57\142\x3e\40\x45\170\164\145\156\145\144\40\155\x6f\144\165\154\145\x20\x63\x6f\x6e\146\x69\x67\165\x72\x61\x74\151\x6f\156\40\x66\151\154\x65\40\141\x6e\x64\x20\x75\x70\x6c\x6f\x61\x64\x20\x62\171\40\x63\x6c\x69\x63\153\x69\156\147\x20\x6f\156\40\164\x68\x65\x20\x62\x75\164\x74\157\x6e\40\x67\151\166\145\156\40\x62\145\154\x6f\167\x2e\40\x3c\57\x70\x3e");
+    $form["\x69\x6d\x70\157\x72\x74\x5f\x43\157\156\146\x69\x67\137\x66\x69\154\x65"] = array("\x23\164\x79\160\x65" => "\146\x69\x6c\145");
+    $form["\155\x69\x6e\151\157\162\x61\x6e\x67\x65\137\x73\141\155\154\137\151\144\x70\137\151\155\x70\157\x72\x74"] = array("\43\164\171\160\145" => "\163\165\x62\x6d\151\164", "\x23\166\141\x6c\165\145" => t("\125\160\x6c\x6f\x61\144"), "\x23\x73\165\x62\155\x69\x74" => array("\155\151\156\x69\157\162\x61\x6e\147\x65\137\151\x6d\160\x6f\x72\x74\137\x43\x6f\x6e\x66\151\x67"), "\x23\x64\151\x73\x61\x62\154\145\x64" => $rE, "\43\141\164\x74\162\x69\142\165\164\145\x73" => array("\x73\x74\x79\x6c\145" => "\x62\141\x63\153\147\x72\157\165\x6e\144\x3a\x20\x23\x33\x33\x37\141\x62\x37\x3b\143\x6f\x6c\157\x72\x3a\40\43\x66\146\x66\146\x66\x66\x3b\164\145\170\164\x2d\163\x68\x61\144\157\167\x3a\x20\x30\x20\55\61\x70\x78\x20\x31\160\170\40\x23\x33\63\x37\x61\142\x37\54\40\61\160\x78\40\60\x20\61\160\x78\x20\43\x33\x33\x37\141\x62\67\54\x20\x30\x20\61\x70\170\40\61\160\170\40\43\x33\x33\67\x61\142\x37\x2c\40\55\61\160\x78\x20\x30\x20\61\160\170\40\43\x33\63\x37\141\x62\x37\x3b\142\x6f\x78\x2d\163\x68\x61\x64\x6f\167\72\x20\x30\40\61\x70\170\x20\x30\x20\43\63\x33\67\141\142\67\x3b\x62\x6f\x72\144\145\162\55\x63\x6f\154\157\162\72\x20\43\x33\x33\67\141\142\x37\x20\43\x33\x33\67\x61\x62\67\x20\x23\63\x33\x37\x61\142\x37\x3b"));
+    $form["\155\151\x6e\151\x6f\x72\x61\156\147\x65\137\x73\141\155\154\137\x73\x75\x70\160\x6f\x72\x74\137\144\x69\166\137\145\x6e\144"] = array("\x23\155\x61\x72\153\x75\160" => "\x3c\x2f\x64\151\x76\x3e");
+    Utilities::AddsupportTab($form, $form_state);
     return $form;
 }
-
-function miniorange_export() {
-
-    $tab_class_name      = unserialize( Tab_Class_Names );
-    $configuration_array = array();
-    /*foreach ( $tab_class_name as $key => $value ) {
-        $configuration_array[ $key ] = mo_get_configuration_array( $value );
-    }*/
-    $configuration_array["Version_dependencies"]=mo_get_version_informations();
-    $configuration_array["Service_Providers"] = getSPList();
-    $configuration_array[ "Mapping" ] = mo_get_configuration_array( "mo_options_enum_mapping" );
-    $configuration_array[ "Sign_In_Settings" ] = mo_get_configuration_array( "mo_options_enum_sign_in_settings" );
-    $configuration_array[ "Custom_Certificate" ] = mo_get_configuration_array( "mo_options_enum_custom_certificate" );
-    header( "Content-Disposition: attachment; filename=miniorange-saml-config.json" );
-    echo( json_encode( $configuration_array, JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES) );
+function miniorange_export()
+{
+    $Me = unserialize(Tab_Class_Names);
+    $ke = array();
+    $ke["\x56\x65\x72\x73\x69\x6f\x6e\x5f\x64\x65\x70\x65\156\144\145\x6e\143\x69\145\163"] = mo_get_version_informations();
+    $ke["\123\145\x72\x76\151\143\x65\137\x50\162\157\x76\151\x64\x65\162\163"] = getSPList();
+    $ke["\115\141\160\x70\151\156\x67"] = mo_get_configuration_array("\155\x6f\137\157\x70\164\151\157\156\x73\137\145\x6e\165\x6d\137\155\x61\x70\160\151\156\147");
+    $ke["\x53\x69\x67\156\137\x49\x6e\x5f\x53\x65\x74\x74\x69\156\x67\163"] = mo_get_configuration_array("\x6d\157\137\x6f\160\164\151\x6f\x6e\163\137\145\x6e\165\155\137\163\151\147\x6e\x5f\151\156\137\x73\145\164\x74\151\x6e\147\163");
+    $ke["\103\165\163\164\x6f\x6d\x5f\x43\145\162\164\151\146\x69\143\141\x74\145"] = mo_get_configuration_array("\x6d\157\137\157\x70\x74\151\x6f\x6e\163\x5f\x65\x6e\x75\x6d\x5f\x63\x75\163\164\157\155\137\143\x65\162\164\151\146\x69\143\141\164\x65");
+    header("\x43\x6f\156\x74\x65\156\x74\x2d\x44\151\163\x70\157\163\x69\x74\151\157\x6e\72\x20\141\164\164\x61\143\150\155\x65\156\x74\73\40\146\151\x6c\145\x6e\141\155\x65\x3d\x6d\151\x6e\151\157\162\141\156\x67\145\x2d\163\x61\x6d\154\55\x63\x6f\x6e\x66\151\x67\56\x6a\x73\157\x6e");
+    echo json_encode($ke, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     exit;
 }
-
-function getSPList(){
-  $sql = db_query("SELECT * FROM {miniorange_saml_idp_list}");
-  $data = $sql->fetchAll();
-  return $data;
+function getSPList()
+{
+    $xE = db_query("\x53\x45\114\x45\103\x54\x20\x2a\40\x46\122\117\115\40\173\x6d\x69\156\x69\x6f\162\x61\156\147\145\137\163\x61\155\x6c\137\x69\144\x70\x5f\154\151\x73\164\x7d");
+    $TG = $xE->fetchAll();
+    return $TG;
 }
-
-function mo_get_configuration_array( $class_name ) {
-    $mo_array = array();
-    if ($class_name == "mo_options_enum_mapping") {
-        $my_array = mo_get_role_mapping();
-        foreach ($my_array as $key => $value) {
-            if (!empty(variable_get($value,NULL))) 
-                $mo_array[ $key ] = variable_get($value,NULL);            
+function mo_get_configuration_array($RN)
+{
+    $BV = array();
+    if ($RN == "\x6d\x6f\x5f\x6f\160\164\151\157\156\163\137\145\156\x75\155\x5f\x6d\x61\x70\x70\151\156\147") {
+        goto bD;
+    }
+    $w2 = call_user_func($RN . "\x3a\72\147\145\x74\x43\157\x6e\163\x74\x61\x6e\x74\x73");
+    foreach ($w2 as $aC => $uo) {
+        $oU = variable_get($uo);
+        if (!$oU) {
+            goto lb;
         }
-    }else{
-        $class_object = call_user_func( $class_name . '::getConstants' );
-        foreach ( $class_object as $key => $value ) {
-            $mo_option_exists=variable_get($value);
-            if($mo_option_exists){
-                if(@unserialize($mo_option_exists)!==false){
-                    $mo_option_exists = unserialize($mo_option_exists);
-                }
-                $mo_array[ $key ] = $mo_option_exists;
+        if (!(@unserialize($oU) !== false)) {
+            goto MT;
+        }
+        $oU = unserialize($oU);
+        MT:
+        $BV[$aC] = $oU;
+        lb:
+        Ql:
+    }
+    w7:
+    goto Es;
+    bD:
+    $j2 = mo_get_role_mapping();
+    foreach ($j2 as $aC => $uo) {
+        if (empty(variable_get($uo, NULL))) {
+            goto ji;
+        }
+        $BV[$aC] = variable_get($uo, NULL);
+        ji:
+        hu:
+    }
+    WR:
+    Es:
+    return $BV;
+}
+function miniorange_import_Config()
+{
+    if (!empty($_FILES["\x66\151\154\145\163"]["\x74\x6d\x70\137\156\x61\x6d\145"]["\x69\x6d\160\x6f\x72\164\137\103\157\156\x66\x69\147\137\146\151\154\145"])) {
+        goto ev;
+    }
+    drupal_set_message(t("\x3c\x62\40\x73\x74\171\x6c\145\x3d\x22\143\157\154\x6f\162\x3a\40\162\x65\x64\42\76\x50\154\145\141\163\x65\40\x73\x65\x6c\145\143\164\x20\x66\151\154\145\x20\146\x69\162\x73\164\40\x74\x6f\40\x75\160\154\x6f\x61\x64\x20\x43\157\156\x66\x69\147\x75\x72\141\164\151\157\x6e\41\x3c\x2f\142\76"), "\145\162\162\x6f\x72");
+    goto vS;
+    ev:
+    $EK = $_FILES["\x66\x69\x6c\x65\163"]["\156\141\155\x65"]["\151\x6d\160\x6f\162\164\x5f\103\157\x6e\x66\x69\x67\137\x66\151\154\145"];
+    list($O7, $rV) = explode("\56", $EK);
+    if ($rV == "\x6a\x73\x6f\x6e") {
+        goto qy;
+    }
+    drupal_set_message(t("\74\142\x20\163\x74\x79\154\145\75\x22\143\x6f\154\157\x72\72\40\162\145\144\x22\76\x46\151\x6c\145\40\x74\x79\x70\x65\40\151\163\x20\156\x6f\x74\x20\x63\157\x6d\x70\141\164\x69\142\154\x65\x3c\x2f\142\76\x20\x3c\x62\162\76\40\x50\154\x65\x61\163\145\40\x53\x65\154\145\x63\x74\40\74\x62\x20\163\164\x79\x6c\145\75\42\x63\x6f\154\x6f\162\72\40\x72\x65\144\42\x3e\x22\56\x6a\163\x6f\156\x22\x3c\x2f\142\76\40\145\170\x74\x65\x6e\144\x65\x64\40\146\x69\154\145\40\x74\157\40\x75\160\154\x6f\x61\144\x20\x43\x6f\156\146\151\x67\x75\x72\x61\x74\x69\x6f\156\x21"), "\145\162\162\157\x72");
+    goto tc;
+    qy:
+    $EK = @file_get_contents($_FILES["\146\151\154\x65\163"]["\x74\155\160\x5f\156\x61\155\x65"]["\x69\155\160\157\162\x74\x5f\x43\x6f\156\146\151\x67\137\x66\x69\x6c\145"]);
+    $ke = json_decode($EK, true);
+    mo_update_configuration_array($ke);
+    tc:
+    vS:
+}
+function mo_update_configuration_array($ke)
+{
+    $Me = unserialize(Tab_Class_Names);
+    foreach ($Me as $NM => $RN) {
+        if ($NM == "\x53\x65\162\166\151\143\145\x5f\120\x72\x6f\x76\151\x64\145\162\x73") {
+            goto Q2;
+        }
+        if ($NM == "\x4d\141\x70\x70\151\156\x67") {
+            goto xk;
+        }
+        foreach ($ke[$NM] as $aC => $uo) {
+            $MQ = constant("{$RN}\x3a\x3a{$aC}");
+            if (!$MQ) {
+                goto Nm;
             }
+            variable_set($MQ, $uo);
+            Nm:
+            Vw:
         }
-    }
-    return $mo_array;
-}
-
-function miniorange_import_Config() {
-    if(! empty( $_FILES['files']['tmp_name']['import_Config_file'] )) {
-        $file = $_FILES['files']['name']['import_Config_file'];
-        list($name_without_extention, $extention) = explode('.', $file);
-        if($extention == 'json') {
-            $file = @file_get_contents($_FILES['files']['tmp_name']['import_Config_file']);  //Array -> Sub-Array -> Field
-            $configuration_array = json_decode($file, true);
-            mo_update_configuration_array($configuration_array);
+        H9:
+        goto l6;
+        Q2:
+        $Lz = count($ke[$NM]);
+        $rZ = new MiniorangeSAMLCustomer(NULL, NULL, NULL, NULL);
+        $Ez = json_decode($rZ->ccl(), true);
+        $Ap = isset($Ez["\156\x6f\117\x66\x53\120"]) && $Ez["\156\x6f\117\146\123\120"] != "\x30" ? $Ez["\156\157\117\146\x53\x50"] : 1;
+        $Lz = $Ap < $Lz ? $Ap : $Lz;
+        $er = 0;
+        vR:
+        if (!($er < $Lz)) {
+            goto iP;
         }
-        else{
-            drupal_set_message(t('<b style="color: red">File type is not compatible</b> <br> Please Select <b style="color: red">".json"</b> extended file to upload Configuration!'),'error');
-        }
-    }
-    else{
-        drupal_set_message(t('<b style="color: red">Please select file first to upload Configuration!</b>'),'error');
-    }
-}
-
-
-function mo_update_configuration_array( $configuration_array ) {
-    $tab_class_name = unserialize( Tab_Class_Names );
-    foreach ( $tab_class_name as $tab_name => $class_name ) {
-        if ($tab_name == "Service_Providers") {
-            $idp_count = count($configuration_array[ $tab_name ]);//print_r($count);exit();
-            $customer = new MiniorangeSAMLCustomer(NULL, NULL, NULL, NULL);
-            $content = json_decode($customer->ccl(), true);
-            $noOfSP = (isset($content['noOfSP']) && $content['noOfSP'] != '0')? $content['noOfSP'] : 1;
-            $idp_count = ( $noOfSP < $idp_count ) ? $noOfSP : $idp_count;
-            for ($idp_no=0; $idp_no < $idp_count; $idp_no++) { 
-
-                $Identity_name = '';
-                $Issuer = '';
-                $Enable_Signed_SSO_and_SLO = '';
-                $Name_ID_format = '';
-                $Binding_SSO = '';
-                $Login_URL = '';
-                $Binding_SLO = '';
-                $Fetch_Metadata_Time_Intervals = '';
-                $Logout_URL = '';
-                $X509_certificate = '';
-                $Fetch_Metadata_URL = '';
-                $Secrity_Signature_Algo = '';
-
-                foreach ($configuration_array[ $tab_name ][ $idp_no ] as $key => $value) {
-                    if($key == "mo_idp_name")
-                        $Identity_name = $value;
-                    elseif ($key == "mo_idp_issuer") 
-                        $Issuer = $value;
-                    elseif ($key == "mo_idp_request_signed") 
-                        $Enable_Signed_SSO_and_SLO = $value;
-                    elseif ($key == "mo_idp_nameid_format") 
-                        $Name_ID_format = $value;
-                    elseif ($key == "mo_idp_http_binding_sso") 
-                        $Binding_SSO = $value;
-                    elseif ($key == "mo_idp_sso_url") 
-                        $Login_URL = $value;
-                    elseif ($key == "mo_idp_http_binding_slo") 
-                        $Binding_SLO = $value;
-                    elseif ($key == "miniorange_saml_fetch_metadata_time_intervals") 
-                        $Fetch_Metadata_Time_Intervals = $value;
-                    elseif ($key == "mo_idp_slo_url") 
-                        $Logout_URL = $value;
-                    elseif ($key == "mo_idp_cert") 
-                        $X509_certificate = $value;
-                    elseif ($key == "miniorange_saml_meta_data_url") 
-                        $Fetch_Metadata_URL = $value;
-                    elseif ($key = "security_signature_algorithm") 
-                        $Secrity_Signature_Algo = $value;
-                }
-
-                $sql = db_query("SELECT * FROM {miniorange_saml_idp_list}");
-                $data = $sql->fetchAll();
-                $idpid = -1;
-
-                foreach ($data as $idpdata) {
-                  if (($idpdata->mo_idp_issuer == $Issuer) || ($idpdata->mo_idp_sso_url == $Login_URL))
-                  $idpid = $idpdata->id;
-                }
-
-                if ($idpid == -1) {
-                    Utilities::Database_insert($Identity_name, $Issuer, $Login_URL, $X509_certificate, $Name_ID_format, $Enable_Signed_SSO_and_SLO, $Binding_SSO,
-                    $Binding_SLO, $Logout_URL, $Fetch_Metadata_Time_Intervals, $Fetch_Metadata_URL,$Secrity_Signature_Algo);
-                }else{
-                    Utilities::Database_update($Identity_name, $Issuer, $Login_URL, $X509_certificate, $Name_ID_format, $Enable_Signed_SSO_and_SLO, $Binding_SSO,
-                    $Binding_SLO, $Logout_URL, $Fetch_Metadata_Time_Intervals, $Fetch_Metadata_URL, $idpid,  $Secrity_Signature_Algo);
-                }
+        $oK = '';
+        $SY = '';
+        $C8 = '';
+        $i6 = '';
+        $tm = '';
+        $uy = '';
+        $ht = '';
+        $CS = '';
+        $XA = '';
+        $PJ = '';
+        $FU = '';
+        $f2 = '';
+        foreach ($ke[$NM][$er] as $aC => $uo) {
+            if ($aC == "\x6d\157\x5f\x69\x64\160\x5f\156\x61\x6d\145") {
+                goto LW;
             }
-        }
-        elseif ($tab_name == "Mapping") {
-            $my_array = mo_get_role_mapping();
-            foreach ( $configuration_array[ $tab_name ] as $key => $value ){
-                variable_set( $my_array[ $key ] , $value);
+            if ($aC == "\155\157\137\x69\x64\160\137\151\x73\x73\165\x65\x72") {
+                goto Fy;
             }
-        }
-        else
-            foreach ( $configuration_array[ $tab_name ] as $key => $value ) {
-                $option_string = constant( "$class_name::$key" );
-                if($option_string) {
-                    variable_set( $option_string, $value );
-                }
+            if ($aC == "\x6d\157\x5f\x69\x64\x70\x5f\x72\x65\x71\165\x65\163\164\137\163\151\147\156\145\x64") {
+                goto H_;
             }
+            if ($aC == "\x6d\157\137\x69\x64\x70\x5f\156\141\155\145\x69\144\x5f\146\157\x72\155\x61\x74") {
+                goto t6;
+            }
+            if ($aC == "\x6d\157\137\x69\x64\x70\137\150\164\164\x70\x5f\x62\x69\156\144\151\x6e\x67\x5f\x73\x73\x6f") {
+                goto Fd;
+            }
+            if ($aC == "\x6d\x6f\137\151\144\160\137\163\163\x6f\137\x75\162\154") {
+                goto kf;
+            }
+            if ($aC == "\155\x6f\137\151\144\160\x5f\150\x74\x74\x70\x5f\142\x69\156\144\x69\156\x67\137\x73\x6c\157") {
+                goto J0;
+            }
+            if ($aC == "\x6d\151\156\151\x6f\x72\141\x6e\x67\145\137\x73\141\x6d\x6c\137\146\145\x74\143\x68\x5f\x6d\145\x74\x61\144\141\164\141\137\x74\151\155\x65\x5f\151\x6e\x74\x65\x72\166\x61\154\x73") {
+                goto N7;
+            }
+            if ($aC == "\x6d\157\137\151\144\160\137\x73\154\x6f\x5f\x75\x72\154") {
+                goto uX;
+            }
+            if ($aC == "\155\x6f\137\x69\144\160\137\x63\145\x72\x74") {
+                goto wj;
+            }
+            if ($aC == "\155\x69\156\x69\x6f\x72\x61\x6e\x67\145\x5f\x73\x61\x6d\x6c\137\155\x65\164\x61\137\x64\x61\164\x61\137\x75\162\x6c") {
+                goto o5;
+            }
+            if ($aC = "\163\x65\x63\x75\162\x69\x74\171\137\163\151\147\156\141\x74\x75\162\x65\x5f\141\154\x67\x6f\162\x69\164\x68\x6d") {
+                goto LG;
+            }
+            goto ep;
+            LW:
+            $oK = $uo;
+            goto ep;
+            Fy:
+            $SY = $uo;
+            goto ep;
+            H_:
+            $C8 = $uo;
+            goto ep;
+            t6:
+            $i6 = $uo;
+            goto ep;
+            Fd:
+            $tm = $uo;
+            goto ep;
+            kf:
+            $uy = $uo;
+            goto ep;
+            J0:
+            $ht = $uo;
+            goto ep;
+            N7:
+            $CS = $uo;
+            goto ep;
+            uX:
+            $XA = $uo;
+            goto ep;
+            wj:
+            $PJ = $uo;
+            goto ep;
+            o5:
+            $FU = $uo;
+            goto ep;
+            LG:
+            $f2 = $uo;
+            ep:
+            rh:
         }
-        $config_status = 'CONFIGURATION_SAVED';
-        variable_set('miniorange_config_status', $config_status);
-        $b_url = Utilities::miniorange_get_baseURL();
-        drupal_goto($b_url . '/admin/config/people/miniorange_saml/sp_setup');
-}
-
-function mo_get_version_informations(){
-    $array_version = array();
-    $array_version["PHP_version"] = phpversion();
-    $array_version["Drupal_version"] = VERSION;
-    $array_version["OPEN_SSL"] = mo_saml_is_openssl_installed();
-    $array_version["CURL"] = mo_saml_is_curl_installed();
-    $array_version["ICONV"] = mo_saml_is_iconv_installed();
-    $array_version["DOM"] = mo_saml_is_dom_installed();
-
-    return $array_version;
-}
-
-function mo_get_role_mapping(){
-    $mo_array = array();
-    $mo_array["Login_by"] = 'miniorange_saml_login_by';
-    $mo_array["Username_attr"] = 'miniorange_saml_username_attribute';
-    $mo_array["Email_attr"] = 'miniorange_saml_email_attribute';
-    $mo_array["Attribute_Name_1"] = 'miniorange_saml_attr5_name';
-    $mo_array["Idp_Attribute_Name_1"] = 'miniorange_saml_idp_attr5_name';
-    $mo_array["Attribute_Name_2"] = 'miniorange_saml_attr2_name';
-    $mo_array["Idp_Attribute_Name_2"] = 'miniorange_saml_idp_attr2_name';
-    $mo_array["Attribute_Name_3"] = 'miniorange_saml_attr3_name';
-    $mo_array["Idp_Attribute_Name_3"] = 'miniorange_saml_idp_attr3_name';
-    $mo_array["Attribute_Name_4"] = 'miniorange_saml_attr4_name';
-    $mo_array["Idp_Attribute_Name_4"] = 'miniorange_saml_idp_attr4_name';
-    $mo_array["Role"] = 'miniorange_saml_idp_attr1_name';
-    $mo_array["Role_mapping"] = 'miniorange_saml_enable_rolemapping';
-    $mo_array["Do_not_update_user_roles"] = 'miniorange_saml_disable_role_update';
-    $mo_array["Disable_auto_create_user"] = 'miniorange_saml_disable_autocreate_users';
-    $mo_array["Default_role"] = 'miniorange_saml_default_role';
-    $mo_array["SP_Roles_For_Mapping"] = 'miniorange_saml_sp_role_names';
-    $mo_array["Custom_Login_Logout_Roles"] = 'miniorange_saml_log_url_class';
-
-    $mrole= user_roles($membersonly = TRUE);
-    foreach($mrole as $roles) {
-        $rolelabel = str_replace(' ','',$roles);
-        $mo_array['Role_'.$rolelabel] = 'miniorange_saml_role_'.$rolelabel;
+        oS:
+        $xE = db_query("\123\105\x4c\105\x43\x54\40\52\x20\106\x52\x4f\x4d\x20\173\155\151\156\151\157\162\x61\156\147\145\x5f\x73\141\155\x6c\x5f\x69\x64\x70\x5f\x6c\x69\x73\x74\x7d");
+        $TG = $xE->fetchAll();
+        $Fv = -1;
+        foreach ($TG as $X8) {
+            if (!($X8->mo_idp_issuer == $SY || $X8->mo_idp_sso_url == $uy)) {
+                goto fi;
+            }
+            $Fv = $X8->id;
+            fi:
+            E_:
+        }
+        kZ:
+        if ($Fv == -1) {
+            goto eP;
+        }
+        Utilities::Database_update($oK, $SY, $uy, $PJ, $i6, $C8, $tm, $ht, $XA, $CS, $FU, $Fv, $f2);
+        goto eo;
+        eP:
+        Utilities::Database_insert($oK, $SY, $uy, $PJ, $i6, $C8, $tm, $ht, $XA, $CS, $FU, $f2);
+        eo:
+        dv:
+        $er++;
+        goto vR;
+        iP:
+        goto l6;
+        xk:
+        $j2 = mo_get_role_mapping();
+        foreach ($ke[$NM] as $aC => $uo) {
+            variable_set($j2[$aC], $uo);
+            CV:
+        }
+        uD:
+        l6:
+        Xk:
     }
-
-    foreach($mrole as $drupalKey=>$drupalRoles) {
-        $lbl = str_replace(' ','',$drupalRoles . '_sin');
-        $l = str_replace(' ','',$drupalRoles . '_sout');
-        $mo_array['Login_URL_'.$drupalRoles] = $lbl;
-        $mo_array['Logout_URL_'.$drupalRoles] = $l;
-    }
-
-    return $mo_array;
+    WS:
+    $cV = "\x43\x4f\116\x46\111\107\125\122\x41\124\x49\x4f\116\x5f\x53\x41\x56\x45\104";
+    variable_set("\155\x69\156\x69\157\162\141\x6e\147\145\137\143\157\x6e\146\151\x67\x5f\x73\164\141\x74\165\163", $cV);
+    $vQ = Utilities::miniorange_get_baseURL();
+    drupal_goto($vQ . "\x2f\x61\144\155\151\x6e\57\143\x6f\156\146\151\x67\57\x70\145\x6f\160\x6c\x65\x2f\155\151\x6e\x69\157\162\x61\x6e\x67\145\x5f\x73\x61\x6d\154\x2f\x73\x70\137\x73\145\x74\x75\x70");
 }
-
-function mo_saml_is_openssl_installed() {
-    if ( in_array( 'openssl', get_loaded_extensions() ) ) {
-        return 1;
-    } else {
-        return 0;
-    }
+function mo_get_version_informations()
+{
+    $Ta = array();
+    $Ta["\x50\110\x50\x5f\x76\x65\x72\x73\x69\x6f\156"] = phpversion();
+    $Ta["\104\x72\x75\x70\x61\x6c\137\x76\145\162\x73\151\x6f\x6e"] = VERSION;
+    $Ta["\x4f\x50\x45\116\x5f\123\123\x4c"] = mo_saml_is_openssl_installed();
+    $Ta["\x43\x55\x52\x4c"] = mo_saml_is_curl_installed();
+    $Ta["\111\103\x4f\x4e\126"] = mo_saml_is_iconv_installed();
+    $Ta["\x44\x4f\x4d"] = mo_saml_is_dom_installed();
+    return $Ta;
 }
-
-function mo_saml_is_curl_installed() {
-    if ( in_array( 'curl', get_loaded_extensions() ) ) {
-        return 1;
-    } else {
-        return 0;
+function mo_get_role_mapping()
+{
+    $BV = array();
+    $BV["\114\x6f\147\x69\156\x5f\142\x79"] = "\155\151\x6e\151\157\162\x61\156\x67\x65\x5f\x73\141\155\x6c\x5f\x6c\157\x67\151\156\x5f\x62\x79";
+    $BV["\x55\x73\x65\x72\156\x61\155\x65\x5f\141\164\164\x72"] = "\x6d\x69\156\151\157\162\141\156\147\x65\x5f\x73\141\155\x6c\137\165\x73\145\x72\156\141\x6d\145\x5f\141\164\164\x72\151\x62\165\164\145";
+    $BV["\105\x6d\x61\151\154\x5f\x61\164\x74\162"] = "\155\x69\156\x69\157\162\x61\156\147\145\x5f\163\141\x6d\154\137\145\x6d\x61\x69\154\137\x61\164\x74\x72\x69\142\165\x74\x65";
+    $BV["\x41\x74\164\162\x69\142\x75\x74\145\x5f\116\x61\155\x65\x5f\x31"] = "\x6d\x69\156\151\157\x72\x61\x6e\x67\x65\x5f\x73\141\x6d\154\x5f\141\x74\x74\x72\65\x5f\x6e\x61\x6d\145";
+    $BV["\111\x64\x70\x5f\101\x74\164\x72\x69\x62\165\x74\145\x5f\116\141\155\x65\x5f\x31"] = "\x6d\151\156\151\157\x72\141\156\147\x65\137\x73\141\155\x6c\137\x69\144\160\137\141\164\x74\162\x35\x5f\156\x61\155\145";
+    $BV["\x41\164\x74\x72\151\x62\165\164\145\x5f\116\x61\x6d\x65\137\62"] = "\155\x69\x6e\x69\157\162\x61\156\147\145\137\163\141\x6d\x6c\x5f\141\x74\164\x72\62\x5f\156\x61\x6d\145";
+    $BV["\111\x64\x70\x5f\101\x74\164\x72\x69\142\165\164\x65\x5f\x4e\x61\x6d\x65\137\62"] = "\x6d\151\x6e\151\x6f\162\141\x6e\x67\145\137\x73\141\x6d\x6c\x5f\151\x64\160\x5f\141\164\164\x72\62\137\x6e\x61\x6d\x65";
+    $BV["\x41\x74\x74\162\151\x62\165\x74\145\137\116\x61\x6d\145\x5f\x33"] = "\155\x69\x6e\x69\x6f\162\141\x6e\147\x65\137\163\141\x6d\154\x5f\x61\x74\x74\x72\63\x5f\x6e\x61\x6d\x65";
+    $BV["\111\x64\160\137\x41\x74\164\162\x69\142\x75\164\x65\x5f\116\x61\155\145\x5f\x33"] = "\155\x69\156\151\x6f\x72\141\x6e\147\x65\x5f\163\141\155\154\x5f\151\x64\x70\137\x61\x74\x74\x72\x33\137\x6e\x61\x6d\x65";
+    $BV["\x41\x74\164\162\151\x62\165\164\x65\x5f\x4e\x61\155\x65\137\64"] = "\x6d\x69\x6e\151\x6f\162\x61\x6e\147\145\137\x73\141\x6d\154\137\141\x74\x74\x72\64\137\156\x61\x6d\145";
+    $BV["\x49\x64\160\137\x41\164\164\x72\151\x62\165\164\145\137\116\141\155\x65\137\64"] = "\155\x69\x6e\151\x6f\x72\x61\x6e\147\x65\x5f\x73\141\155\x6c\x5f\x69\144\160\137\x61\x74\164\x72\x34\x5f\x6e\x61\x6d\x65";
+    $BV["\122\157\154\x65"] = "\x6d\151\x6e\151\x6f\x72\141\x6e\147\x65\x5f\163\141\x6d\154\137\x69\x64\x70\x5f\141\x74\164\x72\x31\x5f\x6e\x61\x6d\x65";
+    $BV["\x52\x6f\x6c\145\137\155\x61\160\160\x69\156\147"] = "\x6d\x69\x6e\151\x6f\162\141\156\147\145\x5f\x73\141\x6d\154\137\145\156\x61\x62\154\145\x5f\162\157\154\x65\155\141\x70\160\x69\x6e\147";
+    $BV["\104\157\137\156\157\x74\137\165\160\x64\141\164\x65\137\165\163\145\x72\137\x72\157\x6c\145\x73"] = "\x6d\151\156\x69\157\x72\141\156\147\x65\x5f\163\x61\155\x6c\137\x64\x69\163\141\142\154\x65\x5f\162\157\154\145\x5f\165\160\144\141\x74\145";
+    $BV["\104\x69\x73\x61\142\154\145\137\x61\x75\164\x6f\x5f\x63\x72\145\x61\x74\145\137\165\163\x65\x72"] = "\x6d\151\156\x69\157\162\141\x6e\147\x65\x5f\163\x61\155\x6c\x5f\x64\x69\163\x61\x62\x6c\x65\x5f\141\165\x74\157\x63\162\145\141\164\145\x5f\165\x73\x65\x72\x73";
+    $BV["\104\145\x66\141\x75\x6c\x74\x5f\x72\157\x6c\145"] = "\155\151\156\151\x6f\162\141\x6e\147\145\137\x73\x61\x6d\154\x5f\x64\x65\146\x61\x75\x6c\164\x5f\162\157\154\145";
+    $BV["\x53\x50\137\122\157\x6c\x65\x73\x5f\x46\157\162\x5f\x4d\x61\x70\160\x69\x6e\x67"] = "\155\151\156\x69\157\162\141\x6e\x67\145\x5f\x73\x61\155\154\137\163\x70\137\x72\x6f\x6c\145\x5f\x6e\x61\x6d\145\163";
+    $BV["\x43\165\x73\164\157\x6d\x5f\114\157\147\151\156\x5f\x4c\x6f\x67\157\165\164\137\122\157\x6c\145\x73"] = "\155\151\156\x69\157\162\x61\156\x67\145\x5f\163\141\155\x6c\x5f\x6c\157\x67\x5f\x75\x72\154\x5f\143\x6c\x61\163\163";
+    $fy = user_roles($TQ = TRUE);
+    foreach ($fy as $Lt) {
+        $zU = str_replace("\40", '', $Lt);
+        $BV["\x52\157\154\x65\137" . $zU] = "\155\151\x6e\x69\x6f\x72\x61\156\x67\x65\137\163\141\x6d\x6c\x5f\x72\x6f\x6c\x65\137" . $zU;
+        Bk:
     }
+    ZJ:
+    foreach ($fy as $fH => $M2) {
+        $tH = str_replace("\40", '', $M2 . "\137\163\151\156");
+        $iv = str_replace("\40", '', $M2 . "\x5f\163\157\x75\164");
+        $BV["\114\x6f\x67\151\156\x5f\x55\122\114\x5f" . $M2] = $tH;
+        $BV["\x4c\x6f\x67\x6f\165\x74\x5f\x55\122\114\x5f" . $M2] = $iv;
+        V1:
+    }
+    VR:
+    return $BV;
 }
-
-function mo_saml_is_iconv_installed(){
-    if ( in_array( 'iconv', get_loaded_extensions() ) ) {
-        return 1;
-    } else {
-        return 0;
+function mo_saml_is_openssl_installed()
+{
+    if (in_array("\157\160\x65\x6e\163\x73\154", get_loaded_extensions())) {
+        goto kw;
     }
+    return 0;
+    goto vs;
+    kw:
+    return 1;
+    vs:
 }
-
-function mo_saml_is_dom_installed(){
-    if ( in_array( 'dom', get_loaded_extensions() ) ) {
-        return 1;
+function mo_saml_is_curl_installed()
+{
+    if (in_array("\x63\x75\162\154", get_loaded_extensions())) {
+        goto WX;
     }
-    else {
-        return 0;
-    }
+    return 0;
+    goto U2;
+    WX:
+    return 1;
+    U2:
 }
-
-/**
- * Send support query.
- */
+function mo_saml_is_iconv_installed()
+{
+    if (in_array("\151\x63\157\x6e\x76", get_loaded_extensions())) {
+        goto Ss;
+    }
+    return 0;
+    goto VH;
+    Ss:
+    return 1;
+    VH:
+}
+function mo_saml_is_dom_installed()
+{
+    if (in_array("\x64\x6f\155", get_loaded_extensions())) {
+        goto Ia;
+    }
+    return 0;
+    goto BJ;
+    Ia:
+    return 1;
+    BJ:
+}
 function miniorange_saml_idp_send_query(&$form, $form_state)
 {
-    $email = $form['miniorange_saml_email_address']['#value'];
-    $phone = $form['miniorange_saml_phone_number']['#value'];
-    $query = $form['miniorange_saml_support_query']['#value'];
-    Utilities::send_query($email, $phone, $query);
+    $k6 = $form["\x6d\151\x6e\151\x6f\x72\141\156\147\x65\137\x73\141\x6d\154\137\x65\155\x61\x69\x6c\137\141\x64\x64\162\145\163\163"]["\x23\x76\141\x6c\165\x65"];
+    $GC = $form["\155\151\x6e\151\x6f\x72\141\156\x67\x65\137\163\x61\x6d\x6c\x5f\160\x68\x6f\156\x65\137\156\165\155\142\145\x72"]["\43\166\141\154\165\145"];
+    $rD = $form["\x6d\x69\x6e\x69\x6f\162\x61\156\x67\x65\137\x73\x61\155\x6c\x5f\x73\x75\160\x70\x6f\x72\x74\137\x71\165\145\162\x79"]["\x23\x76\141\x6c\165\x65"];
+    Utilities::send_query($k6, $GC, $rD);
 }
-
-
-
-
-
