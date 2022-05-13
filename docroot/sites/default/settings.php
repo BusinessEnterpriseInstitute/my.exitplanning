@@ -703,7 +703,9 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
   $files_private_conf_path = conf_path();
   switch ($_ENV['AH_SITE_ENVIRONMENT']) {
     case 'dev':
+		$base_url = 'https://dev.exitplanning.com';
     case 'test':
+	  $base_url = 'https://test.exitplanning.com';
       $conf['cache'] = 0;
       // Cached page compression - always off.
       $conf['page_compression'] = 0;
@@ -720,7 +722,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
       $conf['lockr_cert'] = '/mnt/gfs/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/nobackup/apikeys/lockr/prod/pair.pem';
       break;
     case 'prod':
-      $base_url = 'http://dev.exitplanningsoftware.com/';
+      $base_url = 'https://my.exitplanning.com';
   }
 }
 $conf['image_allow_insecure_derivatives'] = TRUE;
