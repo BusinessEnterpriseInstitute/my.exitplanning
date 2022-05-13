@@ -1,0 +1,85 @@
+# This workflow builds the Help site and deploys the artifacts to Acquia stage branch.
+# stage branch and stage server on Acquia is used for final QA so build artifacts should 
+# be identical to artifacts that gets deploy to production environment.
+
+name: Stage CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request 
+# events but only for the master branch
+on:
+  push:
+    branches: [ stage ]
+  # pull_request:
+  #   branches: [ stage ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    # Setup PHP environment
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+        # tools: composer:v1
+        # extensions: mbstring, xml, curl, gd, soap
+
+    # Adds ssh key to ssh agent
+    - name: webfactory/ssh-agent
+      uses: webfactory/ssh-agent@v0.4.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    # Set git committer
+    - name: Set git committer
+      run: git config --global user.email "${{ secrets.GIT_AUTHOR_EMAIL }}" && git config --global user.name "${{ secrets.GIT_AUTHOR_NAME }}"
+
+    # Set the Acquia git host to known_hosts for ssh/git connection
+    - name: Add Acquia to known hosts
+      run: ssh-keyscan ${{ secrets.GIT_ACQUIA_HOST }} >> ~/.ssh/known_hosts
+
+    # Install environment build tools
+    - name: Install environment build tools
+      run: |
+        pwd
+        sudo npm install -g grunt-cli --force
+        sudo npm install -g sass --force
+    
+    # Install node dependencys
+    - name: npm install
+      run: npm install
+
+    # Deploy feature branch to Acquia
+    # - name: Deploy feature branch to Acquia
+    #   run: node_modules/.bin/artifactsh -a ${{ secrets.GIT_ACQUIA_URL }} -b ${{ github.head_ref }}
+    #   if: github.event_name == 'pull_request'
+    
+    # Deploy artifacts to Acquia DEV
+    - name: Deploy artifacts to Acquia Dev
+      run: node_modules/.bin/artifactsh -a ${{ secrets.GIT_ACQUIA_URL }} -b stage
+      if: github.ref == 'refs/heads/stage'
+
+    
+    # Rebuild cache on Acquia Dev
+    - name: Dev rebuild cache via ssh
+      uses: fifsky/ssh-action@master
+      with:
+        command: |
+          cd /var/www/html/epictest/docroot
+          drush cc all
+        host: ${{ secrets.SSH_HOST_STAGE }}
+        user: ${{ secrets.SSH_USER_STAGE }}
+        key: ${{ secrets.SSH_PRIVATE_KEY}}
+      if: github.ref == 'refs/heads/stage'
