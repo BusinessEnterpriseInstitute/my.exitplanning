@@ -703,9 +703,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
   $files_private_conf_path = conf_path();
   switch ($_ENV['AH_SITE_ENVIRONMENT']) {
     case 'dev':
-		$base_url = 'https://dev.exitplanning.com';
     case 'test':
-	  $base_url = 'https://test.exitplanning.com';
       $conf['cache'] = 0;
       // Cached page compression - always off.
       $conf['page_compression'] = 0;
@@ -739,4 +737,7 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
   if (extension_loaded('newrelic')) { // Ensure PHP agent is available
     newrelic_disable_autorum();
   }
+}
+if (file_exists('/var/www/site-php')) {
+  require '/var/www/site-php/exitplanning/exitplanning-settings.inc';
 }
