@@ -720,7 +720,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
       $conf['lockr_cert'] = '/mnt/gfs/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/nobackup/apikeys/lockr/prod/pair.pem';
       break;
     case 'prod':
-      $base_url = 'https://my.exitplanning.com';
+      $base_url = 'https://dev.exitplanning.com';
   }
 }
 $conf['image_allow_insecure_derivatives'] = TRUE;
@@ -737,7 +737,4 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
   if (extension_loaded('newrelic')) { // Ensure PHP agent is available
     newrelic_disable_autorum();
   }
-}
-if (file_exists('/var/www/site-php')) {
-  require '/var/www/site-php/exitplanning/exitplanning-settings.inc';
 }
