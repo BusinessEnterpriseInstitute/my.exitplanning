@@ -1,0 +1,73 @@
+# This workflow builds the Help site and deploys the tag created from a release to Acquia.
+# The tag that got deployed to Acquia will be used as the production tag
+
+name: Release CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request 
+# events but only for the master branch
+on:
+  release:
+    types: [ published ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+
+jobs:
+  build:
+    name: Build and Deploy
+
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # not including gd extension, already loaded automatically.
+    # env:
+      # extensions: mbstring, xml, curl, gd, soap
+      # key: cache-v1 # can be any string, change to clear the extension cache.
+      
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '10.x'
+
+    # Adds ssh key to ssh agent
+    - name: webfactory/ssh-agent
+      uses: webfactory/ssh-agent@v0.4.1
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+        
+    # Set git committer
+    - name: Set git committer
+      run: git config --global user.email "${{ secrets.GIT_AUTHOR_EMAIL }}" && git config --global user.name "${{ secrets.GIT_AUTHOR_NAME }}"
+
+    # Set the Acquia git host to known_hosts for ssh/git connection
+    - name: Add Acquia to known hosts
+      run: ssh-keyscan ${{ secrets.GIT_ACQUIA_HOST }} >> ~/.ssh/known_hosts
+
+    # Setup PHP environment
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    # Install environment build tools
+    - name: Install environment build tools
+      run: |
+        pwd
+        sudo npm install -g grunt-cli --force
+        sudo npm install -g sass --force
+    
+    # Install node dependencies
+    - name: npm install
+      run: npm install
+
+    # Get the tag name
+    - name: Get the version
+      id: get_version
+      run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+    # Deploy tag to Acquia
+    - name: Deploy tag to Acquia
+      run: node_modules/.bin/artifactsh -a ${{ secrets.GIT_ACQUIA_URL }} -b ${{ steps.get_version.outputs.VERSION }}
+      if: github.event_name == 'release'
