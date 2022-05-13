@@ -543,9 +543,9 @@ $conf['404_fast_paths_exclude'] = '/\/(?:styles)|(?:system\/files)\//';
 $conf['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
 $conf['404_fast_html'] = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML+RDFa 1.0//EN" "http://www.w3.org/MarkUp/DTD/xhtml-rdfa-1.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
-/** Set up the site to only use HTTPS
+/** Set up the site to only use HTTPS**/
 
-$conf['https'] = TRUE;**/
+$conf['https'] = TRUE;
 
 /**
  * By default the page request process will return a fast 404 page for missing
@@ -681,8 +681,6 @@ if (getenv('AH_SITE_ENVIRONMENT') &&
   'cache_path',
   'cache_rules',
 );
-  #Solr version selection through the Drupal admin UI is disabled by default so following these instructions requires you to add the following to
-  $conf['acquia_search_disable_version_select'] = FALSE;
 
 # Move semaphore out of the database and into memory for performance purposes
   $conf['lock_inc'] = 'sites/all/modules/memcache/memcache-lock.inc';
@@ -720,7 +718,7 @@ if (isset($_ENV['AH_SITE_ENVIRONMENT'])) {
       $conf['lockr_cert'] = '/mnt/gfs/' . $_ENV['AH_SITE_GROUP'] . '.' . $_ENV['AH_SITE_ENVIRONMENT'] . '/nobackup/apikeys/lockr/prod/pair.pem';
       break;
     case 'prod':
-      $base_url = 'https://dev.exitplanning.com';
+      $base_url = 'https://www.exitplanning.com';
   }
 }
 $conf['image_allow_insecure_derivatives'] = TRUE;
