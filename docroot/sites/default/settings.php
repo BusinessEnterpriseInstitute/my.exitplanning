@@ -347,7 +347,7 @@ ini_set('session.cookie_lifetime', 2000000);
  */
 # ini_set('pcre.backtrack_limit', 200000);
 # ini_set('pcre.recursion_limit', 200000);
-ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+
 /**
  * Drupal automatically generates a unique session cookie name for each site
  * based on its full domain name. If you have multiple domains pointing at the
@@ -738,3 +738,4 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
     newrelic_disable_autorum();
   }
 }
+ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
