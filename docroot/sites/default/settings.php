@@ -738,3 +738,4 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
     newrelic_disable_autorum();
   }
 }
+ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
