@@ -739,3 +739,5 @@ if (isset($_GET['q']) && strpos($_GET['q'], 'cm-campaign') === 0) {
   }
 }
 ini_set('error_reporting', E_ALL & ~E_NOTICE & ~E_STRICT & ~E_DEPRECATED);
+$config['x_frame_options'] = '';
+$conf['x_frame_options'] = '';
